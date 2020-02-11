@@ -31,7 +31,9 @@
     <name>IoTDB Client</name>
     <properties>
         <cli.test.skip>false</cli.test.skip>
+
         <cli.it.skip>${cli.test.skip}</cli.it.skip>
+
         <cli.ut.skip>${cli.test.skip}</cli.ut.skip>
     </properties>
     <dependencies>
