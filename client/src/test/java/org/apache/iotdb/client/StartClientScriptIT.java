@@ -32,6 +32,7 @@ public class StartClientScriptIT extends AbstractScript {
   }
 
   @After
+  
   public void tearDown() throws Exception {
   }
 
