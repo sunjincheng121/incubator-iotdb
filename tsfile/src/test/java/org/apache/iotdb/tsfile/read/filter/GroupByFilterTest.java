@@ -18,109 +18,105 @@
  */
 package org.apache.iotdb.tsfile.read.filter;
 
-import org.apache.iotdb.tsfile.file.metadata.statistics.LongStatistics;
-import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
-import org.apache.iotdb.tsfile.read.filter.factory.FilterType;
-import org.junit.Before;
-import org.junit.Test;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.iotdb.tsfile.file.metadata.statistics.LongStatistics;
+import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
+import org.junit.Before;
+import org.junit.Test;
+
 public class GroupByFilterTest {
 
-  private GroupByFilter groupByFilter;
+    private GroupByFilter groupByFilter;
 
-  @Before
-  public void setUp() throws Exception {
-    groupByFilter = new GroupByFilter(3, 24,
-            8, 8 + 30 * 24 + 3 + 6);
-  }
+    @Before
+    public void setUp() throws Exception {
+        groupByFilter = new GroupByFilter(3, 24, 8, 8 + 30 * 24 + 3 + 6);
+    }
 
-  @Test
-  public void TestStatisticsSatisfy() {
+    @Test
+    public void TestStatisticsSatisfy() {
 
-    Statistics statistics = new LongStatistics();
-    statistics.setStartTime(0);
-    statistics.setEndTime(7);
-    assertFalse(groupByFilter.satisfy(statistics));
+        Statistics statistics = new LongStatistics();
+        statistics.setStartTime(0);
+        statistics.setEndTime(7);
+        assertFalse(groupByFilter.satisfy(statistics));
 
-    statistics.setStartTime(8 + 30 * 24 + 3 + 6 + 1);
-    statistics.setEndTime(8 + 30 * 24 + 3 + 6 + 2);
-    assertFalse(groupByFilter.satisfy(statistics));
+        statistics.setStartTime(8 + 30 * 24 + 3 + 6 + 1);
+        statistics.setEndTime(8 + 30 * 24 + 3 + 6 + 2);
+        assertFalse(groupByFilter.satisfy(statistics));
 
-    statistics.setStartTime(0);
-    statistics.setEndTime(9);
-    assertTrue(groupByFilter.satisfy(statistics));
+        statistics.setStartTime(0);
+        statistics.setEndTime(9);
+        assertTrue(groupByFilter.satisfy(statistics));
 
-    statistics.setStartTime(32);
-    statistics.setEndTime(34);
-    assertTrue(groupByFilter.satisfy(statistics));
+        statistics.setStartTime(32);
+        statistics.setEndTime(34);
+        assertTrue(groupByFilter.satisfy(statistics));
 
-    statistics.setStartTime(32);
-    statistics.setEndTime(36);
-    assertTrue(groupByFilter.satisfy(statistics));
+        statistics.setStartTime(32);
+        statistics.setEndTime(36);
+        assertTrue(groupByFilter.satisfy(statistics));
 
-    statistics.setStartTime(36);
-    statistics.setEndTime(37);
-    assertFalse(groupByFilter.satisfy(statistics));
+        statistics.setStartTime(36);
+        statistics.setEndTime(37);
+        assertFalse(groupByFilter.satisfy(statistics));
 
-    statistics.setStartTime(36);
-    statistics.setEndTime(55);
-    assertFalse(groupByFilter.satisfy(statistics));
+        statistics.setStartTime(36);
+        statistics.setEndTime(55);
+        assertFalse(groupByFilter.satisfy(statistics));
 
-    statistics.setStartTime(35);
-    statistics.setEndTime(56);
-    assertTrue(groupByFilter.satisfy(statistics));
+        statistics.setStartTime(35);
+        statistics.setEndTime(56);
+        assertTrue(groupByFilter.satisfy(statistics));
 
-    statistics.setStartTime(35);
-    statistics.setEndTime(58);
-    assertTrue(groupByFilter.satisfy(statistics));
+        statistics.setStartTime(35);
+        statistics.setEndTime(58);
+        assertTrue(groupByFilter.satisfy(statistics));
 
-    statistics.setStartTime(8 + 30 * 24 + 3 + 1);
-    statistics.setEndTime(8 + 30 * 24 + 5);
-    assertFalse(groupByFilter.satisfy(statistics));
+        statistics.setStartTime(8 + 30 * 24 + 3 + 1);
+        statistics.setEndTime(8 + 30 * 24 + 5);
+        assertFalse(groupByFilter.satisfy(statistics));
 
-    statistics.setStartTime(8 + 30 * 24 + 3 + 1);
-    statistics.setEndTime(8 + 30 * 24 + 8);
-    assertFalse(groupByFilter.satisfy(statistics));
-  }
+        statistics.setStartTime(8 + 30 * 24 + 3 + 1);
+        statistics.setEndTime(8 + 30 * 24 + 8);
+        assertFalse(groupByFilter.satisfy(statistics));
+    }
 
-  @Test
-  public void TestSatisfy() {
+    @Test
+    public void TestSatisfy() {
 
-    assertFalse(groupByFilter.satisfy(0, null));
+        assertFalse(groupByFilter.satisfy(0, null));
 
-    assertFalse(groupByFilter.satisfy(7, null));
+        assertFalse(groupByFilter.satisfy(7, null));
 
-    assertFalse(groupByFilter.satisfy(12, null));
+        assertFalse(groupByFilter.satisfy(12, null));
 
-    assertFalse(groupByFilter.satisfy(8 + 30 * 24 + 3 + 6, null));
+        assertFalse(groupByFilter.satisfy(8 + 30 * 24 + 3 + 6, null));
 
-    assertTrue(groupByFilter.satisfy(8, null));
+        assertTrue(groupByFilter.satisfy(8, null));
 
-    assertTrue(groupByFilter.satisfy(9, null));
+        assertTrue(groupByFilter.satisfy(9, null));
 
-    assertFalse(groupByFilter.satisfy(11, null));
+        assertFalse(groupByFilter.satisfy(11, null));
+    }
 
-  }
+    @Test
+    public void TestContainStartEndTime() {
 
+        assertTrue(groupByFilter.containStartEndTime(8, 9));
 
-  @Test
-  public void TestContainStartEndTime() {
+        assertFalse(groupByFilter.containStartEndTime(8, 13));
 
-    assertTrue(groupByFilter.containStartEndTime(8, 9));
+        assertFalse(groupByFilter.containStartEndTime(0, 3));
 
-    assertFalse(groupByFilter.containStartEndTime(8, 13));
+        assertFalse(groupByFilter.containStartEndTime(0, 9));
 
-    assertFalse(groupByFilter.containStartEndTime(0, 3));
+        assertFalse(groupByFilter.containStartEndTime(7, 8 + 30 * 24 + 3 + 6 + 1));
 
-    assertFalse(groupByFilter.containStartEndTime(0, 9));
-
-    assertFalse(groupByFilter.containStartEndTime(7, 8 + 30 * 24 + 3 + 6 + 1));
-
-    assertFalse(groupByFilter.containStartEndTime(8 + 30 * 24 + 3 + 6 + 1, 8 + 30 * 24 + 3 + 6 + 2));
-
-  }
-
+        assertFalse(
+                groupByFilter.containStartEndTime(
+                        8 + 30 * 24 + 3 + 6 + 1, 8 + 30 * 24 + 3 + 6 + 2));
+    }
 }

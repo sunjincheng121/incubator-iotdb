@@ -19,10 +19,10 @@
 package org.apache.iotdb.tsfile.write.record.datapoint;
 
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.write.chunk.IChunkWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * a subclass for Long data type extends DataPoint.
@@ -31,37 +31,32 @@ import org.apache.iotdb.tsfile.write.chunk.IChunkWriter;
  */
 public class LongDataPoint extends DataPoint {
 
-  private static final Logger LOG = LoggerFactory.getLogger(LongDataPoint.class);
-  /**
-   * actual value.
-   **/
-  private long value;
+    private static final Logger LOG = LoggerFactory.getLogger(LongDataPoint.class);
+    /** actual value. */
+    private long value;
 
-  /**
-   * constructor of LongDataPoint, the value type will be set automatically.
-   */
-  public LongDataPoint(String measurementId, long v) {
-    super(TSDataType.INT64, measurementId);
-    this.value = v;
-  }
-
-  @Override
-  public void writeTo(long time, IChunkWriter writer) throws IOException {
-    if (writer == null) {
-      LOG.warn("given IChunkWriter is null, do nothing and return");
-      return;
+    /** constructor of LongDataPoint, the value type will be set automatically. */
+    public LongDataPoint(String measurementId, long v) {
+        super(TSDataType.INT64, measurementId);
+        this.value = v;
     }
-    writer.write(time, value);
 
-  }
+    @Override
+    public void writeTo(long time, IChunkWriter writer) throws IOException {
+        if (writer == null) {
+            LOG.warn("given IChunkWriter is null, do nothing and return");
+            return;
+        }
+        writer.write(time, value);
+    }
 
-  @Override
-  public Object getValue() {
-    return value;
-  }
+    @Override
+    public Object getValue() {
+        return value;
+    }
 
-  @Override
-  public void setLong(long value) {
-    this.value = value;
-  }
+    @Override
+    public void setLong(long value) {
+        this.value = value;
+    }
 }

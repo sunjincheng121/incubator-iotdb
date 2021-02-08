@@ -27,72 +27,71 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.iotdb.tsfile.write.writer.TsFileOutput;
 
-
 /**
  * This class is used to wrap the {@link}FSDataOutputStream and implement the interface
  * {@link}TsFileOutput
  */
 public class HDFSOutput implements TsFileOutput {
 
-  private FSDataOutputStream fsDataOutputStream;
-  private FileSystem fs;
-  private Path path;
+    private FSDataOutputStream fsDataOutputStream;
+    private FileSystem fs;
+    private Path path;
 
-  public HDFSOutput(String filePath, boolean overwrite) throws IOException {
-    this(filePath, new Configuration(), overwrite);
-    path = new Path(filePath);
-  }
-
-  public HDFSOutput(String filePath, Configuration configuration, boolean overwrite)
-      throws IOException {
-    this(new Path(filePath), configuration, overwrite);
-    path = new Path(filePath);
-  }
-
-  public HDFSOutput(Path path, Configuration configuration, boolean overwrite)
-      throws IOException {
-    fs = path.getFileSystem(HDFSConfUtil.setConf(configuration));
-    fsDataOutputStream = fs.exists(path) ? fs.append(path) : fs.create(path, overwrite);
-    this.path = path;
-  }
-
-  @Override
-  public void write(byte[] b) throws IOException {
-    fsDataOutputStream.write(b);
-  }
-
-  public void write(ByteBuffer b) throws IOException {
-    throw new UnsupportedOperationException("Unsupported operation.");
-  }
-
-  @Override
-  public long getPosition() throws IOException {
-    return fsDataOutputStream.getPos();
-  }
-
-  @Override
-  public void close() throws IOException {
-    fsDataOutputStream.close();
-  }
-
-  @Override
-  public OutputStream wrapAsStream() throws IOException {
-    return fsDataOutputStream;
-  }
-
-  @Override
-  public void flush() throws IOException {
-    this.fsDataOutputStream.hflush();
-  }
-
-  @Override
-  public void truncate(long size) throws IOException {
-    if (fs.exists(path)) {
-      fsDataOutputStream.close();
+    public HDFSOutput(String filePath, boolean overwrite) throws IOException {
+        this(filePath, new Configuration(), overwrite);
+        path = new Path(filePath);
     }
-    fs.truncate(path, size);
-    if (fs.exists(path)) {
-      fsDataOutputStream = fs.append(path);
+
+    public HDFSOutput(String filePath, Configuration configuration, boolean overwrite)
+            throws IOException {
+        this(new Path(filePath), configuration, overwrite);
+        path = new Path(filePath);
     }
-  }
+
+    public HDFSOutput(Path path, Configuration configuration, boolean overwrite)
+            throws IOException {
+        fs = path.getFileSystem(HDFSConfUtil.setConf(configuration));
+        fsDataOutputStream = fs.exists(path) ? fs.append(path) : fs.create(path, overwrite);
+        this.path = path;
+    }
+
+    @Override
+    public void write(byte[] b) throws IOException {
+        fsDataOutputStream.write(b);
+    }
+
+    public void write(ByteBuffer b) throws IOException {
+        throw new UnsupportedOperationException("Unsupported operation.");
+    }
+
+    @Override
+    public long getPosition() throws IOException {
+        return fsDataOutputStream.getPos();
+    }
+
+    @Override
+    public void close() throws IOException {
+        fsDataOutputStream.close();
+    }
+
+    @Override
+    public OutputStream wrapAsStream() throws IOException {
+        return fsDataOutputStream;
+    }
+
+    @Override
+    public void flush() throws IOException {
+        this.fsDataOutputStream.hflush();
+    }
+
+    @Override
+    public void truncate(long size) throws IOException {
+        if (fs.exists(path)) {
+            fsDataOutputStream.close();
+        }
+        fs.truncate(path, size);
+        if (fs.exists(path)) {
+            fsDataOutputStream = fs.append(path);
+        }
+    }
 }

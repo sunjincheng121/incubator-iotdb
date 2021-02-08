@@ -23,36 +23,37 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
 import org.apache.iotdb.hadoop.fileSystem.HDFSOutput;
+import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
 import org.apache.iotdb.tsfile.write.TsFileWriter;
 import org.apache.iotdb.tsfile.write.record.TSRecord;
 import org.apache.iotdb.tsfile.write.schema.Schema;
 
 public class TsFileRecordWriter extends RecordWriter<NullWritable, TSRecord> {
 
-  private TsFileWriter tsFileWriter = null;
+    private TsFileWriter tsFileWriter = null;
 
-  public TsFileRecordWriter(TaskAttemptContext job, Path file, Schema schema)
-      throws IOException {
-    HDFSOutput hdfsOutput = new HDFSOutput(file.toString(),
-        job.getConfiguration(), false); //NOTE overwrite false here
+    public TsFileRecordWriter(TaskAttemptContext job, Path file, Schema schema) throws IOException {
+        HDFSOutput hdfsOutput =
+                new HDFSOutput(
+                        file.toString(),
+                        job.getConfiguration(),
+                        false); // NOTE overwrite false here
 
-    tsFileWriter = new TsFileWriter(hdfsOutput, schema);
-  }
-
-  @Override
-  public void close(TaskAttemptContext context) throws IOException {
-    tsFileWriter.close();
-  }
-
-  @Override
-  public synchronized void write(NullWritable arg0, TSRecord tsRecord) throws IOException {
-    try {
-      tsFileWriter.write(tsRecord);
-    } catch (WriteProcessException e) {
-      e.printStackTrace();
+        tsFileWriter = new TsFileWriter(hdfsOutput, schema);
     }
-  }
 
+    @Override
+    public void close(TaskAttemptContext context) throws IOException {
+        tsFileWriter.close();
+    }
+
+    @Override
+    public synchronized void write(NullWritable arg0, TSRecord tsRecord) throws IOException {
+        try {
+            tsFileWriter.write(tsRecord);
+        } catch (WriteProcessException e) {
+            e.printStackTrace();
+        }
+    }
 }

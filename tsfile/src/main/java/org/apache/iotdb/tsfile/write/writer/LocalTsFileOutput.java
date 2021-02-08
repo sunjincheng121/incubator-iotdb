@@ -27,60 +27,58 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
- * a TsFileOutput implementation with FileOutputStream. If the file is not
- * existed, it will be created. Otherwise the file will be written from position
- * 0.
+ * a TsFileOutput implementation with FileOutputStream. If the file is not existed, it will be
+ * created. Otherwise the file will be written from position 0.
  */
 public class LocalTsFileOutput implements TsFileOutput {
 
-  private FileOutputStream outputStream;
-  private BufferedOutputStream bufferedStream;
+    private FileOutputStream outputStream;
+    private BufferedOutputStream bufferedStream;
 
-  LocalTsFileOutput(File file, boolean append) throws FileNotFoundException {
-    this.outputStream = new FileOutputStream(file, append);
-    this.bufferedStream = new BufferedOutputStream(outputStream);
-  }
+    LocalTsFileOutput(File file, boolean append) throws FileNotFoundException {
+        this.outputStream = new FileOutputStream(file, append);
+        this.bufferedStream = new BufferedOutputStream(outputStream);
+    }
 
-  public LocalTsFileOutput(FileOutputStream outputStream) {
-    this.outputStream = outputStream;
-    this.bufferedStream = new BufferedOutputStream(outputStream);
-  }
+    public LocalTsFileOutput(FileOutputStream outputStream) {
+        this.outputStream = outputStream;
+        this.bufferedStream = new BufferedOutputStream(outputStream);
+    }
 
-  @Override
-  public void write(byte[] b) throws IOException {
-    bufferedStream.write(b);
-  }
+    @Override
+    public void write(byte[] b) throws IOException {
+        bufferedStream.write(b);
+    }
 
-  @Override
-  public void write(ByteBuffer b) throws IOException {
-    bufferedStream.write(b.array());
-  }
+    @Override
+    public void write(ByteBuffer b) throws IOException {
+        bufferedStream.write(b.array());
+    }
 
-  @Override
-  public long getPosition() throws IOException {
-    bufferedStream.flush();
-    return outputStream.getChannel().position();
-  }
+    @Override
+    public long getPosition() throws IOException {
+        bufferedStream.flush();
+        return outputStream.getChannel().position();
+    }
 
-  @Override
-  public void close() throws IOException {
-    bufferedStream.close();
-    outputStream.close();
-  }
+    @Override
+    public void close() throws IOException {
+        bufferedStream.close();
+        outputStream.close();
+    }
 
-  @Override
-  public OutputStream wrapAsStream() {
-    return bufferedStream;
-  }
+    @Override
+    public OutputStream wrapAsStream() {
+        return bufferedStream;
+    }
 
-  @Override
-  public void flush() throws IOException {
-    this.bufferedStream.flush();
-  }
+    @Override
+    public void flush() throws IOException {
+        this.bufferedStream.flush();
+    }
 
-  @Override
-  public void truncate(long size) throws IOException {
-    outputStream.getChannel().truncate(size);
-  }
-
+    @Override
+    public void truncate(long size) throws IOException {
+        outputStream.getChannel().truncate(size);
+    }
 }

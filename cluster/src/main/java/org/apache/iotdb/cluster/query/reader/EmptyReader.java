@@ -33,138 +33,138 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
 import org.apache.iotdb.tsfile.utils.Pair;
 
-/**
- * A placeholder when the remote node does not contain satisfying data of a series.
- */
-public class EmptyReader extends BaseManagedSeriesReader implements ManagedSeriesReader, IAggregateReader,
-    IPointReader,
-    GroupByExecutor, IReaderByTimestamp {
+/** A placeholder when the remote node does not contain satisfying data of a series. */
+public class EmptyReader extends BaseManagedSeriesReader
+        implements ManagedSeriesReader,
+                IAggregateReader,
+                IPointReader,
+                GroupByExecutor,
+                IReaderByTimestamp {
 
-  private List<AggregateResult> aggregationResults = new ArrayList<>();
+    private List<AggregateResult> aggregationResults = new ArrayList<>();
 
-  @Override
-  public boolean hasNextBatch() {
-    return false;
-  }
+    @Override
+    public boolean hasNextBatch() {
+        return false;
+    }
 
-  @Override
-  public BatchData nextBatch() {
-    return null;
-  }
+    @Override
+    public BatchData nextBatch() {
+        return null;
+    }
 
-  @Override
-  public boolean hasNextTimeValuePair() {
-    return false;
-  }
+    @Override
+    public boolean hasNextTimeValuePair() {
+        return false;
+    }
 
-  @Override
-  public TimeValuePair nextTimeValuePair() {
-    return null;
-  }
+    @Override
+    public TimeValuePair nextTimeValuePair() {
+        return null;
+    }
 
-  @Override
-  public TimeValuePair currentTimeValuePair() {
-    return null;
-  }
+    @Override
+    public TimeValuePair currentTimeValuePair() {
+        return null;
+    }
 
-  @Override
-  public void close() {
-    // do nothing
-  }
+    @Override
+    public void close() {
+        // do nothing
+    }
 
-  @Override
-  public boolean hasNextFile() {
-    return false;
-  }
+    @Override
+    public boolean hasNextFile() {
+        return false;
+    }
 
-  @Override
-  public boolean canUseCurrentFileStatistics() {
-    return false;
-  }
+    @Override
+    public boolean canUseCurrentFileStatistics() {
+        return false;
+    }
 
-  @Override
-  public Statistics currentFileStatistics() {
-    return null;
-  }
+    @Override
+    public Statistics currentFileStatistics() {
+        return null;
+    }
 
-  @Override
-  public void skipCurrentFile() {
-    // do nothing
-  }
+    @Override
+    public void skipCurrentFile() {
+        // do nothing
+    }
 
-  @Override
-  public boolean hasNextChunk() {
-    return false;
-  }
+    @Override
+    public boolean hasNextChunk() {
+        return false;
+    }
 
-  @Override
-  public boolean canUseCurrentChunkStatistics() {
-    return false;
-  }
+    @Override
+    public boolean canUseCurrentChunkStatistics() {
+        return false;
+    }
 
-  @Override
-  public Statistics currentChunkStatistics() {
-    return null;
-  }
+    @Override
+    public Statistics currentChunkStatistics() {
+        return null;
+    }
 
-  @Override
-  public void skipCurrentChunk() {
-    // do nothing
-  }
+    @Override
+    public void skipCurrentChunk() {
+        // do nothing
+    }
 
-  @Override
-  public boolean hasNextPage() {
-    return false;
-  }
+    @Override
+    public boolean hasNextPage() {
+        return false;
+    }
 
-  @Override
-  public boolean canUseCurrentPageStatistics() {
-    return false;
-  }
+    @Override
+    public boolean canUseCurrentPageStatistics() {
+        return false;
+    }
 
-  @Override
-  public Statistics currentPageStatistics() {
-    return null;
-  }
+    @Override
+    public Statistics currentPageStatistics() {
+        return null;
+    }
 
-  @Override
-  public void skipCurrentPage() {
-    // do nothing
-  }
+    @Override
+    public void skipCurrentPage() {
+        // do nothing
+    }
 
-  @Override
-  public BatchData nextPage() {
-    return null;
-  }
+    @Override
+    public BatchData nextPage() {
+        return null;
+    }
 
-  @Override
-  public boolean isAscending() {
-    return false;
-  }
+    @Override
+    public boolean isAscending() {
+        return false;
+    }
 
-  @Override
-  public void addAggregateResult(AggregateResult aggrResult) {
-    aggregationResults.add(aggrResult);
-  }
+    @Override
+    public void addAggregateResult(AggregateResult aggrResult) {
+        aggregationResults.add(aggrResult);
+    }
 
+    @Override
+    public List<AggregateResult> calcResult(long curStartTime, long curEndTime) {
+        return aggregationResults;
+    }
 
-  @Override
-  public List<AggregateResult> calcResult(long curStartTime, long curEndTime) {
-    return aggregationResults;
-  }
+    @Override
+    public Object getValueInTimestamp(long timestamp) {
+        return null;
+    }
 
-  @Override
-  public Object getValueInTimestamp(long timestamp) {
-    return null;
-  }
+    @Override
+    public boolean readerIsEmpty() {
+        return false;
+    }
 
-  @Override
-  public boolean readerIsEmpty() {
-    return false;
-  }
-
-  @Override
-  public Pair<Long, Object> peekNextNotNullValue(long nextStartTime, long nextEndTime) {
-    return null;
-  }
+    @Override
+    public Pair<Long, Object> peekNextNotNullValue(long nextStartTime, long nextEndTime) {
+        return null;
+    }
 }

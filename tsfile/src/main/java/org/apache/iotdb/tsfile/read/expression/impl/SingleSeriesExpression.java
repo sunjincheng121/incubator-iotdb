@@ -19,7 +19,6 @@
 package org.apache.iotdb.tsfile.read.expression.impl;
 
 import java.io.Serializable;
-
 import org.apache.iotdb.tsfile.read.common.Path;
 import org.apache.iotdb.tsfile.read.expression.ExpressionType;
 import org.apache.iotdb.tsfile.read.expression.IExpression;
@@ -28,41 +27,41 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 
 public class SingleSeriesExpression implements IUnaryExpression, Serializable {
 
-  private static final long serialVersionUID = 7131207370394865228L;
-  private Path seriesPath;
-  private Filter filter;
+    private static final long serialVersionUID = 7131207370394865228L;
+    private Path seriesPath;
+    private Filter filter;
 
-  public SingleSeriesExpression(Path seriesDescriptor, Filter filter) {
-    this.seriesPath = seriesDescriptor;
-    this.filter = filter;
-  }
+    public SingleSeriesExpression(Path seriesDescriptor, Filter filter) {
+        this.seriesPath = seriesDescriptor;
+        this.filter = filter;
+    }
 
-  @Override
-  public ExpressionType getType() {
-    return ExpressionType.SERIES;
-  }
+    @Override
+    public ExpressionType getType() {
+        return ExpressionType.SERIES;
+    }
 
-  @Override
-  public IExpression clone() {
-    return new SingleSeriesExpression(seriesPath.clone(), filter.copy());
-  }
+    @Override
+    public IExpression clone() {
+        return new SingleSeriesExpression(seriesPath.clone(), filter.copy());
+    }
 
-  @Override
-  public Filter getFilter() {
-    return filter;
-  }
+    @Override
+    public Filter getFilter() {
+        return filter;
+    }
 
-  @Override
-  public void setFilter(Filter filter) {
-    this.filter = filter;
-  }
+    @Override
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
 
-  @Override
-  public String toString() {
-    return "[" + seriesPath + ":" + filter + "]";
-  }
+    @Override
+    public String toString() {
+        return "[" + seriesPath + ":" + filter + "]";
+    }
 
-  public Path getSeriesPath() {
-    return this.seriesPath;
-  }
+    public Path getSeriesPath() {
+        return this.seriesPath;
+    }
 }

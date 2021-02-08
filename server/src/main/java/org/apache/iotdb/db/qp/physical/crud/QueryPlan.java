@@ -28,85 +28,85 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 
 public abstract class QueryPlan extends PhysicalPlan {
 
-  protected List<PartialPath> paths = null;
-  private List<TSDataType> dataTypes = null;
-  private boolean alignByTime = true; // for disable align sql
+    protected List<PartialPath> paths = null;
+    private List<TSDataType> dataTypes = null;
+    private boolean alignByTime = true; // for disable align sql
 
-  private int rowLimit = 0;
-  private int rowOffset = 0;
+    private int rowLimit = 0;
+    private int rowOffset = 0;
 
-  private boolean ascending = true;
+    private boolean ascending = true;
 
-  private Map<String, Integer> pathToIndex = new HashMap<>();
+    private Map<String, Integer> pathToIndex = new HashMap<>();
 
-  public QueryPlan() {
-    super(true);
-    setOperatorType(Operator.OperatorType.QUERY);
-  }
+    public QueryPlan() {
+        super(true);
+        setOperatorType(Operator.OperatorType.QUERY);
+    }
 
-  public QueryPlan(boolean isQuery, Operator.OperatorType operatorType) {
-    super(isQuery, operatorType);
-  }
+    public QueryPlan(boolean isQuery, Operator.OperatorType operatorType) {
+        super(isQuery, operatorType);
+    }
 
-  @Override
-  public List<PartialPath> getPaths() {
-    return paths;
-  }
+    @Override
+    public List<PartialPath> getPaths() {
+        return paths;
+    }
 
-  @Override
-  public void setPaths(List<PartialPath> paths) {
-    this.paths = paths;
-  }
+    @Override
+    public void setPaths(List<PartialPath> paths) {
+        this.paths = paths;
+    }
 
-  public List<TSDataType> getDataTypes() {
-    return dataTypes;
-  }
+    public List<TSDataType> getDataTypes() {
+        return dataTypes;
+    }
 
-  public void setDataTypes(List<TSDataType> dataTypes) {
-    this.dataTypes = dataTypes;
-  }
+    public void setDataTypes(List<TSDataType> dataTypes) {
+        this.dataTypes = dataTypes;
+    }
 
-  public int getRowLimit() {
-    return rowLimit;
-  }
+    public int getRowLimit() {
+        return rowLimit;
+    }
 
-  public void setRowLimit(int rowLimit) {
-    this.rowLimit = rowLimit;
-  }
+    public void setRowLimit(int rowLimit) {
+        this.rowLimit = rowLimit;
+    }
 
-  public int getRowOffset() {
-    return rowOffset;
-  }
+    public int getRowOffset() {
+        return rowOffset;
+    }
 
-  public void setRowOffset(int rowOffset) {
-    this.rowOffset = rowOffset;
-  }
+    public void setRowOffset(int rowOffset) {
+        this.rowOffset = rowOffset;
+    }
 
-  public boolean hasLimit() {
-    return rowLimit > 0;
-  }
+    public boolean hasLimit() {
+        return rowLimit > 0;
+    }
 
-  public boolean isAlignByTime() {
-    return alignByTime;
-  }
+    public boolean isAlignByTime() {
+        return alignByTime;
+    }
 
-  public void setAlignByTime(boolean align) {
-    alignByTime = align;
-  }
+    public void setAlignByTime(boolean align) {
+        alignByTime = align;
+    }
 
-  public void addPathToIndex(String columnName, Integer index) {
-    pathToIndex.put(columnName, index);
-  }
+    public void addPathToIndex(String columnName, Integer index) {
+        pathToIndex.put(columnName, index);
+    }
 
-  public Map<String, Integer> getPathToIndex() {
-    return pathToIndex;
-  }
+    public Map<String, Integer> getPathToIndex() {
+        return pathToIndex;
+    }
 
-  public boolean isAscending() {
-    return ascending;
-  }
+    public boolean isAscending() {
+        return ascending;
+    }
 
-  public void setAscending(boolean ascending) {
-    this.ascending = ascending;
-  }
+    public void setAscending(boolean ascending) {
+        this.ascending = ascending;
+    }
 }

@@ -18,101 +18,100 @@
  */
 package org.apache.iotdb.tsfile.file.metadata.statistics;
 
+import static org.junit.Assert.*;
+
 import org.apache.iotdb.tsfile.exception.filter.StatisticsClassException;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class LongStatisticsTest {
 
-  @Test
-  public void testUpdate() {
-    Statistics<Long> longStats = new LongStatistics();
-    assertTrue(longStats.isEmpty());
-    long firstValue = -120985402913209L;
-    long secondValue = 1251465332132513L;
-    longStats.updateStats(firstValue);
-    assertFalse(longStats.isEmpty());
-    longStats.updateStats(secondValue);
-    assertFalse(longStats.isEmpty());
-    assertEquals(secondValue, (long) longStats.getMaxValue());
-    assertEquals(firstValue, (long) longStats.getMinValue());
-    assertEquals(firstValue, (long) longStats.getFirstValue());
-    assertEquals(firstValue + secondValue, (long) longStats.getSumValue());
-    assertEquals(secondValue, (long) longStats.getLastValue());
-  }
-
-  @Test
-  public void testMerge() {
-    Statistics<Long> longStats1 = new LongStatistics();
-    longStats1.setStartTime(0);
-    longStats1.setEndTime(2);
-    Statistics<Long> longStats2 = new LongStatistics();
-    longStats2.setStartTime(3);
-    longStats2.setEndTime(5);
-    assertTrue(longStats1.isEmpty());
-    assertTrue(longStats2.isEmpty());
-    long max1 = 100000000000L;
-    long max2 = 200000000000L;
-    longStats1.updateStats(1L);
-    longStats1.updateStats(max1);
-    longStats2.updateStats(max2);
-
-    Statistics<Long> longStats3 = new LongStatistics();
-    longStats3.mergeStatistics(longStats1);
-    assertFalse(longStats3.isEmpty());
-    assertEquals(max1, (long) longStats3.getMaxValue());
-    assertEquals(1, (long) longStats3.getMinValue());
-    assertEquals(max1 + 1, (long) longStats3.getSumValue());
-    assertEquals(1, (long) longStats3.getFirstValue());
-    assertEquals(max1, (long) longStats3.getLastValue());
-
-    longStats3.mergeStatistics(longStats2);
-    assertEquals(max2, (long) longStats3.getMaxValue());
-    assertEquals(1, (long) longStats3.getMinValue());
-    assertEquals(max2 + max1 + 1, (long) longStats3.getSumValue());
-    assertEquals(1, (long) longStats3.getFirstValue());
-    assertEquals(max2, (long) longStats3.getLastValue());
-
-    // Test mismatch
-    IntegerStatistics intStats5 = new IntegerStatistics();
-    intStats5.updateStats(-10000);
-    try {
-      longStats3.mergeStatistics(intStats5);
-    } catch (StatisticsClassException e) {
-      // that's true route
-    } catch (Exception e) {
-      fail();
+    @Test
+    public void testUpdate() {
+        Statistics<Long> longStats = new LongStatistics();
+        assertTrue(longStats.isEmpty());
+        long firstValue = -120985402913209L;
+        long secondValue = 1251465332132513L;
+        longStats.updateStats(firstValue);
+        assertFalse(longStats.isEmpty());
+        longStats.updateStats(secondValue);
+        assertFalse(longStats.isEmpty());
+        assertEquals(secondValue, (long) longStats.getMaxValue());
+        assertEquals(firstValue, (long) longStats.getMinValue());
+        assertEquals(firstValue, (long) longStats.getFirstValue());
+        assertEquals(firstValue + secondValue, (long) longStats.getSumValue());
+        assertEquals(secondValue, (long) longStats.getLastValue());
     }
 
-    assertEquals(max2, (long) longStats3.getMaxValue());
-    // if not merge, the min value will not be changed by smaller value in
-    // intStats5
-    assertEquals(1, (long) longStats3.getMinValue());
-    assertEquals(max2 + max1 + 1, (long) longStats3.getSumValue());
-    assertEquals(1, (long) longStats3.getFirstValue());
-    assertEquals(max2, (long) longStats3.getLastValue());
+    @Test
+    public void testMerge() {
+        Statistics<Long> longStats1 = new LongStatistics();
+        longStats1.setStartTime(0);
+        longStats1.setEndTime(2);
+        Statistics<Long> longStats2 = new LongStatistics();
+        longStats2.setStartTime(3);
+        longStats2.setEndTime(5);
+        assertTrue(longStats1.isEmpty());
+        assertTrue(longStats2.isEmpty());
+        long max1 = 100000000000L;
+        long max2 = 200000000000L;
+        longStats1.updateStats(1L);
+        longStats1.updateStats(max1);
+        longStats2.updateStats(max2);
 
-    // Unseq Merge
-    LongStatistics longStats4 = new LongStatistics();
-    longStats4.setStartTime(0);
-    longStats4.setEndTime(5);
-    LongStatistics longStats5 = new LongStatistics();
-    longStats5.setStartTime(1);
-    longStats5.setEndTime(4);
+        Statistics<Long> longStats3 = new LongStatistics();
+        longStats3.mergeStatistics(longStats1);
+        assertFalse(longStats3.isEmpty());
+        assertEquals(max1, (long) longStats3.getMaxValue());
+        assertEquals(1, (long) longStats3.getMinValue());
+        assertEquals(max1 + 1, (long) longStats3.getSumValue());
+        assertEquals(1, (long) longStats3.getFirstValue());
+        assertEquals(max1, (long) longStats3.getLastValue());
 
-    longStats4.updateStats(111L);
-    longStats4.updateStats(114L);
+        longStats3.mergeStatistics(longStats2);
+        assertEquals(max2, (long) longStats3.getMaxValue());
+        assertEquals(1, (long) longStats3.getMinValue());
+        assertEquals(max2 + max1 + 1, (long) longStats3.getSumValue());
+        assertEquals(1, (long) longStats3.getFirstValue());
+        assertEquals(max2, (long) longStats3.getLastValue());
 
-    longStats5.updateStats(116L);
+        // Test mismatch
+        IntegerStatistics intStats5 = new IntegerStatistics();
+        intStats5.updateStats(-10000);
+        try {
+            longStats3.mergeStatistics(intStats5);
+        } catch (StatisticsClassException e) {
+            // that's true route
+        } catch (Exception e) {
+            fail();
+        }
 
-    longStats3.mergeStatistics(longStats4);
-    assertEquals(111L, (long) longStats3.getFirstValue());
-    assertEquals(114L, (long) longStats3.getLastValue());
+        assertEquals(max2, (long) longStats3.getMaxValue());
+        // if not merge, the min value will not be changed by smaller value in
+        // intStats5
+        assertEquals(1, (long) longStats3.getMinValue());
+        assertEquals(max2 + max1 + 1, (long) longStats3.getSumValue());
+        assertEquals(1, (long) longStats3.getFirstValue());
+        assertEquals(max2, (long) longStats3.getLastValue());
 
-    longStats3.mergeStatistics(longStats5);
-    assertEquals(111L, (long) longStats3.getFirstValue());
-    assertEquals(114L, (long) longStats3.getLastValue());
-  }
+        // Unseq Merge
+        LongStatistics longStats4 = new LongStatistics();
+        longStats4.setStartTime(0);
+        longStats4.setEndTime(5);
+        LongStatistics longStats5 = new LongStatistics();
+        longStats5.setStartTime(1);
+        longStats5.setEndTime(4);
 
+        longStats4.updateStats(111L);
+        longStats4.updateStats(114L);
+
+        longStats5.updateStats(116L);
+
+        longStats3.mergeStatistics(longStats4);
+        assertEquals(111L, (long) longStats3.getFirstValue());
+        assertEquals(114L, (long) longStats3.getLastValue());
+
+        longStats3.mergeStatistics(longStats5);
+        assertEquals(111L, (long) longStats3.getFirstValue());
+        assertEquals(114L, (long) longStats3.getLastValue());
+    }
 }

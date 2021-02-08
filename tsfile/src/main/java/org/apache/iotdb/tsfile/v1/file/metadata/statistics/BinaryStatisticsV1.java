@@ -24,61 +24,67 @@ import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.Binary;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Statistics for string type.
- */
+/** Statistics for string type. */
 public class BinaryStatisticsV1 extends StatisticsV1<Binary> {
 
-  private Binary min = new Binary("");
-  private Binary max = new Binary("");
-  private Binary first = new Binary("");
-  private Binary last = new Binary("");
-  private double sum;
+    private Binary min = new Binary("");
+    private Binary max = new Binary("");
+    private Binary first = new Binary("");
+    private Binary last = new Binary("");
+    private double sum;
 
-  @Override
-  public Binary getMin() {
-    return min;
-  }
+    @Override
+    public Binary getMin() {
+        return min;
+    }
 
-  @Override
-  public Binary getMax() {
-    return max;
-  }
+    @Override
+    public Binary getMax() {
+        return max;
+    }
 
-  @Override
-  public Binary getFirst() {
-    return first;
-  }
+    @Override
+    public Binary getFirst() {
+        return first;
+    }
 
-  @Override
-  public Binary getLast() {
-    return last;
-  }
+    @Override
+    public Binary getLast() {
+        return last;
+    }
 
-  @Override
-  public double getSum() {
-    return sum;
-  }
+    @Override
+    public double getSum() {
+        return sum;
+    }
 
-  @Override
-  void deserialize(ByteBuffer byteBuffer) throws IOException {
-    this.min = new Binary(
-        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
-    this.max = new Binary(
-        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
-    this.first = new Binary(
-        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
-    this.last = new Binary(
-        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
-    this.sum = ReadWriteIOUtils.readDouble(byteBuffer);
-  }
+    @Override
+    void deserialize(ByteBuffer byteBuffer) throws IOException {
+        this.min =
+                new Binary(
+                        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer)
+                                .array());
+        this.max =
+                new Binary(
+                        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer)
+                                .array());
+        this.first =
+                new Binary(
+                        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer)
+                                .array());
+        this.last =
+                new Binary(
+                        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer)
+                                .array());
+        this.sum = ReadWriteIOUtils.readDouble(byteBuffer);
+    }
 
-  @Override
-  void deserialize(InputStream inputStream) throws IOException {
-    this.min = new Binary(ReadWriteIOUtils.readBytesWithSelfDescriptionLength(inputStream));
-    this.max = new Binary(ReadWriteIOUtils.readBytesWithSelfDescriptionLength(inputStream));
-    this.first = new Binary(ReadWriteIOUtils.readBytesWithSelfDescriptionLength(inputStream));
-    this.last = new Binary(ReadWriteIOUtils.readBytesWithSelfDescriptionLength(inputStream));
-    this.sum = ReadWriteIOUtils.readDouble(inputStream);
-  }
+    @Override
+    void deserialize(InputStream inputStream) throws IOException {
+        this.min = new Binary(ReadWriteIOUtils.readBytesWithSelfDescriptionLength(inputStream));
+        this.max = new Binary(ReadWriteIOUtils.readBytesWithSelfDescriptionLength(inputStream));
+        this.first = new Binary(ReadWriteIOUtils.readBytesWithSelfDescriptionLength(inputStream));
+        this.last = new Binary(ReadWriteIOUtils.readBytesWithSelfDescriptionLength(inputStream));
+        this.sum = ReadWriteIOUtils.readDouble(inputStream);
+    }
 }

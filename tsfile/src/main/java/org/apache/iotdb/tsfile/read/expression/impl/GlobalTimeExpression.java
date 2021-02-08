@@ -19,7 +19,6 @@
 package org.apache.iotdb.tsfile.read.expression.impl;
 
 import java.io.Serializable;
-
 import org.apache.iotdb.tsfile.read.expression.ExpressionType;
 import org.apache.iotdb.tsfile.read.expression.IExpression;
 import org.apache.iotdb.tsfile.read.expression.IUnaryExpression;
@@ -27,35 +26,35 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 
 public class GlobalTimeExpression implements IUnaryExpression, Serializable {
 
-  private static final long serialVersionUID = 1146132942359113670L;
-  private Filter filter;
+    private static final long serialVersionUID = 1146132942359113670L;
+    private Filter filter;
 
-  public GlobalTimeExpression(Filter filter) {
-    this.filter = filter;
-  }
+    public GlobalTimeExpression(Filter filter) {
+        this.filter = filter;
+    }
 
-  @Override
-  public Filter getFilter() {
-    return filter;
-  }
+    @Override
+    public Filter getFilter() {
+        return filter;
+    }
 
-  @Override
-  public void setFilter(Filter filter) {
-    this.filter = filter;
-  }
+    @Override
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
 
-  @Override
-  public ExpressionType getType() {
-    return ExpressionType.GLOBAL_TIME;
-  }
+    @Override
+    public ExpressionType getType() {
+        return ExpressionType.GLOBAL_TIME;
+    }
 
-  @Override
-  public IExpression clone() {
-    return new GlobalTimeExpression(filter.copy());
-  }
+    @Override
+    public IExpression clone() {
+        return new GlobalTimeExpression(filter.copy());
+    }
 
-  @Override
-  public String toString() {
-    return "[" + this.filter.toString() + "]";
-  }
+    @Override
+    public String toString() {
+        return "[" + this.filter.toString() + "]";
+    }
 }

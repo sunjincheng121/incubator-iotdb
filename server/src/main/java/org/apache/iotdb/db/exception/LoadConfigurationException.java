@@ -20,18 +20,17 @@ package org.apache.iotdb.db.exception;
 
 public class LoadConfigurationException extends Exception {
 
-  private static final long serialVersionUID = -1950532739374479184L;
+    private static final long serialVersionUID = -1950532739374479184L;
 
-  public LoadConfigurationException(String message) {
-    super(message);
-  }
+    public LoadConfigurationException(String message) {
+        super(message);
+    }
 
-  public LoadConfigurationException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public LoadConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-  public LoadConfigurationException(Throwable cause) {
-    super(cause);
-  }
-
+    public LoadConfigurationException(Throwable cause) {
+        super(cause);
+    }
 }

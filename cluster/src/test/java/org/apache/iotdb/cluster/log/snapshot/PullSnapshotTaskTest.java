@@ -61,239 +61,246 @@ import org.apache.thrift.async.AsyncMethodCallback;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class PullSnapshotTaskTest extends DataSnapshotTest {
 
-  private DataGroupMember sourceMember;
-  private DataGroupMember targetMember;
-  private List<TimeseriesSchema> timeseriesSchemas;
-  private List<TsFileResource> tsFileResources;
-  private boolean hintRegistered;
-  private int requiredRetries;
+    private DataGroupMember sourceMember;
+    private DataGroupMember targetMember;
+    private List<TimeseriesSchema> timeseriesSchemas;
+    private List<TsFileResource> tsFileResources;
+    private boolean hintRegistered;
+    private int requiredRetries;
 
-  @Before
-  public void setUp() throws MetadataException, StartupException {
-    super.setUp();
-    hintRegistered = false;
-    sourceMember = new TestDataGroupMember() {
-      @Override
-      public AsyncClient getAsyncClient(Node node) {
+    @Before
+    public void setUp() throws MetadataException, StartupException {
+        super.setUp();
+        hintRegistered = false;
+        sourceMember =
+                new TestDataGroupMember() {
+                    @Override
+                    public AsyncClient getAsyncClient(Node node) {
+                        try {
+                            return new TestAsyncDataClient(node, null) {
+                                @Override
+                                public void pullSnapshot(
+                                        PullSnapshotRequest request,
+                                        AsyncMethodCallback<PullSnapshotResp> resultHandler) {
+                                    new Thread(
+                                                    () -> {
+                                                        try {
+                                                            if (request.requireReadOnly) {
+                                                                targetMember.setReadOnly();
+                                                            }
+                                                            resultHandler.onComplete(
+                                                                    targetMember.getSnapshot(
+                                                                            request));
+                                                        } catch (IOException e) {
+                                                            resultHandler.onError(e);
+                                                        }
+                                                    })
+                                            .start();
+                                }
+                            };
+                        } catch (IOException e) {
+                            return null;
+                        }
+                    }
+
+                    @Override
+                    public Client getSyncClient(Node node) {
+                        return new SyncDataClient(null) {
+                            @Override
+                            public PullSnapshotResp pullSnapshot(PullSnapshotRequest request)
+                                    throws TException {
+                                try {
+                                    if (request.requireReadOnly) {
+                                        targetMember.setReadOnly();
+                                    }
+                                    return targetMember.getSnapshot(request);
+                                } catch (IOException e) {
+                                    throw new TException(e);
+                                }
+                            }
+
+                            @Override
+                            public ByteBuffer readFile(String filePath, long offset, int length)
+                                    throws TException {
+                                try {
+                                    return IOUtils.readFile(filePath, offset, length);
+                                } catch (IOException e) {
+                                    throw new TException(e);
+                                }
+                            }
+
+                            @Override
+                            public TProtocol getInputProtocol() {
+                                return new TBinaryProtocol(
+                                        new TTransport() {
+                                            @Override
+                                            public boolean isOpen() {
+                                                return false;
+                                            }
+
+                                            @Override
+                                            public void open() {}
+
+                                            @Override
+                                            public void close() {}
+
+                                            @Override
+                                            public int read(byte[] buf, int off, int len) {
+                                                return 0;
+                                            }
+
+                                            @Override
+                                            public void write(byte[] buf, int off, int len) {}
+                                        });
+                            }
+                        };
+                    }
+
+                    @Override
+                    public void registerPullSnapshotHint(PullSnapshotTaskDescriptor descriptor) {
+                        hintRegistered = true;
+                    }
+                };
+        sourceMember.setMetaGroupMember(metaGroupMember);
+        sourceMember.setThisNode(TestUtils.getNode(0));
+        targetMember =
+                new TestDataGroupMember() {
+                    @Override
+                    public PullSnapshotResp getSnapshot(PullSnapshotRequest request)
+                            throws IOException {
+                        if (requiredRetries > 0) {
+                            requiredRetries--;
+                            throw new IOException("Faked pull snapshot exception");
+                        }
+
+                        try {
+                            tsFileResources = TestUtils.prepareTsFileResources(0, 10, 10, 10, true);
+                        } catch (WriteProcessException e) {
+                            return null;
+                        }
+                        Map<Integer, ByteBuffer> snapshotBytes = new HashMap<>();
+                        for (int i = 0; i < 10; i++) {
+                            FileSnapshot fileSnapshot = new FileSnapshot();
+                            fileSnapshot.addFile(tsFileResources.get(i), TestUtils.getNode(i));
+                            fileSnapshot.setTimeseriesSchemas(
+                                    Collections.singletonList(
+                                            TestUtils.getTestTimeSeriesSchema(0, i)));
+                            timeseriesSchemas.add(TestUtils.getTestTimeSeriesSchema(0, i));
+                            snapshotBytes.put(i, fileSnapshot.serialize());
+                        }
+                        PullSnapshotResp pullSnapshotResp = new PullSnapshotResp();
+                        pullSnapshotResp.setSnapshotBytes(snapshotBytes);
+                        return pullSnapshotResp;
+                    }
+                };
+        targetMember.setThisNode(TestUtils.getNode(1));
+        targetMember.setLogManager(new TestLogManager(1));
+
+        timeseriesSchemas = new ArrayList<>();
+        requiredRetries = 0;
+    }
+
+    @Test
+    public void testAsync() throws IllegalPathException, StorageEngineException {
+        boolean useAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
+        ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(true);
         try {
-          return new TestAsyncDataClient(node, null) {
-            @Override
-            public void pullSnapshot(PullSnapshotRequest request,
-                AsyncMethodCallback<PullSnapshotResp> resultHandler) {
-              new Thread(() -> {
-                try {
-                  if (request.requireReadOnly) {
-                    targetMember.setReadOnly();
-                  }
-                  resultHandler.onComplete(targetMember.getSnapshot(request));
-                } catch (IOException e) {
-                  resultHandler.onError(e);
-                }
-              }).start();
-            }
-          };
-        } catch (IOException e) {
-          return null;
+            testNormal(false);
+        } finally {
+            ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(useAsyncServer);
         }
-      }
+    }
 
-      @Override
-      public Client getSyncClient(Node node) {
-        return new SyncDataClient(null) {
-          @Override
-          public PullSnapshotResp pullSnapshot(PullSnapshotRequest request) throws TException {
-            try {
-              if (request.requireReadOnly) {
-                targetMember.setReadOnly();
-              }
-              return targetMember.getSnapshot(request);
-            } catch (IOException e) {
-              throw new TException(e);
-            }
-          }
+    @Test
+    public void testReadOnly() throws StorageEngineException, IllegalPathException {
+        testNormal(true);
+        assertTrue(targetMember.isReadOnly());
+    }
 
-          @Override
-          public ByteBuffer readFile(String filePath, long offset, int length) throws TException {
-            try {
-              return IOUtils.readFile(filePath, offset, length);
-            } catch (IOException e) {
-              throw new TException(e);
-            }
-          }
-
-          @Override
-          public TProtocol getInputProtocol() {
-            return new TBinaryProtocol(new TTransport() {
-              @Override
-              public boolean isOpen() {
-                return false;
-              }
-
-              @Override
-              public void open() {
-
-              }
-
-              @Override
-              public void close() {
-
-              }
-
-              @Override
-              public int read(byte[] buf, int off, int len) {
-                return 0;
-              }
-
-              @Override
-              public void write(byte[] buf, int off, int len) {
-
-              }
-            });
-          }
-        };
-      }
-
-      @Override
-      public void registerPullSnapshotHint(PullSnapshotTaskDescriptor descriptor) {
-        hintRegistered = true;
-      }
-    };
-    sourceMember.setMetaGroupMember(metaGroupMember);
-    sourceMember.setThisNode(TestUtils.getNode(0));
-    targetMember = new TestDataGroupMember() {
-      @Override
-      public PullSnapshotResp getSnapshot(PullSnapshotRequest request) throws IOException {
-        if (requiredRetries > 0) {
-          requiredRetries--;
-          throw new IOException("Faked pull snapshot exception");
-        }
-
+    @Test
+    public void testSync() throws IllegalPathException, StorageEngineException {
+        boolean useAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
+        ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(false);
         try {
-          tsFileResources = TestUtils.prepareTsFileResources(0, 10, 10, 10, true);
-        } catch (WriteProcessException e) {
-          return null;
+            testNormal(false);
+        } finally {
+            ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(useAsyncServer);
         }
-        Map<Integer, ByteBuffer> snapshotBytes = new HashMap<>();
-        for (int i = 0; i < 10; i++) {
-          FileSnapshot fileSnapshot = new FileSnapshot();
-          fileSnapshot.addFile(tsFileResources.get(i), TestUtils.getNode(i));
-          fileSnapshot.setTimeseriesSchemas(
-              Collections.singletonList(TestUtils.getTestTimeSeriesSchema(0, i)));
-          timeseriesSchemas.add(TestUtils.getTestTimeSeriesSchema(0, i));
-          snapshotBytes.put(i, fileSnapshot.serialize());
+    }
+
+    @Test
+    public void testWithRetry() throws StorageEngineException, IllegalPathException {
+        boolean useAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
+        int pullSnapshotRetryIntervalMs =
+                ClusterDescriptor.getInstance().getConfig().getPullSnapshotRetryIntervalMs();
+        ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(false);
+        ClusterDescriptor.getInstance().getConfig().setPullSnapshotRetryIntervalMs(100);
+        try {
+            requiredRetries = 3;
+            testNormal(false);
+        } finally {
+            ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(useAsyncServer);
+            ClusterDescriptor.getInstance()
+                    .getConfig()
+                    .setPullSnapshotRetryIntervalMs(pullSnapshotRetryIntervalMs);
         }
-        PullSnapshotResp pullSnapshotResp = new PullSnapshotResp();
-        pullSnapshotResp.setSnapshotBytes(snapshotBytes);
-        return pullSnapshotResp;
-      }
-    };
-    targetMember.setThisNode(TestUtils.getNode(1));
-    targetMember.setLogManager(new TestLogManager(1));
-
-    timeseriesSchemas = new ArrayList<>();
-    requiredRetries = 0;
-  }
-
-  @Test
-  public void testAsync() throws IllegalPathException, StorageEngineException {
-    boolean useAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
-    ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(true);
-    try {
-      testNormal(false);
-    } finally {
-      ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(useAsyncServer);
-    }
-  }
-
-  @Test
-  public void testReadOnly() throws StorageEngineException, IllegalPathException {
-    testNormal(true);
-    assertTrue(targetMember.isReadOnly());
-  }
-
-  @Test
-  public void testSync() throws IllegalPathException, StorageEngineException {
-    boolean useAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
-    ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(false);
-    try {
-      testNormal(false);
-    } finally {
-      ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(useAsyncServer);
-    }
-  }
-
-  @Test
-  public void testWithRetry() throws StorageEngineException, IllegalPathException {
-    boolean useAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
-    int pullSnapshotRetryIntervalMs = ClusterDescriptor.getInstance().getConfig()
-        .getPullSnapshotRetryIntervalMs();
-    ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(false);
-    ClusterDescriptor.getInstance().getConfig().setPullSnapshotRetryIntervalMs(100);
-    try {
-      requiredRetries = 3;
-      testNormal(false);
-    } finally {
-      ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(useAsyncServer);
-      ClusterDescriptor.getInstance().getConfig()
-          .setPullSnapshotRetryIntervalMs(pullSnapshotRetryIntervalMs);
-    }
-  }
-
-  private void testNormal(boolean requiresReadOnly) throws IllegalPathException,
-      StorageEngineException {
-    PartitionGroup partitionGroup = new PartitionGroup();
-    partitionGroup.add(TestUtils.getNode(1));
-    List<Integer> slots = new ArrayList<>();
-    for (int i = 0; i < 20; i++) {
-      slots.add(i);
-      sourceMember.getSlotManager().setToPulling(i, TestUtils.getNode(1));
-    }
-    PullSnapshotTaskDescriptor descriptor = new PullSnapshotTaskDescriptor(partitionGroup, slots,
-        requiresReadOnly);
-
-    PullSnapshotTask task = new PullSnapshotTask(descriptor, sourceMember, FileSnapshot.Factory.INSTANCE, null);
-    task.call();
-
-    for (TimeseriesSchema timeseriesSchema : timeseriesSchemas) {
-      assertTrue(IoTDB.metaManager.isPathExist(new PartialPath(timeseriesSchema.getFullPath())));
-    }
-    StorageGroupProcessor processor = StorageEngine.getInstance()
-        .getProcessor(new PartialPath(TestUtils.getTestSg(0)));
-    assertEquals(9, processor.getPartitionMaxFileVersions(0));
-    List<TsFileResource> loadedFiles = processor.getSequenceFileTreeSet();
-    assertEquals(tsFileResources.size(), loadedFiles.size());
-    for (int i = 0; i < 9; i++) {
-      assertEquals(i, loadedFiles.get(i).getMaxPlanIndex());
-    }
-    assertEquals(0, processor.getUnSequenceFileList().size());
-
-    for (TsFileResource tsFileResource : tsFileResources) {
-      // source files should be deleted after being pulled
-      assertFalse(tsFileResource.getTsFile().exists());
-    }
-    assertTrue(hintRegistered);
-    for (int i = 0; i < 20; i++) {
-      assertEquals(SlotStatus.NULL, sourceMember.getSlotManager().getStatus(i));
     }
 
-    assertFalse(task.getSnapshotSave().exists());
-  }
+    private void testNormal(boolean requiresReadOnly)
+            throws IllegalPathException, StorageEngineException {
+        PartitionGroup partitionGroup = new PartitionGroup();
+        partitionGroup.add(TestUtils.getNode(1));
+        List<Integer> slots = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            slots.add(i);
+            sourceMember.getSlotManager().setToPulling(i, TestUtils.getNode(1));
+        }
+        PullSnapshotTaskDescriptor descriptor =
+                new PullSnapshotTaskDescriptor(partitionGroup, slots, requiresReadOnly);
 
+        PullSnapshotTask task =
+                new PullSnapshotTask(descriptor, sourceMember, FileSnapshot.Factory.INSTANCE, null);
+        task.call();
 
-  @Override
-  @After
-  public void tearDown() throws Exception {
-    sourceMember.closeLogManager();
-    targetMember.closeLogManager();
-    sourceMember.stop();
-    targetMember.stop();
-    super.tearDown();
-  }
+        for (TimeseriesSchema timeseriesSchema : timeseriesSchemas) {
+            assertTrue(
+                    IoTDB.metaManager.isPathExist(new PartialPath(timeseriesSchema.getFullPath())));
+        }
+        StorageGroupProcessor processor =
+                StorageEngine.getInstance().getProcessor(new PartialPath(TestUtils.getTestSg(0)));
+        assertEquals(9, processor.getPartitionMaxFileVersions(0));
+        List<TsFileResource> loadedFiles = processor.getSequenceFileTreeSet();
+        assertEquals(tsFileResources.size(), loadedFiles.size());
+        for (int i = 0; i < 9; i++) {
+            assertEquals(i, loadedFiles.get(i).getMaxPlanIndex());
+        }
+        assertEquals(0, processor.getUnSequenceFileList().size());
+
+        for (TsFileResource tsFileResource : tsFileResources) {
+            // source files should be deleted after being pulled
+            assertFalse(tsFileResource.getTsFile().exists());
+        }
+        assertTrue(hintRegistered);
+        for (int i = 0; i < 20; i++) {
+            assertEquals(SlotStatus.NULL, sourceMember.getSlotManager().getStatus(i));
+        }
+
+        assertFalse(task.getSnapshotSave().exists());
+    }
+
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        sourceMember.closeLogManager();
+        targetMember.closeLogManager();
+        sourceMember.stop();
+        targetMember.stop();
+        super.tearDown();
+    }
 }

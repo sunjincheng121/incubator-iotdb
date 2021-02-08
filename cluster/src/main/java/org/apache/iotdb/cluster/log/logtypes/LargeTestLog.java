@@ -19,60 +19,61 @@
 
 package org.apache.iotdb.cluster.log.logtypes;
 
-import org.apache.iotdb.cluster.log.Log;
+import static org.apache.iotdb.cluster.log.Log.Types.TEST_LARGE_CONTENT;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
-
-import static org.apache.iotdb.cluster.log.Log.Types.TEST_LARGE_CONTENT;
+import org.apache.iotdb.cluster.log.Log;
 
 public class LargeTestLog extends Log {
-  private ByteBuffer data;
-  public LargeTestLog() {
-    data = ByteBuffer.wrap(new byte[8192]);
-  }
+    private ByteBuffer data;
 
-  @Override
-  public ByteBuffer serialize() {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
-    try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
-      dataOutputStream.writeByte((byte) TEST_LARGE_CONTENT.ordinal());
-      dataOutputStream.writeLong(getCurrLogIndex());
-      dataOutputStream.writeLong(getCurrLogTerm());
-      dataOutputStream.write(data.array());
-    } catch (IOException e) {
-      // unreachable
+    public LargeTestLog() {
+        data = ByteBuffer.wrap(new byte[8192]);
     }
-    return ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-  }
 
-  @Override
-  public void deserialize(ByteBuffer buffer) {
-    setCurrLogIndex(buffer.getLong());
-    setCurrLogTerm(buffer.getLong());
-    data.put(buffer);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof LargeTestLog)) {
-      return false;
+    @Override
+    public ByteBuffer serialize() {
+        ByteArrayOutputStream byteArrayOutputStream =
+                new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+        try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
+            dataOutputStream.writeByte((byte) TEST_LARGE_CONTENT.ordinal());
+            dataOutputStream.writeLong(getCurrLogIndex());
+            dataOutputStream.writeLong(getCurrLogTerm());
+            dataOutputStream.write(data.array());
+        } catch (IOException e) {
+            // unreachable
+        }
+        return ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
     }
-    LargeTestLog obj1 = (LargeTestLog) obj;
-    return getCurrLogIndex() == obj1.getCurrLogIndex() &&
-      getCurrLogTerm() == obj1.getCurrLogTerm();
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(getCurrLogIndex(), getCurrLogTerm());
-  }
+    @Override
+    public void deserialize(ByteBuffer buffer) {
+        setCurrLogIndex(buffer.getLong());
+        setCurrLogTerm(buffer.getLong());
+        data.put(buffer);
+    }
 
-  @Override
-  public String toString() {
-    return "LargeTestLog{" + getCurrLogIndex() + "-" + getCurrLogTerm() + "}";
-  }
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof LargeTestLog)) {
+            return false;
+        }
+        LargeTestLog obj1 = (LargeTestLog) obj;
+        return getCurrLogIndex() == obj1.getCurrLogIndex()
+                && getCurrLogTerm() == obj1.getCurrLogTerm();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getCurrLogIndex(), getCurrLogTerm());
+    }
+
+    @Override
+    public String toString() {
+        return "LargeTestLog{" + getCurrLogIndex() + "-" + getCurrLogTerm() + "}";
+    }
 }

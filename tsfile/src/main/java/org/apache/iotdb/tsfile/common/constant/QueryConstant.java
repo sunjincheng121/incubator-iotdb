@@ -19,15 +19,14 @@
 package org.apache.iotdb.tsfile.common.constant;
 
 public class QueryConstant {
-  public static final String RESERVED_TIME = "time";
+    public static final String RESERVED_TIME = "time";
 
-  public static final String BOOLEAN = "BOOLEAN";
-  public static final String INT32 = "INT32";
-  public static final String INT64 = "INT64";
-  public static final String FLOAT = "FLOAT";
-  public static final String DOUBLE = "DOUBLE";
-  public static final String BYTE_ARRAY = "BYTE_ARRAY";
+    public static final String BOOLEAN = "BOOLEAN";
+    public static final String INT32 = "INT32";
+    public static final String INT64 = "INT64";
+    public static final String FLOAT = "FLOAT";
+    public static final String DOUBLE = "DOUBLE";
+    public static final String BYTE_ARRAY = "BYTE_ARRAY";
 
-  private QueryConstant() {
-  }
+    private QueryConstant() {}
 }

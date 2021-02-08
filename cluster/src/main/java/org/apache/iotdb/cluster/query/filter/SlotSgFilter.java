@@ -26,20 +26,21 @@ import org.apache.iotdb.db.metadata.MManager.StorageGroupFilter;
 
 public class SlotSgFilter implements StorageGroupFilter {
 
-  private List<Integer> slots;
+    private List<Integer> slots;
 
-  public SlotSgFilter(List<Integer> slots) {
-    this.slots = slots;
-  }
+    public SlotSgFilter(List<Integer> slots) {
+        this.slots = slots;
+    }
 
-  @Override
-  public boolean satisfy(String storageGroup) {
-    return satisfy(storageGroup, slots);
-  }
+    @Override
+    public boolean satisfy(String storageGroup) {
+        return satisfy(storageGroup, slots);
+    }
 
-  private static boolean satisfy(String storageGroup, List<Integer> nodeSlots) {
-    int slot = SlotPartitionTable.getSlotStrategy().calculateSlotByPartitionNum(storageGroup,0,
-        ClusterConstant.SLOT_NUM);
-    return nodeSlots.contains(slot);
-  }
+    private static boolean satisfy(String storageGroup, List<Integer> nodeSlots) {
+        int slot =
+                SlotPartitionTable.getSlotStrategy()
+                        .calculateSlotByPartitionNum(storageGroup, 0, ClusterConstant.SLOT_NUM);
+        return nodeSlots.contains(slot);
+    }
 }

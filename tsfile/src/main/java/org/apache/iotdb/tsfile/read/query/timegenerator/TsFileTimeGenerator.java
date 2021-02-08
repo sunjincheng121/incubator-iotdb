@@ -30,27 +30,28 @@ import org.apache.iotdb.tsfile.read.reader.series.FileSeriesReader;
 
 public class TsFileTimeGenerator extends TimeGenerator {
 
-  private IChunkLoader chunkLoader;
-  private IMetadataQuerier metadataQuerier;
+    private IChunkLoader chunkLoader;
+    private IMetadataQuerier metadataQuerier;
 
-  public TsFileTimeGenerator(IExpression iexpression, IChunkLoader chunkLoader,
-      IMetadataQuerier metadataQuerier) throws IOException {
-    this.chunkLoader = chunkLoader;
-    this.metadataQuerier = metadataQuerier;
+    public TsFileTimeGenerator(
+            IExpression iexpression, IChunkLoader chunkLoader, IMetadataQuerier metadataQuerier)
+            throws IOException {
+        this.chunkLoader = chunkLoader;
+        this.metadataQuerier = metadataQuerier;
 
-    super.constructNode(iexpression);
-  }
+        super.constructNode(iexpression);
+    }
 
-  @Override
-  protected IBatchReader generateNewBatchReader(SingleSeriesExpression expression)
-      throws IOException {
-    List<ChunkMetadata> chunkMetadataList = metadataQuerier
-        .getChunkMetaDataList(expression.getSeriesPath());
-    return new FileSeriesReader(chunkLoader, chunkMetadataList, expression.getFilter());
-  }
+    @Override
+    protected IBatchReader generateNewBatchReader(SingleSeriesExpression expression)
+            throws IOException {
+        List<ChunkMetadata> chunkMetadataList =
+                metadataQuerier.getChunkMetaDataList(expression.getSeriesPath());
+        return new FileSeriesReader(chunkLoader, chunkMetadataList, expression.getFilter());
+    }
 
-  @Override
-  protected boolean isAscending() {
-    return true;
-  }
+    @Override
+    protected boolean isAscending() {
+        return true;
+    }
 }

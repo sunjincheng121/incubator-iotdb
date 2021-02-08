@@ -22,60 +22,59 @@ import org.apache.iotdb.db.qp.logical.Operator;
 
 public class GroupByTimePlan extends AggregationPlan {
 
-  // [startTime, endTime)
-  private long startTime;
-  private long endTime;
-  // aggregation time interval
-  private long interval;
-  // sliding step
-  private long slidingStep;
+    // [startTime, endTime)
+    private long startTime;
+    private long endTime;
+    // aggregation time interval
+    private long interval;
+    // sliding step
+    private long slidingStep;
 
-  // if it is left close and right open interval
-  private boolean leftCRightO = true;
+    // if it is left close and right open interval
+    private boolean leftCRightO = true;
 
-  public GroupByTimePlan() {
-    super();
-    setOperatorType(Operator.OperatorType.GROUPBYTIME);
-  }
+    public GroupByTimePlan() {
+        super();
+        setOperatorType(Operator.OperatorType.GROUPBYTIME);
+    }
 
-  public long getStartTime() {
-    return startTime;
-  }
+    public long getStartTime() {
+        return startTime;
+    }
 
-  public void setStartTime(long startTime) {
-    this.startTime = startTime;
-  }
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
 
-  public long getEndTime() {
-    return endTime;
-  }
+    public long getEndTime() {
+        return endTime;
+    }
 
-  public void setEndTime(long endTime) {
-    this.endTime = endTime;
-  }
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
 
-  public long getInterval() {
-    return interval;
-  }
+    public long getInterval() {
+        return interval;
+    }
 
-  public void setInterval(long interval) {
-    this.interval = interval;
-  }
+    public void setInterval(long interval) {
+        this.interval = interval;
+    }
 
-  public long getSlidingStep() {
-    return slidingStep;
-  }
+    public long getSlidingStep() {
+        return slidingStep;
+    }
 
-  public void setSlidingStep(long slidingStep) {
-    this.slidingStep = slidingStep;
-  }
+    public void setSlidingStep(long slidingStep) {
+        this.slidingStep = slidingStep;
+    }
 
-  public boolean isLeftCRightO() {
-    return leftCRightO;
-  }
+    public boolean isLeftCRightO() {
+        return leftCRightO;
+    }
 
-  public void setLeftCRightO(boolean leftCRightO) {
-    this.leftCRightO = leftCRightO;
-  }
-
+    public void setLeftCRightO(boolean leftCRightO) {
+        this.leftCRightO = leftCRightO;
+    }
 }

@@ -24,32 +24,31 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public class FakedBatchReader implements IBatchReader {
 
-  private BatchData data;
-  private boolean hasCached = false;
+    private BatchData data;
+    private boolean hasCached = false;
 
-  public FakedBatchReader(long[] timestamps) {
-    data = new BatchData(TSDataType.INT32);
-    for (long time : timestamps) {
-      data.putInt(time, 1);
-      hasCached = true;
+    public FakedBatchReader(long[] timestamps) {
+        data = new BatchData(TSDataType.INT32);
+        for (long time : timestamps) {
+            data.putInt(time, 1);
+            hasCached = true;
+        }
     }
-  }
 
-  @Override
-  public boolean hasNextBatch() {
-    return hasCached;
-  }
-
-  @Override
-  public BatchData nextBatch() throws IOException {
-    if (data == null || !data.hasCurrent()) {
-      throw new IOException("no next batch");
+    @Override
+    public boolean hasNextBatch() {
+        return hasCached;
     }
-    hasCached = false;
-    return data;
-  }
 
-  @Override
-  public void close() {
-  }
+    @Override
+    public BatchData nextBatch() throws IOException {
+        if (data == null || !data.hasCurrent()) {
+            throw new IOException("no next batch");
+        }
+        hasCached = false;
+        return data;
+    }
+
+    @Override
+    public void close() {}
 }

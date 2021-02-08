@@ -26,29 +26,28 @@ import org.apache.thrift.async.AsyncMethodCallback;
 
 public class NodeStatusHandler implements AsyncMethodCallback<Node> {
 
+    private Map<Node, Boolean> nodeStatusMap;
 
-  private Map<Node, Boolean> nodeStatusMap;
+    private AtomicInteger countResponse;
 
-  private AtomicInteger countResponse;
-
-  public NodeStatusHandler(Map<Node, Boolean> nodeStatusMap) {
-    this.nodeStatusMap = nodeStatusMap;
-    this.countResponse = new AtomicInteger();
-  }
-
-  @Override
-  public void onComplete(Node response) {
-    synchronized (nodeStatusMap) {
-      nodeStatusMap.put(response, true);
-      // except for this node itself
-      if(countResponse.incrementAndGet() == nodeStatusMap.size() - 1){
-        nodeStatusMap.notifyAll();
-      }
+    public NodeStatusHandler(Map<Node, Boolean> nodeStatusMap) {
+        this.nodeStatusMap = nodeStatusMap;
+        this.countResponse = new AtomicInteger();
     }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    // unused
-  }
+    @Override
+    public void onComplete(Node response) {
+        synchronized (nodeStatusMap) {
+            nodeStatusMap.put(response, true);
+            // except for this node itself
+            if (countResponse.incrementAndGet() == nodeStatusMap.size() - 1) {
+                nodeStatusMap.notifyAll();
+            }
+        }
+    }
+
+    @Override
+    public void onError(Exception exception) {
+        // unused
+    }
 }

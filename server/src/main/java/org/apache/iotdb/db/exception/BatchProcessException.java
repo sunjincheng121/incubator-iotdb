@@ -25,14 +25,14 @@ import org.apache.iotdb.service.rpc.thrift.TSStatus;
 
 public class BatchProcessException extends QueryProcessException {
 
-  private final TSStatus[] failingStatus;
+    private final TSStatus[] failingStatus;
 
-  public BatchProcessException(TSStatus[] failingStatus) {
-    super("Batch process failed:" + Arrays.toString(failingStatus));
-    this.failingStatus = failingStatus;
-  }
+    public BatchProcessException(TSStatus[] failingStatus) {
+        super("Batch process failed:" + Arrays.toString(failingStatus));
+        this.failingStatus = failingStatus;
+    }
 
-  public TSStatus[] getFailingStatus() {
-    return failingStatus;
-  }
+    public TSStatus[] getFailingStatus() {
+        return failingStatus;
+    }
 }

@@ -30,46 +30,46 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
  */
 public class MultiFileLogReader implements ILogReader {
 
-  private SingleFileLogReader currentReader;
-  private File[] files;
-  private int fileIdx = 0;
+    private SingleFileLogReader currentReader;
+    private File[] files;
+    private int fileIdx = 0;
 
-  public MultiFileLogReader(File[] files) {
-    this.files = files;
-  }
+    public MultiFileLogReader(File[] files) {
+        this.files = files;
+    }
 
-  @Override
-  public void close() {
-    if (currentReader != null) {
-      currentReader.close();
+    @Override
+    public void close() {
+        if (currentReader != null) {
+            currentReader.close();
+        }
     }
-  }
 
-  @Override
-  public boolean hasNext() throws FileNotFoundException {
-    if (files == null || files.length == 0) {
-      return false;
+    @Override
+    public boolean hasNext() throws FileNotFoundException {
+        if (files == null || files.length == 0) {
+            return false;
+        }
+        if (currentReader == null) {
+            currentReader = new SingleFileLogReader(files[fileIdx++]);
+        }
+        if (currentReader.hasNext()) {
+            return true;
+        }
+        while (fileIdx < files.length) {
+            currentReader.open(files[fileIdx++]);
+            if (currentReader.hasNext()) {
+                return true;
+            }
+        }
+        return false;
     }
-    if (currentReader == null) {
-      currentReader = new SingleFileLogReader(files[fileIdx++]);
-    }
-    if (currentReader.hasNext()) {
-      return true;
-    }
-    while (fileIdx < files.length) {
-      currentReader.open(files[fileIdx++]);
-      if (currentReader.hasNext()) {
-        return true;
-      }
-    }
-    return false;
-  }
 
-  @Override
-  public PhysicalPlan next() throws FileNotFoundException {
-    if (!hasNext()) {
-      throw new NoSuchElementException();
+    @Override
+    public PhysicalPlan next() throws FileNotFoundException {
+        if (!hasNext()) {
+            throw new NoSuchElementException();
+        }
+        return currentReader.next();
     }
-    return currentReader.next();
-  }
 }

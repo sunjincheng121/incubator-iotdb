@@ -23,8 +23,8 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class ShowMergeStatusOperator extends RootOperator {
 
-  public ShowMergeStatusOperator(int tokenIntType) {
-    super(tokenIntType);
-    setOperatorType(OperatorType.SHOW_MERGE_STATUS);
-  }
+    public ShowMergeStatusOperator(int tokenIntType) {
+        super(tokenIntType);
+        setOperatorType(OperatorType.SHOW_MERGE_STATUS);
+    }
 }

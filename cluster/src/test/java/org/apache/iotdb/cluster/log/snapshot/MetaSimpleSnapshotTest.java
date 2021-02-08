@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.cluster.log.snapshot;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -47,141 +46,146 @@ import org.junit.Test;
 
 public class MetaSimpleSnapshotTest extends IoTDBTest {
 
-  private MetaGroupMember metaGroupMember;
-  private boolean subServerInitialized;
+    private MetaGroupMember metaGroupMember;
+    private boolean subServerInitialized;
 
-  @Override
-  @Before
-  public void setUp()
-      throws org.apache.iotdb.db.exception.StartupException, org.apache.iotdb.db.exception.query.QueryProcessException, IllegalPathException {
-    super.setUp();
-    subServerInitialized = false;
-    metaGroupMember = new TestMetaGroupMember() {
-      @Override
-      protected void startSubServers() {
-        subServerInitialized = true;
-      }
-    };
-  }
-
-  @Override
-  @After
-  public void tearDown() throws IOException, StorageEngineException {
-    metaGroupMember.stop();
-    metaGroupMember.closeLogManager();
-    super.tearDown();
-  }
-
-  @Test
-  public void testSerialize() {
-    try {
-      Map<PartialPath, Long> storageGroupTTLMap = new HashMap<>();
-      Map<String, User> userMap = new HashMap<>();
-      Map<String, Role> roleMap = new HashMap<>();
-      PartitionTable partitionTable = TestUtils.getPartitionTable(10);
-      long lastLogIndex = 10;
-      long lastLogTerm = 5;
-
-      for (int i = 0; i < 10; i++) {
-        PartialPath partialPath = new PartialPath("root.ln.sg1");
-        storageGroupTTLMap.put(partialPath, (long) i);
-      }
-
-      for (int i = 0; i < 5; i++) {
-        String userName = "user_" + i;
-        User user = new User(userName, "password_" + i);
-        userMap.put(userName, user);
-      }
-
-      for (int i = 0; i < 10; i++) {
-        String roleName = "role_" + i;
-        Role role = new Role(roleName);
-        roleMap.put(roleName, role);
-      }
-
-      MetaSimpleSnapshot metaSimpleSnapshot = new MetaSimpleSnapshot(storageGroupTTLMap, userMap,
-          roleMap, partitionTable.serialize());
-
-      metaSimpleSnapshot.setLastLogIndex(lastLogIndex);
-      metaSimpleSnapshot.setLastLogTerm(lastLogTerm);
-
-      ByteBuffer buffer = metaSimpleSnapshot.serialize();
-
-      MetaSimpleSnapshot newSnapshot = new MetaSimpleSnapshot();
-      newSnapshot.deserialize(buffer);
-
-      assertEquals(storageGroupTTLMap, newSnapshot.getStorageGroupTTLMap());
-      assertEquals(userMap, newSnapshot.getUserMap());
-      assertEquals(roleMap, newSnapshot.getRoleMap());
-
-      assertEquals(partitionTable.serialize(), newSnapshot.getPartitionTableBuffer());
-      assertEquals(lastLogIndex, newSnapshot.getLastLogIndex());
-      assertEquals(lastLogTerm, newSnapshot.getLastLogTerm());
-
-      assertEquals(metaSimpleSnapshot, newSnapshot);
-
-    } catch (Exception e) {
-      Assert.fail(e.getMessage());
-    }
-  }
-
-  @Test
-  public void testInstall()
-      throws IllegalPathException, SnapshotInstallationException, AuthException {
-    Map<PartialPath, Long> storageGroupTTLMap = new HashMap<>();
-    Map<String, User> userMap = new HashMap<>();
-    Map<String, Role> roleMap = new HashMap<>();
-    PartitionTable partitionTable = TestUtils.getPartitionTable(10);
-    long lastLogIndex = 10;
-    long lastLogTerm = 5;
-
-    for (int i = 0; i < 10; i++) {
-      PartialPath partialPath = new PartialPath("root.ln.sg" + i);
-      storageGroupTTLMap.put(partialPath, (long) i);
+    @Override
+    @Before
+    public void setUp()
+            throws org.apache.iotdb.db.exception.StartupException,
+                    org.apache.iotdb.db.exception.query.QueryProcessException,
+                    IllegalPathException {
+        super.setUp();
+        subServerInitialized = false;
+        metaGroupMember =
+                new TestMetaGroupMember() {
+                    @Override
+                    protected void startSubServers() {
+                        subServerInitialized = true;
+                    }
+                };
     }
 
-    for (int i = 0; i < 5; i++) {
-      String userName = "user_" + i;
-      User user = new User(userName, "password_" + i);
-      userMap.put(userName, user);
+    @Override
+    @After
+    public void tearDown() throws IOException, StorageEngineException {
+        metaGroupMember.stop();
+        metaGroupMember.closeLogManager();
+        super.tearDown();
     }
 
-    for (int i = 0; i < 10; i++) {
-      String roleName = "role_" + i;
-      Role role = new Role(roleName);
-      roleMap.put(roleName, role);
+    @Test
+    public void testSerialize() {
+        try {
+            Map<PartialPath, Long> storageGroupTTLMap = new HashMap<>();
+            Map<String, User> userMap = new HashMap<>();
+            Map<String, Role> roleMap = new HashMap<>();
+            PartitionTable partitionTable = TestUtils.getPartitionTable(10);
+            long lastLogIndex = 10;
+            long lastLogTerm = 5;
+
+            for (int i = 0; i < 10; i++) {
+                PartialPath partialPath = new PartialPath("root.ln.sg1");
+                storageGroupTTLMap.put(partialPath, (long) i);
+            }
+
+            for (int i = 0; i < 5; i++) {
+                String userName = "user_" + i;
+                User user = new User(userName, "password_" + i);
+                userMap.put(userName, user);
+            }
+
+            for (int i = 0; i < 10; i++) {
+                String roleName = "role_" + i;
+                Role role = new Role(roleName);
+                roleMap.put(roleName, role);
+            }
+
+            MetaSimpleSnapshot metaSimpleSnapshot =
+                    new MetaSimpleSnapshot(
+                            storageGroupTTLMap, userMap, roleMap, partitionTable.serialize());
+
+            metaSimpleSnapshot.setLastLogIndex(lastLogIndex);
+            metaSimpleSnapshot.setLastLogTerm(lastLogTerm);
+
+            ByteBuffer buffer = metaSimpleSnapshot.serialize();
+
+            MetaSimpleSnapshot newSnapshot = new MetaSimpleSnapshot();
+            newSnapshot.deserialize(buffer);
+
+            assertEquals(storageGroupTTLMap, newSnapshot.getStorageGroupTTLMap());
+            assertEquals(userMap, newSnapshot.getUserMap());
+            assertEquals(roleMap, newSnapshot.getRoleMap());
+
+            assertEquals(partitionTable.serialize(), newSnapshot.getPartitionTableBuffer());
+            assertEquals(lastLogIndex, newSnapshot.getLastLogIndex());
+            assertEquals(lastLogTerm, newSnapshot.getLastLogTerm());
+
+            assertEquals(metaSimpleSnapshot, newSnapshot);
+
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
     }
 
-    MetaSimpleSnapshot metaSimpleSnapshot = new MetaSimpleSnapshot(storageGroupTTLMap, userMap,
-        roleMap, partitionTable.serialize());
-    metaSimpleSnapshot.setLastLogIndex(lastLogIndex);
-    metaSimpleSnapshot.setLastLogTerm(lastLogTerm);
+    @Test
+    public void testInstall()
+            throws IllegalPathException, SnapshotInstallationException, AuthException {
+        Map<PartialPath, Long> storageGroupTTLMap = new HashMap<>();
+        Map<String, User> userMap = new HashMap<>();
+        Map<String, Role> roleMap = new HashMap<>();
+        PartitionTable partitionTable = TestUtils.getPartitionTable(10);
+        long lastLogIndex = 10;
+        long lastLogTerm = 5;
 
-    SnapshotInstaller defaultInstaller = metaSimpleSnapshot.getDefaultInstaller(metaGroupMember);
-    defaultInstaller.install(metaSimpleSnapshot, -1);
+        for (int i = 0; i < 10; i++) {
+            PartialPath partialPath = new PartialPath("root.ln.sg" + i);
+            storageGroupTTLMap.put(partialPath, (long) i);
+        }
 
-    Map<PartialPath, Long> storageGroupsTTL = IoTDB.metaManager.getStorageGroupsTTL();
-    for (int i = 0; i < 10; i++) {
-      PartialPath partialPath = new PartialPath("root.ln.sg" + i);
-      assertEquals(i, (long) storageGroupsTTL.get(partialPath));
+        for (int i = 0; i < 5; i++) {
+            String userName = "user_" + i;
+            User user = new User(userName, "password_" + i);
+            userMap.put(userName, user);
+        }
+
+        for (int i = 0; i < 10; i++) {
+            String roleName = "role_" + i;
+            Role role = new Role(roleName);
+            roleMap.put(roleName, role);
+        }
+
+        MetaSimpleSnapshot metaSimpleSnapshot =
+                new MetaSimpleSnapshot(
+                        storageGroupTTLMap, userMap, roleMap, partitionTable.serialize());
+        metaSimpleSnapshot.setLastLogIndex(lastLogIndex);
+        metaSimpleSnapshot.setLastLogTerm(lastLogTerm);
+
+        SnapshotInstaller defaultInstaller =
+                metaSimpleSnapshot.getDefaultInstaller(metaGroupMember);
+        defaultInstaller.install(metaSimpleSnapshot, -1);
+
+        Map<PartialPath, Long> storageGroupsTTL = IoTDB.metaManager.getStorageGroupsTTL();
+        for (int i = 0; i < 10; i++) {
+            PartialPath partialPath = new PartialPath("root.ln.sg" + i);
+            assertEquals(i, (long) storageGroupsTTL.get(partialPath));
+        }
+
+        for (int i = 0; i < 5; i++) {
+            String userName = "user_" + i;
+            User user = BasicAuthorizer.getInstance().getUser(userName);
+            assertEquals(userMap.get(userName), user);
+        }
+
+        for (int i = 0; i < 10; i++) {
+            String roleName = "role_" + i;
+            Role role = BasicAuthorizer.getInstance().getRole(roleName);
+            assertEquals(roleMap.get(roleName), role);
+        }
+
+        assertEquals(partitionTable, metaGroupMember.getPartitionTable());
+        assertEquals(lastLogIndex, metaGroupMember.getLogManager().getLastLogIndex());
+        assertEquals(lastLogTerm, metaGroupMember.getLogManager().getLastLogTerm());
+        assertTrue(subServerInitialized);
     }
-
-    for (int i = 0; i < 5; i++) {
-      String userName = "user_" + i;
-      User user = BasicAuthorizer.getInstance().getUser(userName);
-      assertEquals(userMap.get(userName), user);
-    }
-
-    for (int i = 0; i < 10; i++) {
-      String roleName = "role_" + i;
-      Role role = BasicAuthorizer.getInstance().getRole(roleName);
-      assertEquals(roleMap.get(roleName), role);
-    }
-
-    assertEquals(partitionTable, metaGroupMember.getPartitionTable());
-    assertEquals(lastLogIndex, metaGroupMember.getLogManager().getLastLogIndex());
-    assertEquals(lastLogTerm, metaGroupMember.getLogManager().getLastLogTerm());
-    assertTrue(subServerInitialized);
-  }
 }
-

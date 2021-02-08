@@ -42,151 +42,156 @@ import org.slf4j.LoggerFactory;
  */
 public class CompressionRatio {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CompressionRatio.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompressionRatio.class);
 
-  private static final IoTDBConfig CONFIG = IoTDBDescriptor.getInstance().getConfig();
+    private static final IoTDBConfig CONFIG = IoTDBDescriptor.getInstance().getConfig();
 
-  static final String COMPRESSION_RATIO_DIR = "compression_ratio";
+    static final String COMPRESSION_RATIO_DIR = "compression_ratio";
 
-  private static final String FILE_PREFIX = "Ratio-";
+    private static final String FILE_PREFIX = "Ratio-";
 
-  private static final String SEPARATOR = "-";
+    private static final String SEPARATOR = "-";
 
-  static final String RATIO_FILE_PATH_FORMAT = FILE_PREFIX + "%f" + SEPARATOR + "%d";
+    static final String RATIO_FILE_PATH_FORMAT = FILE_PREFIX + "%f" + SEPARATOR + "%d";
 
-  private static final double DEFAULT_COMPRESSION_RATIO = 2.0;
+    private static final double DEFAULT_COMPRESSION_RATIO = 2.0;
 
-  private AtomicDouble compressionRatio = new AtomicDouble(DEFAULT_COMPRESSION_RATIO);
+    private AtomicDouble compressionRatio = new AtomicDouble(DEFAULT_COMPRESSION_RATIO);
 
-  /**
-   * The total sum of all compression ratios.
-   */
-  private double compressionRatioSum;
+    /** The total sum of all compression ratios. */
+    private double compressionRatioSum;
 
-  /**
-   * The number of compression ratios.
-   */
-  private long calcTimes;
+    /** The number of compression ratios. */
+    private long calcTimes;
 
-  private File directory;
+    private File directory;
 
-  private CompressionRatio() {
-    directory = SystemFileFactory.INSTANCE.getFile(
-        FilePathUtils.regularizePath(CONFIG.getSystemDir()) + COMPRESSION_RATIO_DIR);
-    restore();
-  }
-
-  /**
-   * Whenever the task of closing a file ends, the compression ratio of the file is calculated and
-   * call this method.
-   *
-   * @param currentCompressionRatio the compression ratio of the closing file.
-   */
-  public synchronized void updateRatio(double currentCompressionRatio) throws IOException {
-    File oldFile = SystemFileFactory.INSTANCE.getFile(directory,
-        String.format(Locale.ENGLISH, RATIO_FILE_PATH_FORMAT, compressionRatioSum, calcTimes));
-    compressionRatioSum += currentCompressionRatio;
-    calcTimes++;
-    File newFile = SystemFileFactory.INSTANCE.getFile(directory,
-        String.format(Locale.ENGLISH, RATIO_FILE_PATH_FORMAT, compressionRatioSum, calcTimes));
-    persist(oldFile, newFile);
-    compressionRatio.set(compressionRatioSum / calcTimes);
-    if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("Compression ratio is {}", compressionRatio.get());
+    private CompressionRatio() {
+        directory =
+                SystemFileFactory.INSTANCE.getFile(
+                        FilePathUtils.regularizePath(CONFIG.getSystemDir())
+                                + COMPRESSION_RATIO_DIR);
+        restore();
     }
-  }
 
-  /**
-   * Get the average compression ratio for all closed files
-   */
-  public double getRatio() {
-    return compressionRatio.get();
-  }
-
-  private void persist(File oldFile, File newFile) throws IOException {
-    checkDirectoryExist();
-    if (!oldFile.exists()) {
-      newFile.createNewFile();
-      LOGGER.debug("Old ratio file {} doesn't exist, force create ratio file {}",
-          oldFile.getAbsolutePath(), newFile.getAbsolutePath());
-    } else {
-      FileUtils.moveFile(oldFile, newFile);
-      LOGGER.debug("Compression ratio file updated, previous: {}, current: {}",
-          oldFile.getAbsolutePath(), newFile.getAbsolutePath());
-    }
-  }
-
-  private void checkDirectoryExist() throws IOException {
-    if (!directory.exists()) {
-      FileUtils.forceMkdir(directory);
-    }
-  }
-
-  /**
-   * Restore compression ratio statistics from disk when system restart
-   */
-  void restore() {
-    if (!directory.exists()) {
-      return;
-    }
-    File[] ratioFiles = directory.listFiles((dir, name) -> name.startsWith(FILE_PREFIX));
-    if (ratioFiles != null && ratioFiles.length > 0) {
-      long maxTimes = 0;
-      double maxCompressionRatioSum = 0;
-      int maxRatioIndex = 0;
-      for (int i = 0; i < ratioFiles.length; i++) {
-        String[] splits = ratioFiles[i].getName().split("-");
-        long times = Long.parseLong(splits[2]);
-        if (times > maxTimes) {
-          maxTimes = times;
-          maxCompressionRatioSum = Double.parseDouble(splits[1]);
-          maxRatioIndex = i;
-        }
-      }
-      calcTimes = maxTimes;
-      compressionRatioSum = maxCompressionRatioSum;
-      if (calcTimes != 0) {
+    /**
+     * Whenever the task of closing a file ends, the compression ratio of the file is calculated and
+     * call this method.
+     *
+     * @param currentCompressionRatio the compression ratio of the closing file.
+     */
+    public synchronized void updateRatio(double currentCompressionRatio) throws IOException {
+        File oldFile =
+                SystemFileFactory.INSTANCE.getFile(
+                        directory,
+                        String.format(
+                                Locale.ENGLISH,
+                                RATIO_FILE_PATH_FORMAT,
+                                compressionRatioSum,
+                                calcTimes));
+        compressionRatioSum += currentCompressionRatio;
+        calcTimes++;
+        File newFile =
+                SystemFileFactory.INSTANCE.getFile(
+                        directory,
+                        String.format(
+                                Locale.ENGLISH,
+                                RATIO_FILE_PATH_FORMAT,
+                                compressionRatioSum,
+                                calcTimes));
+        persist(oldFile, newFile);
         compressionRatio.set(compressionRatioSum / calcTimes);
-      }
-      LOGGER.debug(
-          "After restoring from compression ratio file, compressionRatioSum = {}, calcTimes = {}",
-          compressionRatioSum, calcTimes);
-      for (int i = 0; i < ratioFiles.length; i++) {
-        if (i != maxRatioIndex) {
-          ratioFiles[i].delete();
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Compression ratio is {}", compressionRatio.get());
         }
-      }
-    }
-  }
-
-  /**
-   * Only for test
-   */
-  void reset() {
-    calcTimes = 0;
-    compressionRatioSum = 0;
-  }
-
-  public double getCompressionRatioSum() {
-    return compressionRatioSum;
-  }
-
-  long getCalcTimes() {
-    return calcTimes;
-  }
-
-  public static CompressionRatio getInstance() {
-    return CompressionRatioHolder.INSTANCE;
-  }
-
-  private static class CompressionRatioHolder {
-
-    private static final CompressionRatio INSTANCE = new CompressionRatio();
-
-    private CompressionRatioHolder() {
-
     }
 
-  }
+    /** Get the average compression ratio for all closed files */
+    public double getRatio() {
+        return compressionRatio.get();
+    }
+
+    private void persist(File oldFile, File newFile) throws IOException {
+        checkDirectoryExist();
+        if (!oldFile.exists()) {
+            newFile.createNewFile();
+            LOGGER.debug(
+                    "Old ratio file {} doesn't exist, force create ratio file {}",
+                    oldFile.getAbsolutePath(),
+                    newFile.getAbsolutePath());
+        } else {
+            FileUtils.moveFile(oldFile, newFile);
+            LOGGER.debug(
+                    "Compression ratio file updated, previous: {}, current: {}",
+                    oldFile.getAbsolutePath(),
+                    newFile.getAbsolutePath());
+        }
+    }
+
+    private void checkDirectoryExist() throws IOException {
+        if (!directory.exists()) {
+            FileUtils.forceMkdir(directory);
+        }
+    }
+
+    /** Restore compression ratio statistics from disk when system restart */
+    void restore() {
+        if (!directory.exists()) {
+            return;
+        }
+        File[] ratioFiles = directory.listFiles((dir, name) -> name.startsWith(FILE_PREFIX));
+        if (ratioFiles != null && ratioFiles.length > 0) {
+            long maxTimes = 0;
+            double maxCompressionRatioSum = 0;
+            int maxRatioIndex = 0;
+            for (int i = 0; i < ratioFiles.length; i++) {
+                String[] splits = ratioFiles[i].getName().split("-");
+                long times = Long.parseLong(splits[2]);
+                if (times > maxTimes) {
+                    maxTimes = times;
+                    maxCompressionRatioSum = Double.parseDouble(splits[1]);
+                    maxRatioIndex = i;
+                }
+            }
+            calcTimes = maxTimes;
+            compressionRatioSum = maxCompressionRatioSum;
+            if (calcTimes != 0) {
+                compressionRatio.set(compressionRatioSum / calcTimes);
+            }
+            LOGGER.debug(
+                    "After restoring from compression ratio file, compressionRatioSum = {}, calcTimes = {}",
+                    compressionRatioSum,
+                    calcTimes);
+            for (int i = 0; i < ratioFiles.length; i++) {
+                if (i != maxRatioIndex) {
+                    ratioFiles[i].delete();
+                }
+            }
+        }
+    }
+
+    /** Only for test */
+    void reset() {
+        calcTimes = 0;
+        compressionRatioSum = 0;
+    }
+
+    public double getCompressionRatioSum() {
+        return compressionRatioSum;
+    }
+
+    long getCalcTimes() {
+        return calcTimes;
+    }
+
+    public static CompressionRatio getInstance() {
+        return CompressionRatioHolder.INSTANCE;
+    }
+
+    private static class CompressionRatioHolder {
+
+        private static final CompressionRatio INSTANCE = new CompressionRatio();
+
+        private CompressionRatioHolder() {}
+    }
 }
-

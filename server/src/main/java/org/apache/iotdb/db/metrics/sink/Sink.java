@@ -20,10 +20,9 @@ package org.apache.iotdb.db.metrics.sink;
 
 public interface Sink {
 
-  void start();
+    void start();
 
-  void stop();
+    void stop();
 
-  void report();
-
+    void report();
 }

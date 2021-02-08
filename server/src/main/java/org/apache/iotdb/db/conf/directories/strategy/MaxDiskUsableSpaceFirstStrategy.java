@@ -23,35 +23,33 @@ import org.apache.iotdb.db.utils.CommonUtils;
 
 public class MaxDiskUsableSpaceFirstStrategy extends DirectoryStrategy {
 
-  @Override
-  public int nextFolderIndex() throws DiskSpaceInsufficientException {
-    return getMaxSpaceFolder();
-  }
-
-  /**
-   * get max space folder.
-   */
-  public int getMaxSpaceFolder() throws DiskSpaceInsufficientException {
-    int maxIndex = -1;
-    long maxSpace = 0;
-
-    for (int i = 0; i < folders.size(); i++) {
-      String folder = folders.get(i);
-      if (!CommonUtils.hasSpace(folder)) {
-        continue;
-      }
-
-      long space = CommonUtils.getUsableSpace(folder);
-      if (space > maxSpace) {
-        maxSpace = space;
-        maxIndex = i;
-      }
+    @Override
+    public int nextFolderIndex() throws DiskSpaceInsufficientException {
+        return getMaxSpaceFolder();
     }
 
-    if (maxIndex == -1) {
-      throw new DiskSpaceInsufficientException(folders);
-    }
+    /** get max space folder. */
+    public int getMaxSpaceFolder() throws DiskSpaceInsufficientException {
+        int maxIndex = -1;
+        long maxSpace = 0;
 
-    return maxIndex;
-  }
+        for (int i = 0; i < folders.size(); i++) {
+            String folder = folders.get(i);
+            if (!CommonUtils.hasSpace(folder)) {
+                continue;
+            }
+
+            long space = CommonUtils.getUsableSpace(folder);
+            if (space > maxSpace) {
+                maxSpace = space;
+                maxIndex = i;
+            }
+        }
+
+        if (maxIndex == -1) {
+            throw new DiskSpaceInsufficientException(folders);
+        }
+
+        return maxIndex;
+    }
 }

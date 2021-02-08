@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.iotdb.cluster.query.reader;
 
 import static org.junit.Assert.assertFalse;
@@ -40,38 +39,45 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DatasourceInfoTest {
-  private MetaGroupMember metaGroupMember;
+    private MetaGroupMember metaGroupMember;
 
-  @Before
-  public void setUp() {
-    metaGroupMember = new TestMetaGroupMember();
-    metaGroupMember.setClientProvider(new DataClientProvider(new Factory()) {
-      @Override
-      public AsyncDataClient getAsyncDataClient(Node node, int timeout) throws IOException {
-        return new AsyncDataClient(null, null, TestUtils.getNode(0), null) {
-          @Override
-          public void querySingleSeries(SingleSeriesQueryRequest request, AsyncMethodCallback<Long> resultHandler) throws TException {
-            throw new TException("Don't worry, this is the exception I constructed.");
-          }
-        };
-      }
-    });
-  }
+    @Before
+    public void setUp() {
+        metaGroupMember = new TestMetaGroupMember();
+        metaGroupMember.setClientProvider(
+                new DataClientProvider(new Factory()) {
+                    @Override
+                    public AsyncDataClient getAsyncDataClient(Node node, int timeout)
+                            throws IOException {
+                        return new AsyncDataClient(null, null, TestUtils.getNode(0), null) {
+                            @Override
+                            public void querySingleSeries(
+                                    SingleSeriesQueryRequest request,
+                                    AsyncMethodCallback<Long> resultHandler)
+                                    throws TException {
+                                throw new TException(
+                                        "Don't worry, this is the exception I constructed.");
+                            }
+                        };
+                    }
+                });
+    }
 
-  @Test
-  public void testFailedAll() {
-    PartitionGroup group = new PartitionGroup();
-    group.add(TestUtils.getNode(0));
-    group.add(TestUtils.getNode(1));
-    group.add(TestUtils.getNode(2));
+    @Test
+    public void testFailedAll() {
+        PartitionGroup group = new PartitionGroup();
+        group.add(TestUtils.getNode(0));
+        group.add(TestUtils.getNode(1));
+        group.add(TestUtils.getNode(2));
 
-    SingleSeriesQueryRequest request = new SingleSeriesQueryRequest();
-    RemoteQueryContext context = new RemoteQueryContext(1);
+        SingleSeriesQueryRequest request = new SingleSeriesQueryRequest();
+        RemoteQueryContext context = new RemoteQueryContext(1);
 
-    DataSourceInfo sourceInfo = new DataSourceInfo(group, TSDataType.DOUBLE,
-      request, context, metaGroupMember, group);
-    boolean hasClient = sourceInfo.hasNextDataClient(false, Long.MIN_VALUE);
+        DataSourceInfo sourceInfo =
+                new DataSourceInfo(
+                        group, TSDataType.DOUBLE, request, context, metaGroupMember, group);
+        boolean hasClient = sourceInfo.hasNextDataClient(false, Long.MIN_VALUE);
 
-    assertFalse(hasClient);
-  }
+        assertFalse(hasClient);
+    }
 }

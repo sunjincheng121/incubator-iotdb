@@ -23,83 +23,83 @@ import java.util.function.BiPredicate;
 
 public class AndNode implements Node {
 
-  private Node leftChild;
-  private Node rightChild;
+    private Node leftChild;
+    private Node rightChild;
 
-  private long cachedValue;
-  private boolean hasCachedValue;
-  private boolean ascending = true;
+    private long cachedValue;
+    private boolean hasCachedValue;
+    private boolean ascending = true;
 
-  /**
-   * Constructor of AndNode.
-   *
-   * @param leftChild  left child
-   * @param rightChild right child
-   */
-  public AndNode(Node leftChild, Node rightChild) {
-    this.leftChild = leftChild;
-    this.rightChild = rightChild;
-    this.hasCachedValue = false;
-  }
-
-  public AndNode(Node leftChild, Node rightChild, boolean ascending) {
-    this.leftChild = leftChild;
-    this.rightChild = rightChild;
-    this.hasCachedValue = false;
-    this.ascending = ascending;
-  }
-
-  @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  @Override
-  public boolean hasNext() throws IOException {
-    if (hasCachedValue) {
-      return true;
+    /**
+     * Constructor of AndNode.
+     *
+     * @param leftChild left child
+     * @param rightChild right child
+     */
+    public AndNode(Node leftChild, Node rightChild) {
+        this.leftChild = leftChild;
+        this.rightChild = rightChild;
+        this.hasCachedValue = false;
     }
-    if (leftChild.hasNext() && rightChild.hasNext()) {
-      if (ascending) {
-        return fillNextCache((l, r) -> l > r);
-      }
-      return fillNextCache((l, r) -> l < r);
-    }
-    return false;
-  }
 
-  private boolean fillNextCache(BiPredicate<Long, Long> seekRight) throws IOException {
-    long leftValue = leftChild.next();
-    long rightValue = rightChild.next();
-    while (true) {
-      if (leftValue == rightValue) {
-        this.hasCachedValue = true;
-        this.cachedValue = leftValue;
-        return true;
-      }
-      if (seekRight.test(leftValue, rightValue)) {
-        if (rightChild.hasNext()) {
-          rightValue = rightChild.next();
-        } else {
-          return false;
+    public AndNode(Node leftChild, Node rightChild, boolean ascending) {
+        this.leftChild = leftChild;
+        this.rightChild = rightChild;
+        this.hasCachedValue = false;
+        this.ascending = ascending;
+    }
+
+    @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
+    @Override
+    public boolean hasNext() throws IOException {
+        if (hasCachedValue) {
+            return true;
         }
-      } else { // leftValue > rightValue
-        if (leftChild.hasNext()) {
-          leftValue = leftChild.next();
-        } else {
-          return false;
+        if (leftChild.hasNext() && rightChild.hasNext()) {
+            if (ascending) {
+                return fillNextCache((l, r) -> l > r);
+            }
+            return fillNextCache((l, r) -> l < r);
         }
-      }
+        return false;
     }
-  }
 
-  @Override
-  public long next() throws IOException {
-    if (hasNext()) {
-      hasCachedValue = false;
-      return cachedValue;
+    private boolean fillNextCache(BiPredicate<Long, Long> seekRight) throws IOException {
+        long leftValue = leftChild.next();
+        long rightValue = rightChild.next();
+        while (true) {
+            if (leftValue == rightValue) {
+                this.hasCachedValue = true;
+                this.cachedValue = leftValue;
+                return true;
+            }
+            if (seekRight.test(leftValue, rightValue)) {
+                if (rightChild.hasNext()) {
+                    rightValue = rightChild.next();
+                } else {
+                    return false;
+                }
+            } else { // leftValue > rightValue
+                if (leftChild.hasNext()) {
+                    leftValue = leftChild.next();
+                } else {
+                    return false;
+                }
+            }
+        }
     }
-    throw new IOException("no more data");
-  }
 
-  @Override
-  public NodeType getType() {
-    return NodeType.AND;
-  }
+    @Override
+    public long next() throws IOException {
+        if (hasNext()) {
+            hasCachedValue = false;
+            return cachedValue;
+        }
+        throw new IOException("no more data");
+    }
+
+    @Override
+    public NodeType getType() {
+        return NodeType.AND;
+    }
 }

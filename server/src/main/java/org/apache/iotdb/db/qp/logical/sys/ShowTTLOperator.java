@@ -26,14 +26,14 @@ import org.apache.iotdb.db.qp.constant.SQLConstant;
 
 public class ShowTTLOperator extends ShowOperator {
 
-  private List<PartialPath> storageGroups;
+    private List<PartialPath> storageGroups;
 
-  public ShowTTLOperator(List<PartialPath> storageGroups) {
-    super(SQLConstant.TOK_SHOW, OperatorType.TTL);
-    this.storageGroups = storageGroups;
-  }
+    public ShowTTLOperator(List<PartialPath> storageGroups) {
+        super(SQLConstant.TOK_SHOW, OperatorType.TTL);
+        this.storageGroups = storageGroups;
+    }
 
-  public List<PartialPath> getStorageGroups() {
-    return storageGroups;
-  }
+    public List<PartialPath> getStorageGroups() {
+        return storageGroups;
+    }
 }

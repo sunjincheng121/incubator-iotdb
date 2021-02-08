@@ -28,39 +28,38 @@ import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.rpc.thrift.AddNodeResponse;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.cluster.server.Response;
-import org.apache.iotdb.cluster.server.handlers.caller.JoinClusterHandler;
 import org.junit.Test;
 
 public class JoinClusterHandlerTest {
 
-  @Test
-  public void testComplete() throws InterruptedException {
-    Node contact = TestUtils.getNode(0);
-    AtomicReference<AddNodeResponse> result = new AtomicReference<>();
-    AddNodeResponse response = new AddNodeResponse();
-    response.setRespNum((int) Response.RESPONSE_AGREE);
-    response.setPartitionTableBytes(new byte[4096]);
-    JoinClusterHandler handler = new JoinClusterHandler();
-    handler.setContact(contact);
-    handler.setResponse(result);
-    synchronized (result) {
-      new Thread(() -> handler.onComplete(response)).start();
-      result.wait();
+    @Test
+    public void testComplete() throws InterruptedException {
+        Node contact = TestUtils.getNode(0);
+        AtomicReference<AddNodeResponse> result = new AtomicReference<>();
+        AddNodeResponse response = new AddNodeResponse();
+        response.setRespNum((int) Response.RESPONSE_AGREE);
+        response.setPartitionTableBytes(new byte[4096]);
+        JoinClusterHandler handler = new JoinClusterHandler();
+        handler.setContact(contact);
+        handler.setResponse(result);
+        synchronized (result) {
+            new Thread(() -> handler.onComplete(response)).start();
+            result.wait();
+        }
+        assertEquals(response, result.get());
     }
-    assertEquals(response, result.get());
-  }
 
-  @Test
-  public void testError() throws InterruptedException {
-    Node contact = TestUtils.getNode(0);
-    AtomicReference<AddNodeResponse> result = new AtomicReference<>();
-    JoinClusterHandler handler = new JoinClusterHandler();
-    handler.setContact(contact);
-    handler.setResponse(result);
-    synchronized (result) {
-      new Thread(() -> handler.onError(new TestException())).start();
-      result.wait();
+    @Test
+    public void testError() throws InterruptedException {
+        Node contact = TestUtils.getNode(0);
+        AtomicReference<AddNodeResponse> result = new AtomicReference<>();
+        JoinClusterHandler handler = new JoinClusterHandler();
+        handler.setContact(contact);
+        handler.setResponse(result);
+        synchronized (result) {
+            new Thread(() -> handler.onError(new TestException())).start();
+            result.wait();
+        }
+        assertNull(result.get());
     }
-    assertNull(result.get());
-  }
 }

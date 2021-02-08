@@ -18,64 +18,63 @@
  */
 package org.apache.iotdb.tsfile.read;
 
-import org.apache.iotdb.tsfile.utils.TsPrimitiveType;
-
 import java.io.Serializable;
+import org.apache.iotdb.tsfile.utils.TsPrimitiveType;
 
 public class TimeValuePair implements Serializable, Comparable<TimeValuePair> {
 
-  private long timestamp;
-  private TsPrimitiveType value;
+    private long timestamp;
+    private TsPrimitiveType value;
 
-  public TimeValuePair(long timestamp, TsPrimitiveType value) {
-    this.timestamp = timestamp;
-    this.value = value;
-  }
-
-  public long getTimestamp() {
-    return timestamp;
-  }
-
-  public void setTimestamp(long timestamp) {
-    this.timestamp = timestamp;
-  }
-
-  public TsPrimitiveType getValue() {
-    return value;
-  }
-
-  public void setValue(TsPrimitiveType value) {
-    this.value = value;
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append(timestamp).append(" : ").append(getValue());
-    return stringBuilder.toString();
-  }
-
-  @Override
-  public boolean equals(Object object) {
-    if (object instanceof TimeValuePair) {
-      return ((TimeValuePair) object).getTimestamp() == timestamp
-          && ((TimeValuePair) object).getValue() != null
-          && ((TimeValuePair) object).getValue().equals(value);
+    public TimeValuePair(long timestamp, TsPrimitiveType value) {
+        this.timestamp = timestamp;
+        this.value = value;
     }
-    return false;
-  }
 
-  @Override
-  public int hashCode(){
-    return ((Long)timestamp).hashCode() + value.hashCode();
-  }
+    public long getTimestamp() {
+        return timestamp;
+    }
 
-  public int getSize() {
-    return 8 + 8 + value.getSize();
-  }
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
-  @Override
-  public int compareTo(TimeValuePair o) {
-    return Long.compare(this.getTimestamp(), o.getTimestamp());
-  }
+    public TsPrimitiveType getValue() {
+        return value;
+    }
+
+    public void setValue(TsPrimitiveType value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(timestamp).append(" : ").append(getValue());
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof TimeValuePair) {
+            return ((TimeValuePair) object).getTimestamp() == timestamp
+                    && ((TimeValuePair) object).getValue() != null
+                    && ((TimeValuePair) object).getValue().equals(value);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return ((Long) timestamp).hashCode() + value.hashCode();
+    }
+
+    public int getSize() {
+        return 8 + 8 + value.getSize();
+    }
+
+    @Override
+    public int compareTo(TimeValuePair o) {
+        return Long.compare(this.getTimestamp(), o.getTimestamp());
+    }
 }

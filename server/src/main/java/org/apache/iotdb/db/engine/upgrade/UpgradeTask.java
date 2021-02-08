@@ -40,115 +40,140 @@ import org.slf4j.LoggerFactory;
 
 public class UpgradeTask extends WrappedRunnable {
 
-  private TsFileResource upgradeResource;
-  private static final Logger logger = LoggerFactory.getLogger(UpgradeTask.class);
-  private static final String COMMA_SEPERATOR = ",";
-  private static final int maxLevelNum = IoTDBDescriptor.getInstance().getConfig().getSeqLevelNum();
+    private TsFileResource upgradeResource;
+    private static final Logger logger = LoggerFactory.getLogger(UpgradeTask.class);
+    private static final String COMMA_SEPERATOR = ",";
+    private static final int maxLevelNum =
+            IoTDBDescriptor.getInstance().getConfig().getSeqLevelNum();
 
-  private FSFactory fsFactory = FSFactoryProducer.getFSFactory();
+    private FSFactory fsFactory = FSFactoryProducer.getFSFactory();
 
-  public UpgradeTask(TsFileResource upgradeResource) {
-    this.upgradeResource = upgradeResource;
-  }
+    public UpgradeTask(TsFileResource upgradeResource) {
+        this.upgradeResource = upgradeResource;
+    }
 
-  @Override
-  public void runMayThrow() {
-    try {
-      List<TsFileResource> upgradedResources = generateUpgradedFiles();
-      upgradeResource.writeLock();
-      String oldTsfilePath = upgradeResource.getTsFile().getAbsolutePath();
-      String oldModificationFilePath = oldTsfilePath + ModificationFile.FILE_SUFFIX;
-      try {
-        // delete old TsFile and resource
-        upgradeResource.delete();
-        File modificationFile = FSFactoryProducer.getFSFactory().getFile(oldModificationFilePath);
-        // move upgraded TsFiles and modificationFile to their own partition directories
-        for (TsFileResource upgradedResource : upgradedResources) {
-          File upgradedFile = upgradedResource.getTsFile();
-          long partition = upgradedResource.getTimePartition();
-          String storageGroupPath = upgradedFile.getParentFile().getParentFile().getParent();
-          File partitionDir = FSFactoryProducer.getFSFactory()
-              .getFile(storageGroupPath, partition + "");
-          if (!partitionDir.exists()) {
-            partitionDir.mkdir();
-          }
-          FSFactoryProducer.getFSFactory().moveFile(upgradedFile,
-              FSFactoryProducer.getFSFactory().getFile(partitionDir, upgradedFile.getName()));
-          upgradedResource.setFile(
-              FSFactoryProducer.getFSFactory().getFile(partitionDir, upgradedFile.getName()));
-          // copy mods file to partition directories
-          if (modificationFile.exists()) {
-            Files.copy(modificationFile.toPath(),
-                FSFactoryProducer.getFSFactory().getFile(partitionDir, upgradedFile.getName()
-                    + ModificationFile.FILE_SUFFIX).toPath());
-          }
-          upgradedResource.serialize();
-          // delete tmp partition folder when it is empty
-          if (upgradedFile.getParentFile().isDirectory()
-              && upgradedFile.getParentFile().listFiles().length == 0) {
-            Files.delete(upgradedFile.getParentFile().toPath());
-          }
-          // rename all files to 0 level
-          upgradedFile = upgradedResource.getTsFile();
-          File zeroMergeVersionFile = getMaxMergeVersionFile(upgradedFile);
-          fsFactory.moveFile(upgradedFile, zeroMergeVersionFile);
-          fsFactory.moveFile(
-              fsFactory.getFile(upgradedFile.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX),
-              fsFactory
-                  .getFile(
-                      zeroMergeVersionFile.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX));
-          upgradedResource.setFile(upgradedFile);
+    @Override
+    public void runMayThrow() {
+        try {
+            List<TsFileResource> upgradedResources = generateUpgradedFiles();
+            upgradeResource.writeLock();
+            String oldTsfilePath = upgradeResource.getTsFile().getAbsolutePath();
+            String oldModificationFilePath = oldTsfilePath + ModificationFile.FILE_SUFFIX;
+            try {
+                // delete old TsFile and resource
+                upgradeResource.delete();
+                File modificationFile =
+                        FSFactoryProducer.getFSFactory().getFile(oldModificationFilePath);
+                // move upgraded TsFiles and modificationFile to their own partition directories
+                for (TsFileResource upgradedResource : upgradedResources) {
+                    File upgradedFile = upgradedResource.getTsFile();
+                    long partition = upgradedResource.getTimePartition();
+                    String storageGroupPath =
+                            upgradedFile.getParentFile().getParentFile().getParent();
+                    File partitionDir =
+                            FSFactoryProducer.getFSFactory()
+                                    .getFile(storageGroupPath, partition + "");
+                    if (!partitionDir.exists()) {
+                        partitionDir.mkdir();
+                    }
+                    FSFactoryProducer.getFSFactory()
+                            .moveFile(
+                                    upgradedFile,
+                                    FSFactoryProducer.getFSFactory()
+                                            .getFile(partitionDir, upgradedFile.getName()));
+                    upgradedResource.setFile(
+                            FSFactoryProducer.getFSFactory()
+                                    .getFile(partitionDir, upgradedFile.getName()));
+                    // copy mods file to partition directories
+                    if (modificationFile.exists()) {
+                        Files.copy(
+                                modificationFile.toPath(),
+                                FSFactoryProducer.getFSFactory()
+                                        .getFile(
+                                                partitionDir,
+                                                upgradedFile.getName()
+                                                        + ModificationFile.FILE_SUFFIX)
+                                        .toPath());
+                    }
+                    upgradedResource.serialize();
+                    // delete tmp partition folder when it is empty
+                    if (upgradedFile.getParentFile().isDirectory()
+                            && upgradedFile.getParentFile().listFiles().length == 0) {
+                        Files.delete(upgradedFile.getParentFile().toPath());
+                    }
+                    // rename all files to 0 level
+                    upgradedFile = upgradedResource.getTsFile();
+                    File zeroMergeVersionFile = getMaxMergeVersionFile(upgradedFile);
+                    fsFactory.moveFile(upgradedFile, zeroMergeVersionFile);
+                    fsFactory.moveFile(
+                            fsFactory.getFile(
+                                    upgradedFile.getAbsolutePath()
+                                            + TsFileResource.RESOURCE_SUFFIX),
+                            fsFactory.getFile(
+                                    zeroMergeVersionFile.getAbsolutePath()
+                                            + TsFileResource.RESOURCE_SUFFIX));
+                    upgradedResource.setFile(upgradedFile);
+                }
+                // delete old modificationFile
+                if (modificationFile.exists()) {
+                    Files.delete(modificationFile.toPath());
+                }
+                // delete upgrade folder when it is empty
+                if (upgradeResource.getTsFile().getParentFile().isDirectory()
+                        && upgradeResource.getTsFile().getParentFile().listFiles().length == 0) {
+                    Files.delete(upgradeResource.getTsFile().getParentFile().toPath());
+                }
+                upgradeResource.setUpgradedResources(upgradedResources);
+                UpgradeLog.writeUpgradeLogFile(
+                        oldTsfilePath + COMMA_SEPERATOR + UpgradeCheckStatus.UPGRADE_SUCCESS);
+                upgradeResource.getUpgradeTsFileResourceCallBack().call(upgradeResource);
+            } finally {
+                upgradeResource.writeUnlock();
+            }
+            UpgradeSevice.setCntUpgradeFileNum(UpgradeSevice.getCntUpgradeFileNum() - 1);
+            logger.info(
+                    "Upgrade completes, file path:{} , the remaining upgraded file num: {}",
+                    oldTsfilePath,
+                    UpgradeSevice.getCntUpgradeFileNum());
+        } catch (Exception e) {
+            logger.error(
+                    "meet error when upgrade file:{}",
+                    upgradeResource.getTsFile().getAbsolutePath(),
+                    e);
         }
-        // delete old modificationFile 
-        if (modificationFile.exists()) {
-          Files.delete(modificationFile.toPath());
-        }
-        // delete upgrade folder when it is empty
-        if (upgradeResource.getTsFile().getParentFile().isDirectory()
-            && upgradeResource.getTsFile().getParentFile().listFiles().length == 0) {
-          Files.delete(upgradeResource.getTsFile().getParentFile().toPath());
-        }
-        upgradeResource.setUpgradedResources(upgradedResources);
+    }
+
+    private List<TsFileResource> generateUpgradedFiles() throws WriteProcessException {
+        upgradeResource.readLock();
+        String oldTsfilePath = upgradeResource.getTsFile().getAbsolutePath();
+        List<TsFileResource> upgradedResources = new ArrayList<>();
         UpgradeLog.writeUpgradeLogFile(
-            oldTsfilePath + COMMA_SEPERATOR + UpgradeCheckStatus.UPGRADE_SUCCESS);
-        upgradeResource.getUpgradeTsFileResourceCallBack().call(upgradeResource);
-      } finally {
-        upgradeResource.writeUnlock();
-      }
-      UpgradeSevice.setCntUpgradeFileNum(UpgradeSevice.getCntUpgradeFileNum() - 1);
-      logger.info("Upgrade completes, file path:{} , the remaining upgraded file num: {}",
-          oldTsfilePath, UpgradeSevice.getCntUpgradeFileNum());
-    } catch (Exception e) {
-      logger.error("meet error when upgrade file:{}", upgradeResource.getTsFile().getAbsolutePath(),
-          e);
+                oldTsfilePath + COMMA_SEPERATOR + UpgradeCheckStatus.BEGIN_UPGRADE_FILE);
+        try {
+            TsFileOnlineUpgradeTool.upgradeOneTsfile(oldTsfilePath, upgradedResources);
+            UpgradeLog.writeUpgradeLogFile(
+                    oldTsfilePath + COMMA_SEPERATOR + UpgradeCheckStatus.AFTER_UPGRADE_FILE);
+        } catch (IOException e) {
+            logger.error(
+                    "generate upgrade file failed, the file to be upgraded:{}", oldTsfilePath, e);
+        } finally {
+            upgradeResource.readUnlock();
+        }
+        return upgradedResources;
     }
-  }
 
-  private List<TsFileResource> generateUpgradedFiles() throws WriteProcessException {
-    upgradeResource.readLock();
-    String oldTsfilePath = upgradeResource.getTsFile().getAbsolutePath();
-    List<TsFileResource> upgradedResources = new ArrayList<>();
-    UpgradeLog.writeUpgradeLogFile(
-        oldTsfilePath + COMMA_SEPERATOR + UpgradeCheckStatus.BEGIN_UPGRADE_FILE);
-    try {
-      TsFileOnlineUpgradeTool.upgradeOneTsfile(oldTsfilePath, upgradedResources);
-      UpgradeLog.writeUpgradeLogFile(
-          oldTsfilePath + COMMA_SEPERATOR + UpgradeCheckStatus.AFTER_UPGRADE_FILE);
-    } catch (IOException e) {
-      logger
-          .error("generate upgrade file failed, the file to be upgraded:{}", oldTsfilePath, e);
-    } finally {
-      upgradeResource.readUnlock();
+    private File getMaxMergeVersionFile(File seqFile) {
+        String[] splits =
+                seqFile.getName()
+                        .replace(TSFILE_SUFFIX, "")
+                        .split(IoTDBConstant.FILE_NAME_SEPARATOR);
+        return fsFactory.getFile(
+                seqFile.getParentFile(),
+                splits[0]
+                        + IoTDBConstant.FILE_NAME_SEPARATOR
+                        + splits[1]
+                        + IoTDBConstant.FILE_NAME_SEPARATOR
+                        + (maxLevelNum - 1)
+                        + TSFILE_SUFFIX);
     }
-    return upgradedResources;
-  }
-
-  private File getMaxMergeVersionFile(File seqFile) {
-    String[] splits = seqFile.getName().replace(TSFILE_SUFFIX, "")
-        .split(IoTDBConstant.FILE_NAME_SEPARATOR);
-    return fsFactory.getFile(seqFile.getParentFile(),
-        splits[0] + IoTDBConstant.FILE_NAME_SEPARATOR + splits[1]
-            + IoTDBConstant.FILE_NAME_SEPARATOR + (maxLevelNum - 1) + TSFILE_SUFFIX);
-  }
-
 }

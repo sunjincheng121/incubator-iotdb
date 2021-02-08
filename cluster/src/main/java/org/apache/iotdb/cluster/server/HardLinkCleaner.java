@@ -29,81 +29,82 @@ import org.slf4j.LoggerFactory;
 
 public class HardLinkCleaner implements Runnable {
 
-  private static final Logger logger = LoggerFactory.getLogger(HardLinkCleaner.class);
-  // hardlinks are kept for 3 days
-  private static final long HARDLINK_LIFE_MS = 3 * 24 * 3600 * 1000L;
+    private static final Logger logger = LoggerFactory.getLogger(HardLinkCleaner.class);
+    // hardlinks are kept for 3 days
+    private static final long HARDLINK_LIFE_MS = 3 * 24 * 3600 * 1000L;
 
-  @Override
-  public void run() {
-    scanFolders(DirectoryManager.getInstance().getAllSequenceFileFolders());
-    if (Thread.interrupted()) {
-      return;
-    }
-    scanFolders(DirectoryManager.getInstance().getAllUnSequenceFileFolders());
-  }
-
-  private void scanFolders(List<String> folders) {
-    for (String folder : folders) {
-      scanFolder(folder);
-    }
-  }
-
-  private void scanFolder(String folder) {
-    File folderFile = new File(folder);
-    scanFile(folderFile);
-  }
-
-  private void scanFile(File file) {
-    if (!file.exists()) {
-      return;
-    }
-    if (file.isDirectory()) {
-      File[] files = file.listFiles();
-      if (files != null) {
-        for (File file1 : files) {
-          scanFile(file1);
-          if (Thread.interrupted()) {
-            Thread.currentThread().interrupt();
+    @Override
+    public void run() {
+        scanFolders(DirectoryManager.getInstance().getAllSequenceFileFolders());
+        if (Thread.interrupted()) {
             return;
-          }
         }
-      }
-      return;
+        scanFolders(DirectoryManager.getInstance().getAllUnSequenceFileFolders());
     }
-    long hardLinkCreateTime = getHardLinkCreateTime(file);
-    long currentTime = System.currentTimeMillis();
-    if (hardLinkCreateTime != -1 && currentTime - hardLinkCreateTime >= HARDLINK_LIFE_MS) {
-      try {
-        Files.delete(file.toPath());
-      } catch (IOException e) {
-        logger.debug("Hardlink {} cannot be removed, leave it to the next try: {}", file,
-            e.getMessage());
-      }
-    }
-  }
 
-  /**
-   *
-   * @param file
-   * @return -1 if the file is not a hardlink or its created time
-   */
-  private long getHardLinkCreateTime(File file) {
-    String fileName = file.getName();
-    // hardlinks have a suffix like ".[createTime]_[randomNumber]"
-    int suffixIndex = fileName.lastIndexOf('.');
-    if (suffixIndex > 0 && suffixIndex < fileName.length()) {
-      String suffix = fileName.substring(suffixIndex + 1);
-      String[] split = suffix.split("_");
-      if (split.length != 2) {
-        return -1;
-      }
-      try {
-        return Long.parseLong(split[0]);
-      } catch (NumberFormatException e) {
-        return -1;
-      }
-    } else {
-      return -1;
+    private void scanFolders(List<String> folders) {
+        for (String folder : folders) {
+            scanFolder(folder);
+        }
     }
-  }
+
+    private void scanFolder(String folder) {
+        File folderFile = new File(folder);
+        scanFile(folderFile);
+    }
+
+    private void scanFile(File file) {
+        if (!file.exists()) {
+            return;
+        }
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File file1 : files) {
+                    scanFile(file1);
+                    if (Thread.interrupted()) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
+            }
+            return;
+        }
+        long hardLinkCreateTime = getHardLinkCreateTime(file);
+        long currentTime = System.currentTimeMillis();
+        if (hardLinkCreateTime != -1 && currentTime - hardLinkCreateTime >= HARDLINK_LIFE_MS) {
+            try {
+                Files.delete(file.toPath());
+            } catch (IOException e) {
+                logger.debug(
+                        "Hardlink {} cannot be removed, leave it to the next try: {}",
+                        file,
+                        e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * @param file
+     * @return -1 if the file is not a hardlink or its created time
+     */
+    private long getHardLinkCreateTime(File file) {
+        String fileName = file.getName();
+        // hardlinks have a suffix like ".[createTime]_[randomNumber]"
+        int suffixIndex = fileName.lastIndexOf('.');
+        if (suffixIndex > 0 && suffixIndex < fileName.length()) {
+            String suffix = fileName.substring(suffixIndex + 1);
+            String[] split = suffix.split("_");
+            if (split.length != 2) {
+                return -1;
+            }
+            try {
+                return Long.parseLong(split[0]);
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        } else {
+            return -1;
+        }
+    }
 }

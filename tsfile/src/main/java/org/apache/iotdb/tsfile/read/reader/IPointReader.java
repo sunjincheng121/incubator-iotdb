@@ -18,17 +18,16 @@
  */
 package org.apache.iotdb.tsfile.read.reader;
 
-import org.apache.iotdb.tsfile.read.TimeValuePair;
-
 import java.io.IOException;
+import org.apache.iotdb.tsfile.read.TimeValuePair;
 
 public interface IPointReader {
 
-  boolean hasNextTimeValuePair() throws IOException;
+    boolean hasNextTimeValuePair() throws IOException;
 
-  TimeValuePair nextTimeValuePair() throws IOException;
+    TimeValuePair nextTimeValuePair() throws IOException;
 
-  TimeValuePair currentTimeValuePair() throws IOException;
+    TimeValuePair currentTimeValuePair() throws IOException;
 
-  void close() throws IOException;
+    void close() throws IOException;
 }

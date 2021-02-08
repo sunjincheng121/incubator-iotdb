@@ -30,40 +30,43 @@ import org.apache.iotdb.tsfile.read.TimeValuePair;
 
 public abstract class IFill {
 
-  protected long queryTime;
-  protected TSDataType dataType;
+    protected long queryTime;
+    protected TSDataType dataType;
 
-  public IFill(TSDataType dataType, long queryTime) {
-    this.dataType = dataType;
-    this.queryTime = queryTime;
-  }
+    public IFill(TSDataType dataType, long queryTime) {
+        this.dataType = dataType;
+        this.queryTime = queryTime;
+    }
 
-  public IFill() {
-  }
+    public IFill() {}
 
-  public abstract IFill copy();
+    public abstract IFill copy();
 
-  public abstract void configureFill(PartialPath path, TSDataType dataType, long queryTime,
-      Set<String> deviceMeasurements, QueryContext context);
+    public abstract void configureFill(
+            PartialPath path,
+            TSDataType dataType,
+            long queryTime,
+            Set<String> deviceMeasurements,
+            QueryContext context);
 
-  public abstract TimeValuePair getFillResult()
-      throws IOException, QueryProcessException, StorageEngineException;
+    public abstract TimeValuePair getFillResult()
+            throws IOException, QueryProcessException, StorageEngineException;
 
-  public TSDataType getDataType() {
-    return this.dataType;
-  }
+    public TSDataType getDataType() {
+        return this.dataType;
+    }
 
-  public void setDataType(TSDataType dataType) {
-    this.dataType = dataType;
-  }
+    public void setDataType(TSDataType dataType) {
+        this.dataType = dataType;
+    }
 
-  public void setQueryTime(long queryTime) {
-    this.queryTime = queryTime;
-  }
+    public void setQueryTime(long queryTime) {
+        this.queryTime = queryTime;
+    }
 
-  public long getQueryTime() {
-    return queryTime;
-  }
+    public long getQueryTime() {
+        return queryTime;
+    }
 
-  abstract void constructFilter();
+    abstract void constructFilter();
 }

@@ -49,96 +49,102 @@ import org.apache.iotdb.tsfile.read.reader.IBatchReader;
  */
 public class ServerTimeGenerator extends TimeGenerator {
 
-  protected QueryContext context;
-  protected RawDataQueryPlan queryPlan;
+    protected QueryContext context;
+    protected RawDataQueryPlan queryPlan;
 
-  public ServerTimeGenerator(QueryContext context) {
-    this.context = context;
-  }
-
-  /**
-   * Constructor of EngineTimeGenerator.
-   */
-  public ServerTimeGenerator(IExpression expression, QueryContext context,
-      RawDataQueryPlan queryPlan)
-      throws StorageEngineException {
-    this.context = context;
-    this.queryPlan = queryPlan;
-    try {
-      serverConstructNode(expression);
-    } catch (IOException e) {
-      throw new StorageEngineException(e);
-    }
-  }
-
-  public void serverConstructNode(IExpression expression) throws IOException, StorageEngineException {
-    List<PartialPath> pathList = new ArrayList<>();
-    getPartialPathFromExpression(expression, pathList);
-    List<StorageGroupProcessor> list = StorageEngine.getInstance().mergeLock(pathList);
-    try {
-      operatorNode = construct(expression);
-    } finally {
-      StorageEngine.getInstance().mergeUnLock(list);
-    }
-  }
-
-  private void getPartialPathFromExpression(IExpression expression, List<PartialPath> pathList) {
-    if (expression.getType() == ExpressionType.SERIES) {
-      pathList.add((PartialPath) ((SingleSeriesExpression) expression).getSeriesPath());
-    } else {
-      getPartialPathFromExpression(((IBinaryExpression) expression).getLeft(), pathList);
-      getPartialPathFromExpression(((IBinaryExpression) expression).getRight(), pathList);
-    }
-  }
-
-  @Override
-  protected IBatchReader generateNewBatchReader(SingleSeriesExpression expression)
-      throws IOException {
-    Filter valueFilter = expression.getFilter();
-    PartialPath path = (PartialPath) expression.getSeriesPath();
-    TSDataType dataType;
-    QueryDataSource queryDataSource;
-    try {
-      dataType = IoTDB.metaManager.getSeriesType(path);
-      queryDataSource = QueryResourceManager.getInstance().getQueryDataSource(path, context, valueFilter);
-      // update valueFilter by TTL
-      valueFilter = queryDataSource.updateFilterUsingTTL(valueFilter);
-    } catch (Exception e) {
-      throw new IOException(e);
+    public ServerTimeGenerator(QueryContext context) {
+        this.context = context;
     }
 
-    // get the TimeFilter part in SingleSeriesExpression
-    Filter timeFilter = getTimeFilter(valueFilter);
-
-    return new SeriesRawDataBatchReader(path,
-        queryPlan.getAllMeasurementsInDevice(path.getDevice()), dataType, context, queryDataSource,
-        timeFilter, valueFilter, null, queryPlan.isAscending());
-  }
-
-  /**
-   * extract time filter from a value filter
-   */
-  private Filter getTimeFilter(Filter filter) {
-    if (filter instanceof UnaryFilter && ((UnaryFilter) filter).getFilterType() == FilterType.TIME_FILTER) {
-      return filter;
+    /** Constructor of EngineTimeGenerator. */
+    public ServerTimeGenerator(
+            IExpression expression, QueryContext context, RawDataQueryPlan queryPlan)
+            throws StorageEngineException {
+        this.context = context;
+        this.queryPlan = queryPlan;
+        try {
+            serverConstructNode(expression);
+        } catch (IOException e) {
+            throw new StorageEngineException(e);
+        }
     }
-    if (filter instanceof AndFilter) {
-      Filter leftTimeFilter = getTimeFilter(((AndFilter) filter).getLeft());
-      Filter rightTimeFilter = getTimeFilter(((AndFilter) filter).getRight());
-      if (leftTimeFilter != null && rightTimeFilter != null) {
-        return filter;
-      } else if (leftTimeFilter != null) {
-        return leftTimeFilter;
-      } else {
-        return rightTimeFilter;
-      }
+
+    public void serverConstructNode(IExpression expression)
+            throws IOException, StorageEngineException {
+        List<PartialPath> pathList = new ArrayList<>();
+        getPartialPathFromExpression(expression, pathList);
+        List<StorageGroupProcessor> list = StorageEngine.getInstance().mergeLock(pathList);
+        try {
+            operatorNode = construct(expression);
+        } finally {
+            StorageEngine.getInstance().mergeUnLock(list);
+        }
     }
-    return null;
-  }
 
+    private void getPartialPathFromExpression(IExpression expression, List<PartialPath> pathList) {
+        if (expression.getType() == ExpressionType.SERIES) {
+            pathList.add((PartialPath) ((SingleSeriesExpression) expression).getSeriesPath());
+        } else {
+            getPartialPathFromExpression(((IBinaryExpression) expression).getLeft(), pathList);
+            getPartialPathFromExpression(((IBinaryExpression) expression).getRight(), pathList);
+        }
+    }
 
-  @Override
-  protected boolean isAscending() {
-    return queryPlan.isAscending();
-  }
+    @Override
+    protected IBatchReader generateNewBatchReader(SingleSeriesExpression expression)
+            throws IOException {
+        Filter valueFilter = expression.getFilter();
+        PartialPath path = (PartialPath) expression.getSeriesPath();
+        TSDataType dataType;
+        QueryDataSource queryDataSource;
+        try {
+            dataType = IoTDB.metaManager.getSeriesType(path);
+            queryDataSource =
+                    QueryResourceManager.getInstance()
+                            .getQueryDataSource(path, context, valueFilter);
+            // update valueFilter by TTL
+            valueFilter = queryDataSource.updateFilterUsingTTL(valueFilter);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+
+        // get the TimeFilter part in SingleSeriesExpression
+        Filter timeFilter = getTimeFilter(valueFilter);
+
+        return new SeriesRawDataBatchReader(
+                path,
+                queryPlan.getAllMeasurementsInDevice(path.getDevice()),
+                dataType,
+                context,
+                queryDataSource,
+                timeFilter,
+                valueFilter,
+                null,
+                queryPlan.isAscending());
+    }
+
+    /** extract time filter from a value filter */
+    private Filter getTimeFilter(Filter filter) {
+        if (filter instanceof UnaryFilter
+                && ((UnaryFilter) filter).getFilterType() == FilterType.TIME_FILTER) {
+            return filter;
+        }
+        if (filter instanceof AndFilter) {
+            Filter leftTimeFilter = getTimeFilter(((AndFilter) filter).getLeft());
+            Filter rightTimeFilter = getTimeFilter(((AndFilter) filter).getRight());
+            if (leftTimeFilter != null && rightTimeFilter != null) {
+                return filter;
+            } else if (leftTimeFilter != null) {
+                return leftTimeFilter;
+            } else {
+                return rightTimeFilter;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected boolean isAscending() {
+        return queryPlan.isAscending();
+    }
 }

@@ -29,39 +29,39 @@ import java.util.Set;
  */
 public interface ISyncFileManager {
 
-  /**
-   * Find out all closed and unmodified files, which means there has a .resource file and doesn't
-   * have a .mod file and .merge file. For these files, they will eventually generate a new tsfile
-   * file as the merge operation is executed and executed in subsequent synchronization tasks.
-   *
-   * @param dataDir data directory
-   */
-  void getCurrentLocalFiles(String dataDir);
+    /**
+     * Find out all closed and unmodified files, which means there has a .resource file and doesn't
+     * have a .mod file and .merge file. For these files, they will eventually generate a new tsfile
+     * file as the merge operation is executed and executed in subsequent synchronization tasks.
+     *
+     * @param dataDir data directory
+     */
+    void getCurrentLocalFiles(String dataDir);
 
-  /**
-   * Load last local files from file<lastLocalFile> which does not contain those tsfiles which are
-   * not synced successfully in previous sync tasks.
-   *
-   * @param lastLocalFile last local file, which may not exist in first sync task.
-   */
-  void getLastLocalFiles(File lastLocalFile) throws IOException;
+    /**
+     * Load last local files from file<lastLocalFile> which does not contain those tsfiles which are
+     * not synced successfully in previous sync tasks.
+     *
+     * @param lastLocalFile last local file, which may not exist in first sync task.
+     */
+    void getLastLocalFiles(File lastLocalFile) throws IOException;
 
-  /**
-   * Based on current local files and last local files, we can distinguish two kinds of files
-   * between them, one is deleted files, the other is new files. These two kinds of files are valid
-   * files that need to be synchronized to the receiving end.
-   *
-   * @param dataDir data directory
-   */
-  void getValidFiles(String dataDir) throws IOException;
+    /**
+     * Based on current local files and last local files, we can distinguish two kinds of files
+     * between them, one is deleted files, the other is new files. These two kinds of files are
+     * valid files that need to be synchronized to the receiving end.
+     *
+     * @param dataDir data directory
+     */
+    void getValidFiles(String dataDir) throws IOException;
 
-  Map<String, Map<Long, Set<File>>> getCurrentSealedLocalFilesMap();
+    Map<String, Map<Long, Set<File>>> getCurrentSealedLocalFilesMap();
 
-  Map<String, Map<Long, Set<File>>> getLastLocalFilesMap();
+    Map<String, Map<Long, Set<File>>> getLastLocalFilesMap();
 
-  Map<String, Map<Long, Set<File>>> getDeletedFilesMap();
+    Map<String, Map<Long, Set<File>>> getDeletedFilesMap();
 
-  Map<String, Map<Long, Set<File>>> getToBeSyncedFilesMap();
+    Map<String, Map<Long, Set<File>>> getToBeSyncedFilesMap();
 
-  Map<String, Set<Long>> getAllSGs();
+    Map<String, Set<Long>> getAllSGs();
 }

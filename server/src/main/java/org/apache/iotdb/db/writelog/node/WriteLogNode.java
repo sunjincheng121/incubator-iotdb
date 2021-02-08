@@ -22,66 +22,60 @@ import java.io.IOException;
 import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import org.apache.iotdb.db.writelog.io.ILogReader;
 
-/**
- * WriteLogNode is the minimum unit of managing WALs.
- */
+/** WriteLogNode is the minimum unit of managing WALs. */
 public interface WriteLogNode {
 
-  /**
-   * Write a wal for a PhysicalPlan. First, the PhysicalPlan will be conveyed to byte[].
-   * Then the byte[] will be put into a cache. When the cache is full, the logs in the cache will be
-   * synced to disk.
-   *
-   * @param plan - a PhysicalPlan
-   */
-  void write(PhysicalPlan plan) throws IOException;
+    /**
+     * Write a wal for a PhysicalPlan. First, the PhysicalPlan will be conveyed to byte[]. Then the
+     * byte[] will be put into a cache. When the cache is full, the logs in the cache will be synced
+     * to disk.
+     *
+     * @param plan - a PhysicalPlan
+     */
+    void write(PhysicalPlan plan) throws IOException;
 
-  /**
-   * Sync and close streams.
-   */
-  void close() throws IOException;
+    /** Sync and close streams. */
+    void close() throws IOException;
 
-  /**
-   * Write what in cache to disk.
-   */
-  void forceSync() throws IOException;
+    /** Write what in cache to disk. */
+    void forceSync() throws IOException;
 
-  /**
-   * When data that have WALs in this node start to be flushed, this method must be called to
-   * change the working WAL file.
-   */
-  void notifyStartFlush() throws IOException;
+    /**
+     * When data that have WALs in this node start to be flushed, this method must be called to
+     * change the working WAL file.
+     */
+    void notifyStartFlush() throws IOException;
 
-  /**
-   * When data that have WALs in this node end flushing, this method must be called to check and
-   * remove the out-dated logs file.
-   */
-  void notifyEndFlush();
+    /**
+     * When data that have WALs in this node end flushing, this method must be called to check and
+     * remove the out-dated logs file.
+     */
+    void notifyEndFlush();
 
-  /**
-   * return identifier of the log node.
-   *
-   * @return The identifier of this log node.
-   */
-  String getIdentifier();
+    /**
+     * return identifier of the log node.
+     *
+     * @return The identifier of this log node.
+     */
+    String getIdentifier();
 
-  /**
-   * return the directory where wal files of this node are placed.
-   *
-   * @return The directory where wal files of this node are placed.
-   */
-  String getLogDirectory();
+    /**
+     * return the directory where wal files of this node are placed.
+     *
+     * @return The directory where wal files of this node are placed.
+     */
+    String getLogDirectory();
 
-  /**
-   * Abandon all logs in this node and delete the log directory. Calling insert() after calling
-   * this method is undefined.
-   */
-  void delete() throws IOException;
+    /**
+     * Abandon all logs in this node and delete the log directory. Calling insert() after calling
+     * this method is undefined.
+     */
+    void delete() throws IOException;
 
-  /**
-   * return an ILogReader which can iterate each log in this log node.
-   * @return an ILogReader which can iterate each log in this log node.
-   */
-  ILogReader getLogReader();
-
+    /**
+     * return an ILogReader which can iterate each log in this log node.
+     *
+     * @return an ILogReader which can iterate each log in this log node.
+     */
+    ILogReader getLogReader();
 }

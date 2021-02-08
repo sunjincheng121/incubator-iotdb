@@ -23,11 +23,11 @@ import org.apache.iotdb.rpc.TSStatusCode;
 
 public class LoadFileException extends IoTDBException {
 
-  public LoadFileException(String message) {
-    super(message, TSStatusCode.LOAD_FILE_ERROR.getStatusCode());
-  }
+    public LoadFileException(String message) {
+        super(message, TSStatusCode.LOAD_FILE_ERROR.getStatusCode());
+    }
 
-  public LoadFileException(Exception exception) {
-    super(exception, TSStatusCode.LOAD_FILE_ERROR.getStatusCode());
-  }
+    public LoadFileException(Exception exception) {
+        super(exception, TSStatusCode.LOAD_FILE_ERROR.getStatusCode());
+    }
 }

@@ -25,41 +25,39 @@ import org.apache.iotdb.cluster.rpc.thrift.Node;
 
 /**
  * PartitionGroup contains all the nodes that will form a data group with a certain node, which are
- * the REPLICATION_NUM - 1 different physical nodes after this node.
- * The first element of the list is called header, which is also the identifier of the data group.
+ * the REPLICATION_NUM - 1 different physical nodes after this node. The first element of the list
+ * is called header, which is also the identifier of the data group.
  */
 public class PartitionGroup extends ArrayList<Node> {
 
-  private Node thisNode;
+    private Node thisNode;
 
-  public PartitionGroup() {
-  }
+    public PartitionGroup() {}
 
-  public PartitionGroup(Node... nodes) {
-    this.addAll(Arrays.asList(nodes));
-  }
+    public PartitionGroup(Node... nodes) {
+        this.addAll(Arrays.asList(nodes));
+    }
 
-  public PartitionGroup(PartitionGroup other) {
-    super(other);
-    this.thisNode = other.thisNode;
-  }
+    public PartitionGroup(PartitionGroup other) {
+        super(other);
+        this.thisNode = other.thisNode;
+    }
 
-  @Override
-  public boolean equals(Object o) {
-    return super.equals(o);
-  }
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
 
-  @Override
-  public int hashCode() {
-    return super.hashCode();
-  }
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 
-  public Node getHeader() {
-    return get(0);
-  }
+    public Node getHeader() {
+        return get(0);
+    }
 
-  public void setThisNode(Node thisNode) {
-    this.thisNode = thisNode;
-  }
-
+    public void setThisNode(Node thisNode) {
+        this.thisNode = thisNode;
+    }
 }

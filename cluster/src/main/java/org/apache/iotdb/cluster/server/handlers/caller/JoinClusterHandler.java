@@ -31,33 +31,33 @@ import org.slf4j.LoggerFactory;
  */
 public class JoinClusterHandler implements AsyncMethodCallback<AddNodeResponse> {
 
-  private static final Logger logger = LoggerFactory.getLogger(JoinClusterHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(JoinClusterHandler.class);
 
-  private Node contact;
-  private AtomicReference<AddNodeResponse> response;
+    private Node contact;
+    private AtomicReference<AddNodeResponse> response;
 
-  @Override
-  public void onComplete(AddNodeResponse resp) {
-    logger.info("Received a join cluster response {} from {}", resp.getRespNum(), contact);
-    synchronized (response) {
-      response.set(resp);
-      response.notifyAll();
+    @Override
+    public void onComplete(AddNodeResponse resp) {
+        logger.info("Received a join cluster response {} from {}", resp.getRespNum(), contact);
+        synchronized (response) {
+            response.set(resp);
+            response.notifyAll();
+        }
     }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    logger.warn("Cannot join the cluster from {}, because", contact, exception);
-    synchronized (response) {
-      response.notifyAll();
+    @Override
+    public void onError(Exception exception) {
+        logger.warn("Cannot join the cluster from {}, because", contact, exception);
+        synchronized (response) {
+            response.notifyAll();
+        }
     }
-  }
 
-  public void setResponse(AtomicReference<AddNodeResponse> response) {
-    this.response = response;
-  }
+    public void setResponse(AtomicReference<AddNodeResponse> response) {
+        this.response = response;
+    }
 
-  public void setContact(Node contact) {
-    this.contact = contact;
-  }
+    public void setContact(Node contact) {
+        this.contact = contact;
+    }
 }

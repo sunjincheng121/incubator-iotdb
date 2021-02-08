@@ -29,82 +29,81 @@ import org.apache.iotdb.cluster.server.member.RaftMember;
 
 public class TestSnapshot extends Snapshot {
 
-  private int id;
-  private ByteBuffer data;
+    private int id;
+    private ByteBuffer data;
 
-  public TestSnapshot() {
-    data = ByteBuffer.wrap(new byte[8192*2048]);
-  }
-
-  public TestSnapshot(int id) {
-    this.id = id;
-    data = ByteBuffer.wrap(new byte[8192*2048]);
-  }
-
-  @Override
-  public ByteBuffer serialize() {
-    ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES + 8192 * 2048);
-    byteBuffer.putInt(id);
-    byteBuffer.put(data);
-    byteBuffer.flip();
-    return byteBuffer;
-  }
-
-  @Override
-  public void deserialize(ByteBuffer buffer) {
-    id = buffer.getInt();
-    data.put(buffer);
-  }
-
-  @Override
-  public SnapshotInstaller<? extends Snapshot> getDefaultInstaller(RaftMember member) {
-    return new SnapshotInstaller<Snapshot>() {
-      @Override
-      public void install(Snapshot snapshot, int slot) {
-        // do nothing
-      }
-
-      @Override
-      public void install(Map<Integer, Snapshot> snapshotMap) {
-        // do nothing
-      }
-    };
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public TestSnapshot() {
+        data = ByteBuffer.wrap(new byte[8192 * 2048]);
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    TestSnapshot that = (TestSnapshot) o;
-    return id == that.id;
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(id);
-  }
-
-  public static class Factory implements SnapshotFactory<TestSnapshot> {
-
-    public static final Factory INSTANCE = new Factory();
-
-    @Override
-    public TestSnapshot create() {
-      return new TestSnapshot();
+    public TestSnapshot(int id) {
+        this.id = id;
+        data = ByteBuffer.wrap(new byte[8192 * 2048]);
     }
 
     @Override
-    public TestSnapshot copy(TestSnapshot origin) {
-      TestSnapshot testSnapshot = create();
-      testSnapshot.id = origin.id;
-      testSnapshot.lastLogIndex = origin.lastLogIndex;
-      testSnapshot.lastLogTerm = origin.lastLogTerm;
-      return testSnapshot;
+    public ByteBuffer serialize() {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES + 8192 * 2048);
+        byteBuffer.putInt(id);
+        byteBuffer.put(data);
+        byteBuffer.flip();
+        return byteBuffer;
     }
-  }
 
+    @Override
+    public void deserialize(ByteBuffer buffer) {
+        id = buffer.getInt();
+        data.put(buffer);
+    }
+
+    @Override
+    public SnapshotInstaller<? extends Snapshot> getDefaultInstaller(RaftMember member) {
+        return new SnapshotInstaller<Snapshot>() {
+            @Override
+            public void install(Snapshot snapshot, int slot) {
+                // do nothing
+            }
+
+            @Override
+            public void install(Map<Integer, Snapshot> snapshotMap) {
+                // do nothing
+            }
+        };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TestSnapshot that = (TestSnapshot) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    public static class Factory implements SnapshotFactory<TestSnapshot> {
+
+        public static final Factory INSTANCE = new Factory();
+
+        @Override
+        public TestSnapshot create() {
+            return new TestSnapshot();
+        }
+
+        @Override
+        public TestSnapshot copy(TestSnapshot origin) {
+            TestSnapshot testSnapshot = create();
+            testSnapshot.id = origin.id;
+            testSnapshot.lastLogIndex = origin.lastLogIndex;
+            testSnapshot.lastLogTerm = origin.lastLogTerm;
+            return testSnapshot;
+        }
+    }
 }

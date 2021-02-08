@@ -23,19 +23,19 @@ import org.apache.iotdb.db.metadata.PartialPath;
 
 public class ShowTTLPlan extends ShowPlan {
 
-  private List<PartialPath> storageGroups;
+    private List<PartialPath> storageGroups;
 
-  public ShowTTLPlan(List<PartialPath> storageGroups) {
-    super(ShowContentType.TTL);
-    this.storageGroups = storageGroups;
-  }
+    public ShowTTLPlan(List<PartialPath> storageGroups) {
+        super(ShowContentType.TTL);
+        this.storageGroups = storageGroups;
+    }
 
-  @Override
-  public List<PartialPath> getPaths() {
-    return null;
-  }
+    @Override
+    public List<PartialPath> getPaths() {
+        return null;
+    }
 
-  public List<PartialPath> getStorageGroups() {
-    return storageGroups;
-  }
+    public List<PartialPath> getStorageGroups() {
+        return storageGroups;
+    }
 }

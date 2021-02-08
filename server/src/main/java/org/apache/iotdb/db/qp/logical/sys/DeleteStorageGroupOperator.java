@@ -24,20 +24,18 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class DeleteStorageGroupOperator extends RootOperator {
 
-  private List<PartialPath> deletePathList;
-  
-  public DeleteStorageGroupOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.DELETE_STORAGE_GROUP;
-  }
-  
-  public List<PartialPath> getDeletePathList() {
-    return deletePathList;
-  }
+    private List<PartialPath> deletePathList;
 
-  public void setDeletePathList(List<PartialPath> deletePathList) {
-    this.deletePathList = deletePathList;
-  }
+    public DeleteStorageGroupOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.DELETE_STORAGE_GROUP;
+    }
 
+    public List<PartialPath> getDeletePathList() {
+        return deletePathList;
+    }
+
+    public void setDeletePathList(List<PartialPath> deletePathList) {
+        this.deletePathList = deletePathList;
+    }
 }
-

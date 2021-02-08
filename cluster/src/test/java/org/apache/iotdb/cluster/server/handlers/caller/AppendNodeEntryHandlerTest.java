@@ -43,130 +43,130 @@ import org.junit.Test;
 
 public class AppendNodeEntryHandlerTest {
 
-  private RaftMember member;
+    private RaftMember member;
 
-  @Before
-  public void setUp() {
-    this.member = new TestMetaGroupMember();
-  }
+    @Before
+    public void setUp() {
+        this.member = new TestMetaGroupMember();
+    }
 
-  @After
-  public void tearDown() throws IOException {
-    member.closeLogManager();
-    member.stop();
-    EnvironmentUtils.cleanAllDir();
-  }
+    @After
+    public void tearDown() throws IOException {
+        member.closeLogManager();
+        member.stop();
+        EnvironmentUtils.cleanAllDir();
+    }
 
-  @Test
-  public void testAgreement() throws InterruptedException {
-    AtomicLong receiverTerm = new AtomicLong(-1);
-    AtomicBoolean leadershipStale = new AtomicBoolean(false);
-    Log log = new TestLog();
+    @Test
+    public void testAgreement() throws InterruptedException {
+        AtomicLong receiverTerm = new AtomicLong(-1);
+        AtomicBoolean leadershipStale = new AtomicBoolean(false);
+        Log log = new TestLog();
 
-    int replicationNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
-    try {
-      ClusterDescriptor.getInstance().getConfig().setReplicationNum(10);
-      AtomicInteger quorum = new AtomicInteger(5);
-      Peer peer = new Peer(1);
-      synchronized (quorum) {
-        for (int i = 0; i < 10; i++) {
-          AppendNodeEntryHandler handler = new AppendNodeEntryHandler();
-          handler.setLeaderShipStale(leadershipStale);
-          handler.setVoteCounter(quorum);
-          handler.setLog(log);
-          handler.setMember(member);
-          handler.setReceiverTerm(receiverTerm);
-          handler.setReceiver(TestUtils.getNode(i));
-          handler.setPeer(peer);
-          long resp = i >= 5 ? Response.RESPONSE_AGREE : Response.RESPONSE_LOG_MISMATCH;
-          new Thread(() -> handler.onComplete(resp)).start();
+        int replicationNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
+        try {
+            ClusterDescriptor.getInstance().getConfig().setReplicationNum(10);
+            AtomicInteger quorum = new AtomicInteger(5);
+            Peer peer = new Peer(1);
+            synchronized (quorum) {
+                for (int i = 0; i < 10; i++) {
+                    AppendNodeEntryHandler handler = new AppendNodeEntryHandler();
+                    handler.setLeaderShipStale(leadershipStale);
+                    handler.setVoteCounter(quorum);
+                    handler.setLog(log);
+                    handler.setMember(member);
+                    handler.setReceiverTerm(receiverTerm);
+                    handler.setReceiver(TestUtils.getNode(i));
+                    handler.setPeer(peer);
+                    long resp = i >= 5 ? Response.RESPONSE_AGREE : Response.RESPONSE_LOG_MISMATCH;
+                    new Thread(() -> handler.onComplete(resp)).start();
+                }
+                quorum.wait();
+            }
+            assertEquals(-1, receiverTerm.get());
+            assertFalse(leadershipStale.get());
+            assertEquals(0, quorum.get());
+        } finally {
+            ClusterDescriptor.getInstance().getConfig().setReplicationNum(replicationNum);
         }
-        quorum.wait();
-      }
-      assertEquals(-1, receiverTerm.get());
-      assertFalse(leadershipStale.get());
-      assertEquals(0, quorum.get());
-    } finally {
-      ClusterDescriptor.getInstance().getConfig().setReplicationNum(replicationNum);
-    }
-  }
-
-  @Test
-  public void testNoAgreement() {
-    AtomicLong receiverTerm = new AtomicLong(-1);
-    AtomicBoolean leadershipStale = new AtomicBoolean(false);
-    Log log = new TestLog();
-    AtomicInteger quorum = new AtomicInteger(5);
-    Peer peer = new Peer(1);
-
-    for (int i = 0; i < 3; i++) {
-      AppendNodeEntryHandler handler = new AppendNodeEntryHandler();
-      handler.setLeaderShipStale(leadershipStale);
-      handler.setVoteCounter(quorum);
-      handler.setLog(log);
-      handler.setMember(member);
-      handler.setReceiverTerm(receiverTerm);
-      handler.setReceiver(TestUtils.getNode(i));
-      handler.setPeer(peer);
-      handler.onComplete(Response.RESPONSE_AGREE);
     }
 
-    assertEquals(-1, receiverTerm.get());
-    assertFalse(leadershipStale.get());
-    assertEquals(2, quorum.get());
-  }
+    @Test
+    public void testNoAgreement() {
+        AtomicLong receiverTerm = new AtomicLong(-1);
+        AtomicBoolean leadershipStale = new AtomicBoolean(false);
+        Log log = new TestLog();
+        AtomicInteger quorum = new AtomicInteger(5);
+        Peer peer = new Peer(1);
 
-  @Test
-  public void testLeadershipStale() throws InterruptedException {
-    AtomicLong receiverTerm = new AtomicLong(-1);
-    AtomicBoolean leadershipStale = new AtomicBoolean(false);
-    Log log = new TestLog();
-    AtomicInteger quorum = new AtomicInteger(5);
-    Peer peer = new Peer(1);
+        for (int i = 0; i < 3; i++) {
+            AppendNodeEntryHandler handler = new AppendNodeEntryHandler();
+            handler.setLeaderShipStale(leadershipStale);
+            handler.setVoteCounter(quorum);
+            handler.setLog(log);
+            handler.setMember(member);
+            handler.setReceiverTerm(receiverTerm);
+            handler.setReceiver(TestUtils.getNode(i));
+            handler.setPeer(peer);
+            handler.onComplete(Response.RESPONSE_AGREE);
+        }
 
-    synchronized (quorum) {
-      AppendNodeEntryHandler handler = new AppendNodeEntryHandler();
-      handler.setLeaderShipStale(leadershipStale);
-      handler.setVoteCounter(quorum);
-      handler.setLog(log);
-      handler.setMember(member);
-      handler.setReceiverTerm(receiverTerm);
-      handler.setReceiver(TestUtils.getNode(0));
-      handler.setPeer(peer);
-      new Thread(() -> handler.onComplete(100L)).start();
-      quorum.wait();
+        assertEquals(-1, receiverTerm.get());
+        assertFalse(leadershipStale.get());
+        assertEquals(2, quorum.get());
     }
-    assertEquals(100, receiverTerm.get());
-    assertTrue(leadershipStale.get());
-    assertEquals(5, quorum.get());
-  }
 
-  @Test
-  public void testError() {
-    AtomicLong receiverTerm = new AtomicLong(-1);
-    AtomicBoolean leadershipStale = new AtomicBoolean(false);
-    Log log = new TestLog();
-    int replicationNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
-    ClusterDescriptor.getInstance().getConfig().setReplicationNum(10);
-    try {
-      AtomicInteger quorum = new AtomicInteger(5);
-      Peer peer = new Peer(1);
+    @Test
+    public void testLeadershipStale() throws InterruptedException {
+        AtomicLong receiverTerm = new AtomicLong(-1);
+        AtomicBoolean leadershipStale = new AtomicBoolean(false);
+        Log log = new TestLog();
+        AtomicInteger quorum = new AtomicInteger(5);
+        Peer peer = new Peer(1);
 
-      AppendNodeEntryHandler handler = new AppendNodeEntryHandler();
-      handler.setLeaderShipStale(leadershipStale);
-      handler.setVoteCounter(quorum);
-      handler.setLog(log);
-      handler.setMember(member);
-      handler.setReceiverTerm(receiverTerm);
-      handler.setReceiver(TestUtils.getNode(0));
-      handler.setPeer(peer);
-      handler.onError(new TestException());
-
-      assertEquals(-1, receiverTerm.get());
-      assertFalse(leadershipStale.get());
-      assertEquals(5, quorum.get());
-    } finally {
-      ClusterDescriptor.getInstance().getConfig().setReplicationNum(replicationNum);
+        synchronized (quorum) {
+            AppendNodeEntryHandler handler = new AppendNodeEntryHandler();
+            handler.setLeaderShipStale(leadershipStale);
+            handler.setVoteCounter(quorum);
+            handler.setLog(log);
+            handler.setMember(member);
+            handler.setReceiverTerm(receiverTerm);
+            handler.setReceiver(TestUtils.getNode(0));
+            handler.setPeer(peer);
+            new Thread(() -> handler.onComplete(100L)).start();
+            quorum.wait();
+        }
+        assertEquals(100, receiverTerm.get());
+        assertTrue(leadershipStale.get());
+        assertEquals(5, quorum.get());
     }
-  }
+
+    @Test
+    public void testError() {
+        AtomicLong receiverTerm = new AtomicLong(-1);
+        AtomicBoolean leadershipStale = new AtomicBoolean(false);
+        Log log = new TestLog();
+        int replicationNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
+        ClusterDescriptor.getInstance().getConfig().setReplicationNum(10);
+        try {
+            AtomicInteger quorum = new AtomicInteger(5);
+            Peer peer = new Peer(1);
+
+            AppendNodeEntryHandler handler = new AppendNodeEntryHandler();
+            handler.setLeaderShipStale(leadershipStale);
+            handler.setVoteCounter(quorum);
+            handler.setLog(log);
+            handler.setMember(member);
+            handler.setReceiverTerm(receiverTerm);
+            handler.setReceiver(TestUtils.getNode(0));
+            handler.setPeer(peer);
+            handler.onError(new TestException());
+
+            assertEquals(-1, receiverTerm.get());
+            assertFalse(leadershipStale.get());
+            assertEquals(5, quorum.get());
+        } finally {
+            ClusterDescriptor.getInstance().getConfig().setReplicationNum(replicationNum);
+        }
+    }
 }

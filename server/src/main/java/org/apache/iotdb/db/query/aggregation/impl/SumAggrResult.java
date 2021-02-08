@@ -32,97 +32,99 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class SumAggrResult extends AggregateResult {
 
-  private TSDataType seriesDataType;
+    private TSDataType seriesDataType;
 
-  public SumAggrResult(TSDataType seriesDataType) {
-    super(TSDataType.DOUBLE, AggregationType.SUM);
-    this.seriesDataType = seriesDataType;
-    reset();
-    setDoubleValue(0.0);
-  }
-
-  @Override
-  public Double getResult() {
-    return getDoubleValue();
-  }
-
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    double preValue = getDoubleValue();
-    preValue += statistics.getSumValue();
-    setDoubleValue(preValue);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage) throws IOException {
-    updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound)
-      throws IOException {
-    while (dataInThisPage.hasCurrent()) {
-      if (dataInThisPage.currentTime() >= maxBound || dataInThisPage.currentTime() < minBound) {
-        break;
-      }
-      updateSum(dataInThisPage.currentValue());
-      dataInThisPage.next();
+    public SumAggrResult(TSDataType seriesDataType) {
+        super(TSDataType.DOUBLE, AggregationType.SUM);
+        this.seriesDataType = seriesDataType;
+        reset();
+        setDoubleValue(0.0);
     }
-  }
 
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value != null) {
-        updateSum(value);
-      }
+    @Override
+    public Double getResult() {
+        return getDoubleValue();
     }
-  }
 
-  private void updateSum(Object sumVal) throws IOException {
-    double preValue = getDoubleValue();
-    switch (seriesDataType) {
-      case INT32:
-        preValue += (int) sumVal;
-        break;
-      case INT64:
-        preValue += (long) sumVal;
-        break;
-      case FLOAT:
-        preValue += (float) sumVal;
-        break;
-      case DOUBLE:
-        preValue += (double) sumVal;
-        break;
-      case TEXT:
-      case BOOLEAN:
-      default:
-        throw new IOException(
-            String.format("Unsupported data type in aggregation SUM : %s", seriesDataType));
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        double preValue = getDoubleValue();
+        preValue += statistics.getSumValue();
+        setDoubleValue(preValue);
     }
-    setDoubleValue(preValue);
-  }
 
-  @Override
-  public boolean hasFinalResult() {
-    return false;
-  }
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage) throws IOException {
+        updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
+    }
 
-  @Override
-  public void merge(AggregateResult another) {
-    SumAggrResult anotherSum = (SumAggrResult) another;
-    setDoubleValue(getDoubleValue() + anotherSum.getDoubleValue());
-  }
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound)
+            throws IOException {
+        while (dataInThisPage.hasCurrent()) {
+            if (dataInThisPage.currentTime() >= maxBound
+                    || dataInThisPage.currentTime() < minBound) {
+                break;
+            }
+            updateSum(dataInThisPage.currentValue());
+            dataInThisPage.next();
+        }
+    }
 
-  @Override
-  protected void deserializeSpecificFields(ByteBuffer buffer) {
-    seriesDataType = TSDataType.deserialize(buffer.getShort());
-  }
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value != null) {
+                updateSum(value);
+            }
+        }
+    }
 
-  @Override
-  protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
-    ReadWriteIOUtils.write(seriesDataType, outputStream);
-  }
+    private void updateSum(Object sumVal) throws IOException {
+        double preValue = getDoubleValue();
+        switch (seriesDataType) {
+            case INT32:
+                preValue += (int) sumVal;
+                break;
+            case INT64:
+                preValue += (long) sumVal;
+                break;
+            case FLOAT:
+                preValue += (float) sumVal;
+                break;
+            case DOUBLE:
+                preValue += (double) sumVal;
+                break;
+            case TEXT:
+            case BOOLEAN:
+            default:
+                throw new IOException(
+                        String.format(
+                                "Unsupported data type in aggregation SUM : %s", seriesDataType));
+        }
+        setDoubleValue(preValue);
+    }
+
+    @Override
+    public boolean hasFinalResult() {
+        return false;
+    }
+
+    @Override
+    public void merge(AggregateResult another) {
+        SumAggrResult anotherSum = (SumAggrResult) another;
+        setDoubleValue(getDoubleValue() + anotherSum.getDoubleValue());
+    }
+
+    @Override
+    protected void deserializeSpecificFields(ByteBuffer buffer) {
+        seriesDataType = TSDataType.deserialize(buffer.getShort());
+    }
+
+    @Override
+    protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
+        ReadWriteIOUtils.write(seriesDataType, outputStream);
+    }
 }

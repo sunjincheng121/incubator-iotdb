@@ -25,48 +25,48 @@ import java.io.IOException;
 
 public class SyncSenderLogger implements ISyncSenderLogger {
 
-  private BufferedWriter bw;
+    private BufferedWriter bw;
 
-  public SyncSenderLogger(File file) throws IOException {
-    if (!file.getParentFile().exists()) {
-      file.getParentFile().mkdirs();
+    public SyncSenderLogger(File file) throws IOException {
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        this.bw = new BufferedWriter(new FileWriter(file.getAbsolutePath()));
     }
-    this.bw = new BufferedWriter(new FileWriter(file.getAbsolutePath()));
-  }
 
-  @Override
-  public void startSyncDeletedFilesName() throws IOException {
-    bw.write(SYNC_DELETED_FILE_NAME_START);
-    bw.newLine();
-    bw.flush();
-  }
-
-  @Override
-  public void finishSyncDeletedFileName(File file) throws IOException {
-    bw.write(file.getAbsolutePath());
-    bw.newLine();
-    bw.flush();
-  }
-
-  @Override
-  public void startSyncTsFiles() throws IOException {
-    bw.write(SYNC_TSFILE_START);
-    bw.newLine();
-    bw.flush();
-  }
-
-  @Override
-  public void finishSyncTsfile(File file) throws IOException {
-    bw.write(file.getAbsolutePath());
-    bw.newLine();
-    bw.flush();
-  }
-
-  @Override
-  public void close() throws IOException {
-    if(bw != null) {
-      bw.close();
-      bw = null;
+    @Override
+    public void startSyncDeletedFilesName() throws IOException {
+        bw.write(SYNC_DELETED_FILE_NAME_START);
+        bw.newLine();
+        bw.flush();
     }
-  }
+
+    @Override
+    public void finishSyncDeletedFileName(File file) throws IOException {
+        bw.write(file.getAbsolutePath());
+        bw.newLine();
+        bw.flush();
+    }
+
+    @Override
+    public void startSyncTsFiles() throws IOException {
+        bw.write(SYNC_TSFILE_START);
+        bw.newLine();
+        bw.flush();
+    }
+
+    @Override
+    public void finishSyncTsfile(File file) throws IOException {
+        bw.write(file.getAbsolutePath());
+        bw.newLine();
+        bw.flush();
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (bw != null) {
+            bw.close();
+            bw = null;
+        }
+    }
 }

@@ -39,69 +39,71 @@ import org.junit.Test;
 
 public class ReaderByTimestampTest {
 
-  private static final String FILE_PATH = TsFileGeneratorForSeriesReaderByTimestamp.outputDataFile;
-  private TsFileSequenceReader fileReader;
-  private MetadataQuerierByFileImpl metadataQuerierByFile;
-  private int rowCount = 1000000;
+    private static final String FILE_PATH =
+            TsFileGeneratorForSeriesReaderByTimestamp.outputDataFile;
+    private TsFileSequenceReader fileReader;
+    private MetadataQuerierByFileImpl metadataQuerierByFile;
+    private int rowCount = 1000000;
 
-  @Before
-  public void before() throws InterruptedException, WriteProcessException, IOException {
-    TSFileDescriptor.getInstance().getConfig().setTimeEncoder("TS_2DIFF");
-    TsFileGeneratorForSeriesReaderByTimestamp.generateFile(rowCount, 10 * 1024 * 1024, 10000);
-    fileReader = new TsFileSequenceReader(FILE_PATH);// TODO remove this class
-    metadataQuerierByFile = new MetadataQuerierByFileImpl(fileReader);
-
-  }
-
-  @After
-  public void after() throws IOException {
-    fileReader.close();
-    TsFileGeneratorForSeriesReaderByTimestamp.after();
-  }
-
-  @Test
-  public void readByTimestamp() throws IOException {
-    CachedChunkLoaderImpl seriesChunkLoader = new CachedChunkLoaderImpl(fileReader);
-    List<ChunkMetadata> chunkMetadataList = metadataQuerierByFile
-        .getChunkMetaDataList(new Path("d1", "s1"));
-    AbstractFileSeriesReader seriesReader = new FileSeriesReader(seriesChunkLoader,
-        chunkMetadataList, null);
-
-    List<Long> timeList = new ArrayList<>();
-    List<Object> valueList = new ArrayList<>();
-    int count = 0;
-    BatchData data = null;
-
-    while (seriesReader.hasNextBatch()) {
-      data = seriesReader.nextBatch();
-      while (data.hasCurrent()) {
-        timeList.add(data.currentTime() - 1);
-        valueList.add(null);
-        timeList.add(data.currentTime());
-        valueList.add(data.currentValue());
-        data.next();
-        count++;
-      }
+    @Before
+    public void before() throws InterruptedException, WriteProcessException, IOException {
+        TSFileDescriptor.getInstance().getConfig().setTimeEncoder("TS_2DIFF");
+        TsFileGeneratorForSeriesReaderByTimestamp.generateFile(rowCount, 10 * 1024 * 1024, 10000);
+        fileReader = new TsFileSequenceReader(FILE_PATH); // TODO remove this class
+        metadataQuerierByFile = new MetadataQuerierByFileImpl(fileReader);
     }
 
-    long startTimestamp = System.currentTimeMillis();
-    count = 0;
-
-    FileSeriesReaderByTimestamp seriesReaderFromSingleFileByTimestamp = new FileSeriesReaderByTimestamp(
-        seriesChunkLoader,
-        chunkMetadataList);
-
-    for (long time : timeList) {
-      Object value = seriesReaderFromSingleFileByTimestamp.getValueInTimestamp(time);
-      if (value == null) {
-        Assert.assertNull(valueList.get(count));
-      } else {
-        Assert.assertEquals(valueList.get(count), value);
-      }
-      count++;
+    @After
+    public void after() throws IOException {
+        fileReader.close();
+        TsFileGeneratorForSeriesReaderByTimestamp.after();
     }
-    long endTimestamp = System.currentTimeMillis();
-    System.out.println("SeriesReadWithFilterTest. [Time used]: " + (endTimestamp - startTimestamp)
-        + " ms. [Read Count]: " + count);
-  }
+
+    @Test
+    public void readByTimestamp() throws IOException {
+        CachedChunkLoaderImpl seriesChunkLoader = new CachedChunkLoaderImpl(fileReader);
+        List<ChunkMetadata> chunkMetadataList =
+                metadataQuerierByFile.getChunkMetaDataList(new Path("d1", "s1"));
+        AbstractFileSeriesReader seriesReader =
+                new FileSeriesReader(seriesChunkLoader, chunkMetadataList, null);
+
+        List<Long> timeList = new ArrayList<>();
+        List<Object> valueList = new ArrayList<>();
+        int count = 0;
+        BatchData data = null;
+
+        while (seriesReader.hasNextBatch()) {
+            data = seriesReader.nextBatch();
+            while (data.hasCurrent()) {
+                timeList.add(data.currentTime() - 1);
+                valueList.add(null);
+                timeList.add(data.currentTime());
+                valueList.add(data.currentValue());
+                data.next();
+                count++;
+            }
+        }
+
+        long startTimestamp = System.currentTimeMillis();
+        count = 0;
+
+        FileSeriesReaderByTimestamp seriesReaderFromSingleFileByTimestamp =
+                new FileSeriesReaderByTimestamp(seriesChunkLoader, chunkMetadataList);
+
+        for (long time : timeList) {
+            Object value = seriesReaderFromSingleFileByTimestamp.getValueInTimestamp(time);
+            if (value == null) {
+                Assert.assertNull(valueList.get(count));
+            } else {
+                Assert.assertEquals(valueList.get(count), value);
+            }
+            count++;
+        }
+        long endTimestamp = System.currentTimeMillis();
+        System.out.println(
+                "SeriesReadWithFilterTest. [Time used]: "
+                        + (endTimestamp - startTimestamp)
+                        + " ms. [Read Count]: "
+                        + count);
+    }
 }

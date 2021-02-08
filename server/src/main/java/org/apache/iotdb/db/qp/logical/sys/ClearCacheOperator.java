@@ -22,8 +22,8 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class ClearCacheOperator extends RootOperator {
 
-  public ClearCacheOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.CLEAR_CACHE;
-  }
+    public ClearCacheOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.CLEAR_CACHE;
+    }
 }

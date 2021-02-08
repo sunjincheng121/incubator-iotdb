@@ -19,19 +19,18 @@ package org.apache.iotdb.db.index.common;
 
 public class IndexConstant {
 
-  // whole matching
-  public static final int NON_SET_TOP_K = -1;
-  public static final String TOP_K = "TOP_K";
+    // whole matching
+    public static final int NON_SET_TOP_K = -1;
+    public static final String TOP_K = "TOP_K";
 
-  public static final String PATTERN = "PATTERN";
-  public static final String THRESHOLD = "THRESHOLD";
+    public static final String PATTERN = "PATTERN";
+    public static final String THRESHOLD = "THRESHOLD";
 
-  // RTree PAA parameters
-  public static final String PAA_DIM = "PAA_DIM";
+    // RTree PAA parameters
+    public static final String PAA_DIM = "PAA_DIM";
 
-  //ELB: calc param
-  public static final String BLOCK_SIZE = "BLOCK_SIZE";
+    // ELB: calc param
+    public static final String BLOCK_SIZE = "BLOCK_SIZE";
 
-  private IndexConstant() {
-  }
+    private IndexConstant() {}
 }

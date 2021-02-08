@@ -26,28 +26,28 @@ import org.apache.iotdb.tsfile.write.record.TSRecord;
 
 public interface IStatistic {
 
-  /**
-   * Get A HashMap that contains the module seriesPaths and their statistics measurement.
-   * @return A HashMap that contains the module seriesPath like: root.stats.write.global,
-   *        and its value is TSRecord format contains all statistics measurement
-   */
-  Map<String, TSRecord> getAllStatisticsValue();
+    /**
+     * Get A HashMap that contains the module seriesPaths and their statistics measurement.
+     *
+     * @return A HashMap that contains the module seriesPath like: root.stats.write.global, and its
+     *     value is TSRecord format contains all statistics measurement
+     */
+    Map<String, TSRecord> getAllStatisticsValue();
 
-  /**
-   * registerStatMetadata registers statistics info to the manager.
-   */
-  void registerStatMetadata();
+    /** registerStatMetadata registers statistics info to the manager. */
+    void registerStatMetadata();
 
-  /**
-   * Get all module's statistics parameters as a time-series seriesPath.
-   *
-   * @return a list of string like "root.stats.xxx.statisticsParams",
-   */
-  List<String> getAllPathForStatistic();
+    /**
+     * Get all module's statistics parameters as a time-series seriesPath.
+     *
+     * @return a list of string like "root.stats.xxx.statisticsParams",
+     */
+    List<String> getAllPathForStatistic();
 
-  /**
-   * Get a HashMap contains the names and values of the statistics parameters.
-   * @return a HashMap contains the names and values of the statistics parameters
-   */
-  Map<String, AtomicLong> getStatParamsHashMap();
+    /**
+     * Get a HashMap contains the names and values of the statistics parameters.
+     *
+     * @return a HashMap contains the names and values of the statistics parameters
+     */
+    Map<String, AtomicLong> getStatParamsHashMap();
 }

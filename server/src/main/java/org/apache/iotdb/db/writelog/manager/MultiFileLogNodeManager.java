@@ -35,122 +35,123 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * MultiFileLogNodeManager manages all ExclusiveWriteLogNodes, each manages WALs of a TsFile
- * (either seq or unseq).
+ * MultiFileLogNodeManager manages all ExclusiveWriteLogNodes, each manages WALs of a TsFile (either
+ * seq or unseq).
  */
 public class MultiFileLogNodeManager implements WriteLogNodeManager, IService {
 
-  private static final Logger logger = LoggerFactory.getLogger(MultiFileLogNodeManager.class);
-  private Map<String, WriteLogNode> nodeMap;
+    private static final Logger logger = LoggerFactory.getLogger(MultiFileLogNodeManager.class);
+    private Map<String, WriteLogNode> nodeMap;
 
-  private ScheduledExecutorService executorService;
-  private IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
+    private ScheduledExecutorService executorService;
+    private IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
 
-  private final void forceTask() {
-    if (IoTDBDescriptor.getInstance().getConfig().isReadOnly()) {
-      logger.warn("system mode is read-only, the force flush WAL task is stopped");
-      return;
+    private final void forceTask() {
+        if (IoTDBDescriptor.getInstance().getConfig().isReadOnly()) {
+            logger.warn("system mode is read-only, the force flush WAL task is stopped");
+            return;
+        }
+        if (Thread.interrupted()) {
+            logger.info("WAL force thread exits.");
+            return;
+        }
+
+        for (WriteLogNode node : nodeMap.values()) {
+            try {
+                node.forceSync();
+            } catch (IOException e) {
+                logger.error("Cannot force {}, because ", node, e);
+            }
+        }
     }
-    if (Thread.interrupted()) {
-      logger.info("WAL force thread exits.");
-      return;
+
+    private MultiFileLogNodeManager() {
+        nodeMap = new ConcurrentHashMap<>();
     }
 
-    for (WriteLogNode node : nodeMap.values()) {
-      try {
-        node.forceSync();
-      } catch (IOException e) {
-        logger.error("Cannot force {}, because ", node, e);
-      }
+    public static MultiFileLogNodeManager getInstance() {
+        return InstanceHolder.instance;
     }
-  }
 
-  private MultiFileLogNodeManager() {
-    nodeMap = new ConcurrentHashMap<>();
-  }
-
-  public static MultiFileLogNodeManager getInstance() {
-    return InstanceHolder.instance;
-  }
-
-
-  @Override
-  public WriteLogNode getNode(String identifier) {
-    WriteLogNode node = nodeMap.get(identifier);
-    if (node == null) {
-      node = new ExclusiveWriteLogNode(identifier);
-      WriteLogNode oldNode = nodeMap.putIfAbsent(identifier, node);
-      if (oldNode != null) {
-        return oldNode;
-      }
+    @Override
+    public WriteLogNode getNode(String identifier) {
+        WriteLogNode node = nodeMap.get(identifier);
+        if (node == null) {
+            node = new ExclusiveWriteLogNode(identifier);
+            WriteLogNode oldNode = nodeMap.putIfAbsent(identifier, node);
+            if (oldNode != null) {
+                return oldNode;
+            }
+        }
+        return node;
     }
-    return node;
-  }
 
-  @Override
-  public void deleteNode(String identifier) throws IOException {
-    WriteLogNode node = nodeMap.remove(identifier);
-    if (node != null) {
-      node.delete();
+    @Override
+    public void deleteNode(String identifier) throws IOException {
+        WriteLogNode node = nodeMap.remove(identifier);
+        if (node != null) {
+            node.delete();
+        }
     }
-  }
 
-  @Override
-  public void close() {
-    logger.info("{} nodes to be closed", nodeMap.size());
-    for (WriteLogNode node : nodeMap.values()) {
-      try {
-        node.close();
-      } catch (IOException e) {
-        logger.error("failed to close {}", node, e);
-      }
+    @Override
+    public void close() {
+        logger.info("{} nodes to be closed", nodeMap.size());
+        for (WriteLogNode node : nodeMap.values()) {
+            try {
+                node.close();
+            } catch (IOException e) {
+                logger.error("failed to close {}", node, e);
+            }
+        }
+        nodeMap.clear();
+        logger.info("LogNodeManager closed.");
     }
-    nodeMap.clear();
-    logger.info("LogNodeManager closed.");
-  }
 
-  @Override
-  public void start() throws StartupException {
-    try {
-      if (!config.isEnableWal()) {
-        return;
-      }
-      if (config.getForceWalPeriodInMs() > 0) {
-        executorService = Executors.newSingleThreadScheduledExecutor();
-        executorService.scheduleWithFixedDelay(this::forceTask, config.getForceWalPeriodInMs(),
-            config.getForceWalPeriodInMs(), TimeUnit.MILLISECONDS);
-      }
-    } catch (Exception e) {
-      throw new StartupException(this.getID().getName(), e.getMessage());
+    @Override
+    public void start() throws StartupException {
+        try {
+            if (!config.isEnableWal()) {
+                return;
+            }
+            if (config.getForceWalPeriodInMs() > 0) {
+                executorService = Executors.newSingleThreadScheduledExecutor();
+                executorService.scheduleWithFixedDelay(
+                        this::forceTask,
+                        config.getForceWalPeriodInMs(),
+                        config.getForceWalPeriodInMs(),
+                        TimeUnit.MILLISECONDS);
+            }
+        } catch (Exception e) {
+            throw new StartupException(this.getID().getName(), e.getMessage());
+        }
     }
-  }
 
-  @Override
-  public void stop() {
-    if (!config.isEnableWal()) {
-      return;
+    @Override
+    public void stop() {
+        if (!config.isEnableWal()) {
+            return;
+        }
+        if (executorService != null) {
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                logger.warn("force flush wal thread still doesn't exit after 30s");
+                Thread.currentThread().interrupt();
+            }
+        }
+        close();
     }
-    if (executorService != null) {
-      executorService.shutdown();
-      try {
-        executorService.awaitTermination(30, TimeUnit.SECONDS);
-      } catch (InterruptedException e) {
-        logger.warn("force flush wal thread still doesn't exit after 30s");
-        Thread.currentThread().interrupt();
-      }
+
+    @Override
+    public ServiceType getID() {
+        return ServiceType.WAL_SERVICE;
     }
-    close();
-  }
 
-  @Override
-  public ServiceType getID() {
-    return ServiceType.WAL_SERVICE;
-  }
+    private static class InstanceHolder {
+        private InstanceHolder() {}
 
-  private static class InstanceHolder {
-    private InstanceHolder(){}
-
-    private static MultiFileLogNodeManager instance = new MultiFileLogNodeManager();
-  }
-
+        private static MultiFileLogNodeManager instance = new MultiFileLogNodeManager();
+    }
 }

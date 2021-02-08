@@ -35,49 +35,50 @@ import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
 
 public class TestHelper {
 
-  public static TsFileMetadata createSimpleFileMetaData() {
-    TsFileMetadata metaData = new TsFileMetadata();
-    metaData.setMetadataIndex(generateMetaDataIndex());
-    metaData.setVersionInfo(generateVersionInfo());
-    return metaData;
-  }
-
-  private static MetadataIndexNode generateMetaDataIndex() {
-    MetadataIndexNode metaDataIndex = new MetadataIndexNode(MetadataIndexNodeType.LEAF_MEASUREMENT);
-    for (int i = 0; i < 5; i++) {
-      metaDataIndex.addEntry(new MetadataIndexEntry("d" + i, (long) i * 5));
+    public static TsFileMetadata createSimpleFileMetaData() {
+        TsFileMetadata metaData = new TsFileMetadata();
+        metaData.setMetadataIndex(generateMetaDataIndex());
+        metaData.setVersionInfo(generateVersionInfo());
+        return metaData;
     }
-    return metaDataIndex;
-  }
 
-  private static List<Pair<Long, Long>> generateVersionInfo() {
-    List<Pair<Long, Long>> versionInfo = new ArrayList<>();
-    for (int i = 0; i < 5; i++) {
-      versionInfo.add(new Pair<>((long) i * 5, 0L));
+    private static MetadataIndexNode generateMetaDataIndex() {
+        MetadataIndexNode metaDataIndex =
+                new MetadataIndexNode(MetadataIndexNodeType.LEAF_MEASUREMENT);
+        for (int i = 0; i < 5; i++) {
+            metaDataIndex.addEntry(new MetadataIndexEntry("d" + i, (long) i * 5));
+        }
+        return metaDataIndex;
     }
-    return versionInfo;
-  }
 
-  public static MeasurementSchema createSimpleMeasurementSchema(String measurementuid) {
-    return new MeasurementSchema(measurementuid, TSDataType.INT64, TSEncoding.RLE);
-  }
+    private static List<Pair<Long, Long>> generateVersionInfo() {
+        List<Pair<Long, Long>> versionInfo = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            versionInfo.add(new Pair<>((long) i * 5, 0L));
+        }
+        return versionInfo;
+    }
 
-  public static TimeseriesMetadata createSimpleTimseriesMetaData(String measurementuid) {
-    Statistics<?> statistics = Statistics.getStatsByType(PageHeaderTest.DATA_TYPE);
-    statistics.setEmpty(false);
-    TimeseriesMetadata timeseriesMetaData = new TimeseriesMetadata();
-    timeseriesMetaData.setMeasurementId(measurementuid);
-    timeseriesMetaData.setTSDataType(PageHeaderTest.DATA_TYPE);
-    timeseriesMetaData.setOffsetOfChunkMetaDataList(1000L);
-    timeseriesMetaData.setDataSizeOfChunkMetaDataList(200);
-    timeseriesMetaData.setStatistics(statistics);
-    return timeseriesMetaData;
-  }
+    public static MeasurementSchema createSimpleMeasurementSchema(String measurementuid) {
+        return new MeasurementSchema(measurementuid, TSDataType.INT64, TSEncoding.RLE);
+    }
 
-  public static PageHeader createTestPageHeader() {
-    Statistics<?> statistics = Statistics.getStatsByType(PageHeaderTest.DATA_TYPE);
-    statistics.setEmpty(false);
-    return new PageHeader(PageHeaderTest.UNCOMPRESSED_SIZE, PageHeaderTest.COMPRESSED_SIZE,
-        statistics);
-  }
+    public static TimeseriesMetadata createSimpleTimseriesMetaData(String measurementuid) {
+        Statistics<?> statistics = Statistics.getStatsByType(PageHeaderTest.DATA_TYPE);
+        statistics.setEmpty(false);
+        TimeseriesMetadata timeseriesMetaData = new TimeseriesMetadata();
+        timeseriesMetaData.setMeasurementId(measurementuid);
+        timeseriesMetaData.setTSDataType(PageHeaderTest.DATA_TYPE);
+        timeseriesMetaData.setOffsetOfChunkMetaDataList(1000L);
+        timeseriesMetaData.setDataSizeOfChunkMetaDataList(200);
+        timeseriesMetaData.setStatistics(statistics);
+        return timeseriesMetaData;
+    }
+
+    public static PageHeader createTestPageHeader() {
+        Statistics<?> statistics = Statistics.getStatsByType(PageHeaderTest.DATA_TYPE);
+        statistics.setEmpty(false);
+        return new PageHeader(
+                PageHeaderTest.UNCOMPRESSED_SIZE, PageHeaderTest.COMPRESSED_SIZE, statistics);
+    }
 }

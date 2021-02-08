@@ -25,48 +25,48 @@ import java.io.IOException;
 
 public class LoadLogger implements ILoadLogger {
 
-  private BufferedWriter bw;
+    private BufferedWriter bw;
 
-  public LoadLogger(File logFile) throws IOException {
-    if (!logFile.getParentFile().exists()) {
-      logFile.getParentFile().mkdirs();
+    public LoadLogger(File logFile) throws IOException {
+        if (!logFile.getParentFile().exists()) {
+            logFile.getParentFile().mkdirs();
+        }
+        bw = new BufferedWriter(new FileWriter(logFile));
     }
-    bw = new BufferedWriter(new FileWriter(logFile));
-  }
 
-  @Override
-  public void startLoadDeletedFiles() throws IOException {
-    bw.write(LOAD_DELETED_FILE_NAME_START);
-    bw.newLine();
-    bw.flush();
-  }
-
-  @Override
-  public void finishLoadDeletedFile(File file) throws IOException {
-    bw.write(file.getAbsolutePath());
-    bw.newLine();
-    bw.flush();
-  }
-
-  @Override
-  public void startLoadTsFiles() throws IOException {
-    bw.write(LOAD_TSFILE_START);
-    bw.newLine();
-    bw.flush();
-  }
-
-  @Override
-  public void finishLoadTsfile(File file) throws IOException {
-    bw.write(file.getAbsolutePath());
-    bw.newLine();
-    bw.flush();
-  }
-
-  @Override
-  public void close() throws IOException {
-    if(bw != null) {
-      bw.close();
-      bw = null;
+    @Override
+    public void startLoadDeletedFiles() throws IOException {
+        bw.write(LOAD_DELETED_FILE_NAME_START);
+        bw.newLine();
+        bw.flush();
     }
-  }
+
+    @Override
+    public void finishLoadDeletedFile(File file) throws IOException {
+        bw.write(file.getAbsolutePath());
+        bw.newLine();
+        bw.flush();
+    }
+
+    @Override
+    public void startLoadTsFiles() throws IOException {
+        bw.write(LOAD_TSFILE_START);
+        bw.newLine();
+        bw.flush();
+    }
+
+    @Override
+    public void finishLoadTsfile(File file) throws IOException {
+        bw.write(file.getAbsolutePath());
+        bw.newLine();
+        bw.flush();
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (bw != null) {
+            bw.close();
+            bw = null;
+        }
+    }
 }

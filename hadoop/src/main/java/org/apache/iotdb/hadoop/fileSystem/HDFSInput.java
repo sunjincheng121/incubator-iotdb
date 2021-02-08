@@ -31,99 +31,99 @@ import org.apache.iotdb.tsfile.read.reader.TsFileInput;
 
 public class HDFSInput implements TsFileInput {
 
-  private FSDataInputStream fsDataInputStream;
-  private FileSystem fs;
-  private Path path;
+    private FSDataInputStream fsDataInputStream;
+    private FileSystem fs;
+    private Path path;
 
-  public HDFSInput(String filePath) throws IOException {
-    this(new Path(filePath), new Configuration());
-  }
-
-  public HDFSInput(String filePath, Configuration configuration) throws IOException {
-    this(new Path(filePath), configuration);
-  }
-
-  public HDFSInput(Path path, Configuration configuration) throws IOException {
-    this.fs = path.getFileSystem(configuration);
-    this.path = path;
-    this.fsDataInputStream = fs.open(path);
-  }
-
-  @Override
-  public long size() throws IOException {
-    return fs.getFileStatus(path).getLen();
-  }
-
-  @Override
-  public long position() throws IOException {
-    return fsDataInputStream.getPos();
-  }
-
-  @Override
-  public synchronized TsFileInput position(long newPosition) throws IOException {
-    fsDataInputStream.seek(newPosition);
-    return this;
-  }
-
-  @Override
-  public synchronized int read(ByteBuffer dst) throws IOException {
-    int res;
-    if (fs instanceof ChecksumFileSystem) {
-      byte[] bytes = new byte[dst.remaining()];
-      res = fsDataInputStream.read(bytes);
-      dst.put(bytes);
-    } else {
-      res = fsDataInputStream.read(dst);
-    }
-    return res;
-  }
-
-  @Override
-  public synchronized int read(ByteBuffer dst, long position) throws IOException {
-    if (position < 0) {
-      throw new IllegalArgumentException("position must be non-negative");
+    public HDFSInput(String filePath) throws IOException {
+        this(new Path(filePath), new Configuration());
     }
 
-    if (position >= this.size()) {
-      return -1;
+    public HDFSInput(String filePath, Configuration configuration) throws IOException {
+        this(new Path(filePath), configuration);
     }
 
-    long srcPosition = fsDataInputStream.getPos();
+    public HDFSInput(Path path, Configuration configuration) throws IOException {
+        this.fs = path.getFileSystem(configuration);
+        this.path = path;
+        this.fsDataInputStream = fs.open(path);
+    }
 
-    fsDataInputStream.seek(position);
-    int res = read(dst);
-    fsDataInputStream.seek(srcPosition);
+    @Override
+    public long size() throws IOException {
+        return fs.getFileStatus(path).getLen();
+    }
 
-    return res;
-  }
+    @Override
+    public long position() throws IOException {
+        return fsDataInputStream.getPos();
+    }
 
-  @Override
-  public int read() throws IOException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public synchronized TsFileInput position(long newPosition) throws IOException {
+        fsDataInputStream.seek(newPosition);
+        return this;
+    }
 
-  @Override
-  public int read(byte[] b, int off, int len) throws IOException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public synchronized int read(ByteBuffer dst) throws IOException {
+        int res;
+        if (fs instanceof ChecksumFileSystem) {
+            byte[] bytes = new byte[dst.remaining()];
+            res = fsDataInputStream.read(bytes);
+            dst.put(bytes);
+        } else {
+            res = fsDataInputStream.read(dst);
+        }
+        return res;
+    }
 
-  @Override
-  public FileChannel wrapAsFileChannel() throws IOException {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public synchronized int read(ByteBuffer dst, long position) throws IOException {
+        if (position < 0) {
+            throw new IllegalArgumentException("position must be non-negative");
+        }
 
-  @Override
-  public InputStream wrapAsInputStream() throws IOException {
-    return fsDataInputStream;
-  }
+        if (position >= this.size()) {
+            return -1;
+        }
 
-  @Override
-  public void close() throws IOException {
-    fsDataInputStream.close();
-  }
+        long srcPosition = fsDataInputStream.getPos();
 
-  @Override
-  public int readInt() throws IOException {
-    throw new UnsupportedOperationException();
-  }
+        fsDataInputStream.seek(position);
+        int res = read(dst);
+        fsDataInputStream.seek(srcPosition);
+
+        return res;
+    }
+
+    @Override
+    public int read() throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FileChannel wrapAsFileChannel() throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public InputStream wrapAsInputStream() throws IOException {
+        return fsDataInputStream;
+    }
+
+    @Override
+    public void close() throws IOException {
+        fsDataInputStream.close();
+    }
+
+    @Override
+    public int readInt() throws IOException {
+        throw new UnsupportedOperationException();
+    }
 }

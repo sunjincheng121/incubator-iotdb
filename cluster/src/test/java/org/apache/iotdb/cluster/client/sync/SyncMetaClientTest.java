@@ -20,43 +20,46 @@ import org.junit.Test;
 
 public class SyncMetaClientTest {
 
-  @Test
-  public void test() throws IOException, InterruptedException {
-    Node node = new Node();
-    node.setMetaPort(9003).setIp("localhost");
-    ServerSocket serverSocket = new ServerSocket(node.getMetaPort());
-    Thread listenThread = new Thread(() -> {
-      while (!Thread.interrupted()) {
+    @Test
+    public void test() throws IOException, InterruptedException {
+        Node node = new Node();
+        node.setMetaPort(9003).setIp("localhost");
+        ServerSocket serverSocket = new ServerSocket(node.getMetaPort());
+        Thread listenThread =
+                new Thread(
+                        () -> {
+                            while (!Thread.interrupted()) {
+                                try {
+                                    serverSocket.accept();
+                                } catch (IOException e) {
+                                    return;
+                                }
+                            }
+                        });
+        listenThread.start();
+
         try {
-          serverSocket.accept();
-        } catch (IOException e) {
-          return;
+            SyncClientPool syncClientPool = new SyncClientPool(new FactorySync(new Factory()));
+            SyncMetaClient client;
+            client = (SyncMetaClient) syncClientPool.getClient(node);
+
+            assertEquals(node, client.getNode());
+
+            client.putBack();
+            Client newClient = syncClientPool.getClient(node);
+            assertEquals(client, newClient);
+            assertTrue(client.getInputProtocol().getTransport().isOpen());
+
+            client =
+                    new SyncMetaClient(
+                            new TBinaryProtocol(new TSocket(node.getIp(), node.getDataPort())));
+            // client without a belong pool will be closed after putBack()
+            client.putBack();
+            assertFalse(client.getInputProtocol().getTransport().isOpen());
+        } finally {
+            serverSocket.close();
+            listenThread.interrupt();
+            listenThread.join();
         }
-      }
-    });
-    listenThread.start();
-
-    try {
-      SyncClientPool syncClientPool = new SyncClientPool(new FactorySync(new Factory()));
-      SyncMetaClient client;
-      client = (SyncMetaClient) syncClientPool.getClient(node);
-
-      assertEquals(node, client.getNode());
-
-      client.putBack();
-      Client newClient = syncClientPool.getClient(node);
-      assertEquals(client, newClient);
-      assertTrue(client.getInputProtocol().getTransport().isOpen());
-
-      client = new SyncMetaClient(new TBinaryProtocol(new TSocket(node.getIp(),
-          node.getDataPort())));
-      // client without a belong pool will be closed after putBack()
-      client.putBack();
-      assertFalse(client.getInputProtocol().getTransport().isOpen());
-    } finally {
-      serverSocket.close();
-      listenThread.interrupt();
-      listenThread.join();
     }
-  }
 }

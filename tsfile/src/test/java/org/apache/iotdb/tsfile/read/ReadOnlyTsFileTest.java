@@ -20,13 +20,7 @@ package org.apache.iotdb.tsfile.read;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
-import org.apache.iotdb.tsfile.read.ReadOnlyTsFile;
-import org.apache.iotdb.tsfile.read.TsFileSequenceReader;
 import org.apache.iotdb.tsfile.read.common.Path;
 import org.apache.iotdb.tsfile.read.common.RowRecord;
 import org.apache.iotdb.tsfile.read.expression.IExpression;
@@ -41,118 +35,132 @@ import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
 import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
 import org.apache.iotdb.tsfile.utils.Binary;
 import org.apache.iotdb.tsfile.utils.TsFileGeneratorForTest;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ReadOnlyTsFileTest {
 
-  private static final String FILE_PATH = TsFileGeneratorForTest.outputDataFile;
-  private TsFileSequenceReader fileReader;
-  private ReadOnlyTsFile tsFile;
+    private static final String FILE_PATH = TsFileGeneratorForTest.outputDataFile;
+    private TsFileSequenceReader fileReader;
+    private ReadOnlyTsFile tsFile;
 
-  @Test
-  public void test1() throws IOException {
-    TSFileDescriptor.getInstance().getConfig().setTimeEncoder("TS_2DIFF");
-    int rowCount = 1000;
-    TsFileGeneratorForTest.generateFile(rowCount, 16 * 1024 * 1024, 10000);
-    fileReader = new TsFileSequenceReader(FILE_PATH);
-    tsFile = new ReadOnlyTsFile(fileReader);
-    queryTest(rowCount);
-    tsFile.close();
-    TsFileGeneratorForTest.after();
-  }
-
-  private void queryTest(int rowCount) throws IOException {
-    Filter filter = TimeFilter.lt(1480562618100L);
-    Filter filter2 = ValueFilter.gt(new Binary("dog"));
-    Filter filter3 = FilterFactory.and(TimeFilter.gtEq(1480562618000L), TimeFilter.ltEq(1480562618100L));
-
-    IExpression IExpression = BinaryExpression
-        .or(BinaryExpression.and(new SingleSeriesExpression(new Path("d1", "s1"), filter),
-            new SingleSeriesExpression(new Path("d1","s4"), filter2)), new GlobalTimeExpression(filter3));
-
-    QueryExpression queryExpression = QueryExpression.create().addSelectedPath(new Path("d1", "s1"))
-        .addSelectedPath(new Path("d1", "s4")).setExpression(IExpression);
-    QueryDataSet queryDataSet = tsFile.query(queryExpression);
-    long aimedTimestamp = 1480562618000L;
-    while (queryDataSet.hasNext()) {
-      // System.out.println("find next!");
-      RowRecord rowRecord = queryDataSet.next();
-      // System.out.println("result datum: "+rowRecord.getTimestamp()+","
-      // +rowRecord.getFields());
-      Assert.assertEquals(aimedTimestamp, rowRecord.getTimestamp());
-      aimedTimestamp++;
+    @Test
+    public void test1() throws IOException {
+        TSFileDescriptor.getInstance().getConfig().setTimeEncoder("TS_2DIFF");
+        int rowCount = 1000;
+        TsFileGeneratorForTest.generateFile(rowCount, 16 * 1024 * 1024, 10000);
+        fileReader = new TsFileSequenceReader(FILE_PATH);
+        tsFile = new ReadOnlyTsFile(fileReader);
+        queryTest(rowCount);
+        tsFile.close();
+        TsFileGeneratorForTest.after();
     }
 
-    queryExpression = QueryExpression.create().addSelectedPath(new Path("d1", "s1")).addSelectedPath(new Path("d1", "s4"));
-    queryDataSet = tsFile.query(queryExpression);
-    aimedTimestamp = 1480562618000L;
-    int count = 0;
-    while (queryDataSet.hasNext()) {
-      RowRecord rowRecord = queryDataSet.next();
-      Assert.assertEquals(aimedTimestamp, rowRecord.getTimestamp());
-      aimedTimestamp++;
-      count++;
+    private void queryTest(int rowCount) throws IOException {
+        Filter filter = TimeFilter.lt(1480562618100L);
+        Filter filter2 = ValueFilter.gt(new Binary("dog"));
+        Filter filter3 =
+                FilterFactory.and(TimeFilter.gtEq(1480562618000L), TimeFilter.ltEq(1480562618100L));
+
+        IExpression IExpression =
+                BinaryExpression.or(
+                        BinaryExpression.and(
+                                new SingleSeriesExpression(new Path("d1", "s1"), filter),
+                                new SingleSeriesExpression(new Path("d1", "s4"), filter2)),
+                        new GlobalTimeExpression(filter3));
+
+        QueryExpression queryExpression =
+                QueryExpression.create()
+                        .addSelectedPath(new Path("d1", "s1"))
+                        .addSelectedPath(new Path("d1", "s4"))
+                        .setExpression(IExpression);
+        QueryDataSet queryDataSet = tsFile.query(queryExpression);
+        long aimedTimestamp = 1480562618000L;
+        while (queryDataSet.hasNext()) {
+            // System.out.println("find next!");
+            RowRecord rowRecord = queryDataSet.next();
+            // System.out.println("result datum: "+rowRecord.getTimestamp()+","
+            // +rowRecord.getFields());
+            Assert.assertEquals(aimedTimestamp, rowRecord.getTimestamp());
+            aimedTimestamp++;
+        }
+
+        queryExpression =
+                QueryExpression.create()
+                        .addSelectedPath(new Path("d1", "s1"))
+                        .addSelectedPath(new Path("d1", "s4"));
+        queryDataSet = tsFile.query(queryExpression);
+        aimedTimestamp = 1480562618000L;
+        int count = 0;
+        while (queryDataSet.hasNext()) {
+            RowRecord rowRecord = queryDataSet.next();
+            Assert.assertEquals(aimedTimestamp, rowRecord.getTimestamp());
+            aimedTimestamp++;
+            count++;
+        }
+        Assert.assertEquals(rowCount, count);
+
+        queryExpression =
+                QueryExpression.create()
+                        .addSelectedPath(new Path("d1", "s1"))
+                        .addSelectedPath(new Path("d1", "s4"))
+                        .setExpression(new GlobalTimeExpression(filter3));
+        queryDataSet = tsFile.query(queryExpression);
+        aimedTimestamp = 1480562618000L;
+        count = 0;
+        while (queryDataSet.hasNext()) {
+            RowRecord rowRecord = queryDataSet.next();
+            Assert.assertEquals(aimedTimestamp, rowRecord.getTimestamp());
+            aimedTimestamp++;
+            count++;
+        }
+        Assert.assertEquals(101, count);
     }
-    Assert.assertEquals(rowCount, count);
 
-    queryExpression = QueryExpression.create().addSelectedPath(new Path("d1", "s1")).addSelectedPath(new Path("d1", "s4"))
-        .setExpression(new GlobalTimeExpression(filter3));
-    queryDataSet = tsFile.query(queryExpression);
-    aimedTimestamp = 1480562618000L;
-    count = 0;
-    while (queryDataSet.hasNext()) {
-      RowRecord rowRecord = queryDataSet.next();
-      Assert.assertEquals(aimedTimestamp, rowRecord.getTimestamp());
-      aimedTimestamp++;
-      count++;
+    @Test
+    public void test2() throws Exception {
+        int minRowCount = 1000, maxRowCount = 100000;
+        TSFileDescriptor.getInstance().getConfig().setTimeEncoder("TS_2DIFF");
+        TsFileGeneratorForTest.generateFile(minRowCount, maxRowCount, 16 * 1024 * 1024, 10000);
+        fileReader = new TsFileSequenceReader(FILE_PATH);
+        tsFile = new ReadOnlyTsFile(fileReader);
+        queryTest2();
+        queryNonExistPathTest();
+        tsFile.close();
+        TsFileGeneratorForTest.after();
     }
-    Assert.assertEquals(101, count);
-  }
 
-  @Test
-  public void test2() throws Exception {
-    int minRowCount = 1000, maxRowCount = 100000;
-    TSFileDescriptor.getInstance().getConfig().setTimeEncoder("TS_2DIFF");
-    TsFileGeneratorForTest.generateFile(minRowCount, maxRowCount, 16 * 1024 * 1024, 10000);
-    fileReader = new TsFileSequenceReader(FILE_PATH);
-    tsFile = new ReadOnlyTsFile(fileReader);
-    queryTest2();
-    queryNonExistPathTest();
-    tsFile.close();
-    TsFileGeneratorForTest.after();
-  }
+    void queryTest2() throws IOException {
+        ArrayList<Path> paths = new ArrayList<>();
+        paths.add(new Path("d1", "s6"));
+        paths.add(new Path("d2", "s1"));
 
-  void queryTest2() throws IOException {
-    ArrayList<Path> paths = new ArrayList<>();
-    paths.add(new Path("d1", "s6"));
-    paths.add(new Path("d2", "s1"));
+        IExpression expression = new GlobalTimeExpression(TimeFilter.gt(1480562664760L));
 
-    IExpression expression = new GlobalTimeExpression(TimeFilter.gt(1480562664760L));
+        QueryExpression queryExpression = QueryExpression.create(paths, expression);
 
-    QueryExpression queryExpression = QueryExpression.create(paths, expression);
+        QueryDataSet queryDataSet = tsFile.query(queryExpression);
 
-    QueryDataSet queryDataSet = tsFile.query(queryExpression);
-
-    int cnt = 0;
-    while (queryDataSet.hasNext()) {
-      RowRecord r = queryDataSet.next();
-      // System.out.println(r);
-      cnt++;
+        int cnt = 0;
+        while (queryDataSet.hasNext()) {
+            RowRecord r = queryDataSet.next();
+            // System.out.println(r);
+            cnt++;
+        }
+        Assert.assertEquals(10647, cnt);
     }
-    Assert.assertEquals(10647, cnt);
-  }
 
-  void queryNonExistPathTest() throws Exception {
-    ArrayList<Path> paths = new ArrayList<>();
-    paths.add(new Path("dr", "s1"));
-    paths.add(new Path("d2", "s1"));
-    IExpression expression = new GlobalTimeExpression(TimeFilter.gt(1480562664760L));
-    QueryExpression queryExpression = QueryExpression.create(paths, expression);
-    try {
-      QueryDataSet queryDataSet = tsFile.query(queryExpression);
-    } catch (Exception e) {
-      throw new Exception(e);
-      // fail();
+    void queryNonExistPathTest() throws Exception {
+        ArrayList<Path> paths = new ArrayList<>();
+        paths.add(new Path("dr", "s1"));
+        paths.add(new Path("d2", "s1"));
+        IExpression expression = new GlobalTimeExpression(TimeFilter.gt(1480562664760L));
+        QueryExpression queryExpression = QueryExpression.create(paths, expression);
+        try {
+            QueryDataSet queryDataSet = tsFile.query(queryExpression);
+        } catch (Exception e) {
+            throw new Exception(e);
+            // fail();
+        }
     }
-  }
-
 }

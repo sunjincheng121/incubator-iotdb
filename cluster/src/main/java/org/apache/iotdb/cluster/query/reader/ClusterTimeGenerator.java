@@ -37,39 +37,47 @@ import org.apache.iotdb.tsfile.read.reader.IBatchReader;
 
 public class ClusterTimeGenerator extends ServerTimeGenerator {
 
-  private ClusterReaderFactory readerFactory;
+    private ClusterReaderFactory readerFactory;
 
-  /**
-   * Constructor of EngineTimeGenerator.
-   */
-  public ClusterTimeGenerator(IExpression expression,
-      QueryContext context, MetaGroupMember metaGroupMember,
-      RawDataQueryPlan rawDataQueryPlan) throws StorageEngineException {
-    super(context);
-    this.queryPlan = rawDataQueryPlan;
-    this.readerFactory = new ClusterReaderFactory(metaGroupMember);
-    try {
-      constructNode(expression);
-    } catch (IOException e) {
-      throw new StorageEngineException(e);
+    /** Constructor of EngineTimeGenerator. */
+    public ClusterTimeGenerator(
+            IExpression expression,
+            QueryContext context,
+            MetaGroupMember metaGroupMember,
+            RawDataQueryPlan rawDataQueryPlan)
+            throws StorageEngineException {
+        super(context);
+        this.queryPlan = rawDataQueryPlan;
+        this.readerFactory = new ClusterReaderFactory(metaGroupMember);
+        try {
+            constructNode(expression);
+        } catch (IOException e) {
+            throw new StorageEngineException(e);
+        }
     }
-  }
 
-  @Override
-  protected IBatchReader generateNewBatchReader(SingleSeriesExpression expression)
-      throws IOException {
-    Filter filter = expression.getFilter();
-    PartialPath path = (PartialPath) expression.getSeriesPath();
-    TSDataType dataType;
-    try {
-      dataType =
-          ((CMManager) IoTDB.metaManager).getSeriesTypesByPaths(Collections.singletonList(path),
-              null).left.get(0);
-      return readerFactory.getSeriesReader(path,
-          queryPlan.getAllMeasurementsInDevice(path.getDevice()), dataType,
-          null, filter, context, queryPlan.isAscending());
-    } catch (Exception e) {
-      throw new IOException(e);
+    @Override
+    protected IBatchReader generateNewBatchReader(SingleSeriesExpression expression)
+            throws IOException {
+        Filter filter = expression.getFilter();
+        PartialPath path = (PartialPath) expression.getSeriesPath();
+        TSDataType dataType;
+        try {
+            dataType =
+                    ((CMManager) IoTDB.metaManager)
+                            .getSeriesTypesByPaths(Collections.singletonList(path), null)
+                            .left
+                            .get(0);
+            return readerFactory.getSeriesReader(
+                    path,
+                    queryPlan.getAllMeasurementsInDevice(path.getDevice()),
+                    dataType,
+                    null,
+                    filter,
+                    context,
+                    queryPlan.isAscending());
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
-  }
 }

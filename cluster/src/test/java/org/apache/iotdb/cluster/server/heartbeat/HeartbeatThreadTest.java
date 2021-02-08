@@ -55,192 +55,193 @@ import org.junit.Test;
 @SuppressWarnings("java:S2699")
 public class HeartbeatThreadTest {
 
-  RaftMember member;
-  TestLogManager logManager;
-  Thread testThread;
-  boolean respondToElection;
-  boolean testHeartbeat;
+    RaftMember member;
+    TestLogManager logManager;
+    Thread testThread;
+    boolean respondToElection;
+    boolean testHeartbeat;
 
-  Set<Integer> receivedNodes = new ConcurrentSkipListSet<>();
-  PartitionGroup partitionGroup;
-  private boolean prevUseAsyncServer;
+    Set<Integer> receivedNodes = new ConcurrentSkipListSet<>();
+    PartitionGroup partitionGroup;
+    private boolean prevUseAsyncServer;
 
-  RaftMember getMember() {
-    return new TestMetaGroupMember() {
-      @Override
-      public RaftLogManager getLogManager() {
-        return HeartbeatThreadTest.this.logManager;
-      }
-
-      @Override
-      public void updateHardState(long currentTerm, Node leader) {
-      }
-
-      @Override
-      public AsyncClient getAsyncClient(Node node) {
-        return getClient(node);
-      }
-
-      @Override
-      public AsyncClient getAsyncHeartbeatClient(Node node) {
-        return getClient(node);
-      }
-    };
-  }
-
-  AsyncClient getClient(Node node) {
-    return new TestAsyncClient(node.nodeIdentifier) {
-      @Override
-      public void sendHeartbeat(HeartBeatRequest request,
-          AsyncMethodCallback<HeartBeatResponse> resultHandler) {
-        new Thread(() -> {
-          if (testHeartbeat) {
-            assertEquals(TestUtils.getNode(0), request.getLeader());
-            assertEquals(6, request.getCommitLogIndex());
-            assertEquals(10, request.getTerm());
-            assertNull(request.getHeader());
-            synchronized (receivedNodes) {
-              receivedNodes.add(getSerialNum());
-              for (int i = 1; i < 10; i++) {
-                if (!receivedNodes.contains(i)) {
-                  return;
-                }
-              }
-              testThread.interrupt();
+    RaftMember getMember() {
+        return new TestMetaGroupMember() {
+            @Override
+            public RaftLogManager getLogManager() {
+                return HeartbeatThreadTest.this.logManager;
             }
-          } else if (respondToElection) {
-            synchronized (testThread) {
-              testThread.notifyAll();
+
+            @Override
+            public void updateHardState(long currentTerm, Node leader) {}
+
+            @Override
+            public AsyncClient getAsyncClient(Node node) {
+                return getClient(node);
             }
-          }
-        }).start();
-      }
 
-      @Override
-      public void startElection(ElectionRequest request,
-          AsyncMethodCallback<Long> resultHandler) {
-        new Thread(() -> {
-          assertEquals(TestUtils.getNode(0), request.getElector());
-          assertEquals(11, request.getTerm());
-          assertEquals(6, request.getLastLogIndex());
-          assertEquals(6, request.getLastLogTerm());
-          if (respondToElection) {
-            resultHandler.onComplete(Response.RESPONSE_AGREE);
-          }
-        }).start();
-      }
-    };
-  }
-
-  HeartbeatThread getHeartbeatThread(RaftMember member) {
-    return new HeartbeatThread(member);
-  }
-
-  @Before
-  public void setUp() throws Exception {
-    prevUseAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
-    ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(true);
-    logManager = new TestLogManager(1);
-    member = getMember();
-
-    HeartbeatThread heartBeatThread = getHeartbeatThread(member);
-    testThread = new Thread(heartBeatThread);
-    member.getTerm().set(10);
-    List<Log> logs = TestUtils.prepareTestLogs(7);
-    logManager.append(logs);
-    logManager.commitTo(6);
-
-    respondToElection = false;
-    testHeartbeat = false;
-    partitionGroup = new PartitionGroup();
-    for (int i = 0; i < 10; i++) {
-      partitionGroup.add(TestUtils.getNode(i));
+            @Override
+            public AsyncClient getAsyncHeartbeatClient(Node node) {
+                return getClient(node);
+            }
+        };
     }
-    member.setAllNodes(partitionGroup);
-    member.setThisNode(TestUtils.getNode(0));
-    receivedNodes.clear();
-  }
 
-  @After
-  public void tearDown() throws InterruptedException, IOException, StorageEngineException {
-    logManager.close();
-    member.closeLogManager();
-    member.stop();
-    logManager = null;
-    member = null;
-    testThread.interrupt();
-    testThread.join();
-    File dir = new File(SyncLogDequeSerializer.getLogDir(1));
-    for (File file : dir.listFiles()) {
-      file.delete();
-    }
-    dir.delete();
-    ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(prevUseAsyncServer);
-    EnvironmentUtils.cleanAllDir();
-  }
+    AsyncClient getClient(Node node) {
+        return new TestAsyncClient(node.nodeIdentifier) {
+            @Override
+            public void sendHeartbeat(
+                    HeartBeatRequest request,
+                    AsyncMethodCallback<HeartBeatResponse> resultHandler) {
+                new Thread(
+                                () -> {
+                                    if (testHeartbeat) {
+                                        assertEquals(TestUtils.getNode(0), request.getLeader());
+                                        assertEquals(6, request.getCommitLogIndex());
+                                        assertEquals(10, request.getTerm());
+                                        assertNull(request.getHeader());
+                                        synchronized (receivedNodes) {
+                                            receivedNodes.add(getSerialNum());
+                                            for (int i = 1; i < 10; i++) {
+                                                if (!receivedNodes.contains(i)) {
+                                                    return;
+                                                }
+                                            }
+                                            testThread.interrupt();
+                                        }
+                                    } else if (respondToElection) {
+                                        synchronized (testThread) {
+                                            testThread.notifyAll();
+                                        }
+                                    }
+                                })
+                        .start();
+            }
 
-  @Test
-  public void testAsLeader() throws InterruptedException {
-    testHeartbeat = true;
-    member.setCharacter(NodeCharacter.LEADER);
-    member.setLeader(member.getThisNode());
-    synchronized (receivedNodes) {
-      testThread.start();
+            @Override
+            public void startElection(
+                    ElectionRequest request, AsyncMethodCallback<Long> resultHandler) {
+                new Thread(
+                                () -> {
+                                    assertEquals(TestUtils.getNode(0), request.getElector());
+                                    assertEquals(11, request.getTerm());
+                                    assertEquals(6, request.getLastLogIndex());
+                                    assertEquals(6, request.getLastLogTerm());
+                                    if (respondToElection) {
+                                        resultHandler.onComplete(Response.RESPONSE_AGREE);
+                                    }
+                                })
+                        .start();
+            }
+        };
     }
-    begin:
-    while (true) {
-      for (int i = 1; i < 10; i++) {
-        if (!receivedNodes.contains(i)) {
-          continue begin;
+
+    HeartbeatThread getHeartbeatThread(RaftMember member) {
+        return new HeartbeatThread(member);
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        prevUseAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
+        ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(true);
+        logManager = new TestLogManager(1);
+        member = getMember();
+
+        HeartbeatThread heartBeatThread = getHeartbeatThread(member);
+        testThread = new Thread(heartBeatThread);
+        member.getTerm().set(10);
+        List<Log> logs = TestUtils.prepareTestLogs(7);
+        logManager.append(logs);
+        logManager.commitTo(6);
+
+        respondToElection = false;
+        testHeartbeat = false;
+        partitionGroup = new PartitionGroup();
+        for (int i = 0; i < 10; i++) {
+            partitionGroup.add(TestUtils.getNode(i));
         }
-      }
-      break;
+        member.setAllNodes(partitionGroup);
+        member.setThisNode(TestUtils.getNode(0));
+        receivedNodes.clear();
     }
-    testThread.interrupt();
-    testThread.join();
-  }
 
-  @Test
-  public void testAsFollower() throws InterruptedException {
-    int prevTimeOut = RaftServer.getConnectionTimeoutInMS();
-    RaftServer.setConnectionTimeoutInMS(500);
-    member.setCharacter(NodeCharacter.FOLLOWER);
-    member.setLastHeartbeatReceivedTime(System.currentTimeMillis());
-    respondToElection = false;
-    try {
-      testThread.start();
-      while (!NodeCharacter.ELECTOR.equals(member.getCharacter())) {
-
-      }
-      testThread.interrupt();
-      testThread.join();
-    } finally {
-      RaftServer.setConnectionTimeoutInMS(prevTimeOut);
+    @After
+    public void tearDown() throws InterruptedException, IOException, StorageEngineException {
+        logManager.close();
+        member.closeLogManager();
+        member.stop();
+        logManager = null;
+        member = null;
+        testThread.interrupt();
+        testThread.join();
+        File dir = new File(SyncLogDequeSerializer.getLogDir(1));
+        for (File file : dir.listFiles()) {
+            file.delete();
+        }
+        dir.delete();
+        ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(prevUseAsyncServer);
+        EnvironmentUtils.cleanAllDir();
     }
-  }
 
-  @Test
-  public void testAsElector() throws InterruptedException {
-    member.setCharacter(NodeCharacter.ELECTOR);
-    respondToElection = true;
-    testThread.start();
-    while (!NodeCharacter.LEADER.equals(member.getCharacter())) {
-
+    @Test
+    public void testAsLeader() throws InterruptedException {
+        testHeartbeat = true;
+        member.setCharacter(NodeCharacter.LEADER);
+        member.setLeader(member.getThisNode());
+        synchronized (receivedNodes) {
+            testThread.start();
+        }
+        begin:
+        while (true) {
+            for (int i = 1; i < 10; i++) {
+                if (!receivedNodes.contains(i)) {
+                    continue begin;
+                }
+            }
+            break;
+        }
+        testThread.interrupt();
+        testThread.join();
     }
-    testThread.interrupt();
-    testThread.join();
-  }
 
-  @Test
-  public void testSingleNode() throws InterruptedException {
-    member.getAllNodes().clear();
-    member.getAllNodes().add(TestUtils.getNode(0));
-    member.setCharacter(NodeCharacter.ELECTOR);
-    testThread.start();
-    while (!NodeCharacter.LEADER.equals(member.getCharacter())) {
+    @Test
+    public void testAsFollower() throws InterruptedException {
+        int prevTimeOut = RaftServer.getConnectionTimeoutInMS();
+        RaftServer.setConnectionTimeoutInMS(500);
+        member.setCharacter(NodeCharacter.FOLLOWER);
+        member.setLastHeartbeatReceivedTime(System.currentTimeMillis());
+        respondToElection = false;
+        try {
+            testThread.start();
+            while (!NodeCharacter.ELECTOR.equals(member.getCharacter())) {}
 
+            testThread.interrupt();
+            testThread.join();
+        } finally {
+            RaftServer.setConnectionTimeoutInMS(prevTimeOut);
+        }
     }
-    testThread.interrupt();
-    testThread.join();
-  }
+
+    @Test
+    public void testAsElector() throws InterruptedException {
+        member.setCharacter(NodeCharacter.ELECTOR);
+        respondToElection = true;
+        testThread.start();
+        while (!NodeCharacter.LEADER.equals(member.getCharacter())) {}
+
+        testThread.interrupt();
+        testThread.join();
+    }
+
+    @Test
+    public void testSingleNode() throws InterruptedException {
+        member.getAllNodes().clear();
+        member.getAllNodes().add(TestUtils.getNode(0));
+        member.setCharacter(NodeCharacter.ELECTOR);
+        testThread.start();
+        while (!NodeCharacter.LEADER.equals(member.getCharacter())) {}
+
+        testThread.interrupt();
+        testThread.join();
+    }
 }

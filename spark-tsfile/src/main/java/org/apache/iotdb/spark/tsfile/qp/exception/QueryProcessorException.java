@@ -18,24 +18,20 @@
  */
 package org.apache.iotdb.spark.tsfile.qp.exception;
 
-/**
- * This exception is threw whiling meeting error in query processor
- *
- */
+/** This exception is threw whiling meeting error in query processor */
 public class QueryProcessorException extends Exception {
 
-  private static final long serialVersionUID = -8987915921329335088L;
+    private static final long serialVersionUID = -8987915921329335088L;
 
-  private String errMsg;
+    private String errMsg;
 
-  QueryProcessorException(String msg) {
-    super(msg);
-    this.errMsg = msg;
-  }
+    QueryProcessorException(String msg) {
+        super(msg);
+        this.errMsg = msg;
+    }
 
-  @Override
-  public String getMessage() {
-    return errMsg;
-  }
-
+    @Override
+    public String getMessage() {
+        return errMsg;
+    }
 }

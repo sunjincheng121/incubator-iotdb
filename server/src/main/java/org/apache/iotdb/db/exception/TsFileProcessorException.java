@@ -22,13 +22,13 @@ import org.apache.iotdb.rpc.TSStatusCode;
 
 public class TsFileProcessorException extends IoTDBException {
 
-  private static final long serialVersionUID = 3749107630243950925L;
+    private static final long serialVersionUID = 3749107630243950925L;
 
-  public TsFileProcessorException(String message) {
-    super(message, TSStatusCode.TSFILE_PROCESSOR_ERROR.getStatusCode());
-  }
+    public TsFileProcessorException(String message) {
+        super(message, TSStatusCode.TSFILE_PROCESSOR_ERROR.getStatusCode());
+    }
 
-  public TsFileProcessorException(Exception exception) {
-    super(exception, TSStatusCode.TSFILE_PROCESSOR_ERROR.getStatusCode());
-  }
+    public TsFileProcessorException(Exception exception) {
+        super(exception, TSStatusCode.TSFILE_PROCESSOR_ERROR.getStatusCode());
+    }
 }

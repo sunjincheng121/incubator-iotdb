@@ -24,29 +24,28 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class FlushOperator extends RootOperator {
 
-  public List<PartialPath> getStorageGroupList() {
-    return storageGroupList;
-  }
+    public List<PartialPath> getStorageGroupList() {
+        return storageGroupList;
+    }
 
-  public void setStorageGroupList(
-      List<PartialPath> storageGroupList) {
-    this.storageGroupList = storageGroupList;
-  }
+    public void setStorageGroupList(List<PartialPath> storageGroupList) {
+        this.storageGroupList = storageGroupList;
+    }
 
-  private List<PartialPath> storageGroupList;
+    private List<PartialPath> storageGroupList;
 
-  public Boolean isSeq() {
-    return isSeq;
-  }
+    public Boolean isSeq() {
+        return isSeq;
+    }
 
-  public void setSeq(boolean seq) {
-    isSeq = seq;
-  }
+    public void setSeq(boolean seq) {
+        isSeq = seq;
+    }
 
-  private Boolean isSeq;
+    private Boolean isSeq;
 
-  public FlushOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.FLUSH;
-  }
+    public FlushOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.FLUSH;
+    }
 }

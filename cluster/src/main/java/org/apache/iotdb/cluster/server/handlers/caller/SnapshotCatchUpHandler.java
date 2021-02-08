@@ -26,37 +26,34 @@ import org.apache.thrift.async.AsyncMethodCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * SnapshotCatchUpHandler receives the result of sending a snapshot to a stale node.
- */
+/** SnapshotCatchUpHandler receives the result of sending a snapshot to a stale node. */
 public class SnapshotCatchUpHandler implements AsyncMethodCallback<Void> {
 
-  private static final Logger logger = LoggerFactory.getLogger(SnapshotCatchUpHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(SnapshotCatchUpHandler.class);
 
-  private AtomicBoolean succeed;
-  private Node receiver;
-  private Snapshot snapshot;
+    private AtomicBoolean succeed;
+    private Node receiver;
+    private Snapshot snapshot;
 
-  public SnapshotCatchUpHandler(AtomicBoolean succeed,
-      Node receiver, Snapshot snapshot) {
-    this.succeed = succeed;
-    this.receiver = receiver;
-    this.snapshot = snapshot;
-  }
-
-  @Override
-  public void onComplete(Void resp) {
-    synchronized (succeed) {
-      succeed.set(true);
-      succeed.notifyAll();
+    public SnapshotCatchUpHandler(AtomicBoolean succeed, Node receiver, Snapshot snapshot) {
+        this.succeed = succeed;
+        this.receiver = receiver;
+        this.snapshot = snapshot;
     }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    logger.error("Cannot send snapshot {} to {}", snapshot, receiver, exception);
-    synchronized (succeed) {
-      succeed.notifyAll();
+    @Override
+    public void onComplete(Void resp) {
+        synchronized (succeed) {
+            succeed.set(true);
+            succeed.notifyAll();
+        }
     }
-  }
+
+    @Override
+    public void onError(Exception exception) {
+        logger.error("Cannot send snapshot {} to {}", snapshot, receiver, exception);
+        synchronized (succeed) {
+            succeed.notifyAll();
+        }
+    }
 }

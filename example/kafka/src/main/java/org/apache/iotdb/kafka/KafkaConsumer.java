@@ -36,65 +36,54 @@ import kafka.utils.VerifiableProperties;
  */
 public class KafkaConsumer {
 
-  private ConsumerConnector consumer;
+    private ConsumerConnector consumer;
 
-  private KafkaConsumer() {
-    /**
-     * Consumer configuration
-     */
-    Properties props = new Properties();
+    private KafkaConsumer() {
+        /** Consumer configuration */
+        Properties props = new Properties();
 
-    /**
-     * Zookeeper configuration
-     */
-    props.put("zookeeper.connect", "127.0.0.1:2181");
-    props.put("group.id", "consumeGroup");
-    props.put("zookeeper.session.timeout.ms", "400");
-    props.put("zookeeper.sync.time.ms", "200");
-    props.put("rebalance.max.retries", "5");
-    props.put("rebalance.backoff.ms", "1200");
-    props.put("auto.commit.interval.ms", "1000");
+        /** Zookeeper configuration */
+        props.put("zookeeper.connect", "127.0.0.1:2181");
+        props.put("group.id", "consumeGroup");
+        props.put("zookeeper.session.timeout.ms", "400");
+        props.put("zookeeper.sync.time.ms", "200");
+        props.put("rebalance.max.retries", "5");
+        props.put("rebalance.backoff.ms", "1200");
+        props.put("auto.commit.interval.ms", "1000");
 
-    /**
-     * What to do when there is no initial offset in ZooKeeper or if an offset is out of range
-     * smallest : automatically reset the offset to the smallest offset
-     */
-    props.put("auto.offset.reset", "smallest");
+        /**
+         * What to do when there is no initial offset in ZooKeeper or if an offset is out of range
+         * smallest : automatically reset the offset to the smallest offset
+         */
+        props.put("auto.offset.reset", "smallest");
 
-    /**
-     * serializer class
-     */
-    props.put("serializer.class", "kafka.serializer.StringEncoder");
+        /** serializer class */
+        props.put("serializer.class", "kafka.serializer.StringEncoder");
 
-    ConsumerConfig config = new ConsumerConfig(props);
-    consumer = kafka.consumer.Consumer.createJavaConsumerConnector(config);
-  }
-
-  public static void main(String[] args) {
-    new KafkaConsumer().consume();
-  }
-
-  private void consume() {
-    /**
-     * Specify the number of consumer thread
-     */
-    Map<String, Integer> topicCountMap = new HashMap<>();
-    topicCountMap.put(Constant.TOPIC, Constant.CONSUMER_THREAD_NUM);
-
-    /**
-     * Specify data decoder
-     */
-    StringDecoder keyDecoder = new StringDecoder(new VerifiableProperties());
-    StringDecoder valueDecoder = new StringDecoder(new VerifiableProperties());
-
-    Map<String, List<KafkaStream<String, String>>> consumerMap = consumer
-        .createMessageStreams(topicCountMap, keyDecoder,
-            valueDecoder);
-
-    List<KafkaStream<String, String>> streams = consumerMap.get(Constant.TOPIC);
-    ExecutorService executor = Executors.newFixedThreadPool(Constant.CONSUMER_THREAD_NUM);
-    for (final KafkaStream<String, String> stream : streams) {
-      executor.submit(new KafkaConsumerThread(stream));
+        ConsumerConfig config = new ConsumerConfig(props);
+        consumer = kafka.consumer.Consumer.createJavaConsumerConnector(config);
     }
-  }
+
+    public static void main(String[] args) {
+        new KafkaConsumer().consume();
+    }
+
+    private void consume() {
+        /** Specify the number of consumer thread */
+        Map<String, Integer> topicCountMap = new HashMap<>();
+        topicCountMap.put(Constant.TOPIC, Constant.CONSUMER_THREAD_NUM);
+
+        /** Specify data decoder */
+        StringDecoder keyDecoder = new StringDecoder(new VerifiableProperties());
+        StringDecoder valueDecoder = new StringDecoder(new VerifiableProperties());
+
+        Map<String, List<KafkaStream<String, String>>> consumerMap =
+                consumer.createMessageStreams(topicCountMap, keyDecoder, valueDecoder);
+
+        List<KafkaStream<String, String>> streams = consumerMap.get(Constant.TOPIC);
+        ExecutorService executor = Executors.newFixedThreadPool(Constant.CONSUMER_THREAD_NUM);
+        for (final KafkaStream<String, String> stream : streams) {
+            executor.submit(new KafkaConsumerThread(stream));
+        }
+    }
 }

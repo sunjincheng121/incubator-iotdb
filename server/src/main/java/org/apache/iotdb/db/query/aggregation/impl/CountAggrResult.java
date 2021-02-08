@@ -31,76 +31,75 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public class CountAggrResult extends AggregateResult {
 
-  public CountAggrResult() {
-    super(TSDataType.INT64, AggregationType.COUNT);
-    reset();
-    setLongValue(0);
-  }
-
-  @Override
-  public Long getResult() {
-    return getLongValue();
-  }
-
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    long preValue = getLongValue();
-    preValue += statistics.getCount();
-    setLongValue(preValue);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage) {
-    int cnt = dataInThisPage.length();
-    long preValue = getLongValue();
-    preValue += cnt;
-    setLongValue(preValue);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
-    while (dataInThisPage.hasCurrent()) {
-      if (dataInThisPage.currentTime() >= maxBound || dataInThisPage.currentTime() < minBound) {
-        break;
-      }
-      long preValue = getLongValue();
-      setLongValue(++preValue);
-      dataInThisPage.next();
-    }
-  }
-
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    int cnt = 0;
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value != null) {
-        cnt++;
-      }
+    public CountAggrResult() {
+        super(TSDataType.INT64, AggregationType.COUNT);
+        reset();
+        setLongValue(0);
     }
 
-    long preValue = getLongValue();
-    preValue += cnt;
-    setLongValue(preValue);
-  }
+    @Override
+    public Long getResult() {
+        return getLongValue();
+    }
 
-  @Override
-  public boolean hasFinalResult() {
-    return false;
-  }
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        long preValue = getLongValue();
+        preValue += statistics.getCount();
+        setLongValue(preValue);
+    }
 
-  @Override
-  public void merge(AggregateResult another) {
-    CountAggrResult anotherCount = (CountAggrResult) another;
-    setLongValue(anotherCount.getResult() + this.getResult());
-  }
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage) {
+        int cnt = dataInThisPage.length();
+        long preValue = getLongValue();
+        preValue += cnt;
+        setLongValue(preValue);
+    }
 
-  @Override
-  protected void deserializeSpecificFields(ByteBuffer buffer) {
-  }
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
+        while (dataInThisPage.hasCurrent()) {
+            if (dataInThisPage.currentTime() >= maxBound
+                    || dataInThisPage.currentTime() < minBound) {
+                break;
+            }
+            long preValue = getLongValue();
+            setLongValue(++preValue);
+            dataInThisPage.next();
+        }
+    }
 
-  @Override
-  protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
-  }
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        int cnt = 0;
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value != null) {
+                cnt++;
+            }
+        }
+
+        long preValue = getLongValue();
+        preValue += cnt;
+        setLongValue(preValue);
+    }
+
+    @Override
+    public boolean hasFinalResult() {
+        return false;
+    }
+
+    @Override
+    public void merge(AggregateResult another) {
+        CountAggrResult anotherCount = (CountAggrResult) another;
+        setLongValue(anotherCount.getResult() + this.getResult());
+    }
+
+    @Override
+    protected void deserializeSpecificFields(ByteBuffer buffer) {}
+
+    @Override
+    protected void serializeSpecificFields(OutputStream outputStream) throws IOException {}
 }

@@ -37,139 +37,135 @@ import org.junit.Test;
 
 public class IoTDBDeleteStorageGroupIT {
 
-  @Before
-  public void setUp() throws Exception {
-    EnvironmentUtils.closeStatMonitor();
-    EnvironmentUtils.envSetUp();
-  }
+    @Before
+    public void setUp() throws Exception {
+        EnvironmentUtils.closeStatMonitor();
+        EnvironmentUtils.envSetUp();
+    }
 
-  @After
-  public void tearDown() throws Exception {
-    EnvironmentUtils.cleanEnv();
-  }
+    @After
+    public void tearDown() throws Exception {
+        EnvironmentUtils.cleanEnv();
+    }
 
-  @Test
-  public void testDeleteStorageGroup() throws Exception {
-    Class.forName(Config.JDBC_DRIVER_NAME);
-    try (Connection connection = DriverManager.
-            getConnection("jdbc:iotdb://127.0.0.1:6667/", "root", "root");
-         Statement statement = connection.createStatement()) {
-      statement.execute("SET STORAGE GROUP TO root.ln.wf01.wt01");
-      statement.execute("SET STORAGE GROUP TO root.ln.wf01.wt02");
-      statement.execute("SET STORAGE GROUP TO root.ln.wf01.wt03");
-      statement.execute("SET STORAGE GROUP TO root.ln.wf01.wt04");
-      statement.execute("DELETE STORAGE GROUP root.ln.wf01.wt01");
-      boolean hasResult = statement.execute("SHOW STORAGE GROUP");
-      assertTrue(hasResult);
-      String[] expected = new String[]{
-              "root.ln.wf01.wt02",
-              "root.ln.wf01.wt03",
-              "root.ln.wf01.wt04"
-      };
-      List<String> expectedList = new ArrayList<>();
-      Collections.addAll(expectedList, expected);
-      List<String> result = new ArrayList<>();
-      try (ResultSet resultSet = statement.getResultSet()) {
-        while (resultSet.next()) {
-          result.add(resultSet.getString(1));
+    @Test
+    public void testDeleteStorageGroup() throws Exception {
+        Class.forName(Config.JDBC_DRIVER_NAME);
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                "jdbc:iotdb://127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            statement.execute("SET STORAGE GROUP TO root.ln.wf01.wt01");
+            statement.execute("SET STORAGE GROUP TO root.ln.wf01.wt02");
+            statement.execute("SET STORAGE GROUP TO root.ln.wf01.wt03");
+            statement.execute("SET STORAGE GROUP TO root.ln.wf01.wt04");
+            statement.execute("DELETE STORAGE GROUP root.ln.wf01.wt01");
+            boolean hasResult = statement.execute("SHOW STORAGE GROUP");
+            assertTrue(hasResult);
+            String[] expected =
+                    new String[] {"root.ln.wf01.wt02", "root.ln.wf01.wt03", "root.ln.wf01.wt04"};
+            List<String> expectedList = new ArrayList<>();
+            Collections.addAll(expectedList, expected);
+            List<String> result = new ArrayList<>();
+            try (ResultSet resultSet = statement.getResultSet()) {
+                while (resultSet.next()) {
+                    result.add(resultSet.getString(1));
+                }
+            }
+            assertEquals(expected.length, result.size());
+            assertTrue(expectedList.containsAll(result));
         }
-      }
-      assertEquals(expected.length, result.size());
-      assertTrue(expectedList.containsAll(result));
     }
-  }
 
-  @Test
-  public void testDeleteMultipleStorageGroupWithQuote() throws Exception {
-    Class.forName(Config.JDBC_DRIVER_NAME);
-    try (Connection connection = DriverManager
-            .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
-         Statement statement = connection.createStatement()) {
-      statement.execute("SET STORAGE GROUP TO root.ln1.wf01.wt01");
-      statement.execute("SET STORAGE GROUP TO root.ln1.wf01.wt02");
-      statement.execute("SET STORAGE GROUP TO root.ln1.wf02.wt03");
-      statement.execute("SET STORAGE GROUP TO root.ln1.wf02.wt04");
-      statement.execute("DELETE STORAGE GROUP root.ln1.wf01.wt01, root.ln1.wf02.wt03");
-      boolean hasResult = statement.execute("SHOW STORAGE GROUP");
-      assertTrue(hasResult);
-      String[] expected = new String[]{
-              "root.ln1.wf01.wt02",
-              "root.ln1.wf02.wt04"
-      };
-      List<String> expectedList = new ArrayList<>();
-      Collections.addAll(expectedList, expected);
-      List<String> result = new ArrayList<>();
-      try (ResultSet resultSet = statement.getResultSet()) {
-        while (resultSet.next()) {
-          result.add(resultSet.getString(1));
+    @Test
+    public void testDeleteMultipleStorageGroupWithQuote() throws Exception {
+        Class.forName(Config.JDBC_DRIVER_NAME);
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            statement.execute("SET STORAGE GROUP TO root.ln1.wf01.wt01");
+            statement.execute("SET STORAGE GROUP TO root.ln1.wf01.wt02");
+            statement.execute("SET STORAGE GROUP TO root.ln1.wf02.wt03");
+            statement.execute("SET STORAGE GROUP TO root.ln1.wf02.wt04");
+            statement.execute("DELETE STORAGE GROUP root.ln1.wf01.wt01, root.ln1.wf02.wt03");
+            boolean hasResult = statement.execute("SHOW STORAGE GROUP");
+            assertTrue(hasResult);
+            String[] expected = new String[] {"root.ln1.wf01.wt02", "root.ln1.wf02.wt04"};
+            List<String> expectedList = new ArrayList<>();
+            Collections.addAll(expectedList, expected);
+            List<String> result = new ArrayList<>();
+            try (ResultSet resultSet = statement.getResultSet()) {
+                while (resultSet.next()) {
+                    result.add(resultSet.getString(1));
+                }
+            }
+            assertEquals(expected.length, result.size());
+            assertTrue(expectedList.containsAll(result));
         }
-      }
-      assertEquals(expected.length, result.size());
-      assertTrue(expectedList.containsAll(result));
     }
-  }
-  
-  @Test(expected = IoTDBSQLException.class)
-  public void deleteNonExistStorageGroup() throws Exception {
-    Class.forName(Config.JDBC_DRIVER_NAME);
-    try (Connection connection = DriverManager.
-            getConnection("jdbc:iotdb://127.0.0.1:6667/", "root", "root");
-         Statement statement = connection.createStatement()) {
-      statement.execute("SET STORAGE GROUP TO root.ln2.wf01.wt01");
-      statement.execute("DELETE STORAGE GROUP root.ln2.wf01.wt02");
-    }
-  }
 
-  @Test
-  public void testDeleteStorageGroupWithStar() throws Exception {
-    Class.forName(Config.JDBC_DRIVER_NAME);
-    try (Connection connection = DriverManager.
-        getConnection("jdbc:iotdb://127.0.0.1:6667/", "root", "root");
-        Statement statement = connection.createStatement()) {
-      statement.execute("SET STORAGE GROUP TO root.ln3.wf01.wt01");
-      statement.execute("SET STORAGE GROUP TO root.ln3.wf01.wt02");
-      statement.execute("SET STORAGE GROUP TO root.ln3.wf02.wt03");
-      statement.execute("SET STORAGE GROUP TO root.ln3.wf02.wt04");
-      statement.execute("DELETE STORAGE GROUP root.ln3.wf02.*");
-      boolean hasResult = statement.execute("SHOW STORAGE GROUP");
-      assertTrue(hasResult);
-      String[] expected = new String[]{
-          "root.ln3.wf01.wt01",
-          "root.ln3.wf01.wt02"
-      };
-      List<String> expectedList = new ArrayList<>();
-      Collections.addAll(expectedList, expected);
-      List<String> result = new ArrayList<>();
-      try (ResultSet resultSet = statement.getResultSet()) {
-        while (resultSet.next()) {
-          result.add(resultSet.getString(1));
+    @Test(expected = IoTDBSQLException.class)
+    public void deleteNonExistStorageGroup() throws Exception {
+        Class.forName(Config.JDBC_DRIVER_NAME);
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                "jdbc:iotdb://127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            statement.execute("SET STORAGE GROUP TO root.ln2.wf01.wt01");
+            statement.execute("DELETE STORAGE GROUP root.ln2.wf01.wt02");
         }
-      }
-      assertEquals(expected.length, result.size());
-      assertTrue(expectedList.containsAll(result));
     }
-  }
 
-  @Test
-  public void testDeleteAllStorageGroups() throws Exception {
-    Class.forName(Config.JDBC_DRIVER_NAME);
-    try (Connection connection = DriverManager.
-        getConnection("jdbc:iotdb://127.0.0.1:6667/", "root", "root");
-        Statement statement = connection.createStatement()) {
-      statement.execute("SET STORAGE GROUP TO root.ln4.wf01.wt01");
-      statement.execute("SET STORAGE GROUP TO root.ln4.wf01.wt02");
-      statement.execute("SET STORAGE GROUP TO root.ln4.wf02.wt03");
-      statement.execute("SET STORAGE GROUP TO root.ln4.wf02.wt04");
-      statement.execute("DELETE STORAGE GROUP root.*");
-      boolean hasResult = statement.execute("SHOW STORAGE GROUP");
-      assertTrue(hasResult);
-      List<String> result = new ArrayList<>();
-      try (ResultSet resultSet = statement.getResultSet()) {
-        while (resultSet.next()) {
-          result.add(resultSet.getString(1));
+    @Test
+    public void testDeleteStorageGroupWithStar() throws Exception {
+        Class.forName(Config.JDBC_DRIVER_NAME);
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                "jdbc:iotdb://127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            statement.execute("SET STORAGE GROUP TO root.ln3.wf01.wt01");
+            statement.execute("SET STORAGE GROUP TO root.ln3.wf01.wt02");
+            statement.execute("SET STORAGE GROUP TO root.ln3.wf02.wt03");
+            statement.execute("SET STORAGE GROUP TO root.ln3.wf02.wt04");
+            statement.execute("DELETE STORAGE GROUP root.ln3.wf02.*");
+            boolean hasResult = statement.execute("SHOW STORAGE GROUP");
+            assertTrue(hasResult);
+            String[] expected = new String[] {"root.ln3.wf01.wt01", "root.ln3.wf01.wt02"};
+            List<String> expectedList = new ArrayList<>();
+            Collections.addAll(expectedList, expected);
+            List<String> result = new ArrayList<>();
+            try (ResultSet resultSet = statement.getResultSet()) {
+                while (resultSet.next()) {
+                    result.add(resultSet.getString(1));
+                }
+            }
+            assertEquals(expected.length, result.size());
+            assertTrue(expectedList.containsAll(result));
         }
-      }
-      assertEquals(0, result.size());
     }
-  }
+
+    @Test
+    public void testDeleteAllStorageGroups() throws Exception {
+        Class.forName(Config.JDBC_DRIVER_NAME);
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                "jdbc:iotdb://127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            statement.execute("SET STORAGE GROUP TO root.ln4.wf01.wt01");
+            statement.execute("SET STORAGE GROUP TO root.ln4.wf01.wt02");
+            statement.execute("SET STORAGE GROUP TO root.ln4.wf02.wt03");
+            statement.execute("SET STORAGE GROUP TO root.ln4.wf02.wt04");
+            statement.execute("DELETE STORAGE GROUP root.*");
+            boolean hasResult = statement.execute("SHOW STORAGE GROUP");
+            assertTrue(hasResult);
+            List<String> result = new ArrayList<>();
+            try (ResultSet resultSet = statement.getResultSet()) {
+                while (resultSet.next()) {
+                    result.add(resultSet.getString(1));
+                }
+            }
+            assertEquals(0, result.size());
+        }
+    }
 }

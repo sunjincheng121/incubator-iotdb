@@ -34,37 +34,46 @@ import org.apache.thrift.transport.TNonblockingSocket;
  */
 public class AsyncMetaHeartbeatClient extends AsyncMetaClient {
 
-  private AsyncMetaHeartbeatClient(TProtocolFactory protocolFactory,
-      TAsyncClientManager clientManager, Node node, AsyncClientPool pool) throws IOException {
-    super(protocolFactory, clientManager, new TNonblockingSocket(node.getIp(),
-        node.getMetaPort() + ClusterUtils.DATA_HEARTBEAT_PORT_OFFSET
-        , RaftServer.getConnectionTimeoutInMS()));
-    this.node = node;
-    this.pool = pool;
-  }
+    private AsyncMetaHeartbeatClient(
+            TProtocolFactory protocolFactory,
+            TAsyncClientManager clientManager,
+            Node node,
+            AsyncClientPool pool)
+            throws IOException {
+        super(
+                protocolFactory,
+                clientManager,
+                new TNonblockingSocket(
+                        node.getIp(),
+                        node.getMetaPort() + ClusterUtils.DATA_HEARTBEAT_PORT_OFFSET,
+                        RaftServer.getConnectionTimeoutInMS()));
+        this.node = node;
+        this.pool = pool;
+    }
 
-  public static class FactoryAsync extends AsyncClientFactory {
+    public static class FactoryAsync extends AsyncClientFactory {
 
-    public FactoryAsync(TProtocolFactory protocolFactory) {
-      this.protocolFactory = protocolFactory;
+        public FactoryAsync(TProtocolFactory protocolFactory) {
+            this.protocolFactory = protocolFactory;
+        }
+
+        @Override
+        public RaftService.AsyncClient getAsyncClient(Node node, AsyncClientPool pool)
+                throws IOException {
+            TAsyncClientManager manager = managers[clientCnt.incrementAndGet() % managers.length];
+            manager = manager == null ? new TAsyncClientManager() : manager;
+            return new AsyncMetaHeartbeatClient(protocolFactory, manager, node, pool);
+        }
     }
 
     @Override
-    public RaftService.AsyncClient getAsyncClient(Node node, AsyncClientPool pool)
-        throws IOException {
-      TAsyncClientManager manager = managers[clientCnt.incrementAndGet() % managers.length];
-      manager = manager == null ? new TAsyncClientManager() : manager;
-      return new AsyncMetaHeartbeatClient(protocolFactory, manager, node, pool);
+    public String toString() {
+        return "AsyncMetaHeartbeatClient{"
+                + "node="
+                + super.getNode()
+                + ","
+                + "metaHeartbeatPort="
+                + (super.getNode().getMetaPort() + ClusterUtils.META_HEARTBEAT_PORT_OFFSET)
+                + '}';
     }
-  }
-
-  @Override
-  public String toString() {
-    return "AsyncMetaHeartbeatClient{" +
-        "node=" + super.getNode() + "," +
-        "metaHeartbeatPort=" + (super.getNode().getMetaPort()
-        + ClusterUtils.META_HEARTBEAT_PORT_OFFSET) +
-        '}';
-  }
-
 }

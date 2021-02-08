@@ -34,24 +34,24 @@ import org.junit.Test;
 
 public class ForwardPlanHandlerTest {
 
-  @Test
-  public void testComplete() throws IllegalPathException {
-    AtomicReference<TSStatus> result = new AtomicReference<>();
-    PhysicalPlan plan = new SetStorageGroupPlan(new PartialPath("root.test"));
-    ForwardPlanHandler handler = new ForwardPlanHandler(result, plan, TestUtils.getNode(0));
+    @Test
+    public void testComplete() throws IllegalPathException {
+        AtomicReference<TSStatus> result = new AtomicReference<>();
+        PhysicalPlan plan = new SetStorageGroupPlan(new PartialPath("root.test"));
+        ForwardPlanHandler handler = new ForwardPlanHandler(result, plan, TestUtils.getNode(0));
 
-    TSStatus status = new TSStatus();
-    handler.onComplete(status);
-    assertSame(status, result.get());
-  }
+        TSStatus status = new TSStatus();
+        handler.onComplete(status);
+        assertSame(status, result.get());
+    }
 
-  @Test
-  public void testError() throws IllegalPathException {
-    AtomicReference<TSStatus> result = new AtomicReference<>();
-    PhysicalPlan plan = new SetStorageGroupPlan(new PartialPath("root.test"));
-    ForwardPlanHandler handler = new ForwardPlanHandler(result, plan, TestUtils.getNode(0));
+    @Test
+    public void testError() throws IllegalPathException {
+        AtomicReference<TSStatus> result = new AtomicReference<>();
+        PhysicalPlan plan = new SetStorageGroupPlan(new PartialPath("root.test"));
+        ForwardPlanHandler handler = new ForwardPlanHandler(result, plan, TestUtils.getNode(0));
 
-    handler.onError(new TestException());
-    assertEquals("Don't worry, this exception is faked", result.get().getMessage());
-  }
+        handler.onError(new TestException());
+        assertEquals("Don't worry, this exception is faked", result.get().getMessage());
+    }
 }

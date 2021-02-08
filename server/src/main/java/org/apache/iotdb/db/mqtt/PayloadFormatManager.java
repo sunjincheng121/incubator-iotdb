@@ -22,9 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 
-/**
- * PayloadFormatManager loads payload formatter from SPI services.
- */
+/** PayloadFormatManager loads payload formatter from SPI services. */
 public class PayloadFormatManager {
     private static Map<String, PayloadFormatter> map = new HashMap<>();
 

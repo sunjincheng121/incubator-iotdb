@@ -26,50 +26,53 @@ import org.slf4j.LoggerFactory;
 
 public class FlushTaskPoolManager extends AbstractPoolManager {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(FlushTaskPoolManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushTaskPoolManager.class);
 
-  private FlushTaskPoolManager() {
-    int threadCnt = IoTDBDescriptor.getInstance().getConfig().getConcurrentFlushThread();
-    pool = IoTDBThreadPoolFactory.newFixedThreadPool(threadCnt, ThreadName.FLUSH_SERVICE.getName());
-  }
-
-  public static FlushTaskPoolManager getInstance() {
-    return InstanceHolder.instance;
-  }
-
-  @Override
-  public Logger getLogger() {
-    return LOGGER;
-  }
-
-  @Override
-  public String getName() {
-    return "flush task";
-  }
-
-  @Override
-  public void start() {
-    if (pool == null) {
-      int threadCnt = IoTDBDescriptor.getInstance().getConfig().getConcurrentFlushThread();
-      pool = IoTDBThreadPoolFactory
-          .newFixedThreadPool(threadCnt, ThreadName.FLUSH_SERVICE.getName());
+    private FlushTaskPoolManager() {
+        int threadCnt = IoTDBDescriptor.getInstance().getConfig().getConcurrentFlushThread();
+        pool =
+                IoTDBThreadPoolFactory.newFixedThreadPool(
+                        threadCnt, ThreadName.FLUSH_SERVICE.getName());
     }
 
-    LOGGER.info("Flush task manager started.");
-  }
-
-  @Override
-  public void stop() {
-    super.stop();
-    LOGGER.info("Flush task manager stopped");
-  }
-
-  private static class InstanceHolder {
-
-    private InstanceHolder() {
-      //allowed to do nothing
+    public static FlushTaskPoolManager getInstance() {
+        return InstanceHolder.instance;
     }
 
-    private static FlushTaskPoolManager instance = new FlushTaskPoolManager();
-  }
+    @Override
+    public Logger getLogger() {
+        return LOGGER;
+    }
+
+    @Override
+    public String getName() {
+        return "flush task";
+    }
+
+    @Override
+    public void start() {
+        if (pool == null) {
+            int threadCnt = IoTDBDescriptor.getInstance().getConfig().getConcurrentFlushThread();
+            pool =
+                    IoTDBThreadPoolFactory.newFixedThreadPool(
+                            threadCnt, ThreadName.FLUSH_SERVICE.getName());
+        }
+
+        LOGGER.info("Flush task manager started.");
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        LOGGER.info("Flush task manager stopped");
+    }
+
+    private static class InstanceHolder {
+
+        private InstanceHolder() {
+            // allowed to do nothing
+        }
+
+        private static FlushTaskPoolManager instance = new FlushTaskPoolManager();
+    }
 }

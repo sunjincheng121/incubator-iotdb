@@ -18,13 +18,12 @@
 package org.apache.iotdb.flink;
 
 import com.google.common.collect.Lists;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
-
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
@@ -41,18 +40,23 @@ public class FlinkIoTDBSink {
         options.setPassword("root");
         options.setStorageGroup("root.sg");
 
-        //If the server enables auto_create_schema, then we do not need to register all timeseries here.
+        // If the server enables auto_create_schema, then we do not need to register all timeseries
+        // here.
         options.setTimeseriesOptionList(
-            Lists.newArrayList(new IoTDBOptions.TimeseriesOption(
-                "root.sg.d1.s1", TSDataType.DOUBLE, TSEncoding.GORILLA, CompressionType.SNAPPY
-                )));
+                Lists.newArrayList(
+                        new IoTDBOptions.TimeseriesOption(
+                                "root.sg.d1.s1",
+                                TSDataType.DOUBLE,
+                                TSEncoding.GORILLA,
+                                CompressionType.SNAPPY)));
 
         IoTSerializationSchema serializationSchema = new DefaultIoTSerializationSchema();
-        IoTDBSink ioTDBSink = new IoTDBSink(options, serializationSchema)
-                // enable batching
-                .withBatchSize(10)
-                // how many connectons to the server will be created for each parallelism
-                .withSessionPoolSize(3);
+        IoTDBSink ioTDBSink =
+                new IoTDBSink(options, serializationSchema)
+                        // enable batching
+                        .withBatchSize(10)
+                        // how many connectons to the server will be created for each parallelism
+                        .withSessionPoolSize(3);
 
         env.addSource(new SensorSource())
                 .name("sensor-source")
@@ -63,13 +67,14 @@ public class FlinkIoTDBSink {
         env.execute("iotdb-flink-example");
     }
 
-    private static class SensorSource implements SourceFunction<Map<String,String>> {
+    private static class SensorSource implements SourceFunction<Map<String, String>> {
         boolean running = true;
         Random random = new SecureRandom();
+
         @Override
         public void run(SourceContext context) throws Exception {
             while (running) {
-                Map<String,String> tuple = new HashMap();
+                Map<String, String> tuple = new HashMap();
                 tuple.put("device", "root.sg.d1");
                 tuple.put("timestamp", String.valueOf(System.currentTimeMillis()));
                 tuple.put("measurements", "s1");

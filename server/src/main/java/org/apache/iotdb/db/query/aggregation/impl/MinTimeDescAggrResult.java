@@ -25,35 +25,33 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public class MinTimeDescAggrResult extends MinTimeAggrResult {
 
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    long time = statistics.getStartTime();
-    setValue(time);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
-    while (dataInThisPage.hasCurrent() && dataInThisPage.currentTime() >= minBound) {
-      setValue(dataInThisPage.currentTime());
-      dataInThisPage.next();
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        long time = statistics.getStartTime();
+        setValue(time);
     }
-  }
 
-
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value != null) {
-        setLongValue(timestamps[i]);
-      }
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
+        while (dataInThisPage.hasCurrent() && dataInThisPage.currentTime() >= minBound) {
+            setValue(dataInThisPage.currentTime());
+            dataInThisPage.next();
+        }
     }
-  }
 
-  @Override
-  public boolean hasFinalResult() {
-    return false;
-  }
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value != null) {
+                setLongValue(timestamps[i]);
+            }
+        }
+    }
 
+    @Override
+    public boolean hasFinalResult() {
+        return false;
+    }
 }

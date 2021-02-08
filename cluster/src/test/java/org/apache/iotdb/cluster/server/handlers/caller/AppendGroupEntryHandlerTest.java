@@ -42,118 +42,145 @@ import org.junit.Test;
 
 public class AppendGroupEntryHandlerTest {
 
-  private int REPLICATION_NUM;
-  private int prevReplicationNum;
-  private RaftMember member;
+    private int REPLICATION_NUM;
+    private int prevReplicationNum;
+    private RaftMember member;
 
-  @Before
-  public void setUp() {
-    prevReplicationNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
-    ClusterDescriptor.getInstance().getConfig().setReplicationNum(2);
-    REPLICATION_NUM = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
-    member = new TestMetaGroupMember();
-  }
+    @Before
+    public void setUp() {
+        prevReplicationNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
+        ClusterDescriptor.getInstance().getConfig().setReplicationNum(2);
+        REPLICATION_NUM = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
+        member = new TestMetaGroupMember();
+    }
 
-  @After
-  public void tearDown() throws IOException, StorageEngineException {
-    ClusterDescriptor.getInstance().getConfig().setReplicationNum(prevReplicationNum);
-    member.stop();
-    member.closeLogManager();
-    EnvironmentUtils.cleanAllDir();
-  }
+    @After
+    public void tearDown() throws IOException, StorageEngineException {
+        ClusterDescriptor.getInstance().getConfig().setReplicationNum(prevReplicationNum);
+        member.stop();
+        member.closeLogManager();
+        EnvironmentUtils.cleanAllDir();
+    }
 
-  @Test
-  public void testAgreement() throws InterruptedException {
-    int[] groupReceivedCounter = new int[10];
-    for (int i = 0; i < 10; i++) {
-      groupReceivedCounter[i] = REPLICATION_NUM / 2;
+    @Test
+    public void testAgreement() throws InterruptedException {
+        int[] groupReceivedCounter = new int[10];
+        for (int i = 0; i < 10; i++) {
+            groupReceivedCounter[i] = REPLICATION_NUM / 2;
+        }
+        AtomicBoolean leadershipStale = new AtomicBoolean(false);
+        AtomicLong newLeaderTerm = new AtomicLong(-1);
+        Log testLog = new TestLog();
+        synchronized (groupReceivedCounter) {
+            for (int i = 0; i < 10; i += 2) {
+                AppendGroupEntryHandler handler =
+                        new AppendGroupEntryHandler(
+                                groupReceivedCounter,
+                                i,
+                                TestUtils.getNode(i),
+                                leadershipStale,
+                                testLog,
+                                newLeaderTerm,
+                                member);
+                new Thread(() -> handler.onComplete(Response.RESPONSE_AGREE)).start();
+            }
+            groupReceivedCounter.wait();
+        }
+        for (int i = 0; i < 10; i++) {
+            assertEquals(0, groupReceivedCounter[i]);
+        }
+        assertFalse(leadershipStale.get());
+        assertEquals(-1, newLeaderTerm.get());
     }
-    AtomicBoolean leadershipStale = new AtomicBoolean(false);
-    AtomicLong newLeaderTerm = new AtomicLong(-1);
-    Log testLog = new TestLog();
-    synchronized (groupReceivedCounter) {
-      for (int i = 0; i < 10; i += 2) {
-        AppendGroupEntryHandler handler = new AppendGroupEntryHandler(groupReceivedCounter, i,
-            TestUtils.getNode(i), leadershipStale, testLog, newLeaderTerm, member);
-        new Thread(() -> handler.onComplete(Response.RESPONSE_AGREE)).start();
-      }
-      groupReceivedCounter.wait();
-    }
-    for (int i = 0; i < 10; i++) {
-      assertEquals(0, groupReceivedCounter[i]);
-    }
-    assertFalse(leadershipStale.get());
-    assertEquals(-1, newLeaderTerm.get());
-  }
 
-  @Test
-  public void testNoAgreement() throws InterruptedException {
-    int[] groupReceivedCounter = new int[10];
-    for (int i = 0; i < 10; i++) {
-      groupReceivedCounter[i] = REPLICATION_NUM;
+    @Test
+    public void testNoAgreement() throws InterruptedException {
+        int[] groupReceivedCounter = new int[10];
+        for (int i = 0; i < 10; i++) {
+            groupReceivedCounter[i] = REPLICATION_NUM;
+        }
+        AtomicBoolean leadershipStale = new AtomicBoolean(false);
+        AtomicLong newLeaderTerm = new AtomicLong(-1);
+        Log testLog = new TestLog();
+        synchronized (groupReceivedCounter) {
+            for (int i = 0; i < 5; i++) {
+                AppendGroupEntryHandler handler =
+                        new AppendGroupEntryHandler(
+                                groupReceivedCounter,
+                                i,
+                                TestUtils.getNode(i),
+                                leadershipStale,
+                                testLog,
+                                newLeaderTerm,
+                                member);
+                handler.onComplete(Response.RESPONSE_AGREE);
+            }
+        }
+        for (int i = 0; i < 10; i++) {
+            if (i < 5) {
+                assertEquals(Math.max(0, REPLICATION_NUM - (5 - i)), groupReceivedCounter[i]);
+            } else {
+                assertEquals(Math.min(10 - i, REPLICATION_NUM), groupReceivedCounter[i]);
+            }
+        }
+        assertFalse(leadershipStale.get());
+        assertEquals(-1, newLeaderTerm.get());
     }
-    AtomicBoolean leadershipStale = new AtomicBoolean(false);
-    AtomicLong newLeaderTerm = new AtomicLong(-1);
-    Log testLog = new TestLog();
-    synchronized (groupReceivedCounter) {
-      for (int i = 0; i < 5; i++) {
-        AppendGroupEntryHandler handler = new AppendGroupEntryHandler(groupReceivedCounter, i,
-            TestUtils.getNode(i), leadershipStale, testLog, newLeaderTerm, member);
-        handler.onComplete(Response.RESPONSE_AGREE);
-      }
-    }
-    for (int i = 0; i < 10; i++) {
-      if (i < 5) {
-        assertEquals(Math.max(0, REPLICATION_NUM - (5 - i)), groupReceivedCounter[i]);
-      } else {
-        assertEquals(Math.min(10 - i, REPLICATION_NUM),
-            groupReceivedCounter[i]);
-      }
-    }
-    assertFalse(leadershipStale.get());
-    assertEquals(-1, newLeaderTerm.get());
-  }
 
-  @Test
-  public void testLeadershipStale() throws InterruptedException {
-    int[] groupReceivedCounter = new int[10];
-    for (int i = 0; i < 10; i++) {
-      groupReceivedCounter[i] = REPLICATION_NUM / 2;
+    @Test
+    public void testLeadershipStale() throws InterruptedException {
+        int[] groupReceivedCounter = new int[10];
+        for (int i = 0; i < 10; i++) {
+            groupReceivedCounter[i] = REPLICATION_NUM / 2;
+        }
+        AtomicBoolean leadershipStale = new AtomicBoolean(false);
+        AtomicLong newLeaderTerm = new AtomicLong(-1);
+        Log testLog = new TestLog();
+        synchronized (groupReceivedCounter) {
+            AppendGroupEntryHandler handler =
+                    new AppendGroupEntryHandler(
+                            groupReceivedCounter,
+                            0,
+                            TestUtils.getNode(0),
+                            leadershipStale,
+                            testLog,
+                            newLeaderTerm,
+                            member);
+            new Thread(() -> handler.onComplete(100L)).start();
+            groupReceivedCounter.wait();
+        }
+        for (int i = 0; i < 10; i++) {
+            assertEquals(REPLICATION_NUM / 2, groupReceivedCounter[i]);
+        }
+        assertTrue(leadershipStale.get());
+        assertEquals(100, newLeaderTerm.get());
     }
-    AtomicBoolean leadershipStale = new AtomicBoolean(false);
-    AtomicLong newLeaderTerm = new AtomicLong(-1);
-    Log testLog = new TestLog();
-    synchronized (groupReceivedCounter) {
-      AppendGroupEntryHandler handler = new AppendGroupEntryHandler(groupReceivedCounter, 0,
-          TestUtils.getNode(0), leadershipStale, testLog, newLeaderTerm, member);
-      new Thread(() -> handler.onComplete(100L)).start();
-      groupReceivedCounter.wait();
-    }
-    for (int i = 0; i < 10; i++) {
-      assertEquals(REPLICATION_NUM / 2, groupReceivedCounter[i]);
-    }
-    assertTrue(leadershipStale.get());
-    assertEquals(100, newLeaderTerm.get());
-  }
 
-  @Test
-  public void testError() throws InterruptedException {
-    int[] groupReceivedCounter = new int[10];
-    for (int i = 0; i < 10; i++) {
-      groupReceivedCounter[i] = REPLICATION_NUM / 2;
-    }
-    AtomicBoolean leadershipStale = new AtomicBoolean(false);
-    AtomicLong newLeaderTerm = new AtomicLong(-1);
-    Log testLog = new TestLog();
+    @Test
+    public void testError() throws InterruptedException {
+        int[] groupReceivedCounter = new int[10];
+        for (int i = 0; i < 10; i++) {
+            groupReceivedCounter[i] = REPLICATION_NUM / 2;
+        }
+        AtomicBoolean leadershipStale = new AtomicBoolean(false);
+        AtomicLong newLeaderTerm = new AtomicLong(-1);
+        Log testLog = new TestLog();
 
-    AppendGroupEntryHandler handler = new AppendGroupEntryHandler(groupReceivedCounter, 0,
-        TestUtils.getNode(0), leadershipStale, testLog, newLeaderTerm, member);
-    handler.onError(new TestException());
+        AppendGroupEntryHandler handler =
+                new AppendGroupEntryHandler(
+                        groupReceivedCounter,
+                        0,
+                        TestUtils.getNode(0),
+                        leadershipStale,
+                        testLog,
+                        newLeaderTerm,
+                        member);
+        handler.onError(new TestException());
 
-    for (int i = 0; i < 10; i++) {
-      assertEquals(REPLICATION_NUM / 2, groupReceivedCounter[i]);
+        for (int i = 0; i < 10; i++) {
+            assertEquals(REPLICATION_NUM / 2, groupReceivedCounter[i]);
+        }
+        assertFalse(leadershipStale.get());
+        assertEquals(-1, newLeaderTerm.get());
     }
-    assertFalse(leadershipStale.get());
-    assertEquals(-1, newLeaderTerm.get());
-  }
 }

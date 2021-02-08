@@ -30,64 +30,78 @@ import org.apache.iotdb.service.rpc.thrift.TSQueryDataSet;
 
 public class IoTDBJDBCResultSet extends AbstractIoTDBJDBCResultSet {
 
-  public IoTDBJDBCResultSet(Statement statement, List<String> columnNameList,
-      List<String> columnTypeList, Map<String, Integer> columnNameIndex, boolean ignoreTimeStamp,
-      TSIService.Iface client,
-      String sql, long queryId, long sessionId, TSQueryDataSet dataset)
-      throws SQLException {
-    super(statement, columnNameList, columnTypeList, columnNameIndex, ignoreTimeStamp, client, sql,
-        queryId, sessionId);
-    ioTDBRpcDataSet.setTsQueryDataSet(dataset);
-  }
-
-  @Override
-  public long getLong(String columnName) throws SQLException {
-    try {
-      return ioTDBRpcDataSet.getLong(columnName);
-    } catch (StatementExecutionException e) {
-      throw new SQLException(e.getMessage());
+    public IoTDBJDBCResultSet(
+            Statement statement,
+            List<String> columnNameList,
+            List<String> columnTypeList,
+            Map<String, Integer> columnNameIndex,
+            boolean ignoreTimeStamp,
+            TSIService.Iface client,
+            String sql,
+            long queryId,
+            long sessionId,
+            TSQueryDataSet dataset)
+            throws SQLException {
+        super(
+                statement,
+                columnNameList,
+                columnTypeList,
+                columnNameIndex,
+                ignoreTimeStamp,
+                client,
+                sql,
+                queryId,
+                sessionId);
+        ioTDBRpcDataSet.setTsQueryDataSet(dataset);
     }
-  }
 
-  @Override
-  protected boolean fetchResults() throws SQLException {
-    try {
-      return ioTDBRpcDataSet.fetchResults();
-    } catch (StatementExecutionException | IoTDBConnectionException e) {
-      throw new SQLException(e.getMessage());
+    @Override
+    public long getLong(String columnName) throws SQLException {
+        try {
+            return ioTDBRpcDataSet.getLong(columnName);
+        } catch (StatementExecutionException e) {
+            throw new SQLException(e.getMessage());
+        }
     }
-  }
 
-  @Override
-  protected boolean hasCachedResults() {
-    return ioTDBRpcDataSet.hasCachedResults();
-  }
-
-  @Override
-  protected void constructOneRow() {
-    ioTDBRpcDataSet.constructOneRow();
-  }
-
-
-  @Override
-  protected void checkRecord() throws SQLException {
-    try {
-      ioTDBRpcDataSet.checkRecord();
-    } catch (StatementExecutionException e) {
-      throw new SQLException(e.getMessage());
+    @Override
+    protected boolean fetchResults() throws SQLException {
+        try {
+            return ioTDBRpcDataSet.fetchResults();
+        } catch (StatementExecutionException | IoTDBConnectionException e) {
+            throw new SQLException(e.getMessage());
+        }
     }
-  }
 
-  @Override
-  protected String getValueByName(String columnName) throws SQLException {
-    try {
-      return ioTDBRpcDataSet.getValueByName(columnName);
-    } catch (StatementExecutionException e) {
-      throw new SQLException(e.getMessage());
+    @Override
+    protected boolean hasCachedResults() {
+        return ioTDBRpcDataSet.hasCachedResults();
     }
-  }
 
-  public boolean isIgnoreTimeStamp() {
-    return ioTDBRpcDataSet.ignoreTimeStamp;
-  }
+    @Override
+    protected void constructOneRow() {
+        ioTDBRpcDataSet.constructOneRow();
+    }
+
+    @Override
+    protected void checkRecord() throws SQLException {
+        try {
+            ioTDBRpcDataSet.checkRecord();
+        } catch (StatementExecutionException e) {
+            throw new SQLException(e.getMessage());
+        }
+    }
+
+    @Override
+    protected String getValueByName(String columnName) throws SQLException {
+        try {
+            return ioTDBRpcDataSet.getValueByName(columnName);
+        } catch (StatementExecutionException e) {
+            throw new SQLException(e.getMessage());
+        }
+    }
+
+    public boolean isIgnoreTimeStamp() {
+        return ioTDBRpcDataSet.ignoreTimeStamp;
+    }
 }

@@ -28,29 +28,28 @@ import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
 
 public class ListDataSet extends QueryDataSet {
 
-  private List<RowRecord> records = new ArrayList<>();
-  private int index = 0;
+    private List<RowRecord> records = new ArrayList<>();
+    private int index = 0;
 
-  public ListDataSet(List<PartialPath> paths,
-      List<TSDataType> dataTypes) {
-    super(new ArrayList<>(paths), dataTypes);
-  }
+    public ListDataSet(List<PartialPath> paths, List<TSDataType> dataTypes) {
+        super(new ArrayList<>(paths), dataTypes);
+    }
 
-  @Override
-  protected boolean hasNextWithoutConstraint() {
-    return index < records.size();
-  }
+    @Override
+    protected boolean hasNextWithoutConstraint() {
+        return index < records.size();
+    }
 
-  @Override
-  protected RowRecord nextWithoutConstraint() {
-    return records.get(index++);
-  }
+    @Override
+    protected RowRecord nextWithoutConstraint() {
+        return records.get(index++);
+    }
 
-  public void putRecord(RowRecord newRecord) {
-    records.add(newRecord);
-  }
+    public void putRecord(RowRecord newRecord) {
+        records.add(newRecord);
+    }
 
-  public void sortByTime() {
-    records.sort(((o1, o2) -> Long.compare(o2.getTimestamp(), o1.getTimestamp())));
-  }
+    public void sortByTime() {
+        records.sort(((o1, o2) -> Long.compare(o2.getTimestamp(), o1.getTimestamp())));
+    }
 }

@@ -20,8 +20,7 @@ package org.apache.iotdb.tsfile.exception;
 
 public class NullFieldException extends TsFileRuntimeException {
 
-  public NullFieldException() {
-    super("Field is null");
-  }
-
+    public NullFieldException() {
+        super("Field is null");
+    }
 }

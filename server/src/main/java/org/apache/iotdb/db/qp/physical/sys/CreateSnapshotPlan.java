@@ -27,13 +27,12 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class CreateSnapshotPlan extends PhysicalPlan {
 
-  public CreateSnapshotPlan() {
-    super(false, OperatorType.CREATE_SCHEMA_SNAPSHOT);
-  }
+    public CreateSnapshotPlan() {
+        super(false, OperatorType.CREATE_SCHEMA_SNAPSHOT);
+    }
 
-  @Override
-  public List<PartialPath> getPaths() {
-    return Collections.emptyList();
-  }
-
+    @Override
+    public List<PartialPath> getPaths() {
+        return Collections.emptyList();
+    }
 }

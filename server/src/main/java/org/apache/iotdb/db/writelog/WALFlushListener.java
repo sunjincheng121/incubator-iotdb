@@ -27,23 +27,24 @@ import org.apache.iotdb.db.engine.storagegroup.TsFileProcessor;
 
 public class WALFlushListener implements FlushListener {
 
-  private TsFileProcessor processor;
+    private TsFileProcessor processor;
 
-  public WALFlushListener(TsFileProcessor processor) {
-    this.processor = processor;
-  }
-
-  @Override
-  public void onFlushStart(IMemTable memTable) throws IOException {
-    if (IoTDBDescriptor.getInstance().getConfig().isEnableWal()) {
-      processor.getLogNode().notifyStartFlush();
+    public WALFlushListener(TsFileProcessor processor) {
+        this.processor = processor;
     }
-  }
 
-  @Override
-  public void onFlushEnd(IMemTable memTable) {
-    if (!memTable.isSignalMemTable() && IoTDBDescriptor.getInstance().getConfig().isEnableWal()) {
-      processor.getLogNode().notifyEndFlush();
+    @Override
+    public void onFlushStart(IMemTable memTable) throws IOException {
+        if (IoTDBDescriptor.getInstance().getConfig().isEnableWal()) {
+            processor.getLogNode().notifyStartFlush();
+        }
     }
-  }
+
+    @Override
+    public void onFlushEnd(IMemTable memTable) {
+        if (!memTable.isSignalMemTable()
+                && IoTDBDescriptor.getInstance().getConfig().isEnableWal()) {
+            processor.getLogNode().notifyEndFlush();
+        }
+    }
 }

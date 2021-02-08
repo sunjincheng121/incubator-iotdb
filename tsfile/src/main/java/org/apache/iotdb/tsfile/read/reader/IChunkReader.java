@@ -18,18 +18,17 @@
  */
 package org.apache.iotdb.tsfile.read.reader;
 
-import org.apache.iotdb.tsfile.read.common.BatchData;
-
 import java.io.IOException;
 import java.util.List;
+import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public interface IChunkReader {
 
-  boolean hasNextSatisfiedPage() throws IOException;
+    boolean hasNextSatisfiedPage() throws IOException;
 
-  BatchData nextPageData() throws IOException;
+    BatchData nextPageData() throws IOException;
 
-  void close() throws IOException;
+    void close() throws IOException;
 
-  List<IPageReader> loadPageReaderList() throws IOException;
+    List<IPageReader> loadPageReaderList() throws IOException;
 }

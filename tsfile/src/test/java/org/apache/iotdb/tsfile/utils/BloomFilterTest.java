@@ -22,46 +22,45 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import org.apache.iotdb.tsfile.utils.BloomFilter;
-
 public class BloomFilterTest {
 
-  @Test
-  public void testIn() {
-    String value1 = "device1.s1";
-    String value2 = "device1.s2";
-    String value3 = "device1.s3";
-    BloomFilter filter = BloomFilter.getEmptyBloomFilter(0.05, 3);
-    filter.add(value1);
-    filter.add(value2);
-    filter.add(value3);
+    @Test
+    public void testIn() {
+        String value1 = "device1.s1";
+        String value2 = "device1.s2";
+        String value3 = "device1.s3";
+        BloomFilter filter = BloomFilter.getEmptyBloomFilter(0.05, 3);
+        filter.add(value1);
+        filter.add(value2);
+        filter.add(value3);
 
-    assertTrue(filter.contains(value1));
-    assertTrue(filter.contains(value2));
-    assertTrue(filter.contains(value3));
-    System.out.println(filter.contains("12iuedyauydua"));
-    System.out.println(filter.contains("device_1.s1"));
-    System.out.println(filter.contains("device1.s_2"));
-    System.out.println(filter.contains("device2.s1"));
-    System.out.println(filter.contains("device3.s2"));
-    System.out.println(filter.contains("device4.s2"));
-    System.out.println(filter.contains("device1.s4"));
-  }
+        assertTrue(filter.contains(value1));
+        assertTrue(filter.contains(value2));
+        assertTrue(filter.contains(value3));
+        System.out.println(filter.contains("12iuedyauydua"));
+        System.out.println(filter.contains("device_1.s1"));
+        System.out.println(filter.contains("device1.s_2"));
+        System.out.println(filter.contains("device2.s1"));
+        System.out.println(filter.contains("device3.s2"));
+        System.out.println(filter.contains("device4.s2"));
+        System.out.println(filter.contains("device1.s4"));
+    }
 
-  @Test
-  public void testSerialize() {
-    String value1 = "device1.s1";
-    String value2 = "device1.s2";
-    String value3 = "device1.s3";
-    BloomFilter filter = BloomFilter.getEmptyBloomFilter(0.05, 3);
-    filter.add(value1);
-    filter.add(value2);
-    filter.add(value3);
+    @Test
+    public void testSerialize() {
+        String value1 = "device1.s1";
+        String value2 = "device1.s2";
+        String value3 = "device1.s3";
+        BloomFilter filter = BloomFilter.getEmptyBloomFilter(0.05, 3);
+        filter.add(value1);
+        filter.add(value2);
+        filter.add(value3);
 
-    BloomFilter filter1 = BloomFilter.buildBloomFilter(filter.serialize(), filter.getSize(),
-        filter.getHashFunctionSize());
-    assertTrue(filter1.contains(value1));
-    assertTrue(filter1.contains(value2));
-    assertTrue(filter1.contains(value3));
-  }
+        BloomFilter filter1 =
+                BloomFilter.buildBloomFilter(
+                        filter.serialize(), filter.getSize(), filter.getHashFunctionSize());
+        assertTrue(filter1.contains(value1));
+        assertTrue(filter1.contains(value2));
+        assertTrue(filter1.contains(value3));
+    }
 }

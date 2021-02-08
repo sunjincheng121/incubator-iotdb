@@ -22,8 +22,8 @@ import java.io.IOException;
 import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
 import org.apache.iotdb.tsfile.read.TsFileSequenceReader;
 import org.apache.iotdb.tsfile.read.common.Path;
-import org.apache.iotdb.tsfile.read.controller.IChunkLoader;
 import org.apache.iotdb.tsfile.read.controller.CachedChunkLoaderImpl;
+import org.apache.iotdb.tsfile.read.controller.IChunkLoader;
 import org.apache.iotdb.tsfile.read.controller.MetadataQuerierByFileImpl;
 import org.apache.iotdb.tsfile.read.expression.IExpression;
 import org.apache.iotdb.tsfile.read.expression.impl.BinaryExpression;
@@ -41,46 +41,48 @@ import org.junit.Test;
 
 public class TimeGeneratorTest {
 
-  private static final String FILE_PATH = TsFileGeneratorForTest.outputDataFile;
-  private TsFileSequenceReader fileReader;
-  private MetadataQuerierByFileImpl metadataQuerierByFile;
-  private IChunkLoader chunkLoader;
+    private static final String FILE_PATH = TsFileGeneratorForTest.outputDataFile;
+    private TsFileSequenceReader fileReader;
+    private MetadataQuerierByFileImpl metadataQuerierByFile;
+    private IChunkLoader chunkLoader;
 
-  @Before
-  public void before() throws IOException {
-    TSFileDescriptor.getInstance().getConfig().setTimeEncoder("TS_2DIFF");
-    TsFileGeneratorForTest.generateFile(1000, 10 * 1024 * 1024, 10000);
-    fileReader = new TsFileSequenceReader(FILE_PATH);
-    metadataQuerierByFile = new MetadataQuerierByFileImpl(fileReader);
-    chunkLoader = new CachedChunkLoaderImpl(fileReader);
-  }
-
-  @After
-  public void after() throws IOException {
-    fileReader.close();
-    TsFileGeneratorForTest.after();
-  }
-
-  @Test
-  public void testTimeGenerator() throws IOException {
-    long startTimestamp = 1480562618000L;
-    Filter filter = TimeFilter.lt(1480562618100L);
-    Filter filter2 = ValueFilter.gt(new Binary("dog"));
-    Filter filter3 = FilterFactory
-        .and(TimeFilter.gtEq(1480562618000L), TimeFilter.ltEq(1480562618100L));
-
-    IExpression IExpression = BinaryExpression.or(
-        BinaryExpression.and(new SingleSeriesExpression(new Path("d1", "s1"), filter),
-            new SingleSeriesExpression(new Path("d1", "s4"), filter2)),
-        new SingleSeriesExpression(new Path("d1", "s1"), filter3));
-
-    TsFileTimeGenerator timestampGenerator = new TsFileTimeGenerator(IExpression, chunkLoader,
-        metadataQuerierByFile);
-    while (timestampGenerator.hasNext()) {
-      // System.out.println(timestampGenerator.next());
-      Assert.assertEquals(startTimestamp, timestampGenerator.next());
-      startTimestamp += 1;
+    @Before
+    public void before() throws IOException {
+        TSFileDescriptor.getInstance().getConfig().setTimeEncoder("TS_2DIFF");
+        TsFileGeneratorForTest.generateFile(1000, 10 * 1024 * 1024, 10000);
+        fileReader = new TsFileSequenceReader(FILE_PATH);
+        metadataQuerierByFile = new MetadataQuerierByFileImpl(fileReader);
+        chunkLoader = new CachedChunkLoaderImpl(fileReader);
     }
-    Assert.assertEquals(1480562618101L, startTimestamp);
-  }
+
+    @After
+    public void after() throws IOException {
+        fileReader.close();
+        TsFileGeneratorForTest.after();
+    }
+
+    @Test
+    public void testTimeGenerator() throws IOException {
+        long startTimestamp = 1480562618000L;
+        Filter filter = TimeFilter.lt(1480562618100L);
+        Filter filter2 = ValueFilter.gt(new Binary("dog"));
+        Filter filter3 =
+                FilterFactory.and(TimeFilter.gtEq(1480562618000L), TimeFilter.ltEq(1480562618100L));
+
+        IExpression IExpression =
+                BinaryExpression.or(
+                        BinaryExpression.and(
+                                new SingleSeriesExpression(new Path("d1", "s1"), filter),
+                                new SingleSeriesExpression(new Path("d1", "s4"), filter2)),
+                        new SingleSeriesExpression(new Path("d1", "s1"), filter3));
+
+        TsFileTimeGenerator timestampGenerator =
+                new TsFileTimeGenerator(IExpression, chunkLoader, metadataQuerierByFile);
+        while (timestampGenerator.hasNext()) {
+            // System.out.println(timestampGenerator.next());
+            Assert.assertEquals(startTimestamp, timestampGenerator.next());
+            startTimestamp += 1;
+        }
+        Assert.assertEquals(1480562618101L, startTimestamp);
+    }
 }

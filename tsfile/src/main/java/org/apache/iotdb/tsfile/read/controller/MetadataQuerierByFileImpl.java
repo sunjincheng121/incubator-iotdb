@@ -41,232 +41,233 @@ import org.apache.iotdb.tsfile.read.common.TimeRange;
 
 public class MetadataQuerierByFileImpl implements IMetadataQuerier {
 
-  // number of cache entries (path -> List<ChunkMetadata>)
-  private static final int CACHED_ENTRY_NUMBER = 1000;
+    // number of cache entries (path -> List<ChunkMetadata>)
+    private static final int CACHED_ENTRY_NUMBER = 1000;
 
-  private TsFileMetadata fileMetaData;
+    private TsFileMetadata fileMetaData;
 
-  private LRUCache<Path, List<ChunkMetadata>> chunkMetaDataCache;
+    private LRUCache<Path, List<ChunkMetadata>> chunkMetaDataCache;
 
-  private TsFileSequenceReader tsFileReader;
+    private TsFileSequenceReader tsFileReader;
 
-  /**
-   * Constructor of MetadataQuerierByFileImpl.
-   */
-  public MetadataQuerierByFileImpl(TsFileSequenceReader tsFileReader) throws IOException {
-    this.tsFileReader = tsFileReader;
-    this.fileMetaData = tsFileReader.readFileMetadata();
-    chunkMetaDataCache = new LRUCache<Path, List<ChunkMetadata>>(CACHED_ENTRY_NUMBER) {
-      @Override
-      public List<ChunkMetadata> loadObjectByKey(Path key) throws IOException {
-        return loadChunkMetadata(key);
-      }
-    };
-  }
-
-  @Override
-  public List<ChunkMetadata> getChunkMetaDataList(Path path) throws IOException {
-    return chunkMetaDataCache.get(path);
-  }
-
-  @Override
-  public Map<Path, List<ChunkMetadata>> getChunkMetaDataMap(List<Path> paths) throws IOException {
-    Map<Path, List<ChunkMetadata>> chunkMetaDatas = new HashMap<>();
-    for (Path path : paths) {
-      if (!chunkMetaDatas.containsKey(path)) {
-        chunkMetaDatas.put(path, new ArrayList<>());
-      }
-      chunkMetaDatas.get(path).addAll(getChunkMetaDataList(path));
-    }
-    return chunkMetaDatas;
-  }
-
-  @Override
-  public TsFileMetadata getWholeFileMetadata() {
-    return fileMetaData;
-  }
-
-  @Override
-  @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  public void loadChunkMetaDatas(List<Path> paths) throws IOException {
-    // group measurements by device
-    TreeMap<String, Set<String>> deviceMeasurementsMap = new TreeMap<>();
-    for (Path path : paths) {
-      if (!deviceMeasurementsMap.containsKey(path.getDevice())) {
-        deviceMeasurementsMap.put(path.getDevice(), new HashSet<>());
-      }
-      deviceMeasurementsMap.get(path.getDevice()).add(path.getMeasurement());
+    /** Constructor of MetadataQuerierByFileImpl. */
+    public MetadataQuerierByFileImpl(TsFileSequenceReader tsFileReader) throws IOException {
+        this.tsFileReader = tsFileReader;
+        this.fileMetaData = tsFileReader.readFileMetadata();
+        chunkMetaDataCache =
+                new LRUCache<Path, List<ChunkMetadata>>(CACHED_ENTRY_NUMBER) {
+                    @Override
+                    public List<ChunkMetadata> loadObjectByKey(Path key) throws IOException {
+                        return loadChunkMetadata(key);
+                    }
+                };
     }
 
-    Map<Path, List<ChunkMetadata>> tempChunkMetaDatas = new HashMap<>();
+    @Override
+    public List<ChunkMetadata> getChunkMetaDataList(Path path) throws IOException {
+        return chunkMetaDataCache.get(path);
+    }
 
-    int count = 0;
-    boolean enough = false;
-
-    for (Map.Entry<String, Set<String>> deviceMeasurements : deviceMeasurementsMap.entrySet()) {
-      if (enough) {
-        break;
-      }
-      String selectedDevice = deviceMeasurements.getKey();
-      // s1, s2, s3
-      Set<String> selectedMeasurements = deviceMeasurements.getValue();
-      List<String> devices = this.tsFileReader.getAllDevices();
-      String[] deviceNames = devices.toArray(new String[0]);
-      if (Arrays.binarySearch(deviceNames, selectedDevice) < 0) {
-        continue;
-      }
-
-      List<TimeseriesMetadata> timeseriesMetaDataList = tsFileReader
-          .readTimeseriesMetadata(selectedDevice, selectedMeasurements);
-      List<ChunkMetadata> chunkMetadataList = new ArrayList<>();
-      for (TimeseriesMetadata timeseriesMetadata : timeseriesMetaDataList) {
-        chunkMetadataList.addAll(tsFileReader.readChunkMetaDataList(timeseriesMetadata));
-      }
-      // d1
-      for (ChunkMetadata chunkMetaData : chunkMetadataList) {
-        String currentMeasurement = chunkMetaData.getMeasurementUid();
-
-        // s1
-        if (selectedMeasurements.contains(currentMeasurement)) {
-
-          // d1.s1
-          Path path = new Path(selectedDevice, currentMeasurement);
-
-          // add into tempChunkMetaDatas
-          if (!tempChunkMetaDatas.containsKey(path)) {
-            tempChunkMetaDatas.put(path, new ArrayList<>());
-          }
-          tempChunkMetaDatas.get(path).add(chunkMetaData);
-
-          // check cache size, stop when reading enough
-          count++;
-          if (count == CACHED_ENTRY_NUMBER) {
-            enough = true;
-            break;
-          }
+    @Override
+    public Map<Path, List<ChunkMetadata>> getChunkMetaDataMap(List<Path> paths) throws IOException {
+        Map<Path, List<ChunkMetadata>> chunkMetaDatas = new HashMap<>();
+        for (Path path : paths) {
+            if (!chunkMetaDatas.containsKey(path)) {
+                chunkMetaDatas.put(path, new ArrayList<>());
+            }
+            chunkMetaDatas.get(path).addAll(getChunkMetaDataList(path));
         }
-      }
+        return chunkMetaDatas;
     }
 
-    for (Map.Entry<Path, List<ChunkMetadata>> entry : tempChunkMetaDatas.entrySet()) {
-      chunkMetaDataCache.put(entry.getKey(), entry.getValue());
-    }
-  }
-
-  @Override
-  public TSDataType getDataType(Path path) throws IOException {
-    if (tsFileReader.getChunkMetadataList(path) == null || tsFileReader.getChunkMetadataList(path)
-        .isEmpty()) {
-      return null;
-    }
-    return tsFileReader.getChunkMetadataList(path).get(0).getDataType();
-
-  }
-
-  private List<ChunkMetadata> loadChunkMetadata(Path path) throws IOException {
-    return tsFileReader.getChunkMetadataList(path);
-  }
-
-
-  @Override
-  @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  public List<TimeRange> convertSpace2TimePartition(List<Path> paths, long spacePartitionStartPos,
-      long spacePartitionEndPos) throws IOException {
-    if (spacePartitionStartPos > spacePartitionEndPos) {
-      throw new IllegalArgumentException(
-          "'spacePartitionStartPos' should not be larger than 'spacePartitionEndPos'.");
+    @Override
+    public TsFileMetadata getWholeFileMetadata() {
+        return fileMetaData;
     }
 
-    // (1) get timeRangesInCandidates and timeRangesBeforeCandidates by iterating
-    // through the metadata
-    ArrayList<TimeRange> timeRangesInCandidates = new ArrayList<>();
-    ArrayList<TimeRange> timeRangesBeforeCandidates = new ArrayList<>();
-
-    // group measurements by device
-
-    TreeMap<String, Set<String>> deviceMeasurementsMap = new TreeMap<>();
-    for (Path path : paths) {
-      deviceMeasurementsMap.computeIfAbsent(path.getDevice(), key -> new HashSet<>())
-          .add(path.getMeasurement());
-    }
-    for (Map.Entry<String, Set<String>> deviceMeasurements : deviceMeasurementsMap.entrySet()) {
-      String selectedDevice = deviceMeasurements.getKey();
-      Set<String> selectedMeasurements = deviceMeasurements.getValue();
-
-      // measurement -> ChunkMetadata list
-      Map<String, List<ChunkMetadata>> seriesMetadatas = tsFileReader
-          .readChunkMetadataInDevice(selectedDevice);
-
-      for (Entry<String, List<ChunkMetadata>> seriesMetadata : seriesMetadatas.entrySet()) {
-
-        if (!selectedMeasurements.contains(seriesMetadata.getKey())) {
-          continue;
+    @Override
+    @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
+    public void loadChunkMetaDatas(List<Path> paths) throws IOException {
+        // group measurements by device
+        TreeMap<String, Set<String>> deviceMeasurementsMap = new TreeMap<>();
+        for (Path path : paths) {
+            if (!deviceMeasurementsMap.containsKey(path.getDevice())) {
+                deviceMeasurementsMap.put(path.getDevice(), new HashSet<>());
+            }
+            deviceMeasurementsMap.get(path.getDevice()).add(path.getMeasurement());
         }
 
-        for (ChunkMetadata chunkMetadata : seriesMetadata.getValue()) {
-          LocateStatus location = checkLocateStatus(chunkMetadata, spacePartitionStartPos,
-              spacePartitionEndPos);
-          if (location == LocateStatus.after) {
-            break;
-          }
+        Map<Path, List<ChunkMetadata>> tempChunkMetaDatas = new HashMap<>();
 
-          if (location == LocateStatus.in) {
-            timeRangesInCandidates
-                .add(new TimeRange(chunkMetadata.getStartTime(), chunkMetadata.getEndTime()));
-          } else {
-            timeRangesBeforeCandidates
-                .add(new TimeRange(chunkMetadata.getStartTime(), chunkMetadata.getEndTime()));
-          }
+        int count = 0;
+        boolean enough = false;
+
+        for (Map.Entry<String, Set<String>> deviceMeasurements : deviceMeasurementsMap.entrySet()) {
+            if (enough) {
+                break;
+            }
+            String selectedDevice = deviceMeasurements.getKey();
+            // s1, s2, s3
+            Set<String> selectedMeasurements = deviceMeasurements.getValue();
+            List<String> devices = this.tsFileReader.getAllDevices();
+            String[] deviceNames = devices.toArray(new String[0]);
+            if (Arrays.binarySearch(deviceNames, selectedDevice) < 0) {
+                continue;
+            }
+
+            List<TimeseriesMetadata> timeseriesMetaDataList =
+                    tsFileReader.readTimeseriesMetadata(selectedDevice, selectedMeasurements);
+            List<ChunkMetadata> chunkMetadataList = new ArrayList<>();
+            for (TimeseriesMetadata timeseriesMetadata : timeseriesMetaDataList) {
+                chunkMetadataList.addAll(tsFileReader.readChunkMetaDataList(timeseriesMetadata));
+            }
+            // d1
+            for (ChunkMetadata chunkMetaData : chunkMetadataList) {
+                String currentMeasurement = chunkMetaData.getMeasurementUid();
+
+                // s1
+                if (selectedMeasurements.contains(currentMeasurement)) {
+
+                    // d1.s1
+                    Path path = new Path(selectedDevice, currentMeasurement);
+
+                    // add into tempChunkMetaDatas
+                    if (!tempChunkMetaDatas.containsKey(path)) {
+                        tempChunkMetaDatas.put(path, new ArrayList<>());
+                    }
+                    tempChunkMetaDatas.get(path).add(chunkMetaData);
+
+                    // check cache size, stop when reading enough
+                    count++;
+                    if (count == CACHED_ENTRY_NUMBER) {
+                        enough = true;
+                        break;
+                    }
+                }
+            }
         }
 
-      }
+        for (Map.Entry<Path, List<ChunkMetadata>> entry : tempChunkMetaDatas.entrySet()) {
+            chunkMetaDataCache.put(entry.getKey(), entry.getValue());
+        }
     }
 
-    // (2) sort and merge the timeRangesInCandidates
-    ArrayList<TimeRange> timeRangesIn = new ArrayList<>(
-        TimeRange.sortAndMerge(timeRangesInCandidates));
-    if (timeRangesIn.isEmpty()) {
-      return Collections.emptyList(); // return an empty list
+    @Override
+    public TSDataType getDataType(Path path) throws IOException {
+        if (tsFileReader.getChunkMetadataList(path) == null
+                || tsFileReader.getChunkMetadataList(path).isEmpty()) {
+            return null;
+        }
+        return tsFileReader.getChunkMetadataList(path).get(0).getDataType();
     }
 
-    // (3) sort and merge the timeRangesBeforeCandidates
-    ArrayList<TimeRange> timeRangesBefore = new ArrayList<>(
-        TimeRange.sortAndMerge(timeRangesBeforeCandidates));
-
-    // (4) calculate the remaining time ranges
-    List<TimeRange> resTimeRanges = new ArrayList<>();
-    for (TimeRange in : timeRangesIn) {
-      ArrayList<TimeRange> remains = new ArrayList<>(in.getRemains(timeRangesBefore));
-      resTimeRanges.addAll(remains);
+    private List<ChunkMetadata> loadChunkMetadata(Path path) throws IOException {
+        return tsFileReader.getChunkMetadataList(path);
     }
 
-    return resTimeRanges;
-  }
+    @Override
+    @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
+    public List<TimeRange> convertSpace2TimePartition(
+            List<Path> paths, long spacePartitionStartPos, long spacePartitionEndPos)
+            throws IOException {
+        if (spacePartitionStartPos > spacePartitionEndPos) {
+            throw new IllegalArgumentException(
+                    "'spacePartitionStartPos' should not be larger than 'spacePartitionEndPos'.");
+        }
 
-  /**
-   * Check the location of a given chunkGroupMetaData with respect to a space partition constraint.
-   *
-   * @param chunkMetaData the given chunkMetaData
-   * @param spacePartitionStartPos the start position of the space partition
-   * @param spacePartitionEndPos the end position of the space partition
-   * @return LocateStatus
-   */
-  public static LocateStatus checkLocateStatus(ChunkMetadata chunkMetaData,
-      long spacePartitionStartPos, long spacePartitionEndPos) {
-    long startOffsetOfChunk = chunkMetaData.getOffsetOfChunkHeader();
-    if (spacePartitionStartPos <= startOffsetOfChunk
-        && startOffsetOfChunk < spacePartitionEndPos) {
-      return LocateStatus.in;
-    } else if (startOffsetOfChunk < spacePartitionStartPos) {
-      return LocateStatus.before;
-    } else {
-      return LocateStatus.after;
+        // (1) get timeRangesInCandidates and timeRangesBeforeCandidates by iterating
+        // through the metadata
+        ArrayList<TimeRange> timeRangesInCandidates = new ArrayList<>();
+        ArrayList<TimeRange> timeRangesBeforeCandidates = new ArrayList<>();
+
+        // group measurements by device
+
+        TreeMap<String, Set<String>> deviceMeasurementsMap = new TreeMap<>();
+        for (Path path : paths) {
+            deviceMeasurementsMap
+                    .computeIfAbsent(path.getDevice(), key -> new HashSet<>())
+                    .add(path.getMeasurement());
+        }
+        for (Map.Entry<String, Set<String>> deviceMeasurements : deviceMeasurementsMap.entrySet()) {
+            String selectedDevice = deviceMeasurements.getKey();
+            Set<String> selectedMeasurements = deviceMeasurements.getValue();
+
+            // measurement -> ChunkMetadata list
+            Map<String, List<ChunkMetadata>> seriesMetadatas =
+                    tsFileReader.readChunkMetadataInDevice(selectedDevice);
+
+            for (Entry<String, List<ChunkMetadata>> seriesMetadata : seriesMetadatas.entrySet()) {
+
+                if (!selectedMeasurements.contains(seriesMetadata.getKey())) {
+                    continue;
+                }
+
+                for (ChunkMetadata chunkMetadata : seriesMetadata.getValue()) {
+                    LocateStatus location =
+                            checkLocateStatus(
+                                    chunkMetadata, spacePartitionStartPos, spacePartitionEndPos);
+                    if (location == LocateStatus.after) {
+                        break;
+                    }
+
+                    if (location == LocateStatus.in) {
+                        timeRangesInCandidates.add(
+                                new TimeRange(
+                                        chunkMetadata.getStartTime(), chunkMetadata.getEndTime()));
+                    } else {
+                        timeRangesBeforeCandidates.add(
+                                new TimeRange(
+                                        chunkMetadata.getStartTime(), chunkMetadata.getEndTime()));
+                    }
+                }
+            }
+        }
+
+        // (2) sort and merge the timeRangesInCandidates
+        ArrayList<TimeRange> timeRangesIn =
+                new ArrayList<>(TimeRange.sortAndMerge(timeRangesInCandidates));
+        if (timeRangesIn.isEmpty()) {
+            return Collections.emptyList(); // return an empty list
+        }
+
+        // (3) sort and merge the timeRangesBeforeCandidates
+        ArrayList<TimeRange> timeRangesBefore =
+                new ArrayList<>(TimeRange.sortAndMerge(timeRangesBeforeCandidates));
+
+        // (4) calculate the remaining time ranges
+        List<TimeRange> resTimeRanges = new ArrayList<>();
+        for (TimeRange in : timeRangesIn) {
+            ArrayList<TimeRange> remains = new ArrayList<>(in.getRemains(timeRangesBefore));
+            resTimeRanges.addAll(remains);
+        }
+
+        return resTimeRanges;
     }
-  }
 
-  @Override
-  public void clear() {
-    chunkMetaDataCache.clear();
-  }
+    /**
+     * Check the location of a given chunkGroupMetaData with respect to a space partition
+     * constraint.
+     *
+     * @param chunkMetaData the given chunkMetaData
+     * @param spacePartitionStartPos the start position of the space partition
+     * @param spacePartitionEndPos the end position of the space partition
+     * @return LocateStatus
+     */
+    public static LocateStatus checkLocateStatus(
+            ChunkMetadata chunkMetaData, long spacePartitionStartPos, long spacePartitionEndPos) {
+        long startOffsetOfChunk = chunkMetaData.getOffsetOfChunkHeader();
+        if (spacePartitionStartPos <= startOffsetOfChunk
+                && startOffsetOfChunk < spacePartitionEndPos) {
+            return LocateStatus.in;
+        } else if (startOffsetOfChunk < spacePartitionStartPos) {
+            return LocateStatus.before;
+        } else {
+            return LocateStatus.after;
+        }
+    }
 
+    @Override
+    public void clear() {
+        chunkMetaDataCache.clear();
+    }
 }

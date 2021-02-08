@@ -30,28 +30,30 @@ import org.slf4j.LoggerFactory;
 
 public class SlotTsFileFilter implements TsFileFilter {
 
-  private static final Logger logger = LoggerFactory.getLogger(SlotTsFileFilter.class);
-  private List<Integer> slots;
+    private static final Logger logger = LoggerFactory.getLogger(SlotTsFileFilter.class);
+    private List<Integer> slots;
 
-  public SlotTsFileFilter(List<Integer> slots) {
-    this.slots = slots;
-  }
+    public SlotTsFileFilter(List<Integer> slots) {
+        this.slots = slots;
+    }
 
-  @Override
-  public boolean fileNotSatisfy(TsFileResource resource) {
-    return fileNotInSlots(resource, slots);
-  }
+    @Override
+    public boolean fileNotSatisfy(TsFileResource resource) {
+        return fileNotInSlots(resource, slots);
+    }
 
-  private static boolean fileNotInSlots(TsFileResource res, List<Integer> nodeSlots) {
-    // <storageGroupName>/<partitionNum>/<fileName>
-    String[] pathSegments = FilePathUtils.splitTsFilePath(res);
-    String storageGroupName = pathSegments[pathSegments.length - 3];
-    int partitionNum = Integer.parseInt(pathSegments[pathSegments.length - 2]);
-    int slot = SlotPartitionTable.getSlotStrategy()
-        .calculateSlotByPartitionNum(storageGroupName, partitionNum,
-        ClusterConstant.SLOT_NUM);
-    boolean contained = nodeSlots.contains(slot);
-    logger.debug("The slot of {} is {}, contained: {}", res.getTsFile().getPath(), slot, contained);
-    return !contained;
-  }
+    private static boolean fileNotInSlots(TsFileResource res, List<Integer> nodeSlots) {
+        // <storageGroupName>/<partitionNum>/<fileName>
+        String[] pathSegments = FilePathUtils.splitTsFilePath(res);
+        String storageGroupName = pathSegments[pathSegments.length - 3];
+        int partitionNum = Integer.parseInt(pathSegments[pathSegments.length - 2]);
+        int slot =
+                SlotPartitionTable.getSlotStrategy()
+                        .calculateSlotByPartitionNum(
+                                storageGroupName, partitionNum, ClusterConstant.SLOT_NUM);
+        boolean contained = nodeSlots.contains(slot);
+        logger.debug(
+                "The slot of {} is {}, contained: {}", res.getTsFile().getPath(), slot, contained);
+        return !contained;
+    }
 }

@@ -35,26 +35,30 @@ import org.apache.iotdb.db.service.IoTDB;
 
 public class ClusterAlignByDeviceDataSet extends AlignByDeviceDataSet {
 
-
-  public ClusterAlignByDeviceDataSet(
-      AlignByDevicePlan alignByDevicePlan,
-      QueryContext context,
-      IQueryRouter queryRouter) {
-    super(alignByDevicePlan, context, queryRouter);
-  }
-
-  @Override
-  protected Set<String> getDeviceMeasurements(PartialPath device) throws IOException {
-    try {
-      List<PartialPath> matchedPaths = ((CMManager) IoTDB.metaManager).getMatchedPaths(device);
-      Set<String> deviceMeasurements = new HashSet<>();
-      for (PartialPath matchedPath : matchedPaths) {
-        deviceMeasurements.add(matchedPath.getFullPath().substring(
-            matchedPath.getFullPath().lastIndexOf(IoTDBConstant.PATH_SEPARATOR) + 1));
-      }
-      return deviceMeasurements;
-    } catch (MetadataException e) {
-      throw new IOException(e);
+    public ClusterAlignByDeviceDataSet(
+            AlignByDevicePlan alignByDevicePlan, QueryContext context, IQueryRouter queryRouter) {
+        super(alignByDevicePlan, context, queryRouter);
     }
-  }
+
+    @Override
+    protected Set<String> getDeviceMeasurements(PartialPath device) throws IOException {
+        try {
+            List<PartialPath> matchedPaths =
+                    ((CMManager) IoTDB.metaManager).getMatchedPaths(device);
+            Set<String> deviceMeasurements = new HashSet<>();
+            for (PartialPath matchedPath : matchedPaths) {
+                deviceMeasurements.add(
+                        matchedPath
+                                .getFullPath()
+                                .substring(
+                                        matchedPath
+                                                        .getFullPath()
+                                                        .lastIndexOf(IoTDBConstant.PATH_SEPARATOR)
+                                                + 1));
+            }
+            return deviceMeasurements;
+        } catch (MetadataException e) {
+            throw new IOException(e);
+        }
+    }
 }

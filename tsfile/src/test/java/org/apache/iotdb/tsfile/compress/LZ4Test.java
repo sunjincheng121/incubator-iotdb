@@ -30,40 +30,37 @@ import org.junit.Test;
 
 public class LZ4Test {
 
-  private String randomString(int length) {
-    StringBuilder builder = new StringBuilder(length);
-    for (int i = 0; i < length; i++) {
-      builder.append((char) (ThreadLocalRandom.current().nextInt(33, 128)));
+    private String randomString(int length) {
+        StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            builder.append((char) (ThreadLocalRandom.current().nextInt(33, 128)));
+        }
+        return builder.toString();
     }
-    return builder.toString();
-  }
 
-  @Before
-  public void setUp() {
-  }
+    @Before
+    public void setUp() {}
 
-  @After
-  public void tearDown() {
-  }
+    @After
+    public void tearDown() {}
 
-  @Test
-  public void testBytes() throws IOException {
-    String input = randomString(2000000);
-    byte[] uncom = input.getBytes(StandardCharsets.UTF_8);
-    long time = System.currentTimeMillis();
-    ICompressor compressor = new IOTDBLZ4Compressor();
+    @Test
+    public void testBytes() throws IOException {
+        String input = randomString(2000000);
+        byte[] uncom = input.getBytes(StandardCharsets.UTF_8);
+        long time = System.currentTimeMillis();
+        ICompressor compressor = new IOTDBLZ4Compressor();
 
-    byte[] compressed = compressor.compress(uncom);
-    System.out.println("compression time cost:" + (System.currentTimeMillis() - time));
-    time = System.currentTimeMillis();
-    System.out.println("ratio: " + (double) compressed.length / uncom.length);
+        byte[] compressed = compressor.compress(uncom);
+        System.out.println("compression time cost:" + (System.currentTimeMillis() - time));
+        time = System.currentTimeMillis();
+        System.out.println("ratio: " + (double) compressed.length / uncom.length);
 
-    IUnCompressor unCompressor = new LZ4UnCompressor();
-    byte[] uncompressed = new byte[uncom.length];
-    unCompressor.uncompress(compressed, 0, compressed.length, uncompressed, 0);
-    System.out.println("decompression time cost:" + (System.currentTimeMillis() - time));
+        IUnCompressor unCompressor = new LZ4UnCompressor();
+        byte[] uncompressed = new byte[uncom.length];
+        unCompressor.uncompress(compressed, 0, compressed.length, uncompressed, 0);
+        System.out.println("decompression time cost:" + (System.currentTimeMillis() - time));
 
-    Assert.assertArrayEquals(uncom, uncompressed);
-  }
-
+        Assert.assertArrayEquals(uncom, uncompressed);
+    }
 }

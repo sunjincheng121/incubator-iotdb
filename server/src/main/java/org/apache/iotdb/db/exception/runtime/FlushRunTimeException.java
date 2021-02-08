@@ -21,9 +21,9 @@ package org.apache.iotdb.db.exception.runtime;
 
 public class FlushRunTimeException extends RuntimeException {
 
-  private static final long serialVersionUID = 2249517655460110259L;
+    private static final long serialVersionUID = 2249517655460110259L;
 
-  public FlushRunTimeException(Exception exception) {
-    super(exception);
-  }
+    public FlushRunTimeException(Exception exception) {
+        super(exception);
+    }
 }

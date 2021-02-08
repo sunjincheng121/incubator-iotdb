@@ -47,112 +47,116 @@ import org.junit.Before;
 
 public class DataHeartbeatThreadTest extends HeartbeatThreadTest {
 
-  private TestLogManager dataLogManager;
-  private MetaGroupMember metaGroupMember = (MetaGroupMember) super.getMember();
+    private TestLogManager dataLogManager;
+    private MetaGroupMember metaGroupMember = (MetaGroupMember) super.getMember();
 
-  @Override
-  RaftMember getMember() {
-    return new TestDataGroupMember() {
-      @Override
-      public RaftLogManager getLogManager() {
-        return dataLogManager;
-      }
-
-      @Override
-      public void updateHardState(long currentTerm, Node leader) {
-      }
-
-      @Override
-      public AsyncClient getAsyncClient(Node node) {
-        return getClient(node);
-      }
-
-      @Override
-      public AsyncClient getAsyncHeartbeatClient(Node node) {
-        return getClient(node);
-      }
-
-      @Override
-      public MetaGroupMember getMetaGroupMember() {
-        return metaGroupMember;
-      }
-    };
-  }
-
-  @Override
-  AsyncClient getClient(Node node) {
-    return new TestAsyncClient(node.nodeIdentifier) {
-      @Override
-      public void sendHeartbeat(HeartBeatRequest request,
-          AsyncMethodCallback<HeartBeatResponse> resultHandler) {
-        new Thread(() -> {
-          if (testHeartbeat) {
-            assertEquals(TestUtils.getNode(0), request.getLeader());
-            assertEquals(13, request.getCommitLogIndex());
-            assertEquals(10, request.getTerm());
-            assertEquals(TestUtils.getNode(0), request.getHeader());
-            synchronized (receivedNodes) {
-              receivedNodes.add(getSerialNum());
-              for (int i = 1; i < 10; i++) {
-                if (!receivedNodes.contains(i)) {
-                  return;
-                }
-              }
-              testThread.interrupt();
+    @Override
+    RaftMember getMember() {
+        return new TestDataGroupMember() {
+            @Override
+            public RaftLogManager getLogManager() {
+                return dataLogManager;
             }
-          } else if (respondToElection) {
-            synchronized (testThread) {
-              testThread.notifyAll();
+
+            @Override
+            public void updateHardState(long currentTerm, Node leader) {}
+
+            @Override
+            public AsyncClient getAsyncClient(Node node) {
+                return getClient(node);
             }
-          }
-        }).start();
-      }
 
-      @Override
-      public void startElection(ElectionRequest request,
-          AsyncMethodCallback<Long> resultHandler) {
-        new Thread(() -> {
-          assertEquals(TestUtils.getNode(0), request.getElector());
-          assertEquals(11, request.getTerm());
-          assertEquals(6, request.getLastLogIndex());
-          assertEquals(6, request.getLastLogTerm());
-          assertEquals(13, request.getDataLogLastTerm());
-          assertEquals(13, request.getDataLogLastIndex());
-          if (respondToElection) {
-            resultHandler.onComplete(Response.RESPONSE_AGREE);
-          }
-        }).start();
-      }
-    };
-  }
+            @Override
+            public AsyncClient getAsyncHeartbeatClient(Node node) {
+                return getClient(node);
+            }
 
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    dataLogManager = new TestLogManager(2);
-    List<Log> logs = TestUtils.prepareTestLogs(14);
-    dataLogManager.append(logs);
-    dataLogManager.commitTo(13);
-  }
-
-  @Override
-  @After
-  public void tearDown() throws InterruptedException, IOException, StorageEngineException {
-    dataLogManager.close();
-    dataLogManager = null;
-    metaGroupMember.closeLogManager();
-    metaGroupMember = null;
-    File dir = new File(SyncLogDequeSerializer.getLogDir(2));
-    for (File file : dir.listFiles()) {
-      file.delete();
+            @Override
+            public MetaGroupMember getMetaGroupMember() {
+                return metaGroupMember;
+            }
+        };
     }
-    dir.delete();
-    super.tearDown();
-  }
 
-  @Override
-  HeartbeatThread getHeartbeatThread(RaftMember member) {
-    return new DataHeartbeatThread((DataGroupMember) member);
-  }
+    @Override
+    AsyncClient getClient(Node node) {
+        return new TestAsyncClient(node.nodeIdentifier) {
+            @Override
+            public void sendHeartbeat(
+                    HeartBeatRequest request,
+                    AsyncMethodCallback<HeartBeatResponse> resultHandler) {
+                new Thread(
+                                () -> {
+                                    if (testHeartbeat) {
+                                        assertEquals(TestUtils.getNode(0), request.getLeader());
+                                        assertEquals(13, request.getCommitLogIndex());
+                                        assertEquals(10, request.getTerm());
+                                        assertEquals(TestUtils.getNode(0), request.getHeader());
+                                        synchronized (receivedNodes) {
+                                            receivedNodes.add(getSerialNum());
+                                            for (int i = 1; i < 10; i++) {
+                                                if (!receivedNodes.contains(i)) {
+                                                    return;
+                                                }
+                                            }
+                                            testThread.interrupt();
+                                        }
+                                    } else if (respondToElection) {
+                                        synchronized (testThread) {
+                                            testThread.notifyAll();
+                                        }
+                                    }
+                                })
+                        .start();
+            }
+
+            @Override
+            public void startElection(
+                    ElectionRequest request, AsyncMethodCallback<Long> resultHandler) {
+                new Thread(
+                                () -> {
+                                    assertEquals(TestUtils.getNode(0), request.getElector());
+                                    assertEquals(11, request.getTerm());
+                                    assertEquals(6, request.getLastLogIndex());
+                                    assertEquals(6, request.getLastLogTerm());
+                                    assertEquals(13, request.getDataLogLastTerm());
+                                    assertEquals(13, request.getDataLogLastIndex());
+                                    if (respondToElection) {
+                                        resultHandler.onComplete(Response.RESPONSE_AGREE);
+                                    }
+                                })
+                        .start();
+            }
+        };
+    }
+
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        dataLogManager = new TestLogManager(2);
+        List<Log> logs = TestUtils.prepareTestLogs(14);
+        dataLogManager.append(logs);
+        dataLogManager.commitTo(13);
+    }
+
+    @Override
+    @After
+    public void tearDown() throws InterruptedException, IOException, StorageEngineException {
+        dataLogManager.close();
+        dataLogManager = null;
+        metaGroupMember.closeLogManager();
+        metaGroupMember = null;
+        File dir = new File(SyncLogDequeSerializer.getLogDir(2));
+        for (File file : dir.listFiles()) {
+            file.delete();
+        }
+        dir.delete();
+        super.tearDown();
+    }
+
+    @Override
+    HeartbeatThread getHeartbeatThread(RaftMember member) {
+        return new DataHeartbeatThread((DataGroupMember) member);
+    }
 }

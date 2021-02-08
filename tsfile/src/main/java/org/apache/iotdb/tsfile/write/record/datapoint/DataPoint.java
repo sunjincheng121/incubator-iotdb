@@ -34,120 +34,117 @@ import org.apache.iotdb.tsfile.write.chunk.IChunkWriter;
  */
 public abstract class DataPoint {
 
-  /**
-   * value type of this DataPoint.
-   **/
-  protected final TSDataType type;
-  /**
-   * measurementId of this DataPoint.
-   **/
-  protected final String measurementId;
+    /** value type of this DataPoint. */
+    protected final TSDataType type;
+    /** measurementId of this DataPoint. */
+    protected final String measurementId;
 
-  /**
-   * constructor of DataPoint.
-   *
-   * @param type value type of this DataPoint
-   * @param measurementId measurementId of this DataPoint
-   */
-  public DataPoint(TSDataType type, String measurementId) {
-    this.type = type;
-    this.measurementId = measurementId;
-  }
-
-  /**
-   * Construct one data point with data type and value.
-   *
-   * @param dataType data type
-   * @param measurementId measurement id
-   * @param value value in string format
-   * @return data point class according to data type
-   */
-  public static DataPoint getDataPoint(TSDataType dataType, String measurementId, String value) {
-    DataPoint dataPoint = null;
-    try {
-      switch (dataType) {
-        case INT32:
-          dataPoint = new IntDataPoint(measurementId, Integer.valueOf(value));
-          break;
-        case INT64:
-          dataPoint = new LongDataPoint(measurementId, Long.valueOf(value));
-          break;
-        case FLOAT:
-          dataPoint = new FloatDataPoint(measurementId, Float.valueOf(value));
-          break;
-        case DOUBLE:
-          dataPoint = new DoubleDataPoint(measurementId, Double.valueOf(value));
-          break;
-        case BOOLEAN:
-          dataPoint = new BooleanDataPoint(measurementId, Boolean.valueOf(value));
-          break;
-        case TEXT:
-          dataPoint = new StringDataPoint(measurementId, new Binary(value));
-          break;
-        default:
-          throw new UnSupportedDataTypeException(
-              String.format("Data type %s is not supported.", dataType));
-      }
-    } catch (Exception e) {
-      throw new UnSupportedDataTypeException(
-          String.format("Data type of %s is %s, but input value is %s", measurementId, dataType,
-              value));
+    /**
+     * constructor of DataPoint.
+     *
+     * @param type value type of this DataPoint
+     * @param measurementId measurementId of this DataPoint
+     */
+    public DataPoint(TSDataType type, String measurementId) {
+        this.type = type;
+        this.measurementId = measurementId;
     }
 
-    return dataPoint;
-  }
+    /**
+     * Construct one data point with data type and value.
+     *
+     * @param dataType data type
+     * @param measurementId measurement id
+     * @param value value in string format
+     * @return data point class according to data type
+     */
+    public static DataPoint getDataPoint(TSDataType dataType, String measurementId, String value) {
+        DataPoint dataPoint = null;
+        try {
+            switch (dataType) {
+                case INT32:
+                    dataPoint = new IntDataPoint(measurementId, Integer.valueOf(value));
+                    break;
+                case INT64:
+                    dataPoint = new LongDataPoint(measurementId, Long.valueOf(value));
+                    break;
+                case FLOAT:
+                    dataPoint = new FloatDataPoint(measurementId, Float.valueOf(value));
+                    break;
+                case DOUBLE:
+                    dataPoint = new DoubleDataPoint(measurementId, Double.valueOf(value));
+                    break;
+                case BOOLEAN:
+                    dataPoint = new BooleanDataPoint(measurementId, Boolean.valueOf(value));
+                    break;
+                case TEXT:
+                    dataPoint = new StringDataPoint(measurementId, new Binary(value));
+                    break;
+                default:
+                    throw new UnSupportedDataTypeException(
+                            String.format("Data type %s is not supported.", dataType));
+            }
+        } catch (Exception e) {
+            throw new UnSupportedDataTypeException(
+                    String.format(
+                            "Data type of %s is %s, but input value is %s",
+                            measurementId, dataType, value));
+        }
 
-  /**
-   * write this DataPoint by a SeriesWriter.
-   *
-   * @param time timestamp
-   * @param writer writer
-   * @throws IOException exception in IO
-   */
-  public abstract void writeTo(long time, IChunkWriter writer) throws IOException;
+        return dataPoint;
+    }
 
-  public String getMeasurementId() {
-    return measurementId;
-  }
+    /**
+     * write this DataPoint by a SeriesWriter.
+     *
+     * @param time timestamp
+     * @param writer writer
+     * @throws IOException exception in IO
+     */
+    public abstract void writeTo(long time, IChunkWriter writer) throws IOException;
 
-  public abstract Object getValue();
+    public String getMeasurementId() {
+        return measurementId;
+    }
 
-  public TSDataType getType() {
-    return type;
-  }
+    public abstract Object getValue();
 
-  @Override
-  public String toString() {
-    StringContainer sc = new StringContainer(" ");
-    sc.addTail("{measurement id:", measurementId, "type:", type, "value:", getValue(), "}");
-    return sc.toString();
-  }
+    public TSDataType getType() {
+        return type;
+    }
 
-  public void setInteger(int value) {
-    throw new UnsupportedOperationException("set Integer not support in DataPoint");
-  }
+    @Override
+    public String toString() {
+        StringContainer sc = new StringContainer(" ");
+        sc.addTail("{measurement id:", measurementId, "type:", type, "value:", getValue(), "}");
+        return sc.toString();
+    }
 
-  public void setLong(long value) {
-    throw new UnsupportedOperationException("set Long not support in DataPoint");
-  }
+    public void setInteger(int value) {
+        throw new UnsupportedOperationException("set Integer not support in DataPoint");
+    }
 
-  public void setBoolean(boolean value) {
-    throw new UnsupportedOperationException("set Boolean not support in DataPoint");
-  }
+    public void setLong(long value) {
+        throw new UnsupportedOperationException("set Long not support in DataPoint");
+    }
 
-  public void setFloat(float value) {
-    throw new UnsupportedOperationException("set Float not support in DataPoint");
-  }
+    public void setBoolean(boolean value) {
+        throw new UnsupportedOperationException("set Boolean not support in DataPoint");
+    }
 
-  public void setDouble(double value) {
-    throw new UnsupportedOperationException("set Double not support in DataPoint");
-  }
+    public void setFloat(float value) {
+        throw new UnsupportedOperationException("set Float not support in DataPoint");
+    }
 
-  public void setString(Binary value) {
-    throw new UnsupportedOperationException("set String not support in DataPoint");
-  }
+    public void setDouble(double value) {
+        throw new UnsupportedOperationException("set Double not support in DataPoint");
+    }
 
-  public void setBigDecimal(BigDecimal value) {
-    throw new UnsupportedOperationException("set BigDecimal not support in DataPoint");
-  }
+    public void setString(Binary value) {
+        throw new UnsupportedOperationException("set String not support in DataPoint");
+    }
+
+    public void setBigDecimal(BigDecimal value) {
+        throw new UnsupportedOperationException("set BigDecimal not support in DataPoint");
+    }
 }

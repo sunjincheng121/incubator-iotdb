@@ -19,63 +19,58 @@
 package org.apache.iotdb.tsfile.read.common;
 
 import java.nio.ByteBuffer;
-
 import java.util.List;
 import org.apache.iotdb.tsfile.common.cache.Accountable;
 import org.apache.iotdb.tsfile.file.header.ChunkHeader;
 
-/**
- * used in query.
- */
+/** used in query. */
 public class Chunk implements Accountable {
 
-  private ChunkHeader chunkHeader;
-  private ByteBuffer chunkData;
-  /**
-   * A list of deleted intervals.
-   */
-  private List<TimeRange> deleteIntervalList;
+    private ChunkHeader chunkHeader;
+    private ByteBuffer chunkData;
+    /** A list of deleted intervals. */
+    private List<TimeRange> deleteIntervalList;
 
-  private long ramSize;
+    private long ramSize;
 
-  public Chunk(ChunkHeader header, ByteBuffer buffer, List<TimeRange> deleteIntervalList) {
-    this.chunkHeader = header;
-    this.chunkData = buffer;
-    this.deleteIntervalList = deleteIntervalList;
-  }
+    public Chunk(ChunkHeader header, ByteBuffer buffer, List<TimeRange> deleteIntervalList) {
+        this.chunkHeader = header;
+        this.chunkData = buffer;
+        this.deleteIntervalList = deleteIntervalList;
+    }
 
-  public ChunkHeader getHeader() {
-    return chunkHeader;
-  }
+    public ChunkHeader getHeader() {
+        return chunkHeader;
+    }
 
-  public ByteBuffer getData() {
-    return chunkData;
-  }
+    public ByteBuffer getData() {
+        return chunkData;
+    }
 
-  public List<TimeRange> getDeleteIntervalList() {
-    return deleteIntervalList;
-  }
+    public List<TimeRange> getDeleteIntervalList() {
+        return deleteIntervalList;
+    }
 
-  public void setDeleteIntervalList(List<TimeRange> list) {
-    this.deleteIntervalList = list;
-  }
+    public void setDeleteIntervalList(List<TimeRange> list) {
+        this.deleteIntervalList = list;
+    }
 
-  public void mergeChunk(Chunk chunk) {
-    chunkHeader.mergeChunkHeader(chunk.chunkHeader);
-    ByteBuffer newChunkData = ByteBuffer
-        .allocate(chunkData.array().length + chunk.chunkData.array().length);
-    newChunkData.put(chunkData.array());
-    newChunkData.put(chunk.chunkData.array());
-    chunkData = newChunkData;
-  }
+    public void mergeChunk(Chunk chunk) {
+        chunkHeader.mergeChunkHeader(chunk.chunkHeader);
+        ByteBuffer newChunkData =
+                ByteBuffer.allocate(chunkData.array().length + chunk.chunkData.array().length);
+        newChunkData.put(chunkData.array());
+        newChunkData.put(chunk.chunkData.array());
+        chunkData = newChunkData;
+    }
 
-  @Override
-  public void setRamSize(long size) {
-    this.ramSize = size;
-  }
+    @Override
+    public void setRamSize(long size) {
+        this.ramSize = size;
+    }
 
-  @Override
-  public long getRamSize() {
-    return ramSize;
-  }
+    @Override
+    public long getRamSize() {
+        return ramSize;
+    }
 }

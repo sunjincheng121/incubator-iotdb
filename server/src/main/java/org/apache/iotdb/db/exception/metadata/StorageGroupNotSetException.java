@@ -21,9 +21,9 @@ package org.apache.iotdb.db.exception.metadata;
 
 public class StorageGroupNotSetException extends MetadataException {
 
-  private static final long serialVersionUID = 3739300272099030533L;
+    private static final long serialVersionUID = 3739300272099030533L;
 
-  public StorageGroupNotSetException(String path) {
-    super(String.format("Storage group is not set for current seriesPath: [%s]", path));
-  }
+    public StorageGroupNotSetException(String path) {
+        super(String.format("Storage group is not set for current seriesPath: [%s]", path));
+    }
 }

@@ -27,73 +27,72 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class PartialPathTest {
-  @Before
-  public void setUp() throws Exception {
-    EnvironmentUtils.envSetUp();
-  }
+    @Before
+    public void setUp() throws Exception {
+        EnvironmentUtils.envSetUp();
+    }
 
-  @After
-  public void tearDown() throws Exception {
-    EnvironmentUtils.cleanEnv();
-  }
+    @After
+    public void tearDown() throws Exception {
+        EnvironmentUtils.cleanEnv();
+    }
 
-  @Test
-  public void testConcatPath() {
-    String[] arr1 = new String[2];
-    arr1[0] = "root";
-    arr1[1] = "sg1";
-    PartialPath a = new PartialPath(arr1);
-    String[] arr2 = new String[2];
-    arr2[0] = "d1";
-    arr2[1] = "s1";
-    PartialPath b = new PartialPath(arr2);
-    Assert.assertEquals("[root, sg1, d1, s1]", Arrays.toString(a.concatPath(b).getNodes()));
-  }
+    @Test
+    public void testConcatPath() {
+        String[] arr1 = new String[2];
+        arr1[0] = "root";
+        arr1[1] = "sg1";
+        PartialPath a = new PartialPath(arr1);
+        String[] arr2 = new String[2];
+        arr2[0] = "d1";
+        arr2[1] = "s1";
+        PartialPath b = new PartialPath(arr2);
+        Assert.assertEquals("[root, sg1, d1, s1]", Arrays.toString(a.concatPath(b).getNodes()));
+    }
 
-  @Test
-  public void testConcatArray() {
-    String[] arr1 = new String[2];
-    arr1[0] = "root";
-    arr1[1] = "sg1";
-    PartialPath a = new PartialPath(arr1);
-    String[] arr2 = new String[2];
-    arr2[0] = "d1";
-    arr2[1] = "s1";
-    a.concatPath(arr2);
-    Assert.assertEquals("[root, sg1, d1, s1]", Arrays.toString(a.getNodes()));
-  }
+    @Test
+    public void testConcatArray() {
+        String[] arr1 = new String[2];
+        arr1[0] = "root";
+        arr1[1] = "sg1";
+        PartialPath a = new PartialPath(arr1);
+        String[] arr2 = new String[2];
+        arr2[0] = "d1";
+        arr2[1] = "s1";
+        a.concatPath(arr2);
+        Assert.assertEquals("[root, sg1, d1, s1]", Arrays.toString(a.getNodes()));
+    }
 
-  @Test
-  public void testConcatNode() {
-    String[] arr1 = new String[2];
-    arr1[0] = "root";
-    arr1[1] = "sg1";
-    PartialPath a = new PartialPath(arr1);
-    String[] arr2 = new String[1];
-    arr2[0] = "d1";
-    a.concatPath(arr2);
-    Assert.assertEquals("[root, sg1, d1]", Arrays.toString(a.getNodes()));
-    Assert.assertEquals("root.sg1.d1", a.getFullPath());
-  }
+    @Test
+    public void testConcatNode() {
+        String[] arr1 = new String[2];
+        arr1[0] = "root";
+        arr1[1] = "sg1";
+        PartialPath a = new PartialPath(arr1);
+        String[] arr2 = new String[1];
+        arr2[0] = "d1";
+        a.concatPath(arr2);
+        Assert.assertEquals("[root, sg1, d1]", Arrays.toString(a.getNodes()));
+        Assert.assertEquals("root.sg1.d1", a.getFullPath());
+    }
 
-  @Test
-  public void testAlterPrefixPath() throws IllegalPathException {
-    PartialPath p1 = new PartialPath("root.sg1.d1.s1");
-    PartialPath p2 = p1.alterPrefixPath(new PartialPath("root.sg2"));
-    PartialPath p3 = p1.alterPrefixPath(new PartialPath("root.sg2.d1.d2.s3"));
+    @Test
+    public void testAlterPrefixPath() throws IllegalPathException {
+        PartialPath p1 = new PartialPath("root.sg1.d1.s1");
+        PartialPath p2 = p1.alterPrefixPath(new PartialPath("root.sg2"));
+        PartialPath p3 = p1.alterPrefixPath(new PartialPath("root.sg2.d1.d2.s3"));
 
-    Assert.assertEquals("root.sg2.d1.s1", p2.getFullPath());
-    Assert.assertEquals("root.sg2.d1.d2.s3", p3.getFullPath());
-  }
+        Assert.assertEquals("root.sg2.d1.s1", p2.getFullPath());
+        Assert.assertEquals("root.sg2.d1.d2.s3", p3.getFullPath());
+    }
 
-  @Test
-  public void testMatchPath() throws IllegalPathException {
-    PartialPath p1 = new PartialPath("root.sg1.d1.*");
+    @Test
+    public void testMatchPath() throws IllegalPathException {
+        PartialPath p1 = new PartialPath("root.sg1.d1.*");
 
-    Assert.assertTrue(p1.matchFullPath(new PartialPath("root.sg1.d1.s2")));
-    Assert.assertFalse(p1.matchFullPath(new PartialPath("root.sg1.d1")));
-    Assert.assertFalse(p1.matchFullPath(new PartialPath("root.sg2.d1.*")));
-    Assert.assertFalse(p1.matchFullPath(new PartialPath("")));
-  }
-
+        Assert.assertTrue(p1.matchFullPath(new PartialPath("root.sg1.d1.s2")));
+        Assert.assertFalse(p1.matchFullPath(new PartialPath("root.sg1.d1")));
+        Assert.assertFalse(p1.matchFullPath(new PartialPath("root.sg2.d1.*")));
+        Assert.assertFalse(p1.matchFullPath(new PartialPath("")));
+    }
 }

@@ -32,33 +32,33 @@ import org.apache.iotdb.tsfile.fileSystem.fsFactory.LocalFSFactory;
 
 public class FSFactoryProducer {
 
-  private static FSType fSType = TSFileDescriptor.getInstance().getConfig().getTSFileStorageFs();
+    private static FSType fSType = TSFileDescriptor.getInstance().getConfig().getTSFileStorageFs();
 
-  private static FSFactory fsFactory;
-  private static FileInputFactory fileInputFactory;
-  private static FileOutputFactory fileOutputFactory;
+    private static FSFactory fsFactory;
+    private static FileInputFactory fileInputFactory;
+    private static FileOutputFactory fileOutputFactory;
 
-  static {
-    if (fSType.equals(FSType.HDFS)) {
-      fsFactory = new HDFSFactory();
-      fileInputFactory = new HDFSInputFactory();
-      fileOutputFactory = new HDFSOutputFactory();
-    } else {
-      fsFactory = new LocalFSFactory();
-      fileInputFactory = new LocalFSInputFactory();
-      fileOutputFactory = new LocalFSOutputFactory();
+    static {
+        if (fSType.equals(FSType.HDFS)) {
+            fsFactory = new HDFSFactory();
+            fileInputFactory = new HDFSInputFactory();
+            fileOutputFactory = new HDFSOutputFactory();
+        } else {
+            fsFactory = new LocalFSFactory();
+            fileInputFactory = new LocalFSInputFactory();
+            fileOutputFactory = new LocalFSOutputFactory();
+        }
     }
-  }
 
-  public static FSFactory getFSFactory() {
-    return fsFactory;
-  }
+    public static FSFactory getFSFactory() {
+        return fsFactory;
+    }
 
-  public static FileInputFactory getFileInputFactory() {
-    return fileInputFactory;
-  }
+    public static FileInputFactory getFileInputFactory() {
+        return fileInputFactory;
+    }
 
-  public static FileOutputFactory getFileOutputFactory() {
-    return fileOutputFactory;
-  }
+    public static FileOutputFactory getFileOutputFactory() {
+        return fileOutputFactory;
+    }
 }

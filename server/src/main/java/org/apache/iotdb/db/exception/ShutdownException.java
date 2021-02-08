@@ -22,20 +22,19 @@ import org.apache.iotdb.rpc.TSStatusCode;
 
 public class ShutdownException extends IoTDBException {
 
+    public ShutdownException(String message, int errorCode) {
+        super(message, errorCode);
+    }
 
-  public ShutdownException(String message, int errorCode) {
-    super(message, errorCode);
-  }
+    public ShutdownException(Throwable cause) {
+        super(cause.getMessage(), TSStatusCode.SHUT_DOWN_ERROR.getStatusCode());
+    }
 
-  public ShutdownException(Throwable cause) {
-    super(cause.getMessage(), TSStatusCode.SHUT_DOWN_ERROR.getStatusCode());
-  }
+    public ShutdownException(String message, Throwable cause, int errorCode) {
+        super(message, cause, errorCode);
+    }
 
-  public ShutdownException(String message, Throwable cause, int errorCode) {
-    super(message, cause, errorCode);
-  }
-
-  public ShutdownException(Throwable cause, int errorCode) {
-    super(cause, errorCode);
-  }
+    public ShutdownException(Throwable cause, int errorCode) {
+        super(cause, errorCode);
+    }
 }

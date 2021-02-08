@@ -25,41 +25,39 @@ import kafka.producer.ProducerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * The class is to show how to send data to kafka through multi-threads.
- */
+/** The class is to show how to send data to kafka through multi-threads. */
 public class KafkaProducer {
 
-  private final Producer<String, String> producer;
-  private static final Logger logger = LoggerFactory.getLogger(KafkaProducer.class);
+    private final Producer<String, String> producer;
+    private static final Logger logger = LoggerFactory.getLogger(KafkaProducer.class);
 
-  public KafkaProducer() {
+    public KafkaProducer() {
 
-    Properties props = new Properties();
-    props.put("metadata.broker.list", "127.0.0.1:9092");
-    props.put("zk.connect", "127.0.0.1:2181");
-    props.put("serializer.class", "kafka.serializer.StringEncoder");
-    props.put("key.serializer.class", "kafka.serializer.StringEncoder");
-    props.put("request.required.acks", "-1");
+        Properties props = new Properties();
+        props.put("metadata.broker.list", "127.0.0.1:9092");
+        props.put("zk.connect", "127.0.0.1:2181");
+        props.put("serializer.class", "kafka.serializer.StringEncoder");
+        props.put("key.serializer.class", "kafka.serializer.StringEncoder");
+        props.put("request.required.acks", "-1");
 
-    producer = new Producer<>(new ProducerConfig(props));
-  }
-
-  public static void main(String[] args) {
-    KafkaProducer kafkaProducer = new KafkaProducer();
-    kafkaProducer.produce();
-    kafkaProducer.close();
-  }
-
-  private void produce() {
-    for (int i = 0; i < Constant.ALL_DATA.length; i++) {
-      String key = Integer.toString(i);
-      producer.send(new KeyedMessage<>(Constant.TOPIC, key, Constant.ALL_DATA[i]));
-      logger.info(Constant.ALL_DATA[i]);
+        producer = new Producer<>(new ProducerConfig(props));
     }
-  }
 
-  public void close(){
-    producer.close();
-  }
+    public static void main(String[] args) {
+        KafkaProducer kafkaProducer = new KafkaProducer();
+        kafkaProducer.produce();
+        kafkaProducer.close();
+    }
+
+    private void produce() {
+        for (int i = 0; i < Constant.ALL_DATA.length; i++) {
+            String key = Integer.toString(i);
+            producer.send(new KeyedMessage<>(Constant.TOPIC, key, Constant.ALL_DATA[i]));
+            logger.info(Constant.ALL_DATA[i]);
+        }
+    }
+
+    public void close() {
+        producer.close();
+    }
 }

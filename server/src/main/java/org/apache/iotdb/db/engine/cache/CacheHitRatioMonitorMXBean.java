@@ -20,36 +20,33 @@ package org.apache.iotdb.db.engine.cache;
 
 public interface CacheHitRatioMonitorMXBean {
 
-  double getChunkMetaDataHitRatio();
+    double getChunkMetaDataHitRatio();
 
-  long getChunkMetaDataCacheUsedMemory();
+    long getChunkMetaDataCacheUsedMemory();
 
-  long getChunkMetaDataCacheMaxMemory();
+    long getChunkMetaDataCacheMaxMemory();
 
-  double getChunkMetaDataCacheUsedMemoryProportion();
+    double getChunkMetaDataCacheUsedMemoryProportion();
 
-  long getChunkMetaDataCacheAverageSize();
+    long getChunkMetaDataCacheAverageSize();
 
+    double getChunkHitRatio();
 
-  double getChunkHitRatio();
+    long getChunkCacheUsedMemory();
 
-  long getChunkCacheUsedMemory();
+    long getChunkCacheMaxMemory();
 
-  long getChunkCacheMaxMemory();
+    double getChunkCacheUsedMemoryProportion();
 
-  double getChunkCacheUsedMemoryProportion();
+    long getChunkCacheAverageSize();
 
-  long getChunkCacheAverageSize();
+    double getTimeSeriesMetadataHitRatio();
 
+    long getTimeSeriesMetadataCacheUsedMemory();
 
-  double getTimeSeriesMetadataHitRatio();
+    long getTimeSeriesMetadataCacheMaxMemory();
 
-  long getTimeSeriesMetadataCacheUsedMemory();
+    double getTimeSeriesCacheUsedMemoryProportion();
 
-  long getTimeSeriesMetadataCacheMaxMemory();
-
-  double getTimeSeriesCacheUsedMemoryProportion();
-
-  long getTimeSeriesMetaDataCacheAverageSize();
-
+    long getTimeSeriesMetaDataCacheAverageSize();
 }

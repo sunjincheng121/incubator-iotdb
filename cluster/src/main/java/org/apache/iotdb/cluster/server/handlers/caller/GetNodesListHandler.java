@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.iotdb.cluster.server.handlers.caller;
 
 import java.util.List;
@@ -29,30 +28,30 @@ import org.slf4j.LoggerFactory;
 
 public class GetNodesListHandler implements AsyncMethodCallback<List<String>> {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetNodesListHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(GetNodesListHandler.class);
 
-  private Node contact;
-  private AtomicReference<List<String>> result;
+    private Node contact;
+    private AtomicReference<List<String>> result;
 
-  @Override
-  public void onComplete(List<String> resp) {
-    logger.info("Received node lists of size {} from {}", resp.size(), contact);
-    synchronized (result) {
-      result.set(resp);
-      result.notifyAll();
+    @Override
+    public void onComplete(List<String> resp) {
+        logger.info("Received node lists of size {} from {}", resp.size(), contact);
+        synchronized (result) {
+            result.set(resp);
+            result.notifyAll();
+        }
     }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    logger.warn("Cannot get node list from {}, because", contact, exception);
-  }
+    @Override
+    public void onError(Exception exception) {
+        logger.warn("Cannot get node list from {}, because", contact, exception);
+    }
 
-  public void setResponse(AtomicReference<List<String>> response) {
-    this.result = response;
-  }
+    public void setResponse(AtomicReference<List<String>> response) {
+        this.result = response;
+    }
 
-  public void setContact(Node contact) {
-    this.contact = contact;
-  }
+    public void setContact(Node contact) {
+        this.contact = contact;
+    }
 }

@@ -21,16 +21,14 @@ package org.apache.iotdb.cluster.partition;
 
 public class NodeAdditionResult {
 
-  /**
-   * A new data group headed by the new node.
-   */
-  private PartitionGroup newGroup;
+    /** A new data group headed by the new node. */
+    private PartitionGroup newGroup;
 
-  public PartitionGroup getNewGroup() {
-    return newGroup;
-  }
+    public PartitionGroup getNewGroup() {
+        return newGroup;
+    }
 
-  public void setNewGroup(PartitionGroup newGroup) {
-    this.newGroup = newGroup;
-  }
+    public void setNewGroup(PartitionGroup newGroup) {
+        this.newGroup = newGroup;
+    }
 }

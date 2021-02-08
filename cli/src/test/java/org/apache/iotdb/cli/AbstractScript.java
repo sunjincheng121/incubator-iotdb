@@ -27,55 +27,65 @@ import java.util.Properties;
 
 public abstract class AbstractScript {
 
-  protected void testOutput(ProcessBuilder builder, String[] output) throws IOException {
-    builder.redirectErrorStream(true);
-    Process p = builder.start();
-    BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-    String line;
-    List<String> outputList = new ArrayList<>();
-    while (true) {
-      line = r.readLine();
-      if (line == null) {
-        break;
-      } else {
-        // remove thing after "connection refused", only for test
-        if(line.contains("Connection refused")) {
-          line = line.substring(0, line.indexOf("Connection refused") + "Connection refused".length());
+    protected void testOutput(ProcessBuilder builder, String[] output) throws IOException {
+        builder.redirectErrorStream(true);
+        Process p = builder.start();
+        BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String line;
+        List<String> outputList = new ArrayList<>();
+        while (true) {
+            line = r.readLine();
+            if (line == null) {
+                break;
+            } else {
+                // remove thing after "connection refused", only for test
+                if (line.contains("Connection refused")) {
+                    line =
+                            line.substring(
+                                    0,
+                                    line.indexOf("Connection refused")
+                                            + "Connection refused".length());
+                }
+                outputList.add(line);
+            }
         }
-        outputList.add(line);
-      }
+        r.close();
+        p.destroy();
+
+        System.out.println("Process output:");
+        for (String s : outputList) {
+            System.out.println(s);
+        }
+
+        for (int i = 0; i < output.length; i++) {
+            assertEquals(output[output.length - 1 - i], outputList.get(outputList.size() - 1 - i));
+        }
     }
-    r.close();
-    p.destroy();
 
-    System.out.println("Process output:");
-    for (String s : outputList) {
-      System.out.println(s);
+    protected String getCliPath() {
+        // This is usually always set by the JVM
+
+        File userDir = new File(System.getProperty("user.dir"));
+        if (!userDir.exists()) {
+            throw new RuntimeException("user.dir " + userDir.getAbsolutePath() + " doesn't exist.");
+        }
+        File target = new File(userDir, "target/maven-archiver/pom.properties");
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileReader(target));
+        } catch (IOException e) {
+            return "target/iotdb-cli-";
+        }
+        return new File(
+                        userDir,
+                        String.format(
+                                "target/%s-%s",
+                                properties.getProperty("artifactId"),
+                                properties.getProperty("version")))
+                .getAbsolutePath();
     }
 
-    for (int i = 0; i < output.length; i++) {
-      assertEquals(output[output.length - 1 - i], outputList.get(outputList.size() - 1 - i));
-    }
-  }
+    protected abstract void testOnWindows() throws IOException;
 
-  protected String getCliPath() {
-    // This is usually always set by the JVM
-
-    File userDir = new File(System.getProperty("user.dir"));
-    if(!userDir.exists()) {
-      throw new RuntimeException("user.dir " + userDir.getAbsolutePath() + " doesn't exist.");
-    }
-    File target = new File(userDir, "target/maven-archiver/pom.properties");
-    Properties properties = new Properties();
-    try {
-      properties.load(new FileReader(target));
-    } catch (IOException e) {
-      return "target/iotdb-cli-";
-    }
-    return new File(userDir, String.format("target/%s-%s", properties.getProperty("artifactId"), properties.getProperty("version"))).getAbsolutePath();
-  }
-
-  protected abstract void testOnWindows() throws IOException;
-
-  protected abstract void testOnUnix() throws IOException;
+    protected abstract void testOnUnix() throws IOException;
 }

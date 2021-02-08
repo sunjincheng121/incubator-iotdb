@@ -24,24 +24,23 @@ import org.apache.thrift.protocol.TProtocol;
 
 public class TestSyncClient extends Client {
 
-  private int serialNum;
+    private int serialNum;
 
-  public TestSyncClient() {
-    super(null, null);
-  }
+    public TestSyncClient() {
+        super(null, null);
+    }
 
-  public TestSyncClient(int serialNum) {
-    this();
-    this.serialNum = serialNum;
-  }
+    public TestSyncClient(int serialNum) {
+        this();
+        this.serialNum = serialNum;
+    }
 
-  TestSyncClient(TProtocol in, TProtocol out, int serialNum) {
-    super(in, out);
-    this.serialNum = serialNum;
-  }
+    TestSyncClient(TProtocol in, TProtocol out, int serialNum) {
+        super(in, out);
+        this.serialNum = serialNum;
+    }
 
-  public int getSerialNum() {
-    return serialNum;
-  }
-
+    public int getSerialNum() {
+        return serialNum;
+    }
 }

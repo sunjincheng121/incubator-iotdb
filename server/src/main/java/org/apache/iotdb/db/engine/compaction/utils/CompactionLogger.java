@@ -29,59 +29,62 @@ import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
 
 public class CompactionLogger {
 
-  public static final String COMPACTION_LOG_NAME = ".compaction.log";
-  public static final String SOURCE_NAME = "source";
-  public static final String TARGET_NAME = "target";
-  public static final String SEQUENCE_NAME = "sequence";
-  public static final String UNSEQUENCE_NAME = "unsequence";
-  public static final String FULL_MERGE = "full merge";
-  public static final String MERGE_FINISHED = "merge finished";
+    public static final String COMPACTION_LOG_NAME = ".compaction.log";
+    public static final String SOURCE_NAME = "source";
+    public static final String TARGET_NAME = "target";
+    public static final String SEQUENCE_NAME = "sequence";
+    public static final String UNSEQUENCE_NAME = "unsequence";
+    public static final String FULL_MERGE = "full merge";
+    public static final String MERGE_FINISHED = "merge finished";
 
-  private BufferedWriter logStream;
+    private BufferedWriter logStream;
 
-  public CompactionLogger(String storageGroupDir, String storageGroupName) throws IOException {
-    logStream = new BufferedWriter(
-        new FileWriter(SystemFileFactory.INSTANCE.getFile(storageGroupDir,
-            storageGroupName + COMPACTION_LOG_NAME), true));
-  }
-
-  public void close() throws IOException {
-    logStream.close();
-  }
-
-  public void logDevice(String device, long offset) throws IOException {
-    logStream.write(device + STR_DEVICE_OFFSET_SEPERATOR + offset);
-    logStream.newLine();
-    logStream.flush();
-  }
-
-  public void logFile(String prefix, File file) throws IOException {
-    logStream.write(prefix);
-    logStream.newLine();
-    logStream.write(file.getAbsolutePath());
-    logStream.newLine();
-    logStream.flush();
-  }
-
-  public void logMergeFinish() throws IOException {
-    logStream.write(MERGE_FINISHED);
-    logStream.newLine();
-    logStream.flush();
-  }
-
-  public void logFullMerge() throws IOException {
-    logStream.write(FULL_MERGE);
-    logStream.newLine();
-    logStream.flush();
-  }
-
-  public void logSequence(boolean isSeq) throws IOException {
-    if (isSeq) {
-      logStream.write(SEQUENCE_NAME);
-    } else {
-      logStream.write(UNSEQUENCE_NAME);
+    public CompactionLogger(String storageGroupDir, String storageGroupName) throws IOException {
+        logStream =
+                new BufferedWriter(
+                        new FileWriter(
+                                SystemFileFactory.INSTANCE.getFile(
+                                        storageGroupDir, storageGroupName + COMPACTION_LOG_NAME),
+                                true));
     }
-    logStream.newLine();
-    logStream.flush();
-  }
+
+    public void close() throws IOException {
+        logStream.close();
+    }
+
+    public void logDevice(String device, long offset) throws IOException {
+        logStream.write(device + STR_DEVICE_OFFSET_SEPERATOR + offset);
+        logStream.newLine();
+        logStream.flush();
+    }
+
+    public void logFile(String prefix, File file) throws IOException {
+        logStream.write(prefix);
+        logStream.newLine();
+        logStream.write(file.getAbsolutePath());
+        logStream.newLine();
+        logStream.flush();
+    }
+
+    public void logMergeFinish() throws IOException {
+        logStream.write(MERGE_FINISHED);
+        logStream.newLine();
+        logStream.flush();
+    }
+
+    public void logFullMerge() throws IOException {
+        logStream.write(FULL_MERGE);
+        logStream.newLine();
+        logStream.flush();
+    }
+
+    public void logSequence(boolean isSeq) throws IOException {
+        if (isSeq) {
+            logStream.write(SEQUENCE_NAME);
+        } else {
+            logStream.write(UNSEQUENCE_NAME);
+        }
+        logStream.newLine();
+        logStream.flush();
+    }
 }

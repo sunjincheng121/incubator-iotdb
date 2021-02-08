@@ -28,25 +28,25 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class DeletePartitionPlan extends PhysicalPlan {
 
-  private PartialPath storageGroupName;
-  private Set<Long> partitionId;
+    private PartialPath storageGroupName;
+    private Set<Long> partitionId;
 
-  public DeletePartitionPlan(PartialPath storageGroupName, Set<Long> partitionId) {
-    super(false, OperatorType.DELETE_PARTITION);
-    this.storageGroupName = storageGroupName;
-    this.partitionId = partitionId;
-  }
+    public DeletePartitionPlan(PartialPath storageGroupName, Set<Long> partitionId) {
+        super(false, OperatorType.DELETE_PARTITION);
+        this.storageGroupName = storageGroupName;
+        this.partitionId = partitionId;
+    }
 
-  @Override
-  public List<PartialPath> getPaths() {
-    return Collections.emptyList();
-  }
+    @Override
+    public List<PartialPath> getPaths() {
+        return Collections.emptyList();
+    }
 
-  public PartialPath getStorageGroupName() {
-    return storageGroupName;
-  }
+    public PartialPath getStorageGroupName() {
+        return storageGroupName;
+    }
 
-  public Set<Long> getPartitionId() {
-    return partitionId;
-  }
+    public Set<Long> getPartitionId() {
+        return partitionId;
+    }
 }

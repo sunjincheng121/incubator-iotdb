@@ -24,5 +24,5 @@ import org.apache.iotdb.db.exception.TsFileProcessorException;
 
 @FunctionalInterface
 public interface CloseFileListener {
-  void onClosed(TsFileProcessor processor) throws TsFileProcessorException;
+    void onClosed(TsFileProcessor processor) throws TsFileProcessorException;
 }

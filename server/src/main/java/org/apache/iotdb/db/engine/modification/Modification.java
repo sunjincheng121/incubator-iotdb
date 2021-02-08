@@ -22,76 +22,75 @@ package org.apache.iotdb.db.engine.modification;
 import java.util.Objects;
 import org.apache.iotdb.db.metadata.PartialPath;
 
-/**
- * Modification represents an UPDATE or DELETE operation on a certain timeseries.
- */
+/** Modification represents an UPDATE or DELETE operation on a certain timeseries. */
 public abstract class Modification {
 
-  protected Type type;
-  protected PartialPath path;
-  protected long versionNum;
+    protected Type type;
+    protected PartialPath path;
+    protected long versionNum;
 
-  Modification(Type type, PartialPath path, long versionNum) {
-    this.type = type;
-    this.path = path;
-    this.versionNum = versionNum;
-  }
-
-  public String getPathString() {
-    return path.getFullPath();
-  }
-
-  public PartialPath getPath() {
-    return path;
-  }
-
-  public String getDevice() {
-    return path.getDevice();
-  }
-
-  public String getMeasurement() {
-    return path.getMeasurement();
-  }
-
-  public void setPath(PartialPath path) {
-    this.path = path;
-  }
-
-  public long getVersionNum() {
-    return versionNum;
-  }
-
-  public void setVersionNum(long versionNum) {
-    this.versionNum = versionNum;
-  }
-
-  public Type getType() {
-    return type;
-  }
-
-  public void setType(Type type) {
-    this.type = type;
-  }
-
-  public enum Type {
-    DELETION
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-       return true;
+    Modification(Type type, PartialPath path, long versionNum) {
+        this.type = type;
+        this.path = path;
+        this.versionNum = versionNum;
     }
-    if (!(obj instanceof Modification)) {
-      return false;
-    }
-    Modification mod = (Modification) obj;
-    return mod.type.equals(this.type) && mod.path.equals(this.path)
-            && mod.versionNum == this.versionNum;
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(type, path, versionNum);
-  }
+    public String getPathString() {
+        return path.getFullPath();
+    }
+
+    public PartialPath getPath() {
+        return path;
+    }
+
+    public String getDevice() {
+        return path.getDevice();
+    }
+
+    public String getMeasurement() {
+        return path.getMeasurement();
+    }
+
+    public void setPath(PartialPath path) {
+        this.path = path;
+    }
+
+    public long getVersionNum() {
+        return versionNum;
+    }
+
+    public void setVersionNum(long versionNum) {
+        this.versionNum = versionNum;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public enum Type {
+        DELETION
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Modification)) {
+            return false;
+        }
+        Modification mod = (Modification) obj;
+        return mod.type.equals(this.type)
+                && mod.path.equals(this.path)
+                && mod.versionNum == this.versionNum;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, path, versionNum);
+    }
 }

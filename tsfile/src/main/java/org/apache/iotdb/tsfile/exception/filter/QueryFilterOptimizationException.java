@@ -20,15 +20,15 @@ package org.apache.iotdb.tsfile.exception.filter;
 
 public class QueryFilterOptimizationException extends Exception {
 
-  public QueryFilterOptimizationException(String msg) {
-    super(msg);
-  }
+    public QueryFilterOptimizationException(String msg) {
+        super(msg);
+    }
 
-  public QueryFilterOptimizationException(Throwable cause) {
-    super(cause);
-  }
+    public QueryFilterOptimizationException(Throwable cause) {
+        super(cause);
+    }
 
-  public QueryFilterOptimizationException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public QueryFilterOptimizationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

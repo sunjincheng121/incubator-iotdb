@@ -50,91 +50,99 @@ import org.slf4j.LoggerFactory;
 
 public class SyncClientTest {
 
-  private static final Logger logger = LoggerFactory.getLogger(SyncClientTest.class);
-  private ISyncClient manager = SyncClient.getInstance();
-  private SyncSenderConfig config = SyncSenderDescriptor.getInstance().getConfig();
-  private String dataDir;
-  private ISyncSenderLogAnalyzer senderLogAnalyzer;
+    private static final Logger logger = LoggerFactory.getLogger(SyncClientTest.class);
+    private ISyncClient manager = SyncClient.getInstance();
+    private SyncSenderConfig config = SyncSenderDescriptor.getInstance().getConfig();
+    private String dataDir;
+    private ISyncSenderLogAnalyzer senderLogAnalyzer;
 
-  @Before
-  public void setUp()
-      throws IOException, InterruptedException, StartupException, DiskSpaceInsufficientException {
-    EnvironmentUtils.envSetUp();
-    dataDir = new File(DirectoryManager.getInstance().getNextFolderForSequenceFile())
-        .getParentFile().getAbsolutePath();
-    config.update(dataDir);
-    senderLogAnalyzer = new SyncSenderLogAnalyzer(config.getSenderFolderPath());
-  }
-
-  @After
-  public void tearDown() throws InterruptedException, IOException, StorageEngineException {
-    EnvironmentUtils.cleanEnv();
-  }
-
-  @Test
-  public void makeFileSnapshot() throws IOException {
-    Map<String, Set<File>> allFileList = new HashMap<>();
-
-    Random r = new Random(0);
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 5; j++) {
-        if (!allFileList.containsKey(String.valueOf(i))) {
-          allFileList.put(String.valueOf(i), new HashSet<>());
-        }
-        String rand = String.valueOf(r.nextInt(10000));
-        String fileName = FilePathUtils.regularizePath(dataDir) + IoTDBConstant.SEQUENCE_FLODER_NAME
-            + File.separator + i
-            + File.separator + rand;
-        File file = new File(fileName);
-        allFileList.get(String.valueOf(i)).add(file);
-        if (!file.getParentFile().exists()) {
-          file.getParentFile().mkdirs();
-        }
-        if (!file.exists() && !file.createNewFile()) {
-          logger.error("Can not create new file {}", file.getPath());
-        }
-        if (!new File(file.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX).exists()
-            && !new File(file.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX).createNewFile()) {
-          logger.error("Can not create new file {}", file.getPath());
-        }
-      }
+    @Before
+    public void setUp()
+            throws IOException, InterruptedException, StartupException,
+                    DiskSpaceInsufficientException {
+        EnvironmentUtils.envSetUp();
+        dataDir =
+                new File(DirectoryManager.getInstance().getNextFolderForSequenceFile())
+                        .getParentFile()
+                        .getAbsolutePath();
+        config.update(dataDir);
+        senderLogAnalyzer = new SyncSenderLogAnalyzer(config.getSenderFolderPath());
     }
 
-    Map<String, Set<String>> dataFileMap = new HashMap<>();
-    File sequenceFile = new File(dataDir, IoTDBConstant.SEQUENCE_FLODER_NAME);
-    for (File sgFile : sequenceFile.listFiles()) {
-      dataFileMap.putIfAbsent(sgFile.getName(), new HashSet<>());
-      for (File tsfile : sgFile.listFiles()) {
-        if (!tsfile.getName().endsWith(TsFileResource.RESOURCE_SUFFIX)) {
-          ((SyncClient)manager).makeFileSnapshot(tsfile);
+    @After
+    public void tearDown() throws InterruptedException, IOException, StorageEngineException {
+        EnvironmentUtils.cleanEnv();
+    }
+
+    @Test
+    public void makeFileSnapshot() throws IOException {
+        Map<String, Set<File>> allFileList = new HashMap<>();
+
+        Random r = new Random(0);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 5; j++) {
+                if (!allFileList.containsKey(String.valueOf(i))) {
+                    allFileList.put(String.valueOf(i), new HashSet<>());
+                }
+                String rand = String.valueOf(r.nextInt(10000));
+                String fileName =
+                        FilePathUtils.regularizePath(dataDir)
+                                + IoTDBConstant.SEQUENCE_FLODER_NAME
+                                + File.separator
+                                + i
+                                + File.separator
+                                + rand;
+                File file = new File(fileName);
+                allFileList.get(String.valueOf(i)).add(file);
+                if (!file.getParentFile().exists()) {
+                    file.getParentFile().mkdirs();
+                }
+                if (!file.exists() && !file.createNewFile()) {
+                    logger.error("Can not create new file {}", file.getPath());
+                }
+                if (!new File(file.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX).exists()
+                        && !new File(file.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX)
+                                .createNewFile()) {
+                    logger.error("Can not create new file {}", file.getPath());
+                }
+            }
         }
-        dataFileMap.get(sgFile.getName()).add(tsfile.getName());
-      }
+
+        Map<String, Set<String>> dataFileMap = new HashMap<>();
+        File sequenceFile = new File(dataDir, IoTDBConstant.SEQUENCE_FLODER_NAME);
+        for (File sgFile : sequenceFile.listFiles()) {
+            dataFileMap.putIfAbsent(sgFile.getName(), new HashSet<>());
+            for (File tsfile : sgFile.listFiles()) {
+                if (!tsfile.getName().endsWith(TsFileResource.RESOURCE_SUFFIX)) {
+                    ((SyncClient) manager).makeFileSnapshot(tsfile);
+                }
+                dataFileMap.get(sgFile.getName()).add(tsfile.getName());
+            }
+        }
+
+        assertTrue(new File(config.getSenderFolderPath()).exists());
+        assertTrue(new File(config.getSnapshotPath()).exists());
+
+        Map<String, Set<String>> snapFileMap = new HashMap<>();
+        for (File sgFile : new File(config.getSnapshotPath()).listFiles()) {
+            snapFileMap.putIfAbsent(sgFile.getName(), new HashSet<>());
+            for (File snapshotTsfile : sgFile.listFiles()) {
+                snapFileMap.get(sgFile.getName()).add(snapshotTsfile.getName());
+            }
+        }
+
+        assertEquals(dataFileMap.size(), snapFileMap.size());
+        for (Entry<String, Set<String>> entry : dataFileMap.entrySet()) {
+            String sg = entry.getKey();
+            Set<String> tsfiles = entry.getValue();
+            assertTrue(snapFileMap.containsKey(sg));
+            assertEquals(snapFileMap.get(sg).size(), tsfiles.size());
+            assertTrue(snapFileMap.get(sg).containsAll(tsfiles));
+        }
+
+        assertFalse(new File(config.getLastFileInfoPath()).exists());
+        senderLogAnalyzer.recover();
+        assertFalse(new File(config.getSnapshotPath()).exists());
+        assertTrue(new File(config.getLastFileInfoPath()).exists());
     }
-
-    assertTrue(new File(config.getSenderFolderPath()).exists());
-    assertTrue(new File(config.getSnapshotPath()).exists());
-
-    Map<String, Set<String>> snapFileMap = new HashMap<>();
-    for (File sgFile : new File(config.getSnapshotPath()).listFiles()) {
-      snapFileMap.putIfAbsent(sgFile.getName(), new HashSet<>());
-      for (File snapshotTsfile : sgFile.listFiles()) {
-        snapFileMap.get(sgFile.getName()).add(snapshotTsfile.getName());
-      }
-    }
-
-    assertEquals(dataFileMap.size(), snapFileMap.size());
-    for (Entry<String, Set<String>> entry : dataFileMap.entrySet()) {
-      String sg = entry.getKey();
-      Set<String> tsfiles = entry.getValue();
-      assertTrue(snapFileMap.containsKey(sg));
-      assertEquals(snapFileMap.get(sg).size(), tsfiles.size());
-      assertTrue(snapFileMap.get(sg).containsAll(tsfiles));
-    }
-
-    assertFalse(new File(config.getLastFileInfoPath()).exists());
-    senderLogAnalyzer.recover();
-    assertFalse(new File(config.getSnapshotPath()).exists());
-    assertTrue(new File(config.getLastFileInfoPath()).exists());
-  }
 }

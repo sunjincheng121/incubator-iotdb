@@ -25,81 +25,82 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class AlterTimeSeriesOperator extends RootOperator {
 
-  private PartialPath path;
+    private PartialPath path;
 
-  private AlterType alterType;
+    private AlterType alterType;
 
-  // used when the alterType is RENAME, SET, DROP, ADD_TAGS, ADD_ATTRIBUTES
-  // when the alterType is RENAME, alterMap has only one entry, key is the beforeName, value is the
-  // currentName
-  // when the alterType is DROP, only the keySet of alterMap is useful, it contains all the key
-  // names needed to be removed
-  private Map<String, String> alterMap;
+    // used when the alterType is RENAME, SET, DROP, ADD_TAGS, ADD_ATTRIBUTES
+    // when the alterType is RENAME, alterMap has only one entry, key is the beforeName, value is
+    // the
+    // currentName
+    // when the alterType is DROP, only the keySet of alterMap is useful, it contains all the key
+    // names needed to be removed
+    private Map<String, String> alterMap;
 
-  // used when the alterType is UPSERT
-  private String alias;
-  private Map<String, String> tagsMap;
-  private Map<String, String> attributesMap;
+    // used when the alterType is UPSERT
+    private String alias;
+    private Map<String, String> tagsMap;
+    private Map<String, String> attributesMap;
 
-  public AlterTimeSeriesOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.ALTER_TIMESERIES;
-  }
+    public AlterTimeSeriesOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.ALTER_TIMESERIES;
+    }
 
-  public PartialPath getPath() {
-    return path;
-  }
+    public PartialPath getPath() {
+        return path;
+    }
 
-  public void setPath(PartialPath path) {
-    this.path = path;
-  }
+    public void setPath(PartialPath path) {
+        this.path = path;
+    }
 
-  public AlterType getAlterType() {
-    return alterType;
-  }
+    public AlterType getAlterType() {
+        return alterType;
+    }
 
-  public void setAlterType(AlterType alterType) {
-    this.alterType = alterType;
-  }
+    public void setAlterType(AlterType alterType) {
+        this.alterType = alterType;
+    }
 
-  public Map<String, String> getAlterMap() {
-    return alterMap;
-  }
+    public Map<String, String> getAlterMap() {
+        return alterMap;
+    }
 
-  public void setAlterMap(Map<String, String> alterMap) {
-    this.alterMap = alterMap;
-  }
+    public void setAlterMap(Map<String, String> alterMap) {
+        this.alterMap = alterMap;
+    }
 
-  public Map<String, String> getTagsMap() {
-    return tagsMap;
-  }
+    public Map<String, String> getTagsMap() {
+        return tagsMap;
+    }
 
-  public void setTagsMap(Map<String, String> tagsMap) {
-    this.tagsMap = tagsMap;
-  }
+    public void setTagsMap(Map<String, String> tagsMap) {
+        this.tagsMap = tagsMap;
+    }
 
-  public Map<String, String> getAttributesMap() {
-    return attributesMap;
-  }
+    public Map<String, String> getAttributesMap() {
+        return attributesMap;
+    }
 
-  public void setAttributesMap(Map<String, String> attributesMap) {
-    this.attributesMap = attributesMap;
-  }
+    public void setAttributesMap(Map<String, String> attributesMap) {
+        this.attributesMap = attributesMap;
+    }
 
-  public String getAlias() {
-    return alias;
-  }
+    public String getAlias() {
+        return alias;
+    }
 
-  public void setAlias(String alias) {
-    this.alias = alias;
-  }
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 
-  public enum AlterType {
-    RENAME,
-    SET,
-    DROP,
-    ADD_TAGS,
-    ADD_ATTRIBUTES,
-    UPSERT
-  }
+    public enum AlterType {
+        RENAME,
+        SET,
+        DROP,
+        ADD_TAGS,
+        ADD_ATTRIBUTES,
+        UPSERT
+    }
 }

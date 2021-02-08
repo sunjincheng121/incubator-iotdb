@@ -21,11 +21,9 @@ package org.apache.iotdb.db.qp.strategy.optimizer;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.qp.logical.crud.FilterOperator;
 
-/**
- * provide a filter operator, optimize it.
- */
+/** provide a filter operator, optimize it. */
 @FunctionalInterface
 public interface IFilterOptimizer {
 
-  FilterOperator optimize(FilterOperator filter) throws QueryProcessException;
+    FilterOperator optimize(FilterOperator filter) throws QueryProcessException;
 }

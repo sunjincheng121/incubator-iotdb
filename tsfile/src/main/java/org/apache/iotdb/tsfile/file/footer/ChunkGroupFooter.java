@@ -30,148 +30,171 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class ChunkGroupFooter {
 
-  private static final byte MARKER = MetaMarker.CHUNK_GROUP_FOOTER;
+    private static final byte MARKER = MetaMarker.CHUNK_GROUP_FOOTER;
 
-  private String deviceID;
+    private String deviceID;
 
-  private long dataSize;
+    private long dataSize;
 
-  private int numberOfChunks;
+    private int numberOfChunks;
 
-  private long minPlanIndex;
-  private long maxPlanIndex;
+    private long minPlanIndex;
+    private long maxPlanIndex;
 
-  // this field does not need to be serialized.
-  private int serializedSize;
+    // this field does not need to be serialized.
+    private int serializedSize;
 
-  /**
-   * constructor of CHUNK_GROUP_FOOTER.
-   *
-   * @param deviceID       device ID
-   * @param dataSize       data size
-   * @param numberOfChunks number of chunks
-   */
-  public ChunkGroupFooter(String deviceID, long dataSize, int numberOfChunks, long minPlanIndex,
-      long maxPlanIndex) {
-    this.deviceID = deviceID;
-    this.dataSize = dataSize;
-    this.numberOfChunks = numberOfChunks;
-    this.minPlanIndex = minPlanIndex;
-    this.maxPlanIndex = maxPlanIndex;
-    this.serializedSize =
-        Byte.BYTES + Integer.BYTES + deviceID.getBytes(TSFileConfig.STRING_CHARSET).length
-            + Long.BYTES + Integer.BYTES + Long.BYTES + Long.BYTES;
-  }
-
-  public static int getSerializedSize(String deviceID) {
-    return Byte.BYTES + Integer.BYTES + getSerializedSize(deviceID.length()) + Long.BYTES
-        + Long.BYTES;
-  }
-
-  private static int getSerializedSize(int deviceIdLength) {
-    return deviceIdLength + Long.BYTES + Integer.BYTES + Long.BYTES + Long.BYTES;
-  }
-
-  /**
-   * deserialize from inputStream.
-   *
-   * @param markerRead Whether the marker of the CHUNK_GROUP_FOOTER is read ahead.
-   */
-  public static ChunkGroupFooter deserializeFrom(InputStream inputStream, boolean markerRead)
-      throws IOException {
-    if (!markerRead) {
-      byte marker = (byte) inputStream.read();
-      if (marker != MARKER) {
-        MetaMarker.handleUnexpectedMarker(marker);
-      }
+    /**
+     * constructor of CHUNK_GROUP_FOOTER.
+     *
+     * @param deviceID device ID
+     * @param dataSize data size
+     * @param numberOfChunks number of chunks
+     */
+    public ChunkGroupFooter(
+            String deviceID,
+            long dataSize,
+            int numberOfChunks,
+            long minPlanIndex,
+            long maxPlanIndex) {
+        this.deviceID = deviceID;
+        this.dataSize = dataSize;
+        this.numberOfChunks = numberOfChunks;
+        this.minPlanIndex = minPlanIndex;
+        this.maxPlanIndex = maxPlanIndex;
+        this.serializedSize =
+                Byte.BYTES
+                        + Integer.BYTES
+                        + deviceID.getBytes(TSFileConfig.STRING_CHARSET).length
+                        + Long.BYTES
+                        + Integer.BYTES
+                        + Long.BYTES
+                        + Long.BYTES;
     }
 
-    String deviceID = ReadWriteIOUtils.readString(inputStream);
-    long dataSize = ReadWriteIOUtils.readLong(inputStream);
-    int numOfChunks = ReadWriteIOUtils.readInt(inputStream);
-    long minPlanIndex = ReadWriteIOUtils.readLong(inputStream);
-    long maxPlanIndex = ReadWriteIOUtils.readLong(inputStream);
-    return new ChunkGroupFooter(deviceID, dataSize, numOfChunks, minPlanIndex, maxPlanIndex);
-  }
-
-  /**
-   * deserialize from TsFileInput.
-   *
-   * @param markerRead Whether the marker of the CHUNK_GROUP_FOOTER is read ahead.
-   */
-  public static ChunkGroupFooter deserializeFrom(TsFileInput input, long offset, boolean markerRead)
-      throws IOException {
-    long offsetVar = offset;
-    if (!markerRead) {
-      offsetVar++;
+    public static int getSerializedSize(String deviceID) {
+        return Byte.BYTES
+                + Integer.BYTES
+                + getSerializedSize(deviceID.length())
+                + Long.BYTES
+                + Long.BYTES;
     }
-    ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
-    input.read(buffer, offsetVar);
-    buffer.flip();
-    int size = buffer.getInt();
-    offsetVar += Integer.BYTES;
-    buffer = ByteBuffer.allocate(getSerializedSize(size));
-    ReadWriteIOUtils.readAsPossible(input, offsetVar, buffer);
-    buffer.flip();
-    String deviceID = ReadWriteIOUtils.readStringWithLength(buffer, size);
-    long dataSize = ReadWriteIOUtils.readLong(buffer);
-    int numOfChunks = ReadWriteIOUtils.readInt(buffer);
-    long minPlanIndex = ReadWriteIOUtils.readLong(buffer);
-    long maxPlanIndex = ReadWriteIOUtils.readLong(buffer);
-    return new ChunkGroupFooter(deviceID, dataSize, numOfChunks, minPlanIndex, maxPlanIndex);
-  }
 
-  public int getSerializedSize() {
-    return serializedSize;
-  }
+    private static int getSerializedSize(int deviceIdLength) {
+        return deviceIdLength + Long.BYTES + Integer.BYTES + Long.BYTES + Long.BYTES;
+    }
 
-  public String getDeviceID() {
-    return deviceID;
-  }
+    /**
+     * deserialize from inputStream.
+     *
+     * @param markerRead Whether the marker of the CHUNK_GROUP_FOOTER is read ahead.
+     */
+    public static ChunkGroupFooter deserializeFrom(InputStream inputStream, boolean markerRead)
+            throws IOException {
+        if (!markerRead) {
+            byte marker = (byte) inputStream.read();
+            if (marker != MARKER) {
+                MetaMarker.handleUnexpectedMarker(marker);
+            }
+        }
 
-  public long getDataSize() {
-    return dataSize;
-  }
+        String deviceID = ReadWriteIOUtils.readString(inputStream);
+        long dataSize = ReadWriteIOUtils.readLong(inputStream);
+        int numOfChunks = ReadWriteIOUtils.readInt(inputStream);
+        long minPlanIndex = ReadWriteIOUtils.readLong(inputStream);
+        long maxPlanIndex = ReadWriteIOUtils.readLong(inputStream);
+        return new ChunkGroupFooter(deviceID, dataSize, numOfChunks, minPlanIndex, maxPlanIndex);
+    }
 
-  public void setDataSize(long dataSize) {
-    this.dataSize = dataSize;
-  }
+    /**
+     * deserialize from TsFileInput.
+     *
+     * @param markerRead Whether the marker of the CHUNK_GROUP_FOOTER is read ahead.
+     */
+    public static ChunkGroupFooter deserializeFrom(
+            TsFileInput input, long offset, boolean markerRead) throws IOException {
+        long offsetVar = offset;
+        if (!markerRead) {
+            offsetVar++;
+        }
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+        input.read(buffer, offsetVar);
+        buffer.flip();
+        int size = buffer.getInt();
+        offsetVar += Integer.BYTES;
+        buffer = ByteBuffer.allocate(getSerializedSize(size));
+        ReadWriteIOUtils.readAsPossible(input, offsetVar, buffer);
+        buffer.flip();
+        String deviceID = ReadWriteIOUtils.readStringWithLength(buffer, size);
+        long dataSize = ReadWriteIOUtils.readLong(buffer);
+        int numOfChunks = ReadWriteIOUtils.readInt(buffer);
+        long minPlanIndex = ReadWriteIOUtils.readLong(buffer);
+        long maxPlanIndex = ReadWriteIOUtils.readLong(buffer);
+        return new ChunkGroupFooter(deviceID, dataSize, numOfChunks, minPlanIndex, maxPlanIndex);
+    }
 
-  public int getNumberOfChunks() {
-    return numberOfChunks;
-  }
+    public int getSerializedSize() {
+        return serializedSize;
+    }
 
-  /**
-   * serialize to outputStream.
-   *
-   * @param outputStream output stream
-   * @return length
-   * @throws IOException IOException
-   */
-  public int serializeTo(OutputStream outputStream) throws IOException {
-    int length = 0;
-    length += ReadWriteIOUtils.write(MARKER, outputStream);
-    length += ReadWriteIOUtils.write(deviceID, outputStream);
-    length += ReadWriteIOUtils.write(dataSize, outputStream);
-    length += ReadWriteIOUtils.write(numberOfChunks, outputStream);
-    length += ReadWriteIOUtils.write(minPlanIndex, outputStream);
-    length += ReadWriteIOUtils.write(maxPlanIndex, outputStream);
-    return length;
-  }
+    public String getDeviceID() {
+        return deviceID;
+    }
 
-  @Override
-  public String toString() {
-    return "CHUNK_GROUP_FOOTER{" + "deviceID='" + deviceID + '\'' + ", dataSize=" + dataSize
-        + ", numberOfChunks="
-        + numberOfChunks + ", serializedSize=" + serializedSize + ", logIndex=[" + minPlanIndex
-        + "," + maxPlanIndex + "]}";
-  }
+    public long getDataSize() {
+        return dataSize;
+    }
 
-  public long getMinPlanIndex() {
-    return minPlanIndex;
-  }
+    public void setDataSize(long dataSize) {
+        this.dataSize = dataSize;
+    }
 
-  public long getMaxPlanIndex() {
-    return maxPlanIndex;
-  }
+    public int getNumberOfChunks() {
+        return numberOfChunks;
+    }
+
+    /**
+     * serialize to outputStream.
+     *
+     * @param outputStream output stream
+     * @return length
+     * @throws IOException IOException
+     */
+    public int serializeTo(OutputStream outputStream) throws IOException {
+        int length = 0;
+        length += ReadWriteIOUtils.write(MARKER, outputStream);
+        length += ReadWriteIOUtils.write(deviceID, outputStream);
+        length += ReadWriteIOUtils.write(dataSize, outputStream);
+        length += ReadWriteIOUtils.write(numberOfChunks, outputStream);
+        length += ReadWriteIOUtils.write(minPlanIndex, outputStream);
+        length += ReadWriteIOUtils.write(maxPlanIndex, outputStream);
+        return length;
+    }
+
+    @Override
+    public String toString() {
+        return "CHUNK_GROUP_FOOTER{"
+                + "deviceID='"
+                + deviceID
+                + '\''
+                + ", dataSize="
+                + dataSize
+                + ", numberOfChunks="
+                + numberOfChunks
+                + ", serializedSize="
+                + serializedSize
+                + ", logIndex=["
+                + minPlanIndex
+                + ","
+                + maxPlanIndex
+                + "]}";
+    }
+
+    public long getMinPlanIndex() {
+        return minPlanIndex;
+    }
+
+    public long getMaxPlanIndex() {
+        return maxPlanIndex;
+    }
 }

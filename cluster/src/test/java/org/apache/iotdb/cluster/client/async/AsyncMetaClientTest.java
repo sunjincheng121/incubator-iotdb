@@ -23,39 +23,48 @@ import org.junit.Test;
 
 public class AsyncMetaClientTest {
 
-  @Test
-  public void test() throws IOException, TException {
-    AsyncClientPool asyncClientPool = new AsyncClientPool(new FactoryAsync(new Factory()));
-    AsyncMetaClient client;
-    Node node = TestUtils.getNode(0);
-    client = new AsyncMetaClient(new Factory(), new TAsyncClientManager(),
-        new TNonblockingSocket(node.getIp(), node.getMetaPort()
-            , RaftServer.getConnectionTimeoutInMS()));
-    assertTrue(client.isReady());
+    @Test
+    public void test() throws IOException, TException {
+        AsyncClientPool asyncClientPool = new AsyncClientPool(new FactoryAsync(new Factory()));
+        AsyncMetaClient client;
+        Node node = TestUtils.getNode(0);
+        client =
+                new AsyncMetaClient(
+                        new Factory(),
+                        new TAsyncClientManager(),
+                        new TNonblockingSocket(
+                                node.getIp(),
+                                node.getMetaPort(),
+                                RaftServer.getConnectionTimeoutInMS()));
+        assertTrue(client.isReady());
 
-    client = (AsyncMetaClient) asyncClientPool.getClient(TestUtils.getNode(0));
+        client = (AsyncMetaClient) asyncClientPool.getClient(TestUtils.getNode(0));
 
-    assertEquals(TestUtils.getNode(0), client.getNode());
+        assertEquals(TestUtils.getNode(0), client.getNode());
 
-    client.matchTerm(0, 0, TestUtils.getNode(0), new AsyncMethodCallback<Boolean>() {
-      @Override
-      public void onComplete(Boolean aBoolean) {
-        // do nothing
-      }
+        client.matchTerm(
+                0,
+                0,
+                TestUtils.getNode(0),
+                new AsyncMethodCallback<Boolean>() {
+                    @Override
+                    public void onComplete(Boolean aBoolean) {
+                        // do nothing
+                    }
 
-      @Override
-      public void onError(Exception e) {
-        // do nothing
-      }
-    });
-    assertFalse(client.isReady());
+                    @Override
+                    public void onError(Exception e) {
+                        // do nothing
+                    }
+                });
+        assertFalse(client.isReady());
 
-    client.onError(new Exception());
-    assertNull(client.getCurrMethod());
-    assertTrue(client.isReady());
+        client.onError(new Exception());
+        assertNull(client.getCurrMethod());
+        assertTrue(client.isReady());
 
-    assertEquals(
-        "MetaClient{node=ClusterNode{ ip='192.168.0.0', metaPort=9003, nodeIdentifier=0, dataPort=40010, clientPort=0}}",
-        client.toString());
-  }
+        assertEquals(
+                "MetaClient{node=ClusterNode{ ip='192.168.0.0', metaPort=9003, nodeIdentifier=0, dataPort=40010, clientPort=0}}",
+                client.toString());
+    }
 }

@@ -29,79 +29,79 @@ import org.apache.iotdb.tsfile.read.reader.IChunkReader;
 import org.apache.iotdb.tsfile.read.reader.IPageReader;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
-/**
- * To read chunk data in memory
- */
+/** To read chunk data in memory */
 public class MemChunkReader implements IChunkReader, IPointReader {
 
-  private IPointReader timeValuePairIterator;
-  private Filter filter;
-  private boolean hasCachedTimeValuePair;
-  private TimeValuePair cachedTimeValuePair;
-  private List<IPageReader> pageReaderList;
+    private IPointReader timeValuePairIterator;
+    private Filter filter;
+    private boolean hasCachedTimeValuePair;
+    private TimeValuePair cachedTimeValuePair;
+    private List<IPageReader> pageReaderList;
 
-
-  public MemChunkReader(ReadOnlyMemChunk readableChunk, Filter filter) {
-    timeValuePairIterator = readableChunk.getPointReader();
-    this.filter = filter;
-    // we treat one ReadOnlyMemChunk as one Page
-    this.pageReaderList = Collections.singletonList(
-        new MemPageReader(timeValuePairIterator, readableChunk.getChunkMetaData(), filter));
-  }
-
-  @Override
-  public boolean hasNextTimeValuePair() throws IOException {
-    if (hasCachedTimeValuePair) {
-      return true;
+    public MemChunkReader(ReadOnlyMemChunk readableChunk, Filter filter) {
+        timeValuePairIterator = readableChunk.getPointReader();
+        this.filter = filter;
+        // we treat one ReadOnlyMemChunk as one Page
+        this.pageReaderList =
+                Collections.singletonList(
+                        new MemPageReader(
+                                timeValuePairIterator, readableChunk.getChunkMetaData(), filter));
     }
-    while (timeValuePairIterator.hasNextTimeValuePair()) {
-      TimeValuePair timeValuePair = timeValuePairIterator.nextTimeValuePair();
-      if (filter == null || filter
-          .satisfy(timeValuePair.getTimestamp(), timeValuePair.getValue().getValue())) {
-        hasCachedTimeValuePair = true;
-        cachedTimeValuePair = timeValuePair;
-        break;
-      }
+
+    @Override
+    public boolean hasNextTimeValuePair() throws IOException {
+        if (hasCachedTimeValuePair) {
+            return true;
+        }
+        while (timeValuePairIterator.hasNextTimeValuePair()) {
+            TimeValuePair timeValuePair = timeValuePairIterator.nextTimeValuePair();
+            if (filter == null
+                    || filter.satisfy(
+                            timeValuePair.getTimestamp(), timeValuePair.getValue().getValue())) {
+                hasCachedTimeValuePair = true;
+                cachedTimeValuePair = timeValuePair;
+                break;
+            }
+        }
+        return hasCachedTimeValuePair;
     }
-    return hasCachedTimeValuePair;
-  }
 
-  @Override
-  public TimeValuePair nextTimeValuePair() throws IOException {
-    if (hasCachedTimeValuePair) {
-      hasCachedTimeValuePair = false;
-      return cachedTimeValuePair;
-    } else {
-      return timeValuePairIterator.nextTimeValuePair();
+    @Override
+    public TimeValuePair nextTimeValuePair() throws IOException {
+        if (hasCachedTimeValuePair) {
+            hasCachedTimeValuePair = false;
+            return cachedTimeValuePair;
+        } else {
+            return timeValuePairIterator.nextTimeValuePair();
+        }
     }
-  }
 
-  @Override
-  public TimeValuePair currentTimeValuePair() throws IOException {
-    if (!hasCachedTimeValuePair) {
-      cachedTimeValuePair = timeValuePairIterator.nextTimeValuePair();
-      hasCachedTimeValuePair = true;
+    @Override
+    public TimeValuePair currentTimeValuePair() throws IOException {
+        if (!hasCachedTimeValuePair) {
+            cachedTimeValuePair = timeValuePairIterator.nextTimeValuePair();
+            hasCachedTimeValuePair = true;
+        }
+        return cachedTimeValuePair;
     }
-    return cachedTimeValuePair;
-  }
 
-  @Override
-  public boolean hasNextSatisfiedPage() throws IOException {
-    return hasNextTimeValuePair();
-  }
+    @Override
+    public boolean hasNextSatisfiedPage() throws IOException {
+        return hasNextTimeValuePair();
+    }
 
-  @Override
-  public BatchData nextPageData() throws IOException {
-    return pageReaderList.remove(0).getAllSatisfiedPageData();
-  }
+    @Override
+    public BatchData nextPageData() throws IOException {
+        return pageReaderList.remove(0).getAllSatisfiedPageData();
+    }
 
-  @Override
-  public void close() {
-    // Do nothing because mem chunk reader will not open files
-  }
+    @Override
+    public void close() {
+        // Do nothing because mem chunk reader will not open files
+    }
 
-  @Override
-  public List<IPageReader> loadPageReaderList() throws IOException {
-    return this.pageReaderList;
-  }
+    @Override
+    public List<IPageReader> loadPageReaderList() throws IOException {
+        return this.pageReaderList;
+    }
 }

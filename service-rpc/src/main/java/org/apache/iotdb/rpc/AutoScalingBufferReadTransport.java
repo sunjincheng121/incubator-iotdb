@@ -24,56 +24,55 @@ import org.apache.thrift.transport.TTransportException;
 
 public class AutoScalingBufferReadTransport extends NonOpenTransport {
 
-  private final AutoResizingBuffer buf;
-  private int pos = 0;
-  private int limit = 0;
+    private final AutoResizingBuffer buf;
+    private int pos = 0;
+    private int limit = 0;
 
-  public AutoScalingBufferReadTransport(int initialCapacity) {
-    this.buf = new AutoResizingBuffer(initialCapacity);
-  }
+    public AutoScalingBufferReadTransport(int initialCapacity) {
+        this.buf = new AutoResizingBuffer(initialCapacity);
+    }
 
-  public void fill(TTransport inTrans, int length) throws TTransportException {
-    buf.resizeIfNecessary(length);
-    inTrans.readAll(buf.array(), 0, length);
-    pos = 0;
-    limit = length;
-  }
+    public void fill(TTransport inTrans, int length) throws TTransportException {
+        buf.resizeIfNecessary(length);
+        inTrans.readAll(buf.array(), 0, length);
+        pos = 0;
+        limit = length;
+    }
 
+    @Override
+    public final int read(byte[] target, int off, int len) {
+        int amtToRead = Math.min(len, getBytesRemainingInBuffer());
+        System.arraycopy(buf.array(), pos, target, off, amtToRead);
+        consumeBuffer(amtToRead);
+        return amtToRead;
+    }
 
-  @Override
-  public final int read(byte[] target, int off, int len) {
-    int amtToRead = Math.min(len, getBytesRemainingInBuffer());
-    System.arraycopy(buf.array(), pos, target, off, amtToRead);
-    consumeBuffer(amtToRead);
-    return amtToRead;
-  }
+    @Override
+    public void write(byte[] buf, int off, int len) {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public void write(byte[] buf, int off, int len) {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public final void consumeBuffer(int len) {
+        pos += len;
+    }
 
-  @Override
-  public final void consumeBuffer(int len) {
-    pos += len;
-  }
+    @Override
+    public final byte[] getBuffer() {
+        return buf.array();
+    }
 
-  @Override
-  public final byte[] getBuffer() {
-    return buf.array();
-  }
+    @Override
+    public final int getBufferPosition() {
+        return pos;
+    }
 
-  @Override
-  public final int getBufferPosition() {
-    return pos;
-  }
+    @Override
+    public final int getBytesRemainingInBuffer() {
+        return limit - pos;
+    }
 
-  @Override
-  public final int getBytesRemainingInBuffer() {
-    return limit - pos;
-  }
-
-  public void resizeIfNecessary(int size) {
-    buf.resizeIfNecessary(size);
-  }
+    public void resizeIfNecessary(int size) {
+        buf.resizeIfNecessary(size);
+    }
 }

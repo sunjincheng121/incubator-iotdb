@@ -62,228 +62,265 @@ import org.junit.Test;
  */
 public class IoTDBSequenceDataQueryIT {
 
-  private static TSFileConfig tsFileConfig = TSFileDescriptor.getInstance().getConfig();
-  private static int maxNumberOfPointsInPage;
-  private static int pageSizeInByte;
-  private static int groupSizeInByte;
+    private static TSFileConfig tsFileConfig = TSFileDescriptor.getInstance().getConfig();
+    private static int maxNumberOfPointsInPage;
+    private static int pageSizeInByte;
+    private static int groupSizeInByte;
 
-  // count : d0s0 >= 14
-  private static int count = 0;
+    // count : d0s0 >= 14
+    private static int count = 0;
 
-  @BeforeClass
-  public static void setUp() throws Exception {
-    EnvironmentUtils.closeStatMonitor();
+    @BeforeClass
+    public static void setUp() throws Exception {
+        EnvironmentUtils.closeStatMonitor();
 
-    // use small page setting
-    // origin value
-    maxNumberOfPointsInPage = tsFileConfig.getMaxNumberOfPointsInPage();
-    pageSizeInByte = tsFileConfig.getPageSizeInByte();
-    groupSizeInByte = tsFileConfig.getGroupSizeInByte();
+        // use small page setting
+        // origin value
+        maxNumberOfPointsInPage = tsFileConfig.getMaxNumberOfPointsInPage();
+        pageSizeInByte = tsFileConfig.getPageSizeInByte();
+        groupSizeInByte = tsFileConfig.getGroupSizeInByte();
 
-    // new value
-    tsFileConfig.setMaxNumberOfPointsInPage(100);
-    tsFileConfig.setPageSizeInByte(1024 * 1024 * 150);
-    tsFileConfig.setGroupSizeInByte(1024 * 1024 * 100);
-    IoTDBDescriptor.getInstance().getConfig().setMemtableSizeThreshold(1024 * 1024 * 100);
+        // new value
+        tsFileConfig.setMaxNumberOfPointsInPage(100);
+        tsFileConfig.setPageSizeInByte(1024 * 1024 * 150);
+        tsFileConfig.setGroupSizeInByte(1024 * 1024 * 100);
+        IoTDBDescriptor.getInstance().getConfig().setMemtableSizeThreshold(1024 * 1024 * 100);
 
-    EnvironmentUtils.envSetUp();
+        EnvironmentUtils.envSetUp();
 
-    insertData();
-  }
+        insertData();
+    }
 
-  @AfterClass
-  public static void tearDown() throws Exception {
-    // recovery value
-    tsFileConfig.setMaxNumberOfPointsInPage(maxNumberOfPointsInPage);
-    tsFileConfig.setPageSizeInByte(pageSizeInByte);
-    tsFileConfig.setGroupSizeInByte(groupSizeInByte);
-    IoTDBDescriptor.getInstance().getConfig().setMemtableSizeThreshold(groupSizeInByte);
+    @AfterClass
+    public static void tearDown() throws Exception {
+        // recovery value
+        tsFileConfig.setMaxNumberOfPointsInPage(maxNumberOfPointsInPage);
+        tsFileConfig.setPageSizeInByte(pageSizeInByte);
+        tsFileConfig.setGroupSizeInByte(groupSizeInByte);
+        IoTDBDescriptor.getInstance().getConfig().setMemtableSizeThreshold(groupSizeInByte);
 
-    EnvironmentUtils.cleanEnv();
-  }
+        EnvironmentUtils.cleanEnv();
+    }
 
-  private static void insertData() throws ClassNotFoundException {
-    Class.forName(Config.JDBC_DRIVER_NAME);
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
-        Statement statement = connection.createStatement()) {
+    private static void insertData() throws ClassNotFoundException {
+        Class.forName(Config.JDBC_DRIVER_NAME);
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
 
-      // create storage group and measurement
-      for (String sql : TestConstant.create_sql) {
-        statement.execute(sql);
-      }
+            // create storage group and measurement
+            for (String sql : TestConstant.create_sql) {
+                statement.execute(sql);
+            }
 
-      // insert data (time from 300-999)
-      for (long time = 300; time < 1000; time++) {
-        String sql = String
-            .format("insert into root.vehicle.d0(timestamp,s0) values(%s,%s)", time, time % 17);
-        statement.execute(sql);
-        sql = String
-            .format("insert into root.vehicle.d0(timestamp,s1) values(%s,%s)", time, time % 29);
-        statement.execute(sql);
-        sql = String
-            .format("insert into root.vehicle.d0(timestamp,s2) values(%s,%s)", time, time % 31);
-        statement.execute(sql);
-        sql = String.format("insert into root.vehicle.d0(timestamp,s3) values(%s,'%s')", time,
-            TestConstant.stringValue[(int) time % 5]);
-        statement.execute(sql);
+            // insert data (time from 300-999)
+            for (long time = 300; time < 1000; time++) {
+                String sql =
+                        String.format(
+                                "insert into root.vehicle.d0(timestamp,s0) values(%s,%s)",
+                                time, time % 17);
+                statement.execute(sql);
+                sql =
+                        String.format(
+                                "insert into root.vehicle.d0(timestamp,s1) values(%s,%s)",
+                                time, time % 29);
+                statement.execute(sql);
+                sql =
+                        String.format(
+                                "insert into root.vehicle.d0(timestamp,s2) values(%s,%s)",
+                                time, time % 31);
+                statement.execute(sql);
+                sql =
+                        String.format(
+                                "insert into root.vehicle.d0(timestamp,s3) values(%s,'%s')",
+                                time, TestConstant.stringValue[(int) time % 5]);
+                statement.execute(sql);
 
-        if (time % 17 >= 14) {
-          count++;
+                if (time % 17 >= 14) {
+                    count++;
+                }
+            }
+
+            statement.execute("flush");
+
+            // insert data (time from 1200-1499)
+            for (long time = 1200; time < 1500; time++) {
+                String sql;
+                if (time % 2 == 0) {
+                    sql =
+                            String.format(
+                                    "insert into root.vehicle.d0(timestamp,s0) values(%s,%s)",
+                                    time, time % 17);
+                    statement.execute(sql);
+                    sql =
+                            String.format(
+                                    "insert into root.vehicle.d0(timestamp,s1) values(%s,%s)",
+                                    time, time % 29);
+                    statement.execute(sql);
+                    if (time % 17 >= 14) {
+                        count++;
+                    }
+                }
+                sql =
+                        String.format(
+                                "insert into root.vehicle.d0(timestamp,s2) values(%s,%s)",
+                                time, time % 31);
+                statement.execute(sql);
+                sql =
+                        String.format(
+                                "insert into root.vehicle.d0(timestamp,s3) values(%s,'%s')",
+                                time, TestConstant.stringValue[(int) time % 5]);
+                statement.execute(sql);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
         }
-      }
+    }
 
-      statement.execute("flush");
+    @Test
+    public void readWithoutFilterTest()
+            throws IOException, StorageEngineException, QueryProcessException,
+                    IllegalPathException {
 
-      // insert data (time from 1200-1499)
-      for (long time = 1200; time < 1500; time++) {
-        String sql;
-        if (time % 2 == 0) {
-          sql = String
-              .format("insert into root.vehicle.d0(timestamp,s0) values(%s,%s)", time, time % 17);
-          statement.execute(sql);
-          sql = String
-              .format("insert into root.vehicle.d0(timestamp,s1) values(%s,%s)", time, time % 29);
-          statement.execute(sql);
-          if (time % 17 >= 14) {
-            count++;
-          }
+        QueryRouter queryRouter = new QueryRouter();
+        List<PartialPath> pathList = new ArrayList<>();
+        List<TSDataType> dataTypes = new ArrayList<>();
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
+        dataTypes.add(TSDataType.INT32);
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s1));
+        dataTypes.add(TSDataType.INT64);
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s2));
+        dataTypes.add(TSDataType.FLOAT);
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s3));
+        dataTypes.add(TSDataType.TEXT);
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s4));
+        dataTypes.add(TSDataType.BOOLEAN);
+        pathList.add(
+                new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
+        dataTypes.add(TSDataType.INT32);
+        pathList.add(
+                new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s1));
+        dataTypes.add(TSDataType.INT64);
+
+        TEST_QUERY_JOB_ID =
+                QueryResourceManager.getInstance().assignQueryId(true, 1024, pathList.size());
+        TEST_QUERY_CONTEXT = new QueryContext(TEST_QUERY_JOB_ID);
+        RawDataQueryPlan queryPlan = new RawDataQueryPlan();
+        queryPlan.setDeduplicatedDataTypes(dataTypes);
+        queryPlan.setDeduplicatedPaths(pathList);
+        QueryDataSet queryDataSet = queryRouter.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
+
+        int cnt = 0;
+        while (queryDataSet.hasNext()) {
+            queryDataSet.next();
+            cnt++;
         }
-        sql = String
-            .format("insert into root.vehicle.d0(timestamp,s2) values(%s,%s)", time, time % 31);
-        statement.execute(sql);
-        sql = String.format("insert into root.vehicle.d0(timestamp,s3) values(%s,'%s')", time,
-            TestConstant.stringValue[(int) time % 5]);
-        statement.execute(sql);
-      }
+        assertEquals(1000, cnt);
 
-    } catch (Exception e) {
-      e.printStackTrace();
-      fail(e.getMessage());
+        QueryResourceManager.getInstance().endQuery(TEST_QUERY_JOB_ID);
     }
-  }
 
-  @Test
-  public void readWithoutFilterTest()
-      throws IOException, StorageEngineException, QueryProcessException, IllegalPathException {
+    @Test
+    public void readWithTimeFilterTest()
+            throws IOException, StorageEngineException, QueryProcessException,
+                    IllegalPathException {
+        QueryRouter queryRouter = new QueryRouter();
+        List<PartialPath> pathList = new ArrayList<>();
+        List<TSDataType> dataTypes = new ArrayList<>();
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
+        dataTypes.add(TSDataType.INT32);
+        pathList.add(
+                new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
+        dataTypes.add(TSDataType.INT32);
+        pathList.add(
+                new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s1));
+        dataTypes.add(TSDataType.INT64);
 
-    QueryRouter queryRouter = new QueryRouter();
-    List<PartialPath> pathList = new ArrayList<>();
-    List<TSDataType> dataTypes = new ArrayList<>();
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
-    dataTypes.add(TSDataType.INT32);
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s1));
-    dataTypes.add(TSDataType.INT64);
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s2));
-    dataTypes.add(TSDataType.FLOAT);
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s3));
-    dataTypes.add(TSDataType.TEXT);
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s4));
-    dataTypes.add(TSDataType.BOOLEAN);
-    pathList.add(new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
-    dataTypes.add(TSDataType.INT32);
-    pathList.add(new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s1));
-    dataTypes.add(TSDataType.INT64);
+        GlobalTimeExpression globalTimeExpression = new GlobalTimeExpression(TimeFilter.gtEq(800L));
+        TEST_QUERY_JOB_ID =
+                QueryResourceManager.getInstance().assignQueryId(true, 1024, pathList.size());
+        TEST_QUERY_CONTEXT = new QueryContext(TEST_QUERY_JOB_ID);
 
-    TEST_QUERY_JOB_ID = QueryResourceManager.getInstance()
-        .assignQueryId(true, 1024, pathList.size());
-    TEST_QUERY_CONTEXT = new QueryContext(TEST_QUERY_JOB_ID);
-    RawDataQueryPlan queryPlan = new RawDataQueryPlan();
-    queryPlan.setDeduplicatedDataTypes(dataTypes);
-    queryPlan.setDeduplicatedPaths(pathList);
-    QueryDataSet queryDataSet = queryRouter.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
+        RawDataQueryPlan queryPlan = new RawDataQueryPlan();
+        queryPlan.setDeduplicatedDataTypes(dataTypes);
+        queryPlan.setDeduplicatedPaths(pathList);
+        queryPlan.setExpression(globalTimeExpression);
+        QueryDataSet queryDataSet = queryRouter.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
 
-    int cnt = 0;
-    while (queryDataSet.hasNext()) {
-      queryDataSet.next();
-      cnt++;
+        int cnt = 0;
+        while (queryDataSet.hasNext()) {
+            RowRecord rowRecord = queryDataSet.next();
+            String value = rowRecord.getFields().get(0).getStringValue();
+            long time = rowRecord.getTimestamp();
+            assertEquals("" + time % 17, value);
+            cnt++;
+        }
+        assertEquals(350, cnt);
+
+        QueryResourceManager.getInstance().endQuery(TEST_QUERY_JOB_ID);
     }
-    assertEquals(1000, cnt);
 
-    QueryResourceManager.getInstance().endQuery(TEST_QUERY_JOB_ID);
-  }
+    @Test
+    public void readWithValueFilterTest()
+            throws IOException, StorageEngineException, QueryProcessException,
+                    IllegalPathException {
+        // select * from root where root.vehicle.d0.s0 >=14
+        QueryRouter queryRouter = new QueryRouter();
+        List<PartialPath> pathList = new ArrayList<>();
+        List<TSDataType> dataTypes = new ArrayList<>();
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
+        dataTypes.add(TSDataType.INT32);
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s1));
+        dataTypes.add(TSDataType.INT64);
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s2));
+        dataTypes.add(TSDataType.FLOAT);
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s3));
+        dataTypes.add(TSDataType.TEXT);
+        pathList.add(
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s4));
+        dataTypes.add(TSDataType.BOOLEAN);
+        pathList.add(
+                new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
+        dataTypes.add(TSDataType.INT32);
+        pathList.add(
+                new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s1));
+        dataTypes.add(TSDataType.INT64);
 
-  @Test
-  public void readWithTimeFilterTest()
-      throws IOException, StorageEngineException, QueryProcessException, IllegalPathException {
-    QueryRouter queryRouter = new QueryRouter();
-    List<PartialPath> pathList = new ArrayList<>();
-    List<TSDataType> dataTypes = new ArrayList<>();
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
-    dataTypes.add(TSDataType.INT32);
-    pathList.add(new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
-    dataTypes.add(TSDataType.INT32);
-    pathList.add(new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s1));
-    dataTypes.add(TSDataType.INT64);
+        Path queryPath =
+                new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0);
+        SingleSeriesExpression singleSeriesExpression =
+                new SingleSeriesExpression(queryPath, ValueFilter.gtEq(14));
 
-    GlobalTimeExpression globalTimeExpression = new GlobalTimeExpression(TimeFilter.gtEq(800L));
-    TEST_QUERY_JOB_ID = QueryResourceManager.getInstance()
-        .assignQueryId(true, 1024, pathList.size());
-    TEST_QUERY_CONTEXT = new QueryContext(TEST_QUERY_JOB_ID);
+        TEST_QUERY_JOB_ID =
+                QueryResourceManager.getInstance().assignQueryId(true, 1024, pathList.size());
+        TEST_QUERY_CONTEXT = new QueryContext(TEST_QUERY_JOB_ID);
 
-    RawDataQueryPlan queryPlan = new RawDataQueryPlan();
-    queryPlan.setDeduplicatedDataTypes(dataTypes);
-    queryPlan.setDeduplicatedPaths(pathList);
-    queryPlan.setExpression(globalTimeExpression);
-    QueryDataSet queryDataSet = queryRouter.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
+        RawDataQueryPlan queryPlan = new RawDataQueryPlan();
+        queryPlan.setDeduplicatedDataTypes(dataTypes);
+        queryPlan.setDeduplicatedPaths(pathList);
+        queryPlan.setExpression(singleSeriesExpression);
+        QueryDataSet queryDataSet = queryRouter.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
 
-    int cnt = 0;
-    while (queryDataSet.hasNext()) {
-      RowRecord rowRecord = queryDataSet.next();
-      String value = rowRecord.getFields().get(0).getStringValue();
-      long time = rowRecord.getTimestamp();
-      assertEquals("" + time % 17, value);
-      cnt++;
+        int cnt = 0;
+        while (queryDataSet.hasNext()) {
+            queryDataSet.next();
+            cnt++;
+        }
+        assertEquals(count, cnt);
+
+        QueryResourceManager.getInstance().endQuery(TEST_QUERY_JOB_ID);
     }
-    assertEquals(350, cnt);
-
-    QueryResourceManager.getInstance().endQuery(TEST_QUERY_JOB_ID);
-  }
-
-  @Test
-  public void readWithValueFilterTest()
-      throws IOException, StorageEngineException, QueryProcessException, IllegalPathException {
-    // select * from root where root.vehicle.d0.s0 >=14
-    QueryRouter queryRouter = new QueryRouter();
-    List<PartialPath> pathList = new ArrayList<>();
-    List<TSDataType> dataTypes = new ArrayList<>();
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
-    dataTypes.add(TSDataType.INT32);
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s1));
-    dataTypes.add(TSDataType.INT64);
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s2));
-    dataTypes.add(TSDataType.FLOAT);
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s3));
-    dataTypes.add(TSDataType.TEXT);
-    pathList.add(new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s4));
-    dataTypes.add(TSDataType.BOOLEAN);
-    pathList.add(new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0));
-    dataTypes.add(TSDataType.INT32);
-    pathList.add(new PartialPath(TestConstant.d1 + TsFileConstant.PATH_SEPARATOR + TestConstant.s1));
-    dataTypes.add(TSDataType.INT64);
-
-    Path queryPath = new PartialPath(TestConstant.d0 + TsFileConstant.PATH_SEPARATOR + TestConstant.s0);
-    SingleSeriesExpression singleSeriesExpression = new SingleSeriesExpression(queryPath,
-        ValueFilter.gtEq(14));
-
-    TEST_QUERY_JOB_ID = QueryResourceManager.getInstance()
-        .assignQueryId(true, 1024, pathList.size());
-    TEST_QUERY_CONTEXT = new QueryContext(TEST_QUERY_JOB_ID);
-
-    RawDataQueryPlan queryPlan = new RawDataQueryPlan();
-    queryPlan.setDeduplicatedDataTypes(dataTypes);
-    queryPlan.setDeduplicatedPaths(pathList);
-    queryPlan.setExpression(singleSeriesExpression);
-    QueryDataSet queryDataSet = queryRouter.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
-
-    int cnt = 0;
-    while (queryDataSet.hasNext()) {
-      queryDataSet.next();
-      cnt++;
-    }
-    assertEquals(count, cnt);
-
-    QueryResourceManager.getInstance().endQuery(TEST_QUERY_JOB_ID);
-  }
-
 }

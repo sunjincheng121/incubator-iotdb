@@ -35,57 +35,57 @@ import org.junit.Test;
 
 public class LocalFileRoleAccessorTest {
 
-  private File testFolder;
-  private LocalFileRoleAccessor accessor;
+    private File testFolder;
+    private LocalFileRoleAccessor accessor;
 
-  @Before
-  public void setUp() throws Exception {
-    EnvironmentUtils.envSetUp();
-    testFolder = new File(TestConstant.BASE_OUTPUT_PATH.concat("test"));
-    testFolder.mkdirs();
-    accessor = new LocalFileRoleAccessor(testFolder.getPath());
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    FileUtils.deleteDirectory(testFolder);
-    EnvironmentUtils.cleanEnv();
-  }
-
-  @Test
-  public void test() throws IOException {
-    Role[] roles = new Role[5];
-    for (int i = 0; i < roles.length; i++) {
-      roles[i] = new Role("role" + i);
-      for (int j = 0; j <= i; j++) {
-        PathPrivilege pathPrivilege = new PathPrivilege("root.a.b.c" + j);
-        pathPrivilege.getPrivileges().add(j);
-        roles[i].getPrivilegeList().add(pathPrivilege);
-      }
+    @Before
+    public void setUp() throws Exception {
+        EnvironmentUtils.envSetUp();
+        testFolder = new File(TestConstant.BASE_OUTPUT_PATH.concat("test"));
+        testFolder.mkdirs();
+        accessor = new LocalFileRoleAccessor(testFolder.getPath());
     }
 
-    // save
-    for (Role role : roles) {
-      accessor.saveRole(role);
+    @After
+    public void tearDown() throws Exception {
+        FileUtils.deleteDirectory(testFolder);
+        EnvironmentUtils.cleanEnv();
     }
 
-    // load
-    for (Role role : roles) {
-      Role loadedRole = accessor.loadRole(role.getName());
-      assertEquals(role, loadedRole);
-    }
-    assertEquals(null, accessor.loadRole("not a role"));
+    @Test
+    public void test() throws IOException {
+        Role[] roles = new Role[5];
+        for (int i = 0; i < roles.length; i++) {
+            roles[i] = new Role("role" + i);
+            for (int j = 0; j <= i; j++) {
+                PathPrivilege pathPrivilege = new PathPrivilege("root.a.b.c" + j);
+                pathPrivilege.getPrivileges().add(j);
+                roles[i].getPrivilegeList().add(pathPrivilege);
+            }
+        }
 
-    // delete
-    assertEquals(true, accessor.deleteRole(roles[roles.length - 1].getName()));
-    assertEquals(false, accessor.deleteRole(roles[roles.length - 1].getName()));
-    assertEquals(null, accessor.loadRole(roles[roles.length - 1].getName()));
+        // save
+        for (Role role : roles) {
+            accessor.saveRole(role);
+        }
 
-    // list
-    List<String> roleNames = accessor.listAllRoles();
-    roleNames.sort(null);
-    for (int i = 0; i < roleNames.size(); i++) {
-      assertEquals(roles[i].getName(), roleNames.get(i));
+        // load
+        for (Role role : roles) {
+            Role loadedRole = accessor.loadRole(role.getName());
+            assertEquals(role, loadedRole);
+        }
+        assertEquals(null, accessor.loadRole("not a role"));
+
+        // delete
+        assertEquals(true, accessor.deleteRole(roles[roles.length - 1].getName()));
+        assertEquals(false, accessor.deleteRole(roles[roles.length - 1].getName()));
+        assertEquals(null, accessor.loadRole(roles[roles.length - 1].getName()));
+
+        // list
+        List<String> roleNames = accessor.listAllRoles();
+        roleNames.sort(null);
+        for (int i = 0; i < roleNames.size(); i++) {
+            assertEquals(roles[i].getName(), roleNames.get(i));
+        }
     }
-  }
 }

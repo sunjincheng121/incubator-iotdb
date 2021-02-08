@@ -18,52 +18,52 @@
  */
 package org.apache.iotdb.hive;
 
+import java.io.IOException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.exec.FileSinkOperator;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.iotdb.hadoop.fileSystem.HDFSOutput;
 import org.apache.iotdb.hadoop.tsfile.TSFRecordWriter;
 import org.apache.iotdb.hadoop.tsfile.record.HDFSTSRecord;
 import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
-import org.apache.iotdb.hadoop.fileSystem.HDFSOutput;
 import org.apache.iotdb.tsfile.write.TsFileWriter;
 import org.apache.iotdb.tsfile.write.schema.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
-
 /**
- * The function implement is same as {@link org.apache.iotdb.hadoop.tsfile.TSFRecordWriter}
- * and is customized for Hive
+ * The function implement is same as {@link org.apache.iotdb.hadoop.tsfile.TSFRecordWriter} and is
+ * customized for Hive
  */
 public class TSFHiveRecordWriter implements FileSinkOperator.RecordWriter {
 
-  private static final Logger logger = LoggerFactory.getLogger(TSFRecordWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(TSFRecordWriter.class);
 
-  private TsFileWriter writer;
+    private TsFileWriter writer;
 
-  public TSFHiveRecordWriter(JobConf job, Path path, Schema schema) throws IOException {
+    public TSFHiveRecordWriter(JobConf job, Path path, Schema schema) throws IOException {
 
-    HDFSOutput hdfsOutput = new HDFSOutput(path.toString(), job, false);
-    writer = new TsFileWriter(hdfsOutput, schema);
-  }
-
-  @Override
-  public void write(Writable writable) throws IOException {
-    if(!(writable instanceof HDFSTSRecord))
-      throw new IOException("Expecting instance of HDFSTSRecord, but received" + writable.getClass().getCanonicalName());
-    try {
-      writer.write(((HDFSTSRecord)writable).convertToTSRecord());
-    } catch (WriteProcessException e) {
-      throw new IOException(String.format("Write tsfile record error %s", e));
+        HDFSOutput hdfsOutput = new HDFSOutput(path.toString(), job, false);
+        writer = new TsFileWriter(hdfsOutput, schema);
     }
-  }
 
-  @Override
-  public void close(boolean b) throws IOException {
-    logger.info("Close the record writer");
-    writer.close();
-  }
+    @Override
+    public void write(Writable writable) throws IOException {
+        if (!(writable instanceof HDFSTSRecord))
+            throw new IOException(
+                    "Expecting instance of HDFSTSRecord, but received"
+                            + writable.getClass().getCanonicalName());
+        try {
+            writer.write(((HDFSTSRecord) writable).convertToTSRecord());
+        } catch (WriteProcessException e) {
+            throw new IOException(String.format("Write tsfile record error %s", e));
+        }
+    }
+
+    @Override
+    public void close(boolean b) throws IOException {
+        logger.info("Close the record writer");
+        writer.close();
+    }
 }

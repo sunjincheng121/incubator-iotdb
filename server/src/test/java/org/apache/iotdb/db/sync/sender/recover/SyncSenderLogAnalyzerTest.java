@@ -18,13 +18,20 @@
  */
 package org.apache.iotdb.db.sync.sender.recover;
 
+import static org.apache.iotdb.tsfile.common.constant.TsFileConstant.TSFILE_SUFFIX;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
 import org.apache.iotdb.db.conf.IoTDBConstant;
 import org.apache.iotdb.db.conf.directories.DirectoryManager;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.exception.DiskSpaceInsufficientException;
 import org.apache.iotdb.db.exception.StartupException;
 import org.apache.iotdb.db.exception.StorageEngineException;
-import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.service.IoTDB;
@@ -42,134 +49,142 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
-
-import static org.apache.iotdb.tsfile.common.constant.TsFileConstant.TSFILE_SUFFIX;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 public class SyncSenderLogAnalyzerTest {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SyncSenderLogAnalyzerTest.class);
-  private ISyncSenderLogger senderLogger;
-  private ISyncSenderLogAnalyzer senderLogAnalyzer;
-  private ISyncFileManager manager = SyncFileManager.getInstance();
-  private SyncSenderConfig config = SyncSenderDescriptor.getInstance().getConfig();
-  private String dataDir;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SyncSenderLogAnalyzerTest.class);
+    private ISyncSenderLogger senderLogger;
+    private ISyncSenderLogAnalyzer senderLogAnalyzer;
+    private ISyncFileManager manager = SyncFileManager.getInstance();
+    private SyncSenderConfig config = SyncSenderDescriptor.getInstance().getConfig();
+    private String dataDir;
 
-  @Before
-  public void setUp()
-      throws IOException, InterruptedException, StartupException, DiskSpaceInsufficientException {
-    EnvironmentUtils.envSetUp();
-    dataDir = new File(DirectoryManager.getInstance().getNextFolderForSequenceFile())
-        .getParentFile().getAbsolutePath();
-    config.update(dataDir);
-    senderLogger = new SyncSenderLogger(
-        new File(config.getSenderFolderPath(), SyncConstant.SYNC_LOG_NAME));
-    senderLogAnalyzer = new SyncSenderLogAnalyzer(config.getSenderFolderPath());
-  }
-
-  @After
-  public void tearDown() throws InterruptedException, IOException, StorageEngineException {
-    EnvironmentUtils.cleanEnv();
-  }
-
-  @Test
-  public void recover() throws IOException, MetadataException {
-    Map<String, Map<Long, Set<File>>> allFileList = new HashMap<>();
-
-    for (int i = 0; i < 3; i++) {
-      IoTDB.metaManager.setStorageGroup(new PartialPath(getSgName(i)));
+    @Before
+    public void setUp()
+            throws IOException, InterruptedException, StartupException,
+                    DiskSpaceInsufficientException {
+        EnvironmentUtils.envSetUp();
+        dataDir =
+                new File(DirectoryManager.getInstance().getNextFolderForSequenceFile())
+                        .getParentFile()
+                        .getAbsolutePath();
+        config.update(dataDir);
+        senderLogger =
+                new SyncSenderLogger(
+                        new File(config.getSenderFolderPath(), SyncConstant.SYNC_LOG_NAME));
+        senderLogAnalyzer = new SyncSenderLogAnalyzer(config.getSenderFolderPath());
     }
-    Random r = new Random(0);
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 5; j++) {
-        allFileList.computeIfAbsent(getSgName(i), k -> new HashMap<>()).computeIfAbsent(0L, k -> new HashSet<>());
-        String rand = r.nextInt(10000) + TSFILE_SUFFIX;
-        String fileName = FilePathUtils.regularizePath(dataDir) + IoTDBConstant.SEQUENCE_FLODER_NAME
-            + File.separator + getSgName(i) + File.separator + "0" + File.separator + rand;
-        File file = new File(fileName);
-        allFileList.get(getSgName(i)).get(0L).add(file);
-        if (!file.getParentFile().exists()) {
-          file.getParentFile().mkdirs();
+
+    @After
+    public void tearDown() throws InterruptedException, IOException, StorageEngineException {
+        EnvironmentUtils.cleanEnv();
+    }
+
+    @Test
+    public void recover() throws IOException, MetadataException {
+        Map<String, Map<Long, Set<File>>> allFileList = new HashMap<>();
+
+        for (int i = 0; i < 3; i++) {
+            IoTDB.metaManager.setStorageGroup(new PartialPath(getSgName(i)));
         }
-        if (!file.exists() && !file.createNewFile()) {
-          LOGGER.error("Can not create new file {}", file.getPath());
+        Random r = new Random(0);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 5; j++) {
+                allFileList
+                        .computeIfAbsent(getSgName(i), k -> new HashMap<>())
+                        .computeIfAbsent(0L, k -> new HashSet<>());
+                String rand = r.nextInt(10000) + TSFILE_SUFFIX;
+                String fileName =
+                        FilePathUtils.regularizePath(dataDir)
+                                + IoTDBConstant.SEQUENCE_FLODER_NAME
+                                + File.separator
+                                + getSgName(i)
+                                + File.separator
+                                + "0"
+                                + File.separator
+                                + rand;
+                File file = new File(fileName);
+                allFileList.get(getSgName(i)).get(0L).add(file);
+                if (!file.getParentFile().exists()) {
+                    file.getParentFile().mkdirs();
+                }
+                if (!file.exists() && !file.createNewFile()) {
+                    LOGGER.error("Can not create new file {}", file.getPath());
+                }
+                if (!new File(file.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX).exists()
+                        && !new File(file.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX)
+                                .createNewFile()) {
+                    LOGGER.error("Can not create new file {}", file.getPath());
+                }
+            }
         }
-        if (!new File(file.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX).exists()
-            && !new File(file.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX).createNewFile()) {
-          LOGGER.error("Can not create new file {}", file.getPath());
+        manager.getValidFiles(dataDir);
+        assertTrue(SyncUtils.isEmpty(manager.getLastLocalFilesMap()));
+        senderLogger.startSyncTsFiles();
+        for (Map<Long, Set<File>> map : allFileList.values()) {
+            for (Set<File> newTsFiles : map.values()) {
+                for (File file : newTsFiles) {
+                    senderLogger.finishSyncTsfile(file);
+                }
+            }
         }
-      }
-    }
-    manager.getValidFiles(dataDir);
-    assertTrue(SyncUtils.isEmpty(manager.getLastLocalFilesMap()));
-    senderLogger.startSyncTsFiles();
-    for (Map<Long, Set<File>> map : allFileList.values()) {
-      for (Set<File> newTsFiles : map.values()) {
-        for (File file : newTsFiles) {
-          senderLogger.finishSyncTsfile(file);
+        senderLogger.close();
+
+        // recover log
+        senderLogAnalyzer.recover();
+        manager.getValidFiles(dataDir);
+        assertFalse(SyncUtils.isEmpty(manager.getLastLocalFilesMap()));
+        Map<String, Map<Long, Set<File>>> lastFilesMap = manager.getLastLocalFilesMap();
+        assertFileMap(allFileList, lastFilesMap);
+
+        // delete some files
+        assertFalse(new File(config.getSenderFolderPath(), SyncConstant.SYNC_LOG_NAME).exists());
+        senderLogger =
+                new SyncSenderLogger(
+                        new File(config.getSenderFolderPath(), SyncConstant.SYNC_LOG_NAME));
+        manager.getValidFiles(dataDir);
+        assertFalse(SyncUtils.isEmpty(manager.getLastLocalFilesMap()));
+        senderLogger.startSyncDeletedFilesName();
+        for (Map<Long, Set<File>> map : allFileList.values()) {
+            for (Set<File> newTsFiles : map.values()) {
+                for (File file : newTsFiles) {
+                    senderLogger.finishSyncDeletedFileName(file);
+                }
+            }
         }
-      }
+        senderLogger.close();
+        // recover log
+        senderLogAnalyzer.recover();
+        manager.getValidFiles(dataDir);
+        assertTrue(SyncUtils.isEmpty(manager.getLastLocalFilesMap()));
+        assertTrue(SyncUtils.isEmpty(manager.getDeletedFilesMap()));
+        Map<String, Map<Long, Set<File>>> toBeSyncedFilesMap = manager.getToBeSyncedFilesMap();
+        assertFileMap(allFileList, toBeSyncedFilesMap);
     }
-    senderLogger.close();
 
-    // recover log
-    senderLogAnalyzer.recover();
-    manager.getValidFiles(dataDir);
-    assertFalse(SyncUtils.isEmpty(manager.getLastLocalFilesMap()));
-    Map<String, Map<Long, Set<File>>> lastFilesMap = manager.getLastLocalFilesMap();
-    assertFileMap(allFileList, lastFilesMap);
-
-    // delete some files
-    assertFalse(new File(config.getSenderFolderPath(), SyncConstant.SYNC_LOG_NAME).exists());
-    senderLogger = new SyncSenderLogger(
-        new File(config.getSenderFolderPath(), SyncConstant.SYNC_LOG_NAME));
-    manager.getValidFiles(dataDir);
-    assertFalse(SyncUtils.isEmpty(manager.getLastLocalFilesMap()));
-    senderLogger.startSyncDeletedFilesName();
-    for (Map<Long, Set<File>> map : allFileList.values()) {
-      for (Set<File> newTsFiles : map.values()) {
-        for (File file : newTsFiles) {
-          senderLogger.finishSyncDeletedFileName(file);
+    private void assertFileMap(
+            Map<String, Map<Long, Set<File>>> correctMap,
+            Map<String, Map<Long, Set<File>>> curMap) {
+        for (Entry<String, Map<Long, Set<File>>> entry : correctMap.entrySet()) {
+            assertTrue(curMap.containsKey(entry.getKey()));
+            for (Entry<Long, Set<File>> innerEntry : entry.getValue().entrySet()) {
+                assertTrue(
+                        curMap.get(entry.getKey())
+                                .get(innerEntry.getKey())
+                                .containsAll(innerEntry.getValue()));
+            }
         }
-      }
     }
-    senderLogger.close();
-    // recover log
-    senderLogAnalyzer.recover();
-    manager.getValidFiles(dataDir);
-    assertTrue(SyncUtils.isEmpty(manager.getLastLocalFilesMap()));
-    assertTrue(SyncUtils.isEmpty(manager.getDeletedFilesMap()));
-    Map<String, Map<Long, Set<File>>> toBeSyncedFilesMap = manager.getToBeSyncedFilesMap();
-    assertFileMap(allFileList, toBeSyncedFilesMap);
-  }
 
-  private void assertFileMap(Map<String, Map<Long, Set<File>>> correctMap,
-      Map<String, Map<Long, Set<File>>> curMap) {
-    for (Entry<String, Map<Long, Set<File>>> entry : correctMap.entrySet()) {
-      assertTrue(curMap.containsKey(entry.getKey()));
-      for (Entry<Long, Set<File>> innerEntry : entry.getValue().entrySet()) {
-        assertTrue(
-            curMap.get(entry.getKey()).get(innerEntry.getKey()).containsAll(innerEntry.getValue()));
-      }
+    private String getSgName(int i) {
+        return IoTDBConstant.PATH_ROOT + IoTDBConstant.PATH_SEPARATOR + i;
     }
-  }
 
-  private String getSgName(int i) {
-    return IoTDBConstant.PATH_ROOT + IoTDBConstant.PATH_SEPARATOR + i;
-  }
-
-  private boolean isEmpty(Map<String, Set<File>> sendingFileList) {
-    for (Entry<String, Set<File>> entry : sendingFileList.entrySet()) {
-      if (!entry.getValue().isEmpty()) {
-        return false;
-      }
+    private boolean isEmpty(Map<String, Set<File>> sendingFileList) {
+        for (Entry<String, Set<File>> entry : sendingFileList.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
-    return true;
-  }
-
 }

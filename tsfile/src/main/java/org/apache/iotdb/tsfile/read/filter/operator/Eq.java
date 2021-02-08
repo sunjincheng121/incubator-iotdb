@@ -32,67 +32,67 @@ import org.apache.iotdb.tsfile.read.filter.factory.FilterType;
  */
 public class Eq<T extends Comparable<T>> extends UnaryFilter<T> {
 
-  private static final long serialVersionUID = -6668083116644568248L;
+    private static final long serialVersionUID = -6668083116644568248L;
 
-  public Eq() {
-  }
+    public Eq() {}
 
-  public Eq(T value, FilterType filterType) {
-    super(value, filterType);
-  }
-
-  @Override
-  public boolean satisfy(Statistics statistics) {
-    if (filterType == FilterType.TIME_FILTER) {
-      return ((Long) value) >= statistics.getStartTime() && ((Long) value) <= statistics
-          .getEndTime();
-    } else {
-      if (statistics.getType() == TSDataType.TEXT || statistics.getType() == TSDataType.BOOLEAN) {
-        return true;
-      }
-      return value.compareTo((T) statistics.getMinValue()) >= 0
-          && value.compareTo((T) statistics.getMaxValue()) <= 0;
+    public Eq(T value, FilterType filterType) {
+        super(value, filterType);
     }
-  }
 
-  @Override
-  public boolean satisfy(long time, Object value) {
-    Object v = filterType == FilterType.TIME_FILTER ? time : value;
-    return this.value.equals(v);
-  }
-
-  @Override
-  public boolean satisfyStartEndTime(long startTime, long endTime) {
-    if (filterType == FilterType.TIME_FILTER) {
-      long time = (Long) value;
-      return time <= endTime && time >= startTime;
-    } else {
-      return true;
+    @Override
+    public boolean satisfy(Statistics statistics) {
+        if (filterType == FilterType.TIME_FILTER) {
+            return ((Long) value) >= statistics.getStartTime()
+                    && ((Long) value) <= statistics.getEndTime();
+        } else {
+            if (statistics.getType() == TSDataType.TEXT
+                    || statistics.getType() == TSDataType.BOOLEAN) {
+                return true;
+            }
+            return value.compareTo((T) statistics.getMinValue()) >= 0
+                    && value.compareTo((T) statistics.getMaxValue()) <= 0;
+        }
     }
-  }
 
-  @Override
-  public boolean containStartEndTime(long startTime, long endTime) {
-    if (filterType == FilterType.TIME_FILTER) {
-      long time = (Long) value;
-      return time == startTime && time == endTime;
-    } else {
-      return true;
+    @Override
+    public boolean satisfy(long time, Object value) {
+        Object v = filterType == FilterType.TIME_FILTER ? time : value;
+        return this.value.equals(v);
     }
-  }
 
-  @Override
-  public Filter copy() {
-    return new Eq(value, filterType);
-  }
+    @Override
+    public boolean satisfyStartEndTime(long startTime, long endTime) {
+        if (filterType == FilterType.TIME_FILTER) {
+            long time = (Long) value;
+            return time <= endTime && time >= startTime;
+        } else {
+            return true;
+        }
+    }
 
-  @Override
-  public String toString() {
-    return getFilterType() + " == " + value;
-  }
+    @Override
+    public boolean containStartEndTime(long startTime, long endTime) {
+        if (filterType == FilterType.TIME_FILTER) {
+            long time = (Long) value;
+            return time == startTime && time == endTime;
+        } else {
+            return true;
+        }
+    }
 
-  @Override
-  public FilterSerializeId getSerializeId() {
-    return FilterSerializeId.EQ;
-  }
+    @Override
+    public Filter copy() {
+        return new Eq(value, filterType);
+    }
+
+    @Override
+    public String toString() {
+        return getFilterType() + " == " + value;
+    }
+
+    @Override
+    public FilterSerializeId getSerializeId() {
+        return FilterSerializeId.EQ;
+    }
 }

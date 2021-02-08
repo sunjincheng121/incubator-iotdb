@@ -24,40 +24,41 @@ import org.apache.iotdb.db.metadata.MetadataConstant;
 
 public class StorageGroupMNode extends MNode {
 
-  private static final long serialVersionUID = 7999036474525817732L;
+    private static final long serialVersionUID = 7999036474525817732L;
 
-  /**
-   * when the data file in a storage group is older than dataTTL, it is considered invalid and will
-   * be eventually deleted.
-   */
-  private long dataTTL;
+    /**
+     * when the data file in a storage group is older than dataTTL, it is considered invalid and
+     * will be eventually deleted.
+     */
+    private long dataTTL;
 
-  public StorageGroupMNode(MNode parent, String name, long dataTTL) {
-    super(parent, name);
-    this.dataTTL = dataTTL;
-  }
+    public StorageGroupMNode(MNode parent, String name, long dataTTL) {
+        super(parent, name);
+        this.dataTTL = dataTTL;
+    }
 
-  public long getDataTTL() {
-    return dataTTL;
-  }
+    public long getDataTTL() {
+        return dataTTL;
+    }
 
-  public void setDataTTL(long dataTTL) {
-    this.dataTTL = dataTTL;
-  }
+    public void setDataTTL(long dataTTL) {
+        this.dataTTL = dataTTL;
+    }
 
-  @Override
-  public void serializeTo(BufferedWriter bw) throws IOException {
-    serializeChildren(bw);
+    @Override
+    public void serializeTo(BufferedWriter bw) throws IOException {
+        serializeChildren(bw);
 
-    StringBuilder s = new StringBuilder(String.valueOf(MetadataConstant.STORAGE_GROUP_MNODE_TYPE));
-    s.append(",").append(name).append(",");
-    s.append(dataTTL).append(",");
-    s.append(children == null ? "0" : children.size());
-    bw.write(s.toString());
-    bw.newLine();
-  }
+        StringBuilder s =
+                new StringBuilder(String.valueOf(MetadataConstant.STORAGE_GROUP_MNODE_TYPE));
+        s.append(",").append(name).append(",");
+        s.append(dataTTL).append(",");
+        s.append(children == null ? "0" : children.size());
+        bw.write(s.toString());
+        bw.newLine();
+    }
 
-  public static StorageGroupMNode deserializeFrom(String[] nodeInfo) {
-    return new StorageGroupMNode(null, nodeInfo[1], Long.valueOf(nodeInfo[2]));
-  }
+    public static StorageGroupMNode deserializeFrom(String[] nodeInfo) {
+        return new StorageGroupMNode(null, nodeInfo[1], Long.valueOf(nodeInfo[2]));
+    }
 }

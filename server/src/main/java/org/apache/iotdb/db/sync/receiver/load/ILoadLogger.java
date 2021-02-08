@@ -30,33 +30,28 @@ import java.io.IOException;
  */
 public interface ILoadLogger {
 
-  String LOAD_DELETED_FILE_NAME_START = "load deleted files start";
-  String LOAD_TSFILE_START = "load tsfile start";
+    String LOAD_DELETED_FILE_NAME_START = "load deleted files start";
+    String LOAD_TSFILE_START = "load tsfile start";
 
-  /**
-   * Start to load deleted files.
-   */
-  void startLoadDeletedFiles() throws IOException;
+    /** Start to load deleted files. */
+    void startLoadDeletedFiles() throws IOException;
 
-  /**
-   * After a deleted file is loaded, record it in load log.
-   *
-   * @param file deleted file to be loaded
-   */
-  void finishLoadDeletedFile(File file) throws IOException;
+    /**
+     * After a deleted file is loaded, record it in load log.
+     *
+     * @param file deleted file to be loaded
+     */
+    void finishLoadDeletedFile(File file) throws IOException;
 
-  /**
-   * Start to load tsfiles
-   */
-  void startLoadTsFiles() throws IOException;
+    /** Start to load tsfiles */
+    void startLoadTsFiles() throws IOException;
 
-  /**
-   * After a new tsfile is loaded, record it in load log.
-   *
-   * @param file new tsfile to be loaded
-   */
-  void finishLoadTsfile(File file) throws IOException;
+    /**
+     * After a new tsfile is loaded, record it in load log.
+     *
+     * @param file new tsfile to be loaded
+     */
+    void finishLoadTsfile(File file) throws IOException;
 
-  void close() throws IOException;
-
+    void close() throws IOException;
 }

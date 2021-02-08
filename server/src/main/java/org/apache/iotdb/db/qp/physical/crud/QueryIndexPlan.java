@@ -25,51 +25,51 @@ import org.apache.iotdb.db.qp.logical.Operator.OperatorType;
 
 public class QueryIndexPlan extends RawDataQueryPlan {
 
-  private Map<String, Object> props;
-  private IndexType indexType;
+    private Map<String, Object> props;
+    private IndexType indexType;
 
-  public QueryIndexPlan() {
-    super();
-    setOperatorType(OperatorType.QUERY_INDEX);
-  }
-
-  public IndexType getIndexType() {
-    return indexType;
-  }
-
-  public void setIndexType(IndexType indexType) {
-    this.indexType = indexType;
-  }
-
-  public Map<String, Object> getProps() {
-    return props;
-  }
-
-  public void setProps(Map<String, Object> props) {
-    this.props = props;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public QueryIndexPlan() {
+        super();
+        setOperatorType(OperatorType.QUERY_INDEX);
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public IndexType getIndexType() {
+        return indexType;
     }
-    QueryIndexPlan that = (QueryIndexPlan) o;
-    return Objects.equals(paths, that.paths)
-        && Objects.equals(props, that.props)
-        && Objects.equals(indexType, that.indexType);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(paths, props, indexType);
-  }
+    public void setIndexType(IndexType indexType) {
+        this.indexType = indexType;
+    }
 
-  @Override
-  public String toString() {
-    return String.format("Query paths: %s, index type: %s, props: %s", paths, indexType, props);
-  }
+    public Map<String, Object> getProps() {
+        return props;
+    }
+
+    public void setProps(Map<String, Object> props) {
+        this.props = props;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        QueryIndexPlan that = (QueryIndexPlan) o;
+        return Objects.equals(paths, that.paths)
+                && Objects.equals(props, that.props)
+                && Objects.equals(indexType, that.indexType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paths, props, indexType);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Query paths: %s, index type: %s, props: %s", paths, indexType, props);
+    }
 }

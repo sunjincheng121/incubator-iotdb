@@ -24,46 +24,46 @@ import org.apache.iotdb.db.qp.logical.Operator;
 
 public class AggregationPlan extends RawDataQueryPlan {
 
-  // e.g., for select count(s1), count(s1), count(s2), count(s2), sum (s1)
-  // aggregations are count, count, count, count, sum
-  // deduplicatedAggregations are count, count, sum
+    // e.g., for select count(s1), count(s1), count(s2), count(s2), sum (s1)
+    // aggregations are count, count, count, count, sum
+    // deduplicatedAggregations are count, count, sum
 
-  private List<String> aggregations = new ArrayList<>();
-  private List<String> deduplicatedAggregations = new ArrayList<>();
+    private List<String> aggregations = new ArrayList<>();
+    private List<String> deduplicatedAggregations = new ArrayList<>();
 
-  private int level = -1;
+    private int level = -1;
 
-  public AggregationPlan() {
-    super();
-    setOperatorType(Operator.OperatorType.AGGREGATION);
-  }
+    public AggregationPlan() {
+        super();
+        setOperatorType(Operator.OperatorType.AGGREGATION);
+    }
 
-  @Override
-  public List<String> getAggregations() {
-    return aggregations;
-  }
+    @Override
+    public List<String> getAggregations() {
+        return aggregations;
+    }
 
-  public void setAggregations(List<String> aggregations) {
-    this.aggregations = aggregations;
-  }
+    public void setAggregations(List<String> aggregations) {
+        this.aggregations = aggregations;
+    }
 
-  public List<String> getDeduplicatedAggregations() {
-    return deduplicatedAggregations;
-  }
+    public List<String> getDeduplicatedAggregations() {
+        return deduplicatedAggregations;
+    }
 
-  public void addDeduplicatedAggregations(String aggregations) {
-    this.deduplicatedAggregations.add(aggregations);
-  }
+    public void addDeduplicatedAggregations(String aggregations) {
+        this.deduplicatedAggregations.add(aggregations);
+    }
 
-  public void setDeduplicatedAggregations(List<String> deduplicatedAggregations) {
-    this.deduplicatedAggregations = deduplicatedAggregations;
-  }
+    public void setDeduplicatedAggregations(List<String> deduplicatedAggregations) {
+        this.deduplicatedAggregations = deduplicatedAggregations;
+    }
 
-  public int getLevel() {
-    return level;
-  }
+    public int getLevel() {
+        return level;
+    }
 
-  public void setLevel(int level) {
-    this.level = level;
-  }
+    public void setLevel(int level) {
+        this.level = level;
+    }
 }

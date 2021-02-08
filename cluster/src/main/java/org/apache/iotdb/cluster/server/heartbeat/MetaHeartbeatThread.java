@@ -26,47 +26,47 @@ import org.slf4j.LoggerFactory;
 
 public class MetaHeartbeatThread extends HeartbeatThread {
 
-  private static final Logger logger = LoggerFactory.getLogger(MetaHeartbeatThread.class);
-  private MetaGroupMember localMetaMember;
+    private static final Logger logger = LoggerFactory.getLogger(MetaHeartbeatThread.class);
+    private MetaGroupMember localMetaMember;
 
-  public MetaHeartbeatThread(MetaGroupMember metaMember) {
-    super(metaMember);
-    this.localMetaMember = metaMember;
-  }
-
-  private void presendHeartbeat(Node node) {
-    // if the node's identifier is not clear, require it
-    request.setRequireIdentifier(!node.isSetNodeIdentifier());
-    synchronized (localMetaMember.getIdConflictNodes()) {
-      request.unsetRegenerateIdentifier();
-      if (localMetaMember.getIdConflictNodes().contains(node)) {
-        request.setRegenerateIdentifier(true);
-      }
+    public MetaHeartbeatThread(MetaGroupMember metaMember) {
+        super(metaMember);
+        this.localMetaMember = metaMember;
     }
 
-    // if the node requires the partition table and it is ready, send it
-    if (localMetaMember.isNodeBlind(node) && localMetaMember.getPartitionTable() != null) {
-      logger.debug("Send partition table to {}", node);
-      request.setPartitionTableBytes(localMetaMember.getPartitionTable().serialize());
-      // if the node does not receive the list, it will require it in the next heartbeat, so
-      // we can remove it now
-      localMetaMember.removeBlindNode(node);
+    private void presendHeartbeat(Node node) {
+        // if the node's identifier is not clear, require it
+        request.setRequireIdentifier(!node.isSetNodeIdentifier());
+        synchronized (localMetaMember.getIdConflictNodes()) {
+            request.unsetRegenerateIdentifier();
+            if (localMetaMember.getIdConflictNodes().contains(node)) {
+                request.setRegenerateIdentifier(true);
+            }
+        }
+
+        // if the node requires the partition table and it is ready, send it
+        if (localMetaMember.isNodeBlind(node) && localMetaMember.getPartitionTable() != null) {
+            logger.debug("Send partition table to {}", node);
+            request.setPartitionTableBytes(localMetaMember.getPartitionTable().serialize());
+            // if the node does not receive the list, it will require it in the next heartbeat, so
+            // we can remove it now
+            localMetaMember.removeBlindNode(node);
+        }
     }
-  }
 
-  @Override
-  void sendHeartbeatSync(Node node) {
-    presendHeartbeat(node);
-    super.sendHeartbeatSync(node);
-    // erase the sent partition table so it will not be sent in the next heartbeat
-    request.unsetPartitionTableBytes();
-  }
+    @Override
+    void sendHeartbeatSync(Node node) {
+        presendHeartbeat(node);
+        super.sendHeartbeatSync(node);
+        // erase the sent partition table so it will not be sent in the next heartbeat
+        request.unsetPartitionTableBytes();
+    }
 
-  @Override
-  void sendHeartbeatAsync(Node node) {
-    presendHeartbeat(node);
-    super.sendHeartbeatAsync(node);
-    // erase the sent partition table so it will not be sent in the next heartbeat
-    request.unsetPartitionTableBytes();
-  }
+    @Override
+    void sendHeartbeatAsync(Node node) {
+        presendHeartbeat(node);
+        super.sendHeartbeatAsync(node);
+        // erase the sent partition table so it will not be sent in the next heartbeat
+        request.unsetPartitionTableBytes();
+    }
 }

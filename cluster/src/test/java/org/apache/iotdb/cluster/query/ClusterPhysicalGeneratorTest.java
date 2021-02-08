@@ -33,31 +33,31 @@ import org.apache.iotdb.db.qp.physical.crud.RawDataQueryPlan;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ClusterPhysicalGeneratorTest extends BaseQueryTest{
+public class ClusterPhysicalGeneratorTest extends BaseQueryTest {
 
-  private ClusterPhysicalGenerator physicalGenerator;
+    private ClusterPhysicalGenerator physicalGenerator;
 
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    physicalGenerator = new ClusterPhysicalGenerator();
-  }
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        physicalGenerator = new ClusterPhysicalGenerator();
+    }
 
-  @Test
-  public void test() throws QueryProcessException, IllegalPathException {
-    QueryOperator operator = new QueryOperator(SQLConstant.TOK_QUERY);
+    @Test
+    public void test() throws QueryProcessException, IllegalPathException {
+        QueryOperator operator = new QueryOperator(SQLConstant.TOK_QUERY);
 
-    SelectOperator selectOperator = new SelectOperator(SQLConstant.TOK_SELECT);
-    selectOperator.setSuffixPathList(pathList);
-    FromOperator fromOperator = new FromOperator(SQLConstant.TOK_FROM);
-    fromOperator.addPrefixTablePath(new PartialPath(TestUtils.getTestSg(0)));
+        SelectOperator selectOperator = new SelectOperator(SQLConstant.TOK_SELECT);
+        selectOperator.setSuffixPathList(pathList);
+        FromOperator fromOperator = new FromOperator(SQLConstant.TOK_FROM);
+        fromOperator.addPrefixTablePath(new PartialPath(TestUtils.getTestSg(0)));
 
-    operator.setSelectOperator(selectOperator);
-    operator.setFromOperator(fromOperator);
-    RawDataQueryPlan plan = (RawDataQueryPlan) physicalGenerator.transformToPhysicalPlan(operator
-        , 1024);
+        operator.setSelectOperator(selectOperator);
+        operator.setFromOperator(fromOperator);
+        RawDataQueryPlan plan =
+                (RawDataQueryPlan) physicalGenerator.transformToPhysicalPlan(operator, 1024);
 
-    assertEquals(pathList, plan.getDeduplicatedPaths());
-    assertEquals(dataTypes, plan.getDeduplicatedDataTypes());
-  }
+        assertEquals(pathList, plan.getDeduplicatedPaths());
+        assertEquals(dataTypes, plan.getDeduplicatedDataTypes());
+    }
 }

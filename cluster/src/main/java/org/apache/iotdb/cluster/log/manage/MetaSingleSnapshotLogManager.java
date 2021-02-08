@@ -36,49 +36,52 @@ import org.apache.iotdb.db.service.IoTDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * MetaSingleSnapshotLogManager provides a MetaSimpleSnapshot as snapshot.
- */
+/** MetaSingleSnapshotLogManager provides a MetaSimpleSnapshot as snapshot. */
 public class MetaSingleSnapshotLogManager extends RaftLogManager {
 
-  private static final Logger logger = LoggerFactory.getLogger(MetaSingleSnapshotLogManager.class);
-  private Map<PartialPath, Long> storageGroupTTLMap;
-  private Map<String, User> userMap;
-  private Map<String, Role> roleMap;
-  private MetaGroupMember metaGroupMember;
-  private long commitIndex;
-  private long term;
+    private static final Logger logger =
+            LoggerFactory.getLogger(MetaSingleSnapshotLogManager.class);
+    private Map<PartialPath, Long> storageGroupTTLMap;
+    private Map<String, User> userMap;
+    private Map<String, Role> roleMap;
+    private MetaGroupMember metaGroupMember;
+    private long commitIndex;
+    private long term;
 
-  public MetaSingleSnapshotLogManager(LogApplier logApplier, MetaGroupMember metaGroupMember) {
-    super(new SyncLogDequeSerializer(0), logApplier, metaGroupMember.getName());
-    this.metaGroupMember = metaGroupMember;
-  }
-
-  @Override
-  @SuppressWarnings("java:S1135") // ignore todos
-  public void takeSnapshot() throws IOException {
-    // TODO-cluster https://issues.apache.org/jira/browse/IOTDB-820
-    super.takeSnapshot();
-    synchronized (this) {
-      storageGroupTTLMap = IoTDB.metaManager.getStorageGroupsTTL();
-      try {
-        IAuthorizer authorizer = BasicAuthorizer.getInstance();
-        userMap = authorizer.getAllUsers();
-        roleMap = authorizer.getAllRoles();
-        commitIndex = getCommitLogIndex();
-        term = getCommitLogTerm();
-      } catch (AuthException e) {
-        logger.error("get user or role info failed", e);
-      }
+    public MetaSingleSnapshotLogManager(LogApplier logApplier, MetaGroupMember metaGroupMember) {
+        super(new SyncLogDequeSerializer(0), logApplier, metaGroupMember.getName());
+        this.metaGroupMember = metaGroupMember;
     }
-  }
 
-  @Override
-  public Snapshot getSnapshot(long minIndex) {
-    MetaSimpleSnapshot snapshot = new MetaSimpleSnapshot(storageGroupTTLMap, userMap, roleMap,
-        metaGroupMember.getPartitionTable().serialize());
-    snapshot.setLastLogIndex(commitIndex);
-    snapshot.setLastLogTerm(term);
-    return snapshot;
-  }
+    @Override
+    @SuppressWarnings("java:S1135") // ignore todos
+    public void takeSnapshot() throws IOException {
+        // TODO-cluster https://issues.apache.org/jira/browse/IOTDB-820
+        super.takeSnapshot();
+        synchronized (this) {
+            storageGroupTTLMap = IoTDB.metaManager.getStorageGroupsTTL();
+            try {
+                IAuthorizer authorizer = BasicAuthorizer.getInstance();
+                userMap = authorizer.getAllUsers();
+                roleMap = authorizer.getAllRoles();
+                commitIndex = getCommitLogIndex();
+                term = getCommitLogTerm();
+            } catch (AuthException e) {
+                logger.error("get user or role info failed", e);
+            }
+        }
+    }
+
+    @Override
+    public Snapshot getSnapshot(long minIndex) {
+        MetaSimpleSnapshot snapshot =
+                new MetaSimpleSnapshot(
+                        storageGroupTTLMap,
+                        userMap,
+                        roleMap,
+                        metaGroupMember.getPartitionTable().serialize());
+        snapshot.setLastLogIndex(commitIndex);
+        snapshot.setLastLogTerm(term);
+        return snapshot;
+    }
 }

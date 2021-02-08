@@ -26,70 +26,70 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public class LastValueDescAggrResult extends LastValueAggrResult {
 
-  public LastValueDescAggrResult(TSDataType dataType) {
-    super(dataType);
-  }
-
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    if (hasFinalResult()) {
-      return;
-    }
-    Object lastVal = statistics.getLastValue();
-    setValue(lastVal);
-    timestamp = statistics.getEndTime();
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
-    if (hasFinalResult()) {
-      return;
-    }
-    long time = Long.MIN_VALUE;
-    Object lastVal = null;
-    if (dataInThisPage.hasCurrent()
-        && dataInThisPage.currentTime() < maxBound
-        && dataInThisPage.currentTime() >= minBound) {
-      time = dataInThisPage.currentTime();
-      lastVal = dataInThisPage.currentValue();
-      dataInThisPage.next();
+    public LastValueDescAggrResult(TSDataType dataType) {
+        super(dataType);
     }
 
-    if (time != Long.MIN_VALUE) {
-      setValue(lastVal);
-      timestamp = time;
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        if (hasFinalResult()) {
+            return;
+        }
+        Object lastVal = statistics.getLastValue();
+        setValue(lastVal);
+        timestamp = statistics.getEndTime();
     }
-  }
 
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    if (hasFinalResult()) {
-      return;
-    }
-    long time = Long.MIN_VALUE;
-    Object lastVal = null;
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value != null) {
-        time = timestamps[i];
-        lastVal = value;
-        break;
-      }
-    }
-    if (time != Long.MIN_VALUE) {
-      setValue(lastVal);
-      timestamp = time;
-    }
-  }
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
+        if (hasFinalResult()) {
+            return;
+        }
+        long time = Long.MIN_VALUE;
+        Object lastVal = null;
+        if (dataInThisPage.hasCurrent()
+                && dataInThisPage.currentTime() < maxBound
+                && dataInThisPage.currentTime() >= minBound) {
+            time = dataInThisPage.currentTime();
+            lastVal = dataInThisPage.currentValue();
+            dataInThisPage.next();
+        }
 
-  @Override
-  public boolean hasFinalResult() {
-    return hasCandidateResult;
-  }
+        if (time != Long.MIN_VALUE) {
+            setValue(lastVal);
+            timestamp = time;
+        }
+    }
 
-  @Override
-  public boolean isAscending() {
-    return false;
-  }
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        if (hasFinalResult()) {
+            return;
+        }
+        long time = Long.MIN_VALUE;
+        Object lastVal = null;
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value != null) {
+                time = timestamps[i];
+                lastVal = value;
+                break;
+            }
+        }
+        if (time != Long.MIN_VALUE) {
+            setValue(lastVal);
+            timestamp = time;
+        }
+    }
+
+    @Override
+    public boolean hasFinalResult() {
+        return hasCandidateResult;
+    }
+
+    @Override
+    public boolean isAscending() {
+        return false;
+    }
 }

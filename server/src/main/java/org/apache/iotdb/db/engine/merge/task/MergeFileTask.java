@@ -50,179 +50,202 @@ import org.slf4j.LoggerFactory;
  */
 class MergeFileTask {
 
-  private static final Logger logger = LoggerFactory.getLogger(MergeFileTask.class);
+    private static final Logger logger = LoggerFactory.getLogger(MergeFileTask.class);
 
-  private String taskName;
-  private MergeContext context;
-  private MergeLogger mergeLogger;
-  private MergeResource resource;
-  private List<TsFileResource> unmergedFiles;
+    private String taskName;
+    private MergeContext context;
+    private MergeLogger mergeLogger;
+    private MergeResource resource;
+    private List<TsFileResource> unmergedFiles;
 
-  private FSFactory fsFactory = FSFactoryProducer.getFSFactory();
+    private FSFactory fsFactory = FSFactoryProducer.getFSFactory();
 
-  private int currentMergeIndex;
-  private String currMergeFile;
+    private int currentMergeIndex;
+    private String currMergeFile;
 
-  MergeFileTask(String taskName, MergeContext context, MergeLogger mergeLogger,
-      MergeResource resource, List<TsFileResource> unmergedSeqFiles) {
-    this.taskName = taskName;
-    this.context = context;
-    this.mergeLogger = mergeLogger;
-    this.resource = resource;
-    this.unmergedFiles = unmergedSeqFiles;
-  }
-
-  void mergeFiles() throws IOException {
-    // decide whether to write the unmerged chunks to the merge files or to move the merged chunks
-    // back to the origin seqFile's
-    if (logger.isInfoEnabled()) {
-      logger.info("{} starts to merge {} files", taskName, unmergedFiles.size());
+    MergeFileTask(
+            String taskName,
+            MergeContext context,
+            MergeLogger mergeLogger,
+            MergeResource resource,
+            List<TsFileResource> unmergedSeqFiles) {
+        this.taskName = taskName;
+        this.context = context;
+        this.mergeLogger = mergeLogger;
+        this.resource = resource;
+        this.unmergedFiles = unmergedSeqFiles;
     }
-    long startTime = System.currentTimeMillis();
-    for (int i = 0; i < unmergedFiles.size(); i++) {
-      TsFileResource seqFile = unmergedFiles.get(i);
-      currentMergeIndex = i;
-      currMergeFile = seqFile.getTsFilePath();
 
-      int mergedChunkNum = context.getMergedChunkCnt().getOrDefault(seqFile, 0);
-      int unmergedChunkNum = context.getUnmergedChunkCnt().getOrDefault(seqFile, 0);
+    void mergeFiles() throws IOException {
+        // decide whether to write the unmerged chunks to the merge files or to move the merged
+        // chunks
+        // back to the origin seqFile's
+        if (logger.isInfoEnabled()) {
+            logger.info("{} starts to merge {} files", taskName, unmergedFiles.size());
+        }
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < unmergedFiles.size(); i++) {
+            TsFileResource seqFile = unmergedFiles.get(i);
+            currentMergeIndex = i;
+            currMergeFile = seqFile.getTsFilePath();
 
-      if (logger.isInfoEnabled()) {
-        logger.info("{} moving unmerged data of {} to the merged file, {} merged chunks, {} "
-                + "unmerged chunks", taskName, seqFile.getTsFile().getName(), mergedChunkNum,
-            unmergedChunkNum);
-      }
-      moveUnmergedToNew(seqFile);
+            int mergedChunkNum = context.getMergedChunkCnt().getOrDefault(seqFile, 0);
+            int unmergedChunkNum = context.getUnmergedChunkCnt().getOrDefault(seqFile, 0);
 
-      if (Thread.interrupted()) {
-        Thread.currentThread().interrupt();
-        return;
-      }
+            if (logger.isInfoEnabled()) {
+                logger.info(
+                        "{} moving unmerged data of {} to the merged file, {} merged chunks, {} "
+                                + "unmerged chunks",
+                        taskName,
+                        seqFile.getTsFile().getName(),
+                        mergedChunkNum,
+                        unmergedChunkNum);
+            }
+            moveUnmergedToNew(seqFile);
 
-      logProgress();
+            if (Thread.interrupted()) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            logProgress();
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "{} has merged all files after {}ms",
+                    taskName,
+                    System.currentTimeMillis() - startTime);
+        }
+        mergeLogger.logMergeEnd();
     }
-    if (logger.isInfoEnabled()) {
-      logger.info("{} has merged all files after {}ms", taskName,
-          System.currentTimeMillis() - startTime);
+
+    private void logProgress() {
+        if (logger.isInfoEnabled()) {
+            logger.debug(
+                    "{} has merged {}, processed {}/{} files",
+                    taskName,
+                    currMergeFile,
+                    currentMergeIndex + 1,
+                    unmergedFiles.size());
+        }
     }
-    mergeLogger.logMergeEnd();
-  }
 
-  private void logProgress() {
-    if (logger.isInfoEnabled()) {
-      logger.debug("{} has merged {}, processed {}/{} files", taskName, currMergeFile,
-          currentMergeIndex + 1, unmergedFiles.size());
+    public String getProgress() {
+        return String.format(
+                "Merging %s, processed %d/%d files",
+                currMergeFile, currentMergeIndex + 1, unmergedFiles.size());
     }
-  }
 
-  public String getProgress() {
-    return String.format("Merging %s, processed %d/%d files", currMergeFile,
-        currentMergeIndex + 1, unmergedFiles.size());
-  }
-
-  private void updatePlanIndexes(TsFileResource seqFile) {
-    // as the new file contains data of other files, track their plan indexes in the new file
-    // so that we will be able to compare data across different IoTDBs that share the same index
-    // generation policy
-    // however, since the data of unseq files are mixed together, we won't be able to know
-    // which files are exactly contained in the new file, so we have to record all unseq files
-    // in the new file
-    for (TsFileResource unseqFile : resource.getUnseqFiles()) {
-      seqFile.updatePlanIndexes(unseqFile);
+    private void updatePlanIndexes(TsFileResource seqFile) {
+        // as the new file contains data of other files, track their plan indexes in the new file
+        // so that we will be able to compare data across different IoTDBs that share the same index
+        // generation policy
+        // however, since the data of unseq files are mixed together, we won't be able to know
+        // which files are exactly contained in the new file, so we have to record all unseq files
+        // in the new file
+        for (TsFileResource unseqFile : resource.getUnseqFiles()) {
+            seqFile.updatePlanIndexes(unseqFile);
+        }
     }
-  }
 
-  private void moveUnmergedToNew(TsFileResource seqFile) throws IOException {
-    Map<PartialPath, List<Long>> fileUnmergedChunkStartTimes =
-        context.getUnmergedChunkStartTimes().get(seqFile);
-    RestorableTsFileIOWriter fileWriter = resource.getMergeFileWriter(seqFile);
+    private void moveUnmergedToNew(TsFileResource seqFile) throws IOException {
+        Map<PartialPath, List<Long>> fileUnmergedChunkStartTimes =
+                context.getUnmergedChunkStartTimes().get(seqFile);
+        RestorableTsFileIOWriter fileWriter = resource.getMergeFileWriter(seqFile);
 
-    mergeLogger.logFileMergeStart(fileWriter.getFile(), fileWriter.getFile().length());
-    logger.debug("{} moving unmerged chunks of {} to the new file", taskName, seqFile);
+        mergeLogger.logFileMergeStart(fileWriter.getFile(), fileWriter.getFile().length());
+        logger.debug("{} moving unmerged chunks of {} to the new file", taskName, seqFile);
 
-    int unmergedChunkNum = context.getUnmergedChunkCnt().getOrDefault(seqFile, 0);
+        int unmergedChunkNum = context.getUnmergedChunkCnt().getOrDefault(seqFile, 0);
 
-    if (unmergedChunkNum > 0) {
-      for (Entry<PartialPath, List<Long>> entry : fileUnmergedChunkStartTimes.entrySet()) {
-        PartialPath path = entry.getKey();
-        List<Long> chunkStartTimes = entry.getValue();
-        if (chunkStartTimes.isEmpty()) {
-          continue;
+        if (unmergedChunkNum > 0) {
+            for (Entry<PartialPath, List<Long>> entry : fileUnmergedChunkStartTimes.entrySet()) {
+                PartialPath path = entry.getKey();
+                List<Long> chunkStartTimes = entry.getValue();
+                if (chunkStartTimes.isEmpty()) {
+                    continue;
+                }
+
+                List<ChunkMetadata> chunkMetadataList = resource.queryChunkMetadata(path, seqFile);
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("{} find {} unmerged chunks", taskName, chunkMetadataList.size());
+                }
+
+                fileWriter.startChunkGroup(path.getDevice());
+                long maxVersion =
+                        writeUnmergedChunks(
+                                chunkStartTimes,
+                                chunkMetadataList,
+                                resource.getFileReader(seqFile),
+                                fileWriter);
+
+                if (Thread.interrupted()) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+
+                fileWriter.writeVersion(maxVersion + 1);
+                fileWriter.endChunkGroup();
+            }
         }
 
-        List<ChunkMetadata> chunkMetadataList = resource.queryChunkMetadata(path, seqFile);
+        fileWriter.endFile();
 
-        if (logger.isDebugEnabled()) {
-          logger.debug("{} find {} unmerged chunks", taskName, chunkMetadataList.size());
+        updatePlanIndexes(seqFile);
+        seqFile.serialize();
+        mergeLogger.logFileMergeEnd();
+        logger.debug("{} moved unmerged chunks of {} to the new file", taskName, seqFile);
+
+        seqFile.writeLock();
+        try {
+            resource.removeFileReader(seqFile);
+            ChunkMetadataCache.getInstance().remove(seqFile);
+            FileReaderManager.getInstance().closeFileAndRemoveReader(seqFile.getTsFilePath());
+
+            File newMergeFile = seqFile.getTsFile();
+            newMergeFile.delete();
+            fsFactory.moveFile(fileWriter.getFile(), newMergeFile);
+            seqFile.setFile(newMergeFile);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            // clean cache
+            if (IoTDBDescriptor.getInstance().getConfig().isMetaDataCacheEnable()) {
+                ChunkCache.getInstance().clear();
+                ChunkMetadataCache.getInstance().clear();
+                TimeSeriesMetadataCache.getInstance().clear();
+                FileReaderManager.getInstance().closeFileAndRemoveReader(seqFile.getTsFilePath());
+            }
+            seqFile.writeUnlock();
         }
-
-        fileWriter.startChunkGroup(path.getDevice());
-        long maxVersion = writeUnmergedChunks(chunkStartTimes, chunkMetadataList,
-            resource.getFileReader(seqFile), fileWriter);
-
-        if (Thread.interrupted()) {
-          Thread.currentThread().interrupt();
-          return;
-        }
-
-        fileWriter.writeVersion(maxVersion + 1);
-        fileWriter.endChunkGroup();
-      }
     }
 
-    fileWriter.endFile();
+    private long writeUnmergedChunks(
+            List<Long> chunkStartTimes,
+            List<ChunkMetadata> chunkMetadataList,
+            TsFileSequenceReader reader,
+            RestorableTsFileIOWriter fileWriter)
+            throws IOException {
+        long maxVersion = 0;
+        int chunkIdx = 0;
+        for (Long startTime : chunkStartTimes) {
+            for (; chunkIdx < chunkMetadataList.size(); chunkIdx++) {
+                ChunkMetadata metaData = chunkMetadataList.get(chunkIdx);
+                if (metaData.getStartTime() == startTime) {
+                    Chunk chunk = reader.readMemChunk(metaData);
+                    fileWriter.writeChunk(chunk, metaData);
+                    maxVersion = Math.max(metaData.getVersion(), maxVersion);
+                    context.incTotalPointWritten(metaData.getNumOfPoints());
+                    break;
+                }
+            }
 
-    updatePlanIndexes(seqFile);
-    seqFile.serialize();
-    mergeLogger.logFileMergeEnd();
-    logger.debug("{} moved unmerged chunks of {} to the new file", taskName, seqFile);
-
-    seqFile.writeLock();
-    try {
-      resource.removeFileReader(seqFile);
-      ChunkMetadataCache.getInstance().remove(seqFile);
-      FileReaderManager.getInstance().closeFileAndRemoveReader(seqFile.getTsFilePath());
-
-      File newMergeFile = seqFile.getTsFile();
-      newMergeFile.delete();
-      fsFactory.moveFile(fileWriter.getFile(), newMergeFile);
-      seqFile.setFile(newMergeFile);
-    } catch (Exception e) {
-      logger.error(e.getMessage(), e);
-    } finally {
-      // clean cache
-      if (IoTDBDescriptor.getInstance().getConfig().isMetaDataCacheEnable()) {
-        ChunkCache.getInstance().clear();
-        ChunkMetadataCache.getInstance().clear();
-        TimeSeriesMetadataCache.getInstance().clear();
-        FileReaderManager.getInstance().closeFileAndRemoveReader(seqFile.getTsFilePath());
-      }
-      seqFile.writeUnlock();
-    }
-  }
-
-  private long writeUnmergedChunks(List<Long> chunkStartTimes,
-      List<ChunkMetadata> chunkMetadataList, TsFileSequenceReader reader,
-      RestorableTsFileIOWriter fileWriter) throws IOException {
-    long maxVersion = 0;
-    int chunkIdx = 0;
-    for (Long startTime : chunkStartTimes) {
-      for (; chunkIdx < chunkMetadataList.size(); chunkIdx++) {
-        ChunkMetadata metaData = chunkMetadataList.get(chunkIdx);
-        if (metaData.getStartTime() == startTime) {
-          Chunk chunk = reader.readMemChunk(metaData);
-          fileWriter.writeChunk(chunk, metaData);
-          maxVersion = Math.max(metaData.getVersion(), maxVersion);
-          context.incTotalPointWritten(metaData.getNumOfPoints());
-          break;
+            if (Thread.interrupted()) {
+                Thread.currentThread().interrupt();
+                return maxVersion;
+            }
         }
-      }
-
-      if (Thread.interrupted()) {
-        Thread.currentThread().interrupt();
         return maxVersion;
-      }
     }
-    return maxVersion;
-  }
 }

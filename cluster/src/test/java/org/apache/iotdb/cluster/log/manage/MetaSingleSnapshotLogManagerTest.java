@@ -42,50 +42,47 @@ import org.junit.Test;
 
 public class MetaSingleSnapshotLogManagerTest extends IoTDBTest {
 
-  private MetaSingleSnapshotLogManager logManager;
+    private MetaSingleSnapshotLogManager logManager;
 
-  @Override
-  @Before
-  public void setUp() throws QueryProcessException, StartupException, IllegalPathException {
-    super.setUp();
-    MetaGroupMember metaGroupMember = new MetaGroupMember();
-    metaGroupMember.setPartitionTable(new SlotPartitionTable(new Node()));
-    logManager =
-        new MetaSingleSnapshotLogManager(new TestLogApplier(), metaGroupMember);
-  }
-
-  @Override
-  @After
-  public void tearDown()
-      throws java.io.IOException, org.apache.iotdb.db.exception.StorageEngineException {
-    logManager.close();
-    super.tearDown();
-  }
-
-  @Test
-  public void testTakeSnapshot() throws Exception {
-    try {
-      List<Log> testLogs = TestUtils.prepareTestLogs(10);
-      logManager.append(testLogs);
-      logManager.commitTo(4);
-      logManager.setMaxHaveAppliedCommitIndex(logManager.getCommitLogIndex());
-
-      logManager.takeSnapshot();
-      MetaSimpleSnapshot snapshot = (MetaSimpleSnapshot) logManager.getSnapshot();
-      Map<PartialPath, Long> storageGroupTTLMap = snapshot.getStorageGroupTTLMap();
-      PartialPath[] storageGroups = storageGroupTTLMap.keySet()
-          .toArray(new PartialPath[0]);
-      Arrays.sort(storageGroups);
-
-      assertEquals(10, storageGroups.length);
-      for (int i = 0; i < 10; i++) {
-        assertEquals(new PartialPath(TestUtils.getTestSg(i)), storageGroups[i]);
-      }
-      assertEquals(4, snapshot.getLastLogIndex());
-      assertEquals(4, snapshot.getLastLogTerm());
-    } finally {
-      logManager.close();
+    @Override
+    @Before
+    public void setUp() throws QueryProcessException, StartupException, IllegalPathException {
+        super.setUp();
+        MetaGroupMember metaGroupMember = new MetaGroupMember();
+        metaGroupMember.setPartitionTable(new SlotPartitionTable(new Node()));
+        logManager = new MetaSingleSnapshotLogManager(new TestLogApplier(), metaGroupMember);
     }
 
-  }
+    @Override
+    @After
+    public void tearDown()
+            throws java.io.IOException, org.apache.iotdb.db.exception.StorageEngineException {
+        logManager.close();
+        super.tearDown();
+    }
+
+    @Test
+    public void testTakeSnapshot() throws Exception {
+        try {
+            List<Log> testLogs = TestUtils.prepareTestLogs(10);
+            logManager.append(testLogs);
+            logManager.commitTo(4);
+            logManager.setMaxHaveAppliedCommitIndex(logManager.getCommitLogIndex());
+
+            logManager.takeSnapshot();
+            MetaSimpleSnapshot snapshot = (MetaSimpleSnapshot) logManager.getSnapshot();
+            Map<PartialPath, Long> storageGroupTTLMap = snapshot.getStorageGroupTTLMap();
+            PartialPath[] storageGroups = storageGroupTTLMap.keySet().toArray(new PartialPath[0]);
+            Arrays.sort(storageGroups);
+
+            assertEquals(10, storageGroups.length);
+            for (int i = 0; i < 10; i++) {
+                assertEquals(new PartialPath(TestUtils.getTestSg(i)), storageGroups[i]);
+            }
+            assertEquals(4, snapshot.getLastLogIndex());
+            assertEquals(4, snapshot.getLastLogTerm());
+        } finally {
+            logManager.close();
+        }
+    }
 }

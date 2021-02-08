@@ -23,16 +23,16 @@ import org.apache.iotdb.db.metadata.PartialPath;
 
 public class ShowChildPathsPlan extends ShowPlan {
 
-  // the path could be a prefix path with wildcard
-  private PartialPath prefixPath;
+    // the path could be a prefix path with wildcard
+    private PartialPath prefixPath;
 
-  public ShowChildPathsPlan(ShowContentType showContentType, PartialPath prefixPath) {
-    super(showContentType);
-    this.prefixPath = prefixPath;
-    canBeSplit = false;
-  }
+    public ShowChildPathsPlan(ShowContentType showContentType, PartialPath prefixPath) {
+        super(showContentType);
+        this.prefixPath = prefixPath;
+        canBeSplit = false;
+    }
 
-  public PartialPath getPath() {
-    return this.prefixPath;
-  }
+    public PartialPath getPath() {
+        return this.prefixPath;
+    }
 }

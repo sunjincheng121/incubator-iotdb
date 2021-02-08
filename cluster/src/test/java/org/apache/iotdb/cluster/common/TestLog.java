@@ -25,43 +25,43 @@ import org.apache.iotdb.cluster.log.Log;
 
 public class TestLog extends Log {
 
-  @Override
-  public ByteBuffer serialize() {
-    int totalSize = Long.BYTES * 2;
-    byte[] buffer = new byte[totalSize];
+    @Override
+    public ByteBuffer serialize() {
+        int totalSize = Long.BYTES * 2;
+        byte[] buffer = new byte[totalSize];
 
-    ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
 
-    byteBuffer.putLong(getCurrLogIndex());
-    byteBuffer.putLong(getCurrLogTerm());
+        byteBuffer.putLong(getCurrLogIndex());
+        byteBuffer.putLong(getCurrLogTerm());
 
-    byteBuffer.flip();
-    return byteBuffer;
-  }
-
-  @Override
-  public void deserialize(ByteBuffer buffer) {
-    setCurrLogIndex(buffer.getLong());
-    setCurrLogTerm(buffer.getLong());
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof TestLog)) {
-      return false;
+        byteBuffer.flip();
+        return byteBuffer;
     }
-    TestLog obj1 = (TestLog) obj;
-    return getCurrLogIndex() == obj1.getCurrLogIndex() &&
-        getCurrLogTerm() == obj1.getCurrLogTerm();
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(getCurrLogIndex(), getCurrLogTerm());
-  }
+    @Override
+    public void deserialize(ByteBuffer buffer) {
+        setCurrLogIndex(buffer.getLong());
+        setCurrLogTerm(buffer.getLong());
+    }
 
-  @Override
-  public String toString() {
-    return "TestLog{" + getCurrLogIndex() + "-" + getCurrLogTerm() + "}";
-  }
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TestLog)) {
+            return false;
+        }
+        TestLog obj1 = (TestLog) obj;
+        return getCurrLogIndex() == obj1.getCurrLogIndex()
+                && getCurrLogTerm() == obj1.getCurrLogTerm();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getCurrLogIndex(), getCurrLogTerm());
+    }
+
+    @Override
+    public String toString() {
+        return "TestLog{" + getCurrLogIndex() + "-" + getCurrLogTerm() + "}";
+    }
 }

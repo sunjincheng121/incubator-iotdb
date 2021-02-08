@@ -33,66 +33,66 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
  */
 public abstract class UnaryFilter<T extends Comparable<T>> implements Filter, Serializable {
 
-  private static final long serialVersionUID = 1431606024929453556L;
-  protected T value;
+    private static final long serialVersionUID = 1431606024929453556L;
+    protected T value;
 
-  protected FilterType filterType;
+    protected FilterType filterType;
 
-  public UnaryFilter() {
-  }
+    public UnaryFilter() {}
 
-  protected UnaryFilter(T value, FilterType filterType) {
-    this.value = value;
-    this.filterType = filterType;
-  }
-
-  public T getValue() {
-    return value;
-  }
-
-  public void setValue(T value) {
-    this.value = value;
-  }
-
-  public FilterType getFilterType() {
-    return filterType;
-  }
-
-  @Override
-  public abstract String toString();
-
-  @Override
-  public abstract Filter copy();
-
-  @Override
-  public void serialize(DataOutputStream outputStream) {
-    try {
-      outputStream.write(getSerializeId().ordinal());
-      outputStream.write(filterType.ordinal());
-      ReadWriteIOUtils.writeObject(value, outputStream);
-    } catch (IOException ignored) {
-      // ignored
+    protected UnaryFilter(T value, FilterType filterType) {
+        this.value = value;
+        this.filterType = filterType;
     }
-  }
 
-  @Override
-  public void deserialize(ByteBuffer buffer) {
-    filterType = FilterType.values()[buffer.get()];
-    value = (T) ReadWriteIOUtils.readObject(buffer);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof UnaryFilter)) {
-      return false;
+    public T getValue() {
+        return value;
     }
-    UnaryFilter other = ((UnaryFilter) obj);
-    return this.value.equals(other.value) && this.filterType.equals(other.filterType)
-        && this.getSerializeId().equals(other.getSerializeId());
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(value, filterType, getSerializeId());
-  }
+    public void setValue(T value) {
+        this.value = value;
+    }
+
+    public FilterType getFilterType() {
+        return filterType;
+    }
+
+    @Override
+    public abstract String toString();
+
+    @Override
+    public abstract Filter copy();
+
+    @Override
+    public void serialize(DataOutputStream outputStream) {
+        try {
+            outputStream.write(getSerializeId().ordinal());
+            outputStream.write(filterType.ordinal());
+            ReadWriteIOUtils.writeObject(value, outputStream);
+        } catch (IOException ignored) {
+            // ignored
+        }
+    }
+
+    @Override
+    public void deserialize(ByteBuffer buffer) {
+        filterType = FilterType.values()[buffer.get()];
+        value = (T) ReadWriteIOUtils.readObject(buffer);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof UnaryFilter)) {
+            return false;
+        }
+        UnaryFilter other = ((UnaryFilter) obj);
+        return this.value.equals(other.value)
+                && this.filterType.equals(other.filterType)
+                && this.getSerializeId().equals(other.getSerializeId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, filterType, getSerializeId());
+    }
 }

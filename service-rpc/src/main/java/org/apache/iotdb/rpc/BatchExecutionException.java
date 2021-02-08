@@ -23,24 +23,23 @@ import org.apache.iotdb.service.rpc.thrift.TSStatus;
 
 public class BatchExecutionException extends StatementExecutionException {
 
-  private List<TSStatus> statusList;
+    private List<TSStatus> statusList;
 
-  public BatchExecutionException(String message) {
-    super(message);
-  }
+    public BatchExecutionException(String message) {
+        super(message);
+    }
 
-  public BatchExecutionException(List<TSStatus> statusList) {
-    super("");
-    this.statusList = statusList;
-  }
+    public BatchExecutionException(List<TSStatus> statusList) {
+        super("");
+        this.statusList = statusList;
+    }
 
-  public BatchExecutionException(List<TSStatus> statusList, String message) {
-    super(message);
-    this.statusList = statusList;
-  }
+    public BatchExecutionException(List<TSStatus> statusList, String message) {
+        super(message);
+        this.statusList = statusList;
+    }
 
-  public List<TSStatus> getStatusList() {
-    return statusList;
-  }
-
+    public List<TSStatus> getStatusList() {
+        return statusList;
+    }
 }

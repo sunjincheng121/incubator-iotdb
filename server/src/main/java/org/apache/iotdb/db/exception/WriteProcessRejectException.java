@@ -22,14 +22,13 @@ import org.apache.iotdb.rpc.TSStatusCode;
 
 public class WriteProcessRejectException extends WriteProcessException {
 
-  private static final long serialVersionUID = -4217324287547595610L;
+    private static final long serialVersionUID = -4217324287547595610L;
 
-  public WriteProcessRejectException(String message) {
-    super(message, TSStatusCode.WRITE_PROCESS_REJECT.getStatusCode());
-  }
+    public WriteProcessRejectException(String message) {
+        super(message, TSStatusCode.WRITE_PROCESS_REJECT.getStatusCode());
+    }
 
-  public WriteProcessRejectException(String message, int errorCode) {
-    super(message, errorCode);
-  }
-
+    public WriteProcessRejectException(String message, int errorCode) {
+        super(message, errorCode);
+    }
 }

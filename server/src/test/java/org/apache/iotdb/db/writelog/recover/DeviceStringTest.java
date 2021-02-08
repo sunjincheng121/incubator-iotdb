@@ -19,6 +19,12 @@
 
 package org.apache.iotdb.db.writelog.recover;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
 import org.apache.commons.io.FileUtils;
 import org.apache.iotdb.db.constant.TestConstant;
 import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
@@ -44,76 +50,81 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 public class DeviceStringTest {
 
-  private File tsF;
-  private TsFileWriter writer;
-  private String logNodePrefix = TestConstant.OUTPUT_DATA_DIR.concat("testNode/0");
-  private Schema schema;
-  private TsFileResource resource;
-  private MManager mManager = IoTDB.metaManager;
+    private File tsF;
+    private TsFileWriter writer;
+    private String logNodePrefix = TestConstant.OUTPUT_DATA_DIR.concat("testNode/0");
+    private Schema schema;
+    private TsFileResource resource;
+    private MManager mManager = IoTDB.metaManager;
 
-  @Before
-  public void setup() throws IOException, WriteProcessException, MetadataException {
-    EnvironmentUtils.envSetUp();
-    tsF = SystemFileFactory.INSTANCE.getFile(logNodePrefix, "1-1-1.tsfile");
-    tsF.getParentFile().mkdirs();
+    @Before
+    public void setup() throws IOException, WriteProcessException, MetadataException {
+        EnvironmentUtils.envSetUp();
+        tsF = SystemFileFactory.INSTANCE.getFile(logNodePrefix, "1-1-1.tsfile");
+        tsF.getParentFile().mkdirs();
 
-    schema = new Schema();
-    schema.registerTimeseries(new Path(("root.sg.device99"), ("sensor4")),
-        new MeasurementSchema("sensor4", TSDataType.INT64, TSEncoding.PLAIN));
-    mManager.createTimeseries(new PartialPath("root.sg.device99.sensor4"), TSDataType.INT64, TSEncoding.PLAIN,
-            TSFileDescriptor.getInstance().getConfig().getCompressor(), Collections.emptyMap());
-    schema.registerTimeseries(new Path(("root.sg.device99"), ("sensor2")),
-        new MeasurementSchema("sensor2", TSDataType.INT64, TSEncoding.PLAIN));
-    mManager
-        .createTimeseries(new PartialPath("root.sg.device99.sensor2"), TSDataType.INT64, TSEncoding.PLAIN,
-            TSFileDescriptor.getInstance().getConfig().getCompressor(), Collections.emptyMap());
-    schema.registerTimeseries(new Path(("root.sg.device99"), ("sensor1")),
-        new MeasurementSchema("sensor1", TSDataType.INT64, TSEncoding.PLAIN));
-    mManager
-        .createTimeseries(new PartialPath("root.sg.device99.sensor1"), TSDataType.INT64, TSEncoding.PLAIN,
-            TSFileDescriptor.getInstance().getConfig().getCompressor(), Collections.emptyMap());
-    writer = new TsFileWriter(tsF, schema);
+        schema = new Schema();
+        schema.registerTimeseries(
+                new Path(("root.sg.device99"), ("sensor4")),
+                new MeasurementSchema("sensor4", TSDataType.INT64, TSEncoding.PLAIN));
+        mManager.createTimeseries(
+                new PartialPath("root.sg.device99.sensor4"),
+                TSDataType.INT64,
+                TSEncoding.PLAIN,
+                TSFileDescriptor.getInstance().getConfig().getCompressor(),
+                Collections.emptyMap());
+        schema.registerTimeseries(
+                new Path(("root.sg.device99"), ("sensor2")),
+                new MeasurementSchema("sensor2", TSDataType.INT64, TSEncoding.PLAIN));
+        mManager.createTimeseries(
+                new PartialPath("root.sg.device99.sensor2"),
+                TSDataType.INT64,
+                TSEncoding.PLAIN,
+                TSFileDescriptor.getInstance().getConfig().getCompressor(),
+                Collections.emptyMap());
+        schema.registerTimeseries(
+                new Path(("root.sg.device99"), ("sensor1")),
+                new MeasurementSchema("sensor1", TSDataType.INT64, TSEncoding.PLAIN));
+        mManager.createTimeseries(
+                new PartialPath("root.sg.device99.sensor1"),
+                TSDataType.INT64,
+                TSEncoding.PLAIN,
+                TSFileDescriptor.getInstance().getConfig().getCompressor(),
+                Collections.emptyMap());
+        writer = new TsFileWriter(tsF, schema);
 
-    resource = new TsFileResource(tsF);
-    TSRecord tsRecord = new TSRecord(100, "root.sg.device99");
-    tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.INT64, "sensor4", String.valueOf(0)));
-    writer.write(tsRecord);
-    tsRecord = new TSRecord(2, "root.sg.device99");
-    tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.INT64, "sensor1", String.valueOf(0)));
-    writer.write(tsRecord);
+        resource = new TsFileResource(tsF);
+        TSRecord tsRecord = new TSRecord(100, "root.sg.device99");
+        tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.INT64, "sensor4", String.valueOf(0)));
+        writer.write(tsRecord);
+        tsRecord = new TSRecord(2, "root.sg.device99");
+        tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.INT64, "sensor1", String.valueOf(0)));
+        writer.write(tsRecord);
 
-    writer.flushAllChunkGroups();
-    writer.getIOWriter().close();
-    resource.putStartTime(new String("root.sg.device99"), 2);
-    resource.putEndTime(new String("root.sg.device99"), 100);
-    resource.close();
-    resource.serialize();
-  }
-
-  @After
-  public void tearDown() throws IOException, StorageEngineException {
-    EnvironmentUtils.cleanEnv();
-    FileUtils.deleteDirectory(tsF.getParentFile());
-    resource.close();
-  }
-
-  @Test
-  public void testDeviceString() throws IOException, IllegalPathException {
-    resource = new TsFileResource(tsF);
-    resource.deserialize();
-    assertFalse(resource.getDeviceToIndexMap().keySet().isEmpty());
-    for (String device : resource.getDeviceToIndexMap().keySet()) {
-      assertSame(device, mManager.getDeviceId(new PartialPath(device)));
+        writer.flushAllChunkGroups();
+        writer.getIOWriter().close();
+        resource.putStartTime(new String("root.sg.device99"), 2);
+        resource.putEndTime(new String("root.sg.device99"), 100);
+        resource.close();
+        resource.serialize();
     }
-  }
+
+    @After
+    public void tearDown() throws IOException, StorageEngineException {
+        EnvironmentUtils.cleanEnv();
+        FileUtils.deleteDirectory(tsF.getParentFile());
+        resource.close();
+    }
+
+    @Test
+    public void testDeviceString() throws IOException, IllegalPathException {
+        resource = new TsFileResource(tsF);
+        resource.deserialize();
+        assertFalse(resource.getDeviceToIndexMap().keySet().isEmpty());
+        for (String device : resource.getDeviceToIndexMap().keySet()) {
+            assertSame(device, mManager.getDeviceId(new PartialPath(device)));
+        }
+    }
 }

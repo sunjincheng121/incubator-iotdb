@@ -22,66 +22,62 @@ package org.apache.iotdb.tsfile.read.common;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 
 /**
- * This class is just for reading batch data reversely. The data source is from page reader.
- * For example,
- * the timeRet from pageReader is [1, 1000],
- * It will be written in ascending sequence, but the sequence of reading will be 1000 -> 1.
+ * This class is just for reading batch data reversely. The data source is from page reader. For
+ * example, the timeRet from pageReader is [1, 1000], It will be written in ascending sequence, but
+ * the sequence of reading will be 1000 -> 1.
  */
 public class DescReadBatchData extends BatchData {
 
-  public DescReadBatchData() {
+    public DescReadBatchData() {}
 
-  }
-
-  public DescReadBatchData(TSDataType dataType) {
-    super(dataType);
-  }
-
-  @Override
-  public boolean hasCurrent() {
-    return super.readCurListIndex >= 0 && super.readCurArrayIndex >= 0;
-  }
-
-  @Override
-  public void next() {
-    super.readCurArrayIndex--;
-    if (super.readCurArrayIndex == -1) {
-      super.readCurArrayIndex = capacity - 1;
-      super.readCurListIndex--;
+    public DescReadBatchData(TSDataType dataType) {
+        super(dataType);
     }
-  }
 
-  @Override
-  public void resetBatchData() {
-    super.readCurArrayIndex = writeCurArrayIndex - 1;
-    super.readCurListIndex = writeCurListIndex;
-  }
+    @Override
+    public boolean hasCurrent() {
+        return super.readCurListIndex >= 0 && super.readCurArrayIndex >= 0;
+    }
 
+    @Override
+    public void next() {
+        super.readCurArrayIndex--;
+        if (super.readCurArrayIndex == -1) {
+            super.readCurArrayIndex = capacity - 1;
+            super.readCurListIndex--;
+        }
+    }
 
-  /**
-   * When put data, the writeIndex increases while the readIndex remains 0. For descending read, we
-   * need to read from writeIndex to 0 (set the readIndex to writeIndex)
-   */
-  @Override
-  public BatchData flip() {
-    super.readCurArrayIndex = writeCurArrayIndex - 1;
-    super.readCurListIndex = writeCurListIndex;
-    return this;
-  }
+    @Override
+    public void resetBatchData() {
+        super.readCurArrayIndex = writeCurArrayIndex - 1;
+        super.readCurListIndex = writeCurListIndex;
+    }
 
-  @Override
-  public Object getValueInTimestamp(long time) {
-    while (hasCurrent()) {
-      if (currentTime() > time) {
-        next();
-      } else if (currentTime() == time) {
-        Object value = currentValue();
-        next();
-        return value;
-      } else {
+    /**
+     * When put data, the writeIndex increases while the readIndex remains 0. For descending read,
+     * we need to read from writeIndex to 0 (set the readIndex to writeIndex)
+     */
+    @Override
+    public BatchData flip() {
+        super.readCurArrayIndex = writeCurArrayIndex - 1;
+        super.readCurListIndex = writeCurListIndex;
+        return this;
+    }
+
+    @Override
+    public Object getValueInTimestamp(long time) {
+        while (hasCurrent()) {
+            if (currentTime() > time) {
+                next();
+            } else if (currentTime() == time) {
+                Object value = currentValue();
+                next();
+                return value;
+            } else {
+                return null;
+            }
+        }
         return null;
-      }
     }
-    return null;
-  }
 }

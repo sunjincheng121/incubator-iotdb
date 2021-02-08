@@ -22,7 +22,7 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 
 public interface IUnaryExpression extends IExpression {
 
-  Filter getFilter();
+    Filter getFilter();
 
-  void setFilter(Filter filter);
+    void setFilter(Filter filter);
 }

@@ -39,74 +39,74 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 
 public class TVListAllocator implements TVListAllocatorMBean, IService {
 
-  private Map<TSDataType, Queue<TVList>> tvListCache = new EnumMap<>(TSDataType.class);
-  private String mbeanName = String
-      .format("%s:%s=%s", IoTDBConstant.IOTDB_PACKAGE, IoTDBConstant.JMX_TYPE,
-          getID().getJmxName());
+    private Map<TSDataType, Queue<TVList>> tvListCache = new EnumMap<>(TSDataType.class);
+    private String mbeanName =
+            String.format(
+                    "%s:%s=%s",
+                    IoTDBConstant.IOTDB_PACKAGE, IoTDBConstant.JMX_TYPE, getID().getJmxName());
 
-  private static final TVListAllocator INSTANCE = new TVListAllocator();
+    private static final TVListAllocator INSTANCE = new TVListAllocator();
 
-  public static TVListAllocator getInstance() {
-    return INSTANCE;
-  }
-
-  public synchronized TVList allocate(TSDataType dataType) {
-    Queue<TVList> tvLists = tvListCache.computeIfAbsent(dataType,
-        k -> new ArrayDeque<>());
-    TVList list = tvLists.poll();
-    return list != null ? list : TVList.newList(dataType);
-  }
-
-  public synchronized void release(TSDataType dataType, TVList list) {
-    list.clear();
-    tvListCache.get(dataType).add(list);
-  }
-
-  public synchronized void release(TVList list) {
-    list.clear();
-    if (list instanceof BinaryTVList) {
-      tvListCache.get(TSDataType.TEXT).add(list);
-    } else if (list instanceof BooleanTVList) {
-      tvListCache.get(TSDataType.BOOLEAN).add(list);
-    } else if (list instanceof DoubleTVList) {
-      tvListCache.get(TSDataType.DOUBLE).add(list);
-    } else if (list instanceof FloatTVList) {
-      tvListCache.get(TSDataType.FLOAT).add(list);
-    } else if (list instanceof IntTVList) {
-      tvListCache.get(TSDataType.INT32).add(list);
-    } else if (list instanceof LongTVList) {
-      tvListCache.get(TSDataType.INT64).add(list);
+    public static TVListAllocator getInstance() {
+        return INSTANCE;
     }
-  }
 
-  @Override
-  public int getNumberOfTVLists() {
-    int number = 0;
-    for (Queue<TVList> queue : tvListCache.values()) {
-      number += queue.size();
+    public synchronized TVList allocate(TSDataType dataType) {
+        Queue<TVList> tvLists = tvListCache.computeIfAbsent(dataType, k -> new ArrayDeque<>());
+        TVList list = tvLists.poll();
+        return list != null ? list : TVList.newList(dataType);
     }
-    return number;
-  }
 
-  @Override
-  public void start() throws StartupException {
-    try {
-      JMXService.registerMBean(INSTANCE, mbeanName);
-    } catch (Exception e) {
-      throw new StartupException(this.getID().getName(), e.getMessage());
+    public synchronized void release(TSDataType dataType, TVList list) {
+        list.clear();
+        tvListCache.get(dataType).add(list);
     }
-  }
 
-  @Override
-  public void stop() {
-    JMXService.deregisterMBean(mbeanName);
-    for (Queue<TVList> queue : tvListCache.values()) {
-      queue.clear();
+    public synchronized void release(TVList list) {
+        list.clear();
+        if (list instanceof BinaryTVList) {
+            tvListCache.get(TSDataType.TEXT).add(list);
+        } else if (list instanceof BooleanTVList) {
+            tvListCache.get(TSDataType.BOOLEAN).add(list);
+        } else if (list instanceof DoubleTVList) {
+            tvListCache.get(TSDataType.DOUBLE).add(list);
+        } else if (list instanceof FloatTVList) {
+            tvListCache.get(TSDataType.FLOAT).add(list);
+        } else if (list instanceof IntTVList) {
+            tvListCache.get(TSDataType.INT32).add(list);
+        } else if (list instanceof LongTVList) {
+            tvListCache.get(TSDataType.INT64).add(list);
+        }
     }
-  }
 
-  @Override
-  public ServiceType getID() {
-    return ServiceType.TVLIST_ALLOCATOR_SERVICE;
-  }
+    @Override
+    public int getNumberOfTVLists() {
+        int number = 0;
+        for (Queue<TVList> queue : tvListCache.values()) {
+            number += queue.size();
+        }
+        return number;
+    }
+
+    @Override
+    public void start() throws StartupException {
+        try {
+            JMXService.registerMBean(INSTANCE, mbeanName);
+        } catch (Exception e) {
+            throw new StartupException(this.getID().getName(), e.getMessage());
+        }
+    }
+
+    @Override
+    public void stop() {
+        JMXService.deregisterMBean(mbeanName);
+        for (Queue<TVList> queue : tvListCache.values()) {
+            queue.clear();
+        }
+    }
+
+    @Override
+    public ServiceType getID() {
+        return ServiceType.TVLIST_ALLOCATOR_SERVICE;
+    }
 }

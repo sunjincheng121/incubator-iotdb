@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-
 import org.apache.iotdb.tsfile.constant.TestConstant;
 import org.apache.iotdb.tsfile.file.metadata.utils.TestHelper;
 import org.junit.After;
@@ -33,75 +32,75 @@ import org.junit.Test;
 
 public class TimeSeriesMetadataTest {
 
-  public static final String measurementUID = "sensor01";
-  public static final int typeLength = 1024;
-  final String PATH = TestConstant.BASE_OUTPUT_PATH.concat("outputTimeSeries.tsfile");
+    public static final String measurementUID = "sensor01";
+    public static final int typeLength = 1024;
+    final String PATH = TestConstant.BASE_OUTPUT_PATH.concat("outputTimeSeries.tsfile");
 
-  @Before
-  public void setUp() {
-  }
+    @Before
+    public void setUp() {}
 
-  @After
-  public void tearDown() {
-    File file = new File(PATH);
-    if (file.exists()) {
-      file.delete();
-    }
-  }
-
-  @Test
-  public void testWriteIntoFile() throws IOException {
-    TimeseriesMetadata timeseriesMetadata = TestHelper.createSimpleTimseriesMetaData(measurementUID);
-    serialized(timeseriesMetadata);
-    TimeseriesMetadata readMetadata = deSerialized();
-    timeseriesMetadata.equals(readMetadata);
-    serialized(readMetadata);
-  }
-
-  private TimeseriesMetadata deSerialized() {
-    FileInputStream fis = null;
-    TimeseriesMetadata metaData = null;
-    try {
-      fis = new FileInputStream(new File(PATH));
-      FileChannel fch = fis.getChannel();
-      ByteBuffer buffer = ByteBuffer.allocate((int) fch.size());
-      fch.read(buffer);
-      buffer.flip();
-      metaData = TimeseriesMetadata.deserializeFrom(buffer);
-      return metaData;
-    } catch (IOException e) {
-      e.printStackTrace();
-    } finally {
-      if (fis != null) {
-        try {
-          fis.close();
-        } catch (IOException e) {
-          e.printStackTrace();
+    @After
+    public void tearDown() {
+        File file = new File(PATH);
+        if (file.exists()) {
+            file.delete();
         }
-      }
     }
-    return metaData;
-  }
 
-  private void serialized(TimeseriesMetadata metaData) {
-    File file = new File(PATH);
-    if (file.exists()) {
-      file.delete();
+    @Test
+    public void testWriteIntoFile() throws IOException {
+        TimeseriesMetadata timeseriesMetadata =
+                TestHelper.createSimpleTimseriesMetaData(measurementUID);
+        serialized(timeseriesMetadata);
+        TimeseriesMetadata readMetadata = deSerialized();
+        timeseriesMetadata.equals(readMetadata);
+        serialized(readMetadata);
     }
-    FileOutputStream fos = null;
-    try {
-      fos = new FileOutputStream(file);
-      metaData.serializeTo(fos);
-    } catch (IOException e) {
-      e.printStackTrace();
-    } finally {
-      if (fos != null) {
+
+    private TimeseriesMetadata deSerialized() {
+        FileInputStream fis = null;
+        TimeseriesMetadata metaData = null;
         try {
-          fos.close();
+            fis = new FileInputStream(new File(PATH));
+            FileChannel fch = fis.getChannel();
+            ByteBuffer buffer = ByteBuffer.allocate((int) fch.size());
+            fch.read(buffer);
+            buffer.flip();
+            metaData = TimeseriesMetadata.deserializeFrom(buffer);
+            return metaData;
         } catch (IOException e) {
-          e.printStackTrace();
+            e.printStackTrace();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-      }
+        return metaData;
     }
-  }
+
+    private void serialized(TimeseriesMetadata metaData) {
+        File file = new File(PATH);
+        if (file.exists()) {
+            file.delete();
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file);
+            metaData.serializeTo(fos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

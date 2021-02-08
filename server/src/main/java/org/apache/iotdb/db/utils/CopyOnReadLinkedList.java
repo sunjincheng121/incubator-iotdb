@@ -31,43 +31,42 @@ import java.util.List;
  */
 public class CopyOnReadLinkedList<T> {
 
-  LinkedList<T> data = new LinkedList<>();
-  List<T> readCopy;
+    LinkedList<T> data = new LinkedList<>();
+    List<T> readCopy;
 
-  public synchronized void add(T d) {
-    data.add(d);
-  }
-
-  public synchronized boolean contains(T d) {
-    return data.contains(d);
-  }
-
-  public synchronized void remove(T d) {
-    data.remove(d);
-  }
-
-  public synchronized Iterator<T> iterator() {
-    readCopy = new ArrayList<>(data);
-    return readCopy.iterator();
-  }
-
-  public synchronized void reset() {
-    readCopy = null;
-  }
-
-  public synchronized List<T> cloneList() {
-    if (readCopy == null) {
-      readCopy = new ArrayList<>(data);
+    public synchronized void add(T d) {
+        data.add(d);
     }
-    return readCopy;
-  }
 
-  public boolean isEmpty() {
-    return size() == 0;
-  }
+    public synchronized boolean contains(T d) {
+        return data.contains(d);
+    }
 
-  public int size() {
-    return data.size();
-  }
+    public synchronized void remove(T d) {
+        data.remove(d);
+    }
 
+    public synchronized Iterator<T> iterator() {
+        readCopy = new ArrayList<>(data);
+        return readCopy.iterator();
+    }
+
+    public synchronized void reset() {
+        readCopy = null;
+    }
+
+    public synchronized List<T> cloneList() {
+        if (readCopy == null) {
+            readCopy = new ArrayList<>(data);
+        }
+        return readCopy;
+    }
+
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    public int size() {
+        return data.size();
+    }
 }

@@ -31,96 +31,95 @@ import org.apache.iotdb.db.service.ServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * CompactionMergeTaskPoolManager provides a ThreadPool to queue and run all compaction
- * tasks.
- */
+/** CompactionMergeTaskPoolManager provides a ThreadPool to queue and run all compaction tasks. */
 public class CompactionMergeTaskPoolManager implements IService {
 
-  private static final Logger logger = LoggerFactory
-      .getLogger(CompactionMergeTaskPoolManager.class);
-  private static final CompactionMergeTaskPoolManager INSTANCE = new CompactionMergeTaskPoolManager();
-  private ExecutorService pool;
+    private static final Logger logger =
+            LoggerFactory.getLogger(CompactionMergeTaskPoolManager.class);
+    private static final CompactionMergeTaskPoolManager INSTANCE =
+            new CompactionMergeTaskPoolManager();
+    private ExecutorService pool;
 
-  public static CompactionMergeTaskPoolManager getInstance() {
-    return INSTANCE;
-  }
-
-  @Override
-  public void start() {
-    if (pool == null) {
-      this.pool = IoTDBThreadPoolFactory
-          .newScheduledThreadPool(
-              IoTDBDescriptor.getInstance().getConfig().getCompactionThreadNum(),
-              ThreadName.COMPACTION_SERVICE.getName());
+    public static CompactionMergeTaskPoolManager getInstance() {
+        return INSTANCE;
     }
-    logger.info("Compaction task manager started.");
-  }
 
-  @Override
-  public void stop() {
-    if (pool != null) {
-      pool.shutdownNow();
-      logger.info("Waiting for task pool to shut down");
-      waitTermination();
+    @Override
+    public void start() {
+        if (pool == null) {
+            this.pool =
+                    IoTDBThreadPoolFactory.newScheduledThreadPool(
+                            IoTDBDescriptor.getInstance().getConfig().getCompactionThreadNum(),
+                            ThreadName.COMPACTION_SERVICE.getName());
+        }
+        logger.info("Compaction task manager started.");
     }
-  }
 
-  @Override
-  public void waitAndStop(long milliseconds) {
-    if (pool != null) {
-      awaitTermination(pool, milliseconds);
-      logger.info("Waiting for task pool to shut down");
-      waitTermination();
+    @Override
+    public void stop() {
+        if (pool != null) {
+            pool.shutdownNow();
+            logger.info("Waiting for task pool to shut down");
+            waitTermination();
+        }
     }
-  }
 
-  private void waitTermination() {
-    long startTime = System.currentTimeMillis();
-    while (!pool.isTerminated()) {
-      int timeMillis = 0;
-      try {
-        Thread.sleep(200);
-      } catch (InterruptedException e) {
-        logger.error("CompactionMergeTaskPoolManager {} shutdown",
-            ThreadName.COMPACTION_SERVICE.getName(), e);
-        Thread.currentThread().interrupt();
-      }
-      timeMillis += 200;
-      long time = System.currentTimeMillis() - startTime;
-      if (timeMillis % 60_000 == 0) {
-        logger.warn("CompactionManager has wait for {} seconds to stop", time / 1000);
-      }
+    @Override
+    public void waitAndStop(long milliseconds) {
+        if (pool != null) {
+            awaitTermination(pool, milliseconds);
+            logger.info("Waiting for task pool to shut down");
+            waitTermination();
+        }
     }
-    pool = null;
-    logger.info("CompactionManager stopped");
-  }
 
-  private void awaitTermination(ExecutorService service, long milliseconds) {
-    try {
-      service.shutdown();
-      service.awaitTermination(milliseconds, TimeUnit.MILLISECONDS);
-    } catch (InterruptedException e) {
-      logger.warn("CompactionThreadPool can not be closed in {} ms", milliseconds);
-      Thread.currentThread().interrupt();
+    private void waitTermination() {
+        long startTime = System.currentTimeMillis();
+        while (!pool.isTerminated()) {
+            int timeMillis = 0;
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                logger.error(
+                        "CompactionMergeTaskPoolManager {} shutdown",
+                        ThreadName.COMPACTION_SERVICE.getName(),
+                        e);
+                Thread.currentThread().interrupt();
+            }
+            timeMillis += 200;
+            long time = System.currentTimeMillis() - startTime;
+            if (timeMillis % 60_000 == 0) {
+                logger.warn("CompactionManager has wait for {} seconds to stop", time / 1000);
+            }
+        }
+        pool = null;
+        logger.info("CompactionManager stopped");
     }
-    service.shutdownNow();
-  }
 
-  @Override
-  public ServiceType getID() {
-    return ServiceType.COMPACTION_SERVICE;
-  }
-
-  public void submitTask(CompactionMergeTask compactionMergeTask)
-      throws RejectedExecutionException {
-    if (pool != null && !pool.isTerminated()) {
-      pool.submit(compactionMergeTask);
+    private void awaitTermination(ExecutorService service, long milliseconds) {
+        try {
+            service.shutdown();
+            service.awaitTermination(milliseconds, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            logger.warn("CompactionThreadPool can not be closed in {} ms", milliseconds);
+            Thread.currentThread().interrupt();
+        }
+        service.shutdownNow();
     }
-  }
 
-  public boolean isTerminated() {
-    return pool == null || pool.isTerminated();
-  }
+    @Override
+    public ServiceType getID() {
+        return ServiceType.COMPACTION_SERVICE;
+    }
 
+    public void submitTask(CompactionMergeTask compactionMergeTask)
+            throws RejectedExecutionException {
+        if (pool != null && !pool.isTerminated()) {
+            pool.submit(compactionMergeTask);
+        }
+    }
+
+    public boolean isTerminated() {
+        return pool == null || pool.isTerminated();
+    }
 }

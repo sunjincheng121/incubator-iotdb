@@ -26,31 +26,34 @@ import org.apache.thrift.transport.TTransportFactory;
 @SuppressWarnings("java:S1135") // ignore todos
 public class RpcTransportFactory extends TTransportFactory {
 
-  // TODO: make it a config
-  public static boolean USE_SNAPPY = false;
-  public static final RpcTransportFactory INSTANCE;
-  static {
-    INSTANCE = USE_SNAPPY ?
-        new RpcTransportFactory(new TimeoutChangeableTSnappyFramedTransport.Factory()) :
-        new RpcTransportFactory(new Factory());
-  }
+    // TODO: make it a config
+    public static boolean USE_SNAPPY = false;
+    public static final RpcTransportFactory INSTANCE;
 
-  private TTransportFactory inner;
+    static {
+        INSTANCE =
+                USE_SNAPPY
+                        ? new RpcTransportFactory(
+                                new TimeoutChangeableTSnappyFramedTransport.Factory())
+                        : new RpcTransportFactory(new Factory());
+    }
 
-  public RpcTransportFactory(TTransportFactory inner) {
-    this.inner = inner;
-  }
+    private TTransportFactory inner;
 
-  @Override
-  public TTransport getTransport(TTransport trans) {
-    return inner.getTransport(trans);
-  }
+    public RpcTransportFactory(TTransportFactory inner) {
+        this.inner = inner;
+    }
 
-  public static boolean isUseSnappy() {
-    return USE_SNAPPY;
-  }
+    @Override
+    public TTransport getTransport(TTransport trans) {
+        return inner.getTransport(trans);
+    }
 
-  public static void setUseSnappy(boolean useSnappy) {
-    USE_SNAPPY = useSnappy;
-  }
+    public static boolean isUseSnappy() {
+        return USE_SNAPPY;
+    }
+
+    public static void setUseSnappy(boolean useSnappy) {
+        USE_SNAPPY = useSnappy;
+    }
 }

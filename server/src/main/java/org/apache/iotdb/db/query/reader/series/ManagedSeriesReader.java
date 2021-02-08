@@ -27,11 +27,11 @@ import org.apache.iotdb.tsfile.read.reader.IBatchReader;
  */
 public interface ManagedSeriesReader extends IBatchReader {
 
-  boolean isManagedByQueryManager();
+    boolean isManagedByQueryManager();
 
-  void setManagedByQueryManager(boolean managedByQueryManager);
+    void setManagedByQueryManager(boolean managedByQueryManager);
 
-  boolean hasRemaining();
+    boolean hasRemaining();
 
-  void setHasRemaining(boolean hasRemaining);
+    void setHasRemaining(boolean hasRemaining);
 }

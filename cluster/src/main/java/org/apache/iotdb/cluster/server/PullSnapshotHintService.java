@@ -39,103 +39,101 @@ import org.slf4j.LoggerFactory;
 
 public class PullSnapshotHintService {
 
-  private static final Logger logger = LoggerFactory.getLogger(PullSnapshotHintService.class);
+    private static final Logger logger = LoggerFactory.getLogger(PullSnapshotHintService.class);
 
-  private DataGroupMember member;
-  private ScheduledExecutorService service;
-  private ConcurrentLinkedDeque<PullSnapshotHint> hints;
+    private DataGroupMember member;
+    private ScheduledExecutorService service;
+    private ConcurrentLinkedDeque<PullSnapshotHint> hints;
 
-  public PullSnapshotHintService(DataGroupMember member) {
-    this.member = member;
-    this.hints = new ConcurrentLinkedDeque<>();
-  }
-
-  public void start() {
-    this.service = Executors.newScheduledThreadPool(1);
-    this.service.scheduleAtFixedRate(this::sendHints, 0, 1, TimeUnit.MINUTES);
-  }
-
-  public void stop() {
-    if (service == null) {
-      return;
+    public PullSnapshotHintService(DataGroupMember member) {
+        this.member = member;
+        this.hints = new ConcurrentLinkedDeque<>();
     }
 
-    service.shutdown();
-    try {
-      service.awaitTermination(3, TimeUnit.MINUTES);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      logger.warn("{}: PullSnapshotHintService exiting interrupted", member.getName());
+    public void start() {
+        this.service = Executors.newScheduledThreadPool(1);
+        this.service.scheduleAtFixedRate(this::sendHints, 0, 1, TimeUnit.MINUTES);
     }
-    service = null;
-  }
 
-  public void registerHint(PullSnapshotTaskDescriptor descriptor) {
-    PullSnapshotHint hint = new PullSnapshotHint();
-    hint.receivers = new ArrayList<>(descriptor.getPreviousHolders());
-    hint.header = descriptor.getPreviousHolders().getHeader();
-    hint.slots = descriptor.getSlots();
-    hints.add(hint);
-  }
-
-  private void sendHints() {
-    for (Iterator<PullSnapshotHint> iterator = hints.iterator(); iterator.hasNext(); ) {
-      PullSnapshotHint hint = iterator.next();
-      for (Iterator<Node> iter = hint.receivers.iterator(); iter.hasNext(); ) {
-        Node receiver = iter.next();
-        try {
-          boolean result = sendHint(receiver, hint);
-          if (result) {
-            iter.remove();
-          }
-        } catch (TException e) {
-          logger.warn("Cannot send pull snapshot hint to {}", receiver);
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-          logger.warn("Sending hint to {} interrupted", receiver);
+    public void stop() {
+        if (service == null) {
+            return;
         }
-      }
-      // all nodes in remote group know the hint, the hint can be removed
-      if (hint.receivers.isEmpty()) {
-        iterator.remove();
-      }
+
+        service.shutdown();
+        try {
+            service.awaitTermination(3, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.warn("{}: PullSnapshotHintService exiting interrupted", member.getName());
+        }
+        service = null;
     }
-  }
 
-  private boolean sendHint(Node receiver, PullSnapshotHint hint)
-      throws TException, InterruptedException {
-    boolean result;
-    if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
-      result = sendHintsAsync(receiver, hint);
-    } else {
-      result = sendHintSync(receiver, hint);
+    public void registerHint(PullSnapshotTaskDescriptor descriptor) {
+        PullSnapshotHint hint = new PullSnapshotHint();
+        hint.receivers = new ArrayList<>(descriptor.getPreviousHolders());
+        hint.header = descriptor.getPreviousHolders().getHeader();
+        hint.slots = descriptor.getSlots();
+        hints.add(hint);
     }
-    return result;
-  }
 
-  private boolean sendHintsAsync(Node receiver, PullSnapshotHint hint)
-      throws TException, InterruptedException {
-    AsyncDataClient asyncDataClient = (AsyncDataClient) member.getAsyncClient(receiver);
-    return SyncClientAdaptor.onSnapshotApplied(asyncDataClient, hint.header, hint.slots);
-  }
-
-  private boolean sendHintSync(Node receiver, PullSnapshotHint hint) throws TException {
-    SyncDataClient syncDataClient = (SyncDataClient) member.getSyncClient(receiver);
-    if (syncDataClient == null) {
-      return false;
+    private void sendHints() {
+        for (Iterator<PullSnapshotHint> iterator = hints.iterator(); iterator.hasNext(); ) {
+            PullSnapshotHint hint = iterator.next();
+            for (Iterator<Node> iter = hint.receivers.iterator(); iter.hasNext(); ) {
+                Node receiver = iter.next();
+                try {
+                    boolean result = sendHint(receiver, hint);
+                    if (result) {
+                        iter.remove();
+                    }
+                } catch (TException e) {
+                    logger.warn("Cannot send pull snapshot hint to {}", receiver);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    logger.warn("Sending hint to {} interrupted", receiver);
+                }
+            }
+            // all nodes in remote group know the hint, the hint can be removed
+            if (hint.receivers.isEmpty()) {
+                iterator.remove();
+            }
+        }
     }
-    return syncDataClient.onSnapshotApplied(hint.header, hint.slots);
-  }
 
-  private static class PullSnapshotHint {
+    private boolean sendHint(Node receiver, PullSnapshotHint hint)
+            throws TException, InterruptedException {
+        boolean result;
+        if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
+            result = sendHintsAsync(receiver, hint);
+        } else {
+            result = sendHintSync(receiver, hint);
+        }
+        return result;
+    }
 
-    /**
-     * Nodes to send this hint;
-     */
-    private List<Node> receivers;
+    private boolean sendHintsAsync(Node receiver, PullSnapshotHint hint)
+            throws TException, InterruptedException {
+        AsyncDataClient asyncDataClient = (AsyncDataClient) member.getAsyncClient(receiver);
+        return SyncClientAdaptor.onSnapshotApplied(asyncDataClient, hint.header, hint.slots);
+    }
 
-    private Node header;
+    private boolean sendHintSync(Node receiver, PullSnapshotHint hint) throws TException {
+        SyncDataClient syncDataClient = (SyncDataClient) member.getSyncClient(receiver);
+        if (syncDataClient == null) {
+            return false;
+        }
+        return syncDataClient.onSnapshotApplied(hint.header, hint.slots);
+    }
 
-    private List<Integer> slots;
-  }
+    private static class PullSnapshotHint {
+
+        /** Nodes to send this hint; */
+        private List<Node> receivers;
+
+        private Node header;
+
+        private List<Integer> slots;
+    }
 }

@@ -26,12 +26,13 @@ import org.apache.thrift.transport.TTransportException;
 
 public interface SyncClientFactory {
 
-  /**
-   * Get a client which will connect the given node and be cached in the given pool.
-   * @param node the cluster node the client will connect.
-   * @param pool the pool that will cache the client for reusing.
-   * @return
-   * @throws IOException
-   */
-  RaftService.Client getSyncClient(Node node, SyncClientPool pool) throws TTransportException;
+    /**
+     * Get a client which will connect the given node and be cached in the given pool.
+     *
+     * @param node the cluster node the client will connect.
+     * @param pool the pool that will cache the client for reusing.
+     * @return
+     * @throws IOException
+     */
+    RaftService.Client getSyncClient(Node node, SyncClientPool pool) throws TTransportException;
 }

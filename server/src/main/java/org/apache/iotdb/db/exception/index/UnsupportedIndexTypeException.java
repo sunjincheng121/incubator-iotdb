@@ -17,15 +17,16 @@
  */
 package org.apache.iotdb.db.exception.index;
 
-
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.rpc.TSStatusCode;
 
 public class UnsupportedIndexTypeException extends QueryProcessException {
 
-  private static final long serialVersionUID = -7091830159338197925L;
+    private static final long serialVersionUID = -7091830159338197925L;
 
-  public UnsupportedIndexTypeException(String indexType) {
-    super("Unsupported index type: " + indexType, TSStatusCode.UNSUPPORTED_INDEX_TYPE_ERROR.getStatusCode());
-  }
+    public UnsupportedIndexTypeException(String indexType) {
+        super(
+                "Unsupported index type: " + indexType,
+                TSStatusCode.UNSUPPORTED_INDEX_TYPE_ERROR.getStatusCode());
+    }
 }

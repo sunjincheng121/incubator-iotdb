@@ -27,75 +27,72 @@ import org.apache.iotdb.session.SessionDataSet.DataIterator;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.common.RowRecord;
 
-public class SessionDataSetWrapper implements AutoCloseable{
+public class SessionDataSetWrapper implements AutoCloseable {
 
-  SessionDataSet sessionDataSet;
-  Session session;
-  SessionPool pool;
+    SessionDataSet sessionDataSet;
+    Session session;
+    SessionPool pool;
 
-  public SessionDataSetWrapper(SessionDataSet sessionDataSet,
-      Session session, SessionPool pool) {
-    this.sessionDataSet = sessionDataSet;
-    this.session = session;
-    this.pool = pool;
-  }
+    public SessionDataSetWrapper(SessionDataSet sessionDataSet, Session session, SessionPool pool) {
+        this.sessionDataSet = sessionDataSet;
+        this.session = session;
+        this.pool = pool;
+    }
 
-  protected Session getSession() {
-    return session;
-  }
+    protected Session getSession() {
+        return session;
+    }
 
-  public int getBatchSize() {
-    return sessionDataSet.getFetchSize();
-  }
+    public int getBatchSize() {
+        return sessionDataSet.getFetchSize();
+    }
 
-  public void setBatchSize(int batchSize) {
-    sessionDataSet.setFetchSize(batchSize);
-  }
+    public void setBatchSize(int batchSize) {
+        sessionDataSet.setFetchSize(batchSize);
+    }
 
-  /**
-   * If there is an Exception, and you do not want to use the resultset anymore,
-   * you have to release the resultset manually by calling closeResultSet
-   * @return
-   * @throws IoTDBConnectionException
-   * @throws StatementExecutionException
-   */
-  public boolean hasNext() throws IoTDBConnectionException, StatementExecutionException {
-      boolean next = sessionDataSet.hasNext();
-      if (!next) {
+    /**
+     * If there is an Exception, and you do not want to use the resultset anymore, you have to
+     * release the resultset manually by calling closeResultSet
+     *
+     * @return
+     * @throws IoTDBConnectionException
+     * @throws StatementExecutionException
+     */
+    public boolean hasNext() throws IoTDBConnectionException, StatementExecutionException {
+        boolean next = sessionDataSet.hasNext();
+        if (!next) {
+            pool.closeResultSet(this);
+        }
+        return next;
+    }
+    /**
+     * If there is an Exception, and you do not want to use the resultset anymore, you have to
+     * release the resultset manually by calling closeResultSet
+     *
+     * @return
+     * @throws IoTDBConnectionException
+     * @throws StatementExecutionException
+     */
+    public RowRecord next() throws IoTDBConnectionException, StatementExecutionException {
+        return sessionDataSet.next();
+    }
+
+    /** retrieve data set like jdbc */
+    public DataIterator iterator() {
+        return sessionDataSet.iterator();
+    }
+
+    public List<String> getColumnNames() {
+        return sessionDataSet.getColumnNames();
+    }
+
+    public List<TSDataType> getColumnTypes() {
+        return sessionDataSet.getColumnTypes();
+    }
+
+    /** close this dataset to release the session */
+    public void close() {
         pool.closeResultSet(this);
-      }
-      return next;
-  }
-  /**
-   * If there is an Exception, and you do not want to use the resultset anymore,
-   * you have to release the resultset manually by calling closeResultSet
-   * @return
-   * @throws IoTDBConnectionException
-   * @throws StatementExecutionException
-   */
-  public RowRecord next() throws IoTDBConnectionException, StatementExecutionException {
-    return sessionDataSet.next();
-  }
-
-  /**
-   * retrieve data set like jdbc
-   */
-  public DataIterator iterator() {
-    return sessionDataSet.iterator();
-  }
-
-  public List<String> getColumnNames() {
-    return sessionDataSet.getColumnNames();
-  }
-
-  public List<TSDataType> getColumnTypes() {
-    return sessionDataSet.getColumnTypes();
-  }
-
-  /**
-   * close this dataset to release the session
-   */
-  public void close() {
-    pool.closeResultSet(this);
-  }
+    }
 }

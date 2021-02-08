@@ -36,39 +36,48 @@ import org.apache.iotdb.db.query.reader.series.IReaderByTimestamp;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.expression.IExpression;
 import org.apache.iotdb.tsfile.read.query.timegenerator.TimeGenerator;
+
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class ClusterGroupByVFilterDataSet extends GroupByWithValueFilterDataSet {
 
-  private MetaGroupMember metaGroupMember;
-  private ClusterReaderFactory readerFactory;
+    private MetaGroupMember metaGroupMember;
+    private ClusterReaderFactory readerFactory;
 
-  public ClusterGroupByVFilterDataSet(QueryContext context,
-      GroupByTimePlan groupByPlan, MetaGroupMember metaGroupMember)
-      throws StorageEngineException, QueryProcessException {
-    initQueryDataSetFields(new ArrayList<>(groupByPlan.getDeduplicatedPaths()),
-        groupByPlan.getDeduplicatedDataTypes(), groupByPlan.isAscending());
-    initGroupByEngineDataSetFields(context, groupByPlan);
+    public ClusterGroupByVFilterDataSet(
+            QueryContext context, GroupByTimePlan groupByPlan, MetaGroupMember metaGroupMember)
+            throws StorageEngineException, QueryProcessException {
+        initQueryDataSetFields(
+                new ArrayList<>(groupByPlan.getDeduplicatedPaths()),
+                groupByPlan.getDeduplicatedDataTypes(),
+                groupByPlan.isAscending());
+        initGroupByEngineDataSetFields(context, groupByPlan);
 
-    this.timeStampFetchSize = IoTDBDescriptor.getInstance().getConfig().getBatchSize();
-    this.metaGroupMember = metaGroupMember;
-    this.readerFactory = new ClusterReaderFactory(metaGroupMember);
-    initGroupBy(context, groupByPlan);
-  }
+        this.timeStampFetchSize = IoTDBDescriptor.getInstance().getConfig().getBatchSize();
+        this.metaGroupMember = metaGroupMember;
+        this.readerFactory = new ClusterReaderFactory(metaGroupMember);
+        initGroupBy(context, groupByPlan);
+    }
 
-  @Override
-  protected TimeGenerator getTimeGenerator(IExpression expression, QueryContext context,
-      RawDataQueryPlan rawDataQueryPlan)
-      throws StorageEngineException {
-    return new ClusterTimeGenerator(expression, context, metaGroupMember, rawDataQueryPlan);
-  }
+    @Override
+    protected TimeGenerator getTimeGenerator(
+            IExpression expression, QueryContext context, RawDataQueryPlan rawDataQueryPlan)
+            throws StorageEngineException {
+        return new ClusterTimeGenerator(expression, context, metaGroupMember, rawDataQueryPlan);
+    }
 
-  @Override
-  protected IReaderByTimestamp getReaderByTime(PartialPath path, RawDataQueryPlan dataQueryPlan,
-      TSDataType dataType,
-      QueryContext context,
-      TsFileFilter fileFilter) throws StorageEngineException, QueryProcessException {
-    return readerFactory.getReaderByTimestamp(path,
-        dataQueryPlan.getAllMeasurementsInDevice(path.getDevice()), dataType, context,
-        dataQueryPlan.isAscending());
-  }
+    @Override
+    protected IReaderByTimestamp getReaderByTime(
+            PartialPath path,
+            RawDataQueryPlan dataQueryPlan,
+            TSDataType dataType,
+            QueryContext context,
+            TsFileFilter fileFilter)
+            throws StorageEngineException, QueryProcessException {
+        return readerFactory.getReaderByTimestamp(
+                path,
+                dataQueryPlan.getAllMeasurementsInDevice(path.getDevice()),
+                dataType,
+                context,
+                dataQueryPlan.isAscending());
+    }
 }

@@ -45,115 +45,122 @@ import org.apache.thrift.async.AsyncMethodCallback;
 
 public abstract class BaseAsyncService implements RaftService.AsyncIface {
 
-  RaftMember member;
-  String name;
+    RaftMember member;
+    String name;
 
-  BaseAsyncService(RaftMember member) {
-    this.member = member;
-    this.name = member.getName();
-  }
-
-  @Override
-  public void sendHeartbeat(HeartBeatRequest request,
-      AsyncMethodCallback<HeartBeatResponse> resultHandler) {
-    resultHandler.onComplete(member.processHeartbeatRequest(request));
-  }
-
-  @Override
-  public void startElection(ElectionRequest request, AsyncMethodCallback<Long> resultHandler) {
-    resultHandler.onComplete(member.processElectionRequest(request));
-  }
-
-  @Override
-  public void appendEntry(AppendEntryRequest request, AsyncMethodCallback<Long> resultHandler) {
-    try {
-      resultHandler.onComplete(member.appendEntry(request));
-    } catch (UnknownLogTypeException e) {
-      resultHandler.onError(e);
-    }
-  }
-
-  @Override
-  public void appendEntries(AppendEntriesRequest request, AsyncMethodCallback<Long> resultHandler) {
-    try {
-      resultHandler.onComplete(member.appendEntries(request));
-    } catch (Exception e) {
-      resultHandler.onError(e);
-    }
-  }
-
-  @Override
-  public void requestCommitIndex(Node header, AsyncMethodCallback<Long> resultHandler) {
-    long commitIndex = member.getCommitIndex();
-    if (commitIndex != Long.MIN_VALUE) {
-      resultHandler.onComplete(commitIndex);
-      return;
+    BaseAsyncService(RaftMember member) {
+        this.member = member;
+        this.name = member.getName();
     }
 
-    member.waitLeader();
-    AsyncClient client = member.getAsyncClient(member.getLeader());
-    if (client == null) {
-      resultHandler.onError(new LeaderUnknownException(member.getAllNodes()));
-      return;
+    @Override
+    public void sendHeartbeat(
+            HeartBeatRequest request, AsyncMethodCallback<HeartBeatResponse> resultHandler) {
+        resultHandler.onComplete(member.processHeartbeatRequest(request));
     }
-    try {
-      client.requestCommitIndex(header, resultHandler);
-    } catch (TException e) {
-      resultHandler.onError(e);
+
+    @Override
+    public void startElection(ElectionRequest request, AsyncMethodCallback<Long> resultHandler) {
+        resultHandler.onComplete(member.processElectionRequest(request));
     }
-  }
 
-  @Override
-  public void readFile(String filePath, long offset, int length,
-      AsyncMethodCallback<ByteBuffer> resultHandler) {
-    try {
-      resultHandler.onComplete(IOUtils.readFile(filePath, offset, length));
-    } catch (IOException e) {
-      resultHandler.onError(e);
-    }
-  }
-
-  @Override
-  public void removeHardLink(String hardLinkPath,
-      AsyncMethodCallback<Void> resultHandler) {
-    try {
-      Files.deleteIfExists(new File(hardLinkPath).toPath());
-      resultHandler.onComplete(null);
-    } catch (IOException e) {
-      resultHandler.onError(e);
-    }
-  }
-
-  @Override
-  public void matchTerm(long index, long term, Node header,
-      AsyncMethodCallback<Boolean> resultHandler) {
-    resultHandler.onComplete(member.matchLog(index, term));
-  }
-
-  @Override
-  public void executeNonQueryPlan(ExecutNonQueryReq request,
-      AsyncMethodCallback<TSStatus> resultHandler) {
-    if (member.getCharacter() != NodeCharacter.LEADER) {
-      // forward the plan to the leader
-      AsyncClient client = member.getAsyncClient(member.getLeader());
-      if (client != null) {
+    @Override
+    public void appendEntry(AppendEntryRequest request, AsyncMethodCallback<Long> resultHandler) {
         try {
-          client.executeNonQueryPlan(request, resultHandler);
-        } catch (TException e) {
-          resultHandler.onError(e);
+            resultHandler.onComplete(member.appendEntry(request));
+        } catch (UnknownLogTypeException e) {
+            resultHandler.onError(e);
         }
-      } else {
-        resultHandler.onComplete(StatusUtils.NO_LEADER);
-      }
-      return;
     }
 
-    try {
-      TSStatus status = member.executeNonQueryPlan(request);
-      resultHandler.onComplete(StatusUtils.getStatus(status,
-          new EndPoint(member.getThisNode().getIp(), member.getThisNode().getClientPort())));
-    } catch (Exception e) {
-      resultHandler.onError(e);
+    @Override
+    public void appendEntries(
+            AppendEntriesRequest request, AsyncMethodCallback<Long> resultHandler) {
+        try {
+            resultHandler.onComplete(member.appendEntries(request));
+        } catch (Exception e) {
+            resultHandler.onError(e);
+        }
     }
-  }
+
+    @Override
+    public void requestCommitIndex(Node header, AsyncMethodCallback<Long> resultHandler) {
+        long commitIndex = member.getCommitIndex();
+        if (commitIndex != Long.MIN_VALUE) {
+            resultHandler.onComplete(commitIndex);
+            return;
+        }
+
+        member.waitLeader();
+        AsyncClient client = member.getAsyncClient(member.getLeader());
+        if (client == null) {
+            resultHandler.onError(new LeaderUnknownException(member.getAllNodes()));
+            return;
+        }
+        try {
+            client.requestCommitIndex(header, resultHandler);
+        } catch (TException e) {
+            resultHandler.onError(e);
+        }
+    }
+
+    @Override
+    public void readFile(
+            String filePath,
+            long offset,
+            int length,
+            AsyncMethodCallback<ByteBuffer> resultHandler) {
+        try {
+            resultHandler.onComplete(IOUtils.readFile(filePath, offset, length));
+        } catch (IOException e) {
+            resultHandler.onError(e);
+        }
+    }
+
+    @Override
+    public void removeHardLink(String hardLinkPath, AsyncMethodCallback<Void> resultHandler) {
+        try {
+            Files.deleteIfExists(new File(hardLinkPath).toPath());
+            resultHandler.onComplete(null);
+        } catch (IOException e) {
+            resultHandler.onError(e);
+        }
+    }
+
+    @Override
+    public void matchTerm(
+            long index, long term, Node header, AsyncMethodCallback<Boolean> resultHandler) {
+        resultHandler.onComplete(member.matchLog(index, term));
+    }
+
+    @Override
+    public void executeNonQueryPlan(
+            ExecutNonQueryReq request, AsyncMethodCallback<TSStatus> resultHandler) {
+        if (member.getCharacter() != NodeCharacter.LEADER) {
+            // forward the plan to the leader
+            AsyncClient client = member.getAsyncClient(member.getLeader());
+            if (client != null) {
+                try {
+                    client.executeNonQueryPlan(request, resultHandler);
+                } catch (TException e) {
+                    resultHandler.onError(e);
+                }
+            } else {
+                resultHandler.onComplete(StatusUtils.NO_LEADER);
+            }
+            return;
+        }
+
+        try {
+            TSStatus status = member.executeNonQueryPlan(request);
+            resultHandler.onComplete(
+                    StatusUtils.getStatus(
+                            status,
+                            new EndPoint(
+                                    member.getThisNode().getIp(),
+                                    member.getThisNode().getClientPort())));
+        } catch (Exception e) {
+            resultHandler.onError(e);
+        }
+    }
 }

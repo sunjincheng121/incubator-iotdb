@@ -30,41 +30,47 @@ import org.apache.iotdb.db.query.executor.fill.LinearFill;
 import org.apache.iotdb.tsfile.read.TimeValuePair;
 
 /**
- * ClusterLinearFill overrides the dataReader in LinearFill so that it can read data from the
- * whole cluster instead of only the local node.
+ * ClusterLinearFill overrides the dataReader in LinearFill so that it can read data from the whole
+ * cluster instead of only the local node.
  */
 public class ClusterLinearFill extends LinearFill {
 
-  private MetaGroupMember metaGroupMember;
-  private ClusterAggregator aggregator;
-  private static final List<String> AGGREGATION_NAMES = Arrays.asList(SQLConstant.MIN_TIME,
-      SQLConstant.FIRST_VALUE);
+    private MetaGroupMember metaGroupMember;
+    private ClusterAggregator aggregator;
+    private static final List<String> AGGREGATION_NAMES =
+            Arrays.asList(SQLConstant.MIN_TIME, SQLConstant.FIRST_VALUE);
 
-  ClusterLinearFill(LinearFill fill, MetaGroupMember metaGroupMember) {
-    super(fill.getDataType(), fill.getQueryTime(), fill.getBeforeRange(), fill.getAfterRange());
-    this.metaGroupMember = metaGroupMember;
-    this.aggregator = new ClusterAggregator(metaGroupMember);
-  }
+    ClusterLinearFill(LinearFill fill, MetaGroupMember metaGroupMember) {
+        super(fill.getDataType(), fill.getQueryTime(), fill.getBeforeRange(), fill.getAfterRange());
+        this.metaGroupMember = metaGroupMember;
+        this.aggregator = new ClusterAggregator(metaGroupMember);
+    }
 
-  @Override
-  protected TimeValuePair calculatePrecedingPoint() {
-    // calculate the preceding point can be viewed as a previous fill
-    ClusterPreviousFill clusterPreviousFill = new ClusterPreviousFill(dataType, queryTime,
-        beforeRange, metaGroupMember);
-    clusterPreviousFill.configureFill(seriesPath, dataType, queryTime, deviceMeasurements, context);
-    return clusterPreviousFill.getFillResult();
-  }
+    @Override
+    protected TimeValuePair calculatePrecedingPoint() {
+        // calculate the preceding point can be viewed as a previous fill
+        ClusterPreviousFill clusterPreviousFill =
+                new ClusterPreviousFill(dataType, queryTime, beforeRange, metaGroupMember);
+        clusterPreviousFill.configureFill(
+                seriesPath, dataType, queryTime, deviceMeasurements, context);
+        return clusterPreviousFill.getFillResult();
+    }
 
-  @Override
-  protected TimeValuePair calculateSucceedingPoint()
-      throws StorageEngineException {
+    @Override
+    protected TimeValuePair calculateSucceedingPoint() throws StorageEngineException {
 
-    List<AggregateResult> aggregateResult = aggregator
-        .getAggregateResult(seriesPath, deviceMeasurements, AGGREGATION_NAMES,
-            dataType, afterFilter, context, true);
-    AggregateResult minTimeResult = aggregateResult.get(0);
-    AggregateResult firstValueResult = aggregateResult.get(1);
+        List<AggregateResult> aggregateResult =
+                aggregator.getAggregateResult(
+                        seriesPath,
+                        deviceMeasurements,
+                        AGGREGATION_NAMES,
+                        dataType,
+                        afterFilter,
+                        context,
+                        true);
+        AggregateResult minTimeResult = aggregateResult.get(0);
+        AggregateResult firstValueResult = aggregateResult.get(1);
 
-    return convertToResult(minTimeResult, firstValueResult);
-  }
+        return convertToResult(minTimeResult, firstValueResult);
+    }
 }

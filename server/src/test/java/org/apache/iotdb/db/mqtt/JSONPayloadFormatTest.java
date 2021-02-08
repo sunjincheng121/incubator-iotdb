@@ -17,24 +17,24 @@
  */
 package org.apache.iotdb.db.mqtt;
 
+import static org.junit.Assert.assertEquals;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.junit.Test;
-
 import java.nio.charset.StandardCharsets;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 public class JSONPayloadFormatTest {
 
     @Test
     public void formatJson() {
-        String payload = " {\n" +
-                "      \"device\":\"root.sg.d1\",\n" +
-                "      \"timestamp\":1586076045524,\n" +
-                "      \"measurements\":[\"s1\",\"s2\"],\n" +
-                "      \"values\":[0.530635,0.530635]\n" +
-                " }";
+        String payload =
+                " {\n"
+                        + "      \"device\":\"root.sg.d1\",\n"
+                        + "      \"timestamp\":1586076045524,\n"
+                        + "      \"measurements\":[\"s1\",\"s2\"],\n"
+                        + "      \"values\":[0.530635,0.530635]\n"
+                        + " }";
 
         ByteBuf buf = Unpooled.copiedBuffer(payload, StandardCharsets.UTF_8);
 
@@ -49,12 +49,13 @@ public class JSONPayloadFormatTest {
 
     @Test
     public void formatBatchJson() {
-        String payload = " {\n" +
-                "      \"device\":\"root.sg.d1\",\n" +
-                "      \"timestamps\":[1586076045524,1586076065526],\n" +
-                "      \"measurements\":[\"s1\",\"s2\"],\n" +
-                "      \"values\":[[0.530635,0.530635], [0.530655,0.530695]]\n" +
-                "  }";
+        String payload =
+                " {\n"
+                        + "      \"device\":\"root.sg.d1\",\n"
+                        + "      \"timestamps\":[1586076045524,1586076065526],\n"
+                        + "      \"measurements\":[\"s1\",\"s2\"],\n"
+                        + "      \"values\":[[0.530635,0.530635], [0.530655,0.530695]]\n"
+                        + "  }";
 
         ByteBuf buf = Unpooled.copiedBuffer(payload, StandardCharsets.UTF_8);
 

@@ -23,58 +23,55 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Boolean Statistics.
- */
+/** Boolean Statistics. */
 public class BooleanStatisticsV1 extends StatisticsV1<Boolean> {
 
-  private boolean min;
-  private boolean max;
-  private boolean first;
-  private boolean last;
-  private double sum;
+    private boolean min;
+    private boolean max;
+    private boolean first;
+    private boolean last;
+    private double sum;
 
-  @Override
-  public Boolean getMin() {
-    return min;
-  }
+    @Override
+    public Boolean getMin() {
+        return min;
+    }
 
-  @Override
-  public Boolean getMax() {
-    return max;
-  }
+    @Override
+    public Boolean getMax() {
+        return max;
+    }
 
-  @Override
-  public Boolean getFirst() {
-    return first;
-  }
+    @Override
+    public Boolean getFirst() {
+        return first;
+    }
 
-  @Override
-  public Boolean getLast() {
-    return last;
-  }
+    @Override
+    public Boolean getLast() {
+        return last;
+    }
 
-  @Override
-  public double getSum() {
-    return sum;
-  }
+    @Override
+    public double getSum() {
+        return sum;
+    }
 
-  @Override
-  void deserialize(ByteBuffer byteBuffer) throws IOException {
-    this.min = ReadWriteIOUtils.readBool(byteBuffer);
-    this.max = ReadWriteIOUtils.readBool(byteBuffer);
-    this.first = ReadWriteIOUtils.readBool(byteBuffer);
-    this.last = ReadWriteIOUtils.readBool(byteBuffer);
-    this.sum = ReadWriteIOUtils.readDouble(byteBuffer);
-  }
+    @Override
+    void deserialize(ByteBuffer byteBuffer) throws IOException {
+        this.min = ReadWriteIOUtils.readBool(byteBuffer);
+        this.max = ReadWriteIOUtils.readBool(byteBuffer);
+        this.first = ReadWriteIOUtils.readBool(byteBuffer);
+        this.last = ReadWriteIOUtils.readBool(byteBuffer);
+        this.sum = ReadWriteIOUtils.readDouble(byteBuffer);
+    }
 
-  @Override
-  void deserialize(InputStream inputStream) throws IOException {
-    this.min = ReadWriteIOUtils.readBool(inputStream);
-    this.max = ReadWriteIOUtils.readBool(inputStream);
-    this.first = ReadWriteIOUtils.readBool(inputStream);
-    this.last = ReadWriteIOUtils.readBool(inputStream);
-    this.sum = ReadWriteIOUtils.readDouble(inputStream);
-  }
-
+    @Override
+    void deserialize(InputStream inputStream) throws IOException {
+        this.min = ReadWriteIOUtils.readBool(inputStream);
+        this.max = ReadWriteIOUtils.readBool(inputStream);
+        this.first = ReadWriteIOUtils.readBool(inputStream);
+        this.last = ReadWriteIOUtils.readBool(inputStream);
+        this.sum = ReadWriteIOUtils.readDouble(inputStream);
+    }
 }

@@ -33,100 +33,96 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class DropIndexPlan extends PhysicalPlan {
 
-  protected List<PartialPath> paths;
-  private IndexType indexType;
+    protected List<PartialPath> paths;
+    private IndexType indexType;
 
-  public DropIndexPlan() {
-    super(false, Operator.OperatorType.DROP_INDEX);
-  }
-
-  public DropIndexPlan(List<PartialPath> paths, IndexType indexType) {
-    super(false, OperatorType.DROP_INDEX);
-    this.paths = paths;
-    this.indexType = indexType;
-
-  }
-
-  @Override
-  public void setPaths(List<PartialPath> paths) {
-    this.paths = paths;
-  }
-
-  @Override
-  public List<PartialPath> getPaths() {
-    return paths;
-  }
-
-  public IndexType getIndexType() {
-    return indexType;
-  }
-
-  public void setIndexType(IndexType indexType) {
-    this.indexType = indexType;
-  }
-
-
-  @Override
-  public void serialize(DataOutputStream stream) throws IOException {
-    stream.writeByte((byte) PhysicalPlanType.DROP_INDEX.ordinal());
-    stream.write((byte) indexType.serialize());
-
-    stream.writeInt(paths.size());
-    for (PartialPath path : paths) {
-      putString(stream, path.getFullPath());
+    public DropIndexPlan() {
+        super(false, Operator.OperatorType.DROP_INDEX);
     }
 
-    stream.writeLong(index);
-  }
-
-  @Override
-  public void serialize(ByteBuffer buffer) {
-    int type = PhysicalPlanType.DROP_INDEX.ordinal();
-    buffer.put((byte) type);
-    buffer.put((byte) indexType.serialize());
-
-    buffer.putInt(paths.size());
-    for (PartialPath path : paths) {
-      putString(buffer, path.getFullPath());
+    public DropIndexPlan(List<PartialPath> paths, IndexType indexType) {
+        super(false, OperatorType.DROP_INDEX);
+        this.paths = paths;
+        this.indexType = indexType;
     }
 
-    buffer.putLong(index);
-  }
-
-  @Override
-  public void deserialize(ByteBuffer buffer) throws IllegalPathException {
-    indexType = IndexType.deserialize(buffer.get());
-
-    int pathNum = buffer.getInt();
-    paths = new ArrayList<>();
-    for (int i = 0; i < pathNum; i++) {
-      paths.add(new PartialPath(readString(buffer)));
+    @Override
+    public void setPaths(List<PartialPath> paths) {
+        this.paths = paths;
     }
 
-    this.index = buffer.getLong();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    @Override
+    public List<PartialPath> getPaths() {
+        return paths;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public IndexType getIndexType() {
+        return indexType;
     }
-    DropIndexPlan that = (DropIndexPlan) o;
-    return Objects.equals(paths, that.paths)
-        && Objects.equals(indexType, that.indexType);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(paths, indexType);
-  }
+    public void setIndexType(IndexType indexType) {
+        this.indexType = indexType;
+    }
 
-  @Override
-  public String toString() {
-    return String.format("paths: %s, index type: %s",
-        paths, indexType);
-  }
+    @Override
+    public void serialize(DataOutputStream stream) throws IOException {
+        stream.writeByte((byte) PhysicalPlanType.DROP_INDEX.ordinal());
+        stream.write((byte) indexType.serialize());
+
+        stream.writeInt(paths.size());
+        for (PartialPath path : paths) {
+            putString(stream, path.getFullPath());
+        }
+
+        stream.writeLong(index);
+    }
+
+    @Override
+    public void serialize(ByteBuffer buffer) {
+        int type = PhysicalPlanType.DROP_INDEX.ordinal();
+        buffer.put((byte) type);
+        buffer.put((byte) indexType.serialize());
+
+        buffer.putInt(paths.size());
+        for (PartialPath path : paths) {
+            putString(buffer, path.getFullPath());
+        }
+
+        buffer.putLong(index);
+    }
+
+    @Override
+    public void deserialize(ByteBuffer buffer) throws IllegalPathException {
+        indexType = IndexType.deserialize(buffer.get());
+
+        int pathNum = buffer.getInt();
+        paths = new ArrayList<>();
+        for (int i = 0; i < pathNum; i++) {
+            paths.add(new PartialPath(readString(buffer)));
+        }
+
+        this.index = buffer.getLong();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DropIndexPlan that = (DropIndexPlan) o;
+        return Objects.equals(paths, that.paths) && Objects.equals(indexType, that.indexType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paths, indexType);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("paths: %s, index type: %s", paths, indexType);
+    }
 }

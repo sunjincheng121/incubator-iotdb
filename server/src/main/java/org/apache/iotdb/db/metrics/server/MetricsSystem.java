@@ -28,54 +28,53 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class MetricsSystem {
 
-  private ArrayList<Sink> sinks;
-  private ArrayList<Source> sources;
-  private MetricRegistry metricRegistry;
-  private ServerArgument serverArgument;
+    private ArrayList<Sink> sinks;
+    private ArrayList<Source> sources;
+    private MetricRegistry metricRegistry;
+    private ServerArgument serverArgument;
 
-  public MetricsSystem(ServerArgument serverArgument) {
-    this.sinks = new ArrayList<>();
-    this.sources = new ArrayList<>();
-    this.metricRegistry = new MetricRegistry();
-    this.serverArgument = serverArgument;
-  }
+    public MetricsSystem(ServerArgument serverArgument) {
+        this.sinks = new ArrayList<>();
+        this.sources = new ArrayList<>();
+        this.metricRegistry = new MetricRegistry();
+        this.serverArgument = serverArgument;
+    }
 
-  public ServerArgument getServerArgument() {
-    return serverArgument;
-  }
+    public ServerArgument getServerArgument() {
+        return serverArgument;
+    }
 
-  public void setServerArgument(ServerArgument serverArgument) {
-    this.serverArgument = serverArgument;
-  }
+    public void setServerArgument(ServerArgument serverArgument) {
+        this.serverArgument = serverArgument;
+    }
 
-  public MetricRegistry getMetricRegistry() {
-    return metricRegistry;
-  }
+    public MetricRegistry getMetricRegistry() {
+        return metricRegistry;
+    }
 
-  public ServletContextHandler getServletHandlers() {
-    return new MetricsServletSink(metricRegistry).getHandler();
-  }
+    public ServletContextHandler getServletHandlers() {
+        return new MetricsServletSink(metricRegistry).getHandler();
+    }
 
-  public void start() {
-    registerSource();
-    registerSinks();
-    sinks.forEach(Sink::start);
-  }
+    public void start() {
+        registerSource();
+        registerSinks();
+        sinks.forEach(Sink::start);
+    }
 
-  public void stop() {
-    sinks.forEach(Sink::stop);
-  }
+    public void stop() {
+        sinks.forEach(Sink::stop);
+    }
 
-  public void report() {
-    sinks.forEach(Sink::report);
-  }
+    public void report() {
+        sinks.forEach(Sink::report);
+    }
 
-  public void registerSource() {
-    MetricsSource source = new MetricsSource(serverArgument, metricRegistry);
-    source.registerInfo();
-    sources.add(source);
-  }
+    public void registerSource() {
+        MetricsSource source = new MetricsSource(serverArgument, metricRegistry);
+        source.registerInfo();
+        sources.add(source);
+    }
 
-  public void registerSinks() {}
-
+    public void registerSinks() {}
 }

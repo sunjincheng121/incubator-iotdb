@@ -33,46 +33,47 @@ import org.apache.thrift.async.AsyncMethodCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * PullSnapshotHandler receives the result of pulling a data partition from a node.
- */
-public class PullSnapshotHandler<T extends Snapshot> implements AsyncMethodCallback<PullSnapshotResp> {
+/** PullSnapshotHandler receives the result of pulling a data partition from a node. */
+public class PullSnapshotHandler<T extends Snapshot>
+        implements AsyncMethodCallback<PullSnapshotResp> {
 
-  private static final Logger logger = LoggerFactory.getLogger(PullSnapshotHandler.class);
-  private AtomicReference<Map<Integer, T>> resultRef;
-  private Node node;
-  private List<Integer> slot;
-  private SnapshotFactory<T> factory;
+    private static final Logger logger = LoggerFactory.getLogger(PullSnapshotHandler.class);
+    private AtomicReference<Map<Integer, T>> resultRef;
+    private Node node;
+    private List<Integer> slot;
+    private SnapshotFactory<T> factory;
 
-  public PullSnapshotHandler(AtomicReference<Map<Integer, T>> resultRef,
-      Node owner, List<Integer> slots, SnapshotFactory<T> factory) {
-    this.resultRef = resultRef;
-    this.node = owner;
-    this.slot = slots;
-    this.factory = factory;
-  }
-
-  @Override
-  public void onComplete(PullSnapshotResp response) {
-    synchronized (resultRef) {
-      Map<Integer, T> ret = new HashMap<>();
-      Map<Integer, ByteBuffer> snapshotBytes = response.snapshotBytes;
-      for (Entry<Integer, ByteBuffer> entry : snapshotBytes.entrySet()) {
-        T snapshot = factory.create();
-        snapshot.deserialize(entry.getValue());
-        ret.put(entry.getKey(), snapshot);
-      }
-      resultRef.set(ret);
-      resultRef.notifyAll();
+    public PullSnapshotHandler(
+            AtomicReference<Map<Integer, T>> resultRef,
+            Node owner,
+            List<Integer> slots,
+            SnapshotFactory<T> factory) {
+        this.resultRef = resultRef;
+        this.node = owner;
+        this.slot = slots;
+        this.factory = factory;
     }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    logger.error("Cannot pull snapshot of {} from {}", slot.size(), node, exception);
-    synchronized (resultRef) {
-      resultRef.notifyAll();
+    @Override
+    public void onComplete(PullSnapshotResp response) {
+        synchronized (resultRef) {
+            Map<Integer, T> ret = new HashMap<>();
+            Map<Integer, ByteBuffer> snapshotBytes = response.snapshotBytes;
+            for (Entry<Integer, ByteBuffer> entry : snapshotBytes.entrySet()) {
+                T snapshot = factory.create();
+                snapshot.deserialize(entry.getValue());
+                ret.put(entry.getKey(), snapshot);
+            }
+            resultRef.set(ret);
+            resultRef.notifyAll();
+        }
     }
-  }
 
+    @Override
+    public void onError(Exception exception) {
+        logger.error("Cannot pull snapshot of {} from {}", slot.size(), node, exception);
+        synchronized (resultRef) {
+            resultRef.notifyAll();
+        }
+    }
 }

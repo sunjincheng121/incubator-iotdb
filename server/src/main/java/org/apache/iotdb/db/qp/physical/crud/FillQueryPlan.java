@@ -25,27 +25,27 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 
 public class FillQueryPlan extends RawDataQueryPlan {
 
-  private long queryTime;
-  private Map<TSDataType, IFill> fillType;
+    private long queryTime;
+    private Map<TSDataType, IFill> fillType;
 
-  public FillQueryPlan() {
-    super();
-    setOperatorType(Operator.OperatorType.FILL);
-  }
+    public FillQueryPlan() {
+        super();
+        setOperatorType(Operator.OperatorType.FILL);
+    }
 
-  public long getQueryTime() {
-    return queryTime;
-  }
+    public long getQueryTime() {
+        return queryTime;
+    }
 
-  public void setQueryTime(long queryTime) {
-    this.queryTime = queryTime;
-  }
+    public void setQueryTime(long queryTime) {
+        this.queryTime = queryTime;
+    }
 
-  public Map<TSDataType, IFill> getFillType() {
-    return fillType;
-  }
+    public Map<TSDataType, IFill> getFillType() {
+        return fillType;
+    }
 
-  public void setFillType(Map<TSDataType, IFill> fillType) {
-    this.fillType = fillType;
-  }
+    public void setFillType(Map<TSDataType, IFill> fillType) {
+        this.fillType = fillType;
+    }
 }

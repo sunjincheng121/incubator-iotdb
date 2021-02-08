@@ -34,29 +34,29 @@ import org.junit.Test;
 
 public class PullSnapshotTaskDescriptorTest {
 
-  @Test
-  public void testSerialize() throws IOException {
-    PartitionGroup group = new PartitionGroup();
-    List<Integer> slots = new ArrayList<>();
-    for (int i = 0; i < 10; i++) {
-      group.add(TestUtils.getNode(i));
-      slots.add(i);
-    }
+    @Test
+    public void testSerialize() throws IOException {
+        PartitionGroup group = new PartitionGroup();
+        List<Integer> slots = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            group.add(TestUtils.getNode(i));
+            slots.add(i);
+        }
 
-    PullSnapshotTaskDescriptor descriptor = new PullSnapshotTaskDescriptor(group, slots, true);
+        PullSnapshotTaskDescriptor descriptor = new PullSnapshotTaskDescriptor(group, slots, true);
 
-    byte[] bytes;
-    try (ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
-        DataOutputStream dataOutputStream = new DataOutputStream(arrayOutputStream)) {
-      descriptor.serialize(dataOutputStream);
-      bytes = arrayOutputStream.toByteArray();
-    }
+        byte[] bytes;
+        try (ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+                DataOutputStream dataOutputStream = new DataOutputStream(arrayOutputStream)) {
+            descriptor.serialize(dataOutputStream);
+            bytes = arrayOutputStream.toByteArray();
+        }
 
-    try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-        DataInputStream dataInputStream = new DataInputStream(byteArrayInputStream)) {
-      PullSnapshotTaskDescriptor deserialized = new PullSnapshotTaskDescriptor();
-      deserialized.deserialize(dataInputStream);
-      assertEquals(descriptor, deserialized);
+        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+                DataInputStream dataInputStream = new DataInputStream(byteArrayInputStream)) {
+            PullSnapshotTaskDescriptor deserialized = new PullSnapshotTaskDescriptor();
+            deserialized.deserialize(dataInputStream);
+            assertEquals(descriptor, deserialized);
+        }
     }
-  }
 }

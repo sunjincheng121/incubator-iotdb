@@ -22,9 +22,9 @@ import java.sql.SQLException;
 
 public class IoTDBURLException extends SQLException {
 
-  private static final long serialVersionUID = -5071922897222027267L;
+    private static final long serialVersionUID = -5071922897222027267L;
 
-  public IoTDBURLException(String reason) {
-    super(reason);
-  }
+    public IoTDBURLException(String reason) {
+        super(reason);
+    }
 }

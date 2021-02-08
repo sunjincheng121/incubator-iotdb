@@ -35,119 +35,118 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class IoTDBRpcCompressionIT {
-  boolean rpcThriftCompression = IoTDBDescriptor.getInstance().getConfig().isRpcThriftCompressionEnable();
-  boolean rpcAdvancedCompression = IoTDBDescriptor.getInstance().getConfig().isRpcAdvancedCompressionEnable();
-  @Before
-  public void setUp() throws Exception {
-    EnvironmentUtils.closeStatMonitor();
+    boolean rpcThriftCompression =
+            IoTDBDescriptor.getInstance().getConfig().isRpcThriftCompressionEnable();
+    boolean rpcAdvancedCompression =
+            IoTDBDescriptor.getInstance().getConfig().isRpcAdvancedCompressionEnable();
 
-    Class.forName(Config.JDBC_DRIVER_NAME);
-  }
+    @Before
+    public void setUp() throws Exception {
+        EnvironmentUtils.closeStatMonitor();
 
-  @After
-  public void tearDown() throws Exception {
-    EnvironmentUtils.cleanEnv();
-    IoTDBDescriptor.getInstance().getConfig().setRpcThriftCompressionEnable(rpcThriftCompression);
-    IoTDBDescriptor.getInstance().getConfig().setRpcAdvancedCompressionEnable(rpcAdvancedCompression);
-  }
-
-  @Test
-  public void testNoRpcCompression()
-      throws SQLException, InterruptedException {
-    EnvironmentUtils.envSetUp();
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
-            "root");
-        Statement statement = connection.createStatement()
-    ){
-      doSomething(statement);
+        Class.forName(Config.JDBC_DRIVER_NAME);
     }
-  }
 
-  @Test
-  public void testRpcThriftCompression()
-      throws SQLException, InterruptedException {
-    IoTDBDescriptor.getInstance().getConfig().setRpcThriftCompressionEnable(true);
-    EnvironmentUtils.envSetUp();
-    //let JDBC use thrift rpc compression
-    Config.rpcThriftCompressionEnable = true;
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
-            "root");
-        Statement statement = connection.createStatement()
-    ){
-      doSomething(statement);
-    } finally {
-      Config.rpcThriftCompressionEnable = false;
+    @After
+    public void tearDown() throws Exception {
+        EnvironmentUtils.cleanEnv();
+        IoTDBDescriptor.getInstance()
+                .getConfig()
+                .setRpcThriftCompressionEnable(rpcThriftCompression);
+        IoTDBDescriptor.getInstance()
+                .getConfig()
+                .setRpcAdvancedCompressionEnable(rpcAdvancedCompression);
     }
-  }
 
-  @Test
-  public void testRpcAdvancedCompression()
-      throws SQLException, InterruptedException {
-    IoTDBDescriptor.getInstance().getConfig().setRpcAdvancedCompressionEnable(true);
-    EnvironmentUtils.envSetUp();
-    //let JDBC use thrift advanced compression
-    RpcTransportFactory.setUseSnappy(true);
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
-            "root");
-        Statement statement = connection.createStatement()
-    ){
-      doSomething(statement);
-    }
-  }
-
-  @Test
-  public void testBothRpcCompression()
-      throws SQLException, InterruptedException {
-    IoTDBDescriptor.getInstance().getConfig().setRpcThriftCompressionEnable(true);
-    IoTDBDescriptor.getInstance().getConfig().setRpcThriftCompressionEnable(true);
-    EnvironmentUtils.envSetUp();
-    //let JDBC use thrift rpc compression
-    Config.rpcThriftCompressionEnable = true;
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
-            "root");
-        Statement statement = connection.createStatement()
-    ){
-      doSomething(statement);
-    } finally {
-      Config.rpcThriftCompressionEnable = false;
-    }
-  }
-
-  private void doSomething(Statement statement) throws SQLException, InterruptedException {
-
-      statement.execute("set storage group to root.demo");
-      statement.execute("create timeseries root.demo.d1.s1 with datatype=INT64,encoding=RLE");
-      statement.execute("create timeseries root.demo.d1.s2 with datatype=INT64,encoding=RLE");
-      statement.execute("create timeseries root.demo.d1.s3 with datatype=INT64,encoding=RLE");
-      statement.execute("insert into root.demo.d1(time,s1,s2) values(1,1,2)");
-      statement.execute("flush");
-      statement.execute("insert into root.demo.d1(time,s3) values(1,1)");
-      statement.execute("flush");
-      try (ResultSet set = statement.executeQuery("SELECT * FROM root")) {
-        int cnt = 0;
-        while (set.next()) {
-          cnt++;
-          assertEquals(1, set.getLong("root.demo.d1.s3"));
+    @Test
+    public void testNoRpcCompression() throws SQLException, InterruptedException {
+        EnvironmentUtils.envSetUp();
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            doSomething(statement);
         }
-        assertEquals(1, cnt);
-      }
-      statement.execute("merge");
-      Thread.sleep(1000);
-      // before merge completes
-      try (ResultSet set = statement.executeQuery("SELECT * FROM root")) {
-        int cnt = 0;
-        while (set.next()) {
-          cnt++;
-          assertEquals(1, set.getLong("root.demo.d1.s3"));
-        }
-        assertEquals(1, cnt);
-      }
+    }
 
-      // after merge completes
-      statement.execute("DELETE FROM root.demo.d1");
-  }
+    @Test
+    public void testRpcThriftCompression() throws SQLException, InterruptedException {
+        IoTDBDescriptor.getInstance().getConfig().setRpcThriftCompressionEnable(true);
+        EnvironmentUtils.envSetUp();
+        // let JDBC use thrift rpc compression
+        Config.rpcThriftCompressionEnable = true;
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            doSomething(statement);
+        } finally {
+            Config.rpcThriftCompressionEnable = false;
+        }
+    }
+
+    @Test
+    public void testRpcAdvancedCompression() throws SQLException, InterruptedException {
+        IoTDBDescriptor.getInstance().getConfig().setRpcAdvancedCompressionEnable(true);
+        EnvironmentUtils.envSetUp();
+        // let JDBC use thrift advanced compression
+        RpcTransportFactory.setUseSnappy(true);
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            doSomething(statement);
+        }
+    }
+
+    @Test
+    public void testBothRpcCompression() throws SQLException, InterruptedException {
+        IoTDBDescriptor.getInstance().getConfig().setRpcThriftCompressionEnable(true);
+        IoTDBDescriptor.getInstance().getConfig().setRpcThriftCompressionEnable(true);
+        EnvironmentUtils.envSetUp();
+        // let JDBC use thrift rpc compression
+        Config.rpcThriftCompressionEnable = true;
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            doSomething(statement);
+        } finally {
+            Config.rpcThriftCompressionEnable = false;
+        }
+    }
+
+    private void doSomething(Statement statement) throws SQLException, InterruptedException {
+
+        statement.execute("set storage group to root.demo");
+        statement.execute("create timeseries root.demo.d1.s1 with datatype=INT64,encoding=RLE");
+        statement.execute("create timeseries root.demo.d1.s2 with datatype=INT64,encoding=RLE");
+        statement.execute("create timeseries root.demo.d1.s3 with datatype=INT64,encoding=RLE");
+        statement.execute("insert into root.demo.d1(time,s1,s2) values(1,1,2)");
+        statement.execute("flush");
+        statement.execute("insert into root.demo.d1(time,s3) values(1,1)");
+        statement.execute("flush");
+        try (ResultSet set = statement.executeQuery("SELECT * FROM root")) {
+            int cnt = 0;
+            while (set.next()) {
+                cnt++;
+                assertEquals(1, set.getLong("root.demo.d1.s3"));
+            }
+            assertEquals(1, cnt);
+        }
+        statement.execute("merge");
+        Thread.sleep(1000);
+        // before merge completes
+        try (ResultSet set = statement.executeQuery("SELECT * FROM root")) {
+            int cnt = 0;
+            while (set.next()) {
+                cnt++;
+                assertEquals(1, set.getLong("root.demo.d1.s3"));
+            }
+            assertEquals(1, cnt);
+        }
+
+        // after merge completes
+        statement.execute("DELETE FROM root.demo.d1");
+    }
 }

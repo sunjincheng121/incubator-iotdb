@@ -29,56 +29,57 @@ import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import org.apache.iotdb.db.qp.physical.crud.DeletePlan;
-import org.apache.iotdb.tsfile.read.common.Path;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class MultiFileLogReaderTest {
 
-  private File[] logFiles;
-  private PhysicalPlan[][] fileLogs;
-  private int logsPerFile = 5;
-  private int fileNum = 3;
+    private File[] logFiles;
+    private PhysicalPlan[][] fileLogs;
+    private int logsPerFile = 5;
+    private int fileNum = 3;
 
-  @Before
-  public void setup() throws IOException, IllegalPathException {
-    logFiles = new File[fileNum];
-    fileLogs = new PhysicalPlan[fileNum][logsPerFile];
-    for (int i = 0; i < fileNum; i++) {
-      logFiles[i] = new File(i + ".log");
-      for (int j = 0; j < logsPerFile; j++) {
-        fileLogs[i][j] = new DeletePlan(Long.MIN_VALUE, i * logsPerFile + j, new PartialPath("path" + j));
-      }
+    @Before
+    public void setup() throws IOException, IllegalPathException {
+        logFiles = new File[fileNum];
+        fileLogs = new PhysicalPlan[fileNum][logsPerFile];
+        for (int i = 0; i < fileNum; i++) {
+            logFiles[i] = new File(i + ".log");
+            for (int j = 0; j < logsPerFile; j++) {
+                fileLogs[i][j] =
+                        new DeletePlan(
+                                Long.MIN_VALUE, i * logsPerFile + j, new PartialPath("path" + j));
+            }
 
-      ByteBuffer buffer = ByteBuffer.allocate(64*1024);
-      for (PhysicalPlan plan : fileLogs[i]) {
-        plan.serialize(buffer);
-      }
-      ILogWriter writer = new LogWriter(logFiles[i]);
-      writer.write(buffer);
-      writer.force();
-      writer.close();
+            ByteBuffer buffer = ByteBuffer.allocate(64 * 1024);
+            for (PhysicalPlan plan : fileLogs[i]) {
+                plan.serialize(buffer);
+            }
+            ILogWriter writer = new LogWriter(logFiles[i]);
+            writer.write(buffer);
+            writer.force();
+            writer.close();
+        }
     }
-  }
 
-  @After
-  public void teardown() throws IOException {
-    for (File logFile : logFiles) {
-      FileUtils.forceDelete(logFile);
+    @After
+    public void teardown() throws IOException {
+        for (File logFile : logFiles) {
+            FileUtils.forceDelete(logFile);
+        }
     }
-  }
 
-  @Test
-  public void test() throws IOException {
-    MultiFileLogReader reader = new MultiFileLogReader(logFiles);
-    int i = 0;
-    while (reader.hasNext()) {
-      PhysicalPlan plan = reader.next();
-      assertEquals(fileLogs[i/logsPerFile][i%logsPerFile], plan);
-      i ++;
+    @Test
+    public void test() throws IOException {
+        MultiFileLogReader reader = new MultiFileLogReader(logFiles);
+        int i = 0;
+        while (reader.hasNext()) {
+            PhysicalPlan plan = reader.next();
+            assertEquals(fileLogs[i / logsPerFile][i % logsPerFile], plan);
+            i++;
+        }
+        reader.close();
+        assertEquals(fileNum * logsPerFile, i);
     }
-    reader.close();
-    assertEquals(fileNum * logsPerFile, i);
-  }
 }

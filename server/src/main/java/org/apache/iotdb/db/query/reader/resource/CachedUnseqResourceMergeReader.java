@@ -29,13 +29,13 @@ import org.apache.iotdb.tsfile.read.reader.chunk.ChunkReader;
 
 public class CachedUnseqResourceMergeReader extends CachedPriorityMergeReader {
 
-  public CachedUnseqResourceMergeReader(List<Chunk> chunks, TSDataType dataType)
-      throws IOException {
-    super(dataType);
-    int priorityValue = 1;
-    for (Chunk chunk : chunks) {
-      ChunkReader chunkReader = new ChunkReader(chunk, null);
-      addReader(new ChunkDataIterator(chunkReader), priorityValue++);
+    public CachedUnseqResourceMergeReader(List<Chunk> chunks, TSDataType dataType)
+            throws IOException {
+        super(dataType);
+        int priorityValue = 1;
+        for (Chunk chunk : chunks) {
+            ChunkReader chunkReader = new ChunkReader(chunk, null);
+            addReader(new ChunkDataIterator(chunkReader), priorityValue++);
+        }
     }
-  }
 }

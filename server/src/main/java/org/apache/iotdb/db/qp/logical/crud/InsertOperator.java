@@ -18,42 +18,39 @@
  */
 package org.apache.iotdb.db.qp.logical.crud;
 
-/**
- * this class extends {@code RootOperator} and process insert statement.
- */
+/** this class extends {@code RootOperator} and process insert statement. */
 public class InsertOperator extends SFWOperator {
 
-  private long time;
-  private String[] measurementList;
-  private String[] valueList;
+    private long time;
+    private String[] measurementList;
+    private String[] valueList;
 
-  public InsertOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.INSERT;
-  }
+    public InsertOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.INSERT;
+    }
 
-  public String[] getMeasurementList() {
-    return measurementList;
-  }
+    public String[] getMeasurementList() {
+        return measurementList;
+    }
 
-  public void setMeasurementList(String[] measurementList) {
-    this.measurementList = measurementList;
-  }
+    public void setMeasurementList(String[] measurementList) {
+        this.measurementList = measurementList;
+    }
 
-  public String[] getValueList() {
-    return valueList;
-  }
+    public String[] getValueList() {
+        return valueList;
+    }
 
-  public void setValueList(String[] insertValue) {
-    this.valueList = insertValue;
-  }
+    public void setValueList(String[] insertValue) {
+        this.valueList = insertValue;
+    }
 
-  public long getTime() {
-    return time;
-  }
+    public long getTime() {
+        return time;
+    }
 
-  public void setTime(long time) {
-    this.time = time;
-  }
-
+    public void setTime(long time) {
+        this.time = time;
+    }
 }

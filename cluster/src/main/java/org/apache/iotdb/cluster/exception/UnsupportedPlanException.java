@@ -23,7 +23,7 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class UnsupportedPlanException extends Exception {
 
-  public UnsupportedPlanException(PhysicalPlan plan) {
-    super(String.format("Plan %s is not supported", plan));
-  }
+    public UnsupportedPlanException(PhysicalPlan plan) {
+        super(String.format("Plan %s is not supported", plan));
+    }
 }

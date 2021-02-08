@@ -20,66 +20,62 @@ package org.apache.iotdb.db.sync.conf;
 
 public class SyncConstant {
 
-  private SyncConstant() {
-  }
+    private SyncConstant() {}
 
-  public static final String CONFIG_NAME = "iotdb-sync-client.properties";
+    public static final String CONFIG_NAME = "iotdb-sync-client.properties";
 
-  public static final String SYNC_NAME = "sync";
+    public static final String SYNC_NAME = "sync";
 
-  public static final String SYNC_SENDER = "sync-sender";
+    public static final String SYNC_SENDER = "sync-sender";
 
-  public static final String SYNC_RECEIVER = "sync-receiver";
+    public static final String SYNC_RECEIVER = "sync-receiver";
 
-  public static final String MESSAGE_DIGIT_NAME = "SHA-256";
+    public static final String MESSAGE_DIGIT_NAME = "SHA-256";
 
-  public static final String SYNC_DIR_NAME_SEPARATOR = "_";
+    public static final String SYNC_DIR_NAME_SEPARATOR = "_";
 
-  /**
-   * Split data file, block size at each transmission
-   **/
-  public static final int DATA_CHUNK_SIZE = 64 * 1024 * 1024;
+    /** Split data file, block size at each transmission */
+    public static final int DATA_CHUNK_SIZE = 64 * 1024 * 1024;
 
-  // sender section
+    // sender section
 
-  public static final String LOCK_FILE_NAME = "sync_lock";
+    public static final String LOCK_FILE_NAME = "sync_lock";
 
-  public static final String UUID_FILE_NAME = "uuid.txt";
+    public static final String UUID_FILE_NAME = "uuid.txt";
 
-  public static final String SCHEMA_POS_FILE_NAME = "sync_schema_pos";
+    public static final String SCHEMA_POS_FILE_NAME = "sync_schema_pos";
 
-  public static final String LAST_LOCAL_FILE_NAME = "last_local_files.txt";
+    public static final String LAST_LOCAL_FILE_NAME = "last_local_files.txt";
 
-  public static final String CURRENT_LOCAL_FILE_NAME = "current_local_files.txt";
+    public static final String CURRENT_LOCAL_FILE_NAME = "current_local_files.txt";
 
-  public static final String DATA_SNAPSHOT_NAME = "snapshot";
+    public static final String DATA_SNAPSHOT_NAME = "snapshot";
 
-  public static final String SYNC_LOG_NAME = "sync.log";
+    public static final String SYNC_LOG_NAME = "sync.log";
 
-  private static final SyncSenderConfig CONFIG = SyncSenderDescriptor.getInstance().getConfig();
+    private static final SyncSenderConfig CONFIG = SyncSenderDescriptor.getInstance().getConfig();
 
-  public static final long SYNC_PROCESS_DELAY = 0;
+    public static final long SYNC_PROCESS_DELAY = 0;
 
-  public static final long SYNC_MONITOR_DELAY = CONFIG.getSyncPeriodInSecond();
+    public static final long SYNC_MONITOR_DELAY = CONFIG.getSyncPeriodInSecond();
 
-  public static final long SYNC_PROCESS_PERIOD = CONFIG.getSyncPeriodInSecond();
+    public static final long SYNC_PROCESS_PERIOD = CONFIG.getSyncPeriodInSecond();
 
-  public static final long SYNC_MONITOR_PERIOD = CONFIG.getSyncPeriodInSecond();
+    public static final long SYNC_MONITOR_PERIOD = CONFIG.getSyncPeriodInSecond();
 
-  // receiver section
+    // receiver section
 
-  public static final String RECEIVER_DATA_FOLDER_NAME = "data";
+    public static final String RECEIVER_DATA_FOLDER_NAME = "data";
 
-  public static final String LOAD_LOG_NAME = "load.log";
+    public static final String LOAD_LOG_NAME = "load.log";
 
-  public static final String DEVICE_OWNER_FILE_NAME = "device_owner";
+    public static final String DEVICE_OWNER_FILE_NAME = "device_owner";
 
-  public static final String DEVICE_OWNER_TMP_FILE_NAME = "device_owner.tmp";
+    public static final String DEVICE_OWNER_TMP_FILE_NAME = "device_owner.tmp";
 
-  public static final int SUCCESS_CODE = 1;
+    public static final int SUCCESS_CODE = 1;
 
-  public static final int ERROR_CODE = -1;
+    public static final int ERROR_CODE = -1;
 
-  public static final int CONFLICT_CODE = -2;
-
+    public static final int CONFLICT_CODE = -2;
 }

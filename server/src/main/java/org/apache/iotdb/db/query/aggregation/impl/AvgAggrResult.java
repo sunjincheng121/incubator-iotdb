@@ -33,137 +33,142 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class AvgAggrResult extends AggregateResult {
 
-  private TSDataType seriesDataType;
-  private double avg = 0.0;
-  private long cnt = 0;
+    private TSDataType seriesDataType;
+    private double avg = 0.0;
+    private long cnt = 0;
 
-  public AvgAggrResult(TSDataType seriesDataType) {
-    super(TSDataType.DOUBLE, AggregationType.AVG);
-    this.seriesDataType = seriesDataType;
-    reset();
-    avg = 0.0;
-    cnt = 0;
-  }
-
-  @Override
-  protected boolean hasCandidateResult() {
-    return cnt > 0;
-  }
-
-  @Override
-  public Double getResult() {
-    if (cnt > 0) {
-      setDoubleValue(avg);
+    public AvgAggrResult(TSDataType seriesDataType) {
+        super(TSDataType.DOUBLE, AggregationType.AVG);
+        this.seriesDataType = seriesDataType;
+        reset();
+        avg = 0.0;
+        cnt = 0;
     }
-    return hasCandidateResult() ? getDoubleValue() : null;
-  }
 
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    long preCnt = cnt;
-    if (statistics.getType().equals(TSDataType.BOOLEAN)) {
-      throw new StatisticsClassException("Boolean statistics does not support: avg");
+    @Override
+    protected boolean hasCandidateResult() {
+        return cnt > 0;
     }
-    if (statistics.getType().equals(TSDataType.TEXT)) {
-      throw new StatisticsClassException("Binary statistics does not support: avg");
+
+    @Override
+    public Double getResult() {
+        if (cnt > 0) {
+            setDoubleValue(avg);
+        }
+        return hasCandidateResult() ? getDoubleValue() : null;
     }
-    cnt += statistics.getCount();
-    avg = avg * ((double) preCnt / cnt) + ((double) statistics.getCount() / cnt)
-        * statistics.getSumValue() / statistics.getCount();
-  }
 
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage) throws IOException {
-    updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound)
-      throws IOException {
-    while (dataInThisPage.hasCurrent()) {
-      if (dataInThisPage.currentTime() >= maxBound || dataInThisPage.currentTime() < minBound) {
-        break;
-      }
-      updateAvg(seriesDataType, dataInThisPage.currentValue());
-      dataInThisPage.next();
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        long preCnt = cnt;
+        if (statistics.getType().equals(TSDataType.BOOLEAN)) {
+            throw new StatisticsClassException("Boolean statistics does not support: avg");
+        }
+        if (statistics.getType().equals(TSDataType.TEXT)) {
+            throw new StatisticsClassException("Binary statistics does not support: avg");
+        }
+        cnt += statistics.getCount();
+        avg =
+                avg * ((double) preCnt / cnt)
+                        + ((double) statistics.getCount() / cnt)
+                                * statistics.getSumValue()
+                                / statistics.getCount();
     }
-  }
 
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value != null) {
-        updateAvg(seriesDataType, value);
-      }
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage) throws IOException {
+        updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
     }
-  }
 
-  private void updateAvg(TSDataType type, Object sumVal) throws IOException {
-    double val;
-    switch (type) {
-      case INT32:
-        val = (int) sumVal;
-        break;
-      case INT64:
-        val = (long) sumVal;
-        break;
-      case FLOAT:
-        val = (float) sumVal;
-        break;
-      case DOUBLE:
-        val = (double) sumVal;
-        break;
-      case TEXT:
-      case BOOLEAN:
-      default:
-        throw new IOException(
-            String.format("Unsupported data type in aggregation AVG : %s", type));
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound)
+            throws IOException {
+        while (dataInThisPage.hasCurrent()) {
+            if (dataInThisPage.currentTime() >= maxBound
+                    || dataInThisPage.currentTime() < minBound) {
+                break;
+            }
+            updateAvg(seriesDataType, dataInThisPage.currentValue());
+            dataInThisPage.next();
+        }
     }
-    avg = avg * ((double) cnt / (cnt + 1)) + val * (1.0 / (cnt + 1));
-    cnt++;
-  }
 
-  @Override
-  public boolean hasFinalResult() {
-    return false;
-  }
-
-  @Override
-  public void merge(AggregateResult another) {
-    AvgAggrResult anotherAvg = (AvgAggrResult) another;
-    if (anotherAvg.cnt == 0) {
-      // avoid two empty results producing an NaN
-      return;
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value != null) {
+                updateAvg(seriesDataType, value);
+            }
+        }
     }
-    avg = avg * ((double) cnt / (cnt + anotherAvg.cnt)) +
-        anotherAvg.avg * ((double) anotherAvg.cnt / (cnt + anotherAvg.cnt));
-    cnt += anotherAvg.cnt;
-  }
 
-  @Override
-  protected void deserializeSpecificFields(ByteBuffer buffer) {
-    this.seriesDataType = TSDataType.deserialize(buffer.getShort());
-    this.avg = buffer.getDouble();
-    this.cnt = buffer.getLong();
-  }
+    private void updateAvg(TSDataType type, Object sumVal) throws IOException {
+        double val;
+        switch (type) {
+            case INT32:
+                val = (int) sumVal;
+                break;
+            case INT64:
+                val = (long) sumVal;
+                break;
+            case FLOAT:
+                val = (float) sumVal;
+                break;
+            case DOUBLE:
+                val = (double) sumVal;
+                break;
+            case TEXT:
+            case BOOLEAN:
+            default:
+                throw new IOException(
+                        String.format("Unsupported data type in aggregation AVG : %s", type));
+        }
+        avg = avg * ((double) cnt / (cnt + 1)) + val * (1.0 / (cnt + 1));
+        cnt++;
+    }
 
-  @Override
-  protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
-    ReadWriteIOUtils.write(seriesDataType, outputStream);
-    ReadWriteIOUtils.write(avg, outputStream);
-    ReadWriteIOUtils.write(cnt, outputStream);
-  }
+    @Override
+    public boolean hasFinalResult() {
+        return false;
+    }
 
-  public long getCnt() {
-    return cnt;
-  }
+    @Override
+    public void merge(AggregateResult another) {
+        AvgAggrResult anotherAvg = (AvgAggrResult) another;
+        if (anotherAvg.cnt == 0) {
+            // avoid two empty results producing an NaN
+            return;
+        }
+        avg =
+                avg * ((double) cnt / (cnt + anotherAvg.cnt))
+                        + anotherAvg.avg * ((double) anotherAvg.cnt / (cnt + anotherAvg.cnt));
+        cnt += anotherAvg.cnt;
+    }
 
-  @Override
-  public void reset() {
-    super.reset();
-    cnt = 0;
-    avg = 0;
-  }
+    @Override
+    protected void deserializeSpecificFields(ByteBuffer buffer) {
+        this.seriesDataType = TSDataType.deserialize(buffer.getShort());
+        this.avg = buffer.getDouble();
+        this.cnt = buffer.getLong();
+    }
+
+    @Override
+    protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
+        ReadWriteIOUtils.write(seriesDataType, outputStream);
+        ReadWriteIOUtils.write(avg, outputStream);
+        ReadWriteIOUtils.write(cnt, outputStream);
+    }
+
+    public long getCnt() {
+        return cnt;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        cnt = 0;
+        avg = 0;
+    }
 }

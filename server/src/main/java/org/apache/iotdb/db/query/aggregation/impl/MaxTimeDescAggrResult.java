@@ -25,53 +25,53 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public class MaxTimeDescAggrResult extends MaxTimeAggrResult {
 
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    if (hasFinalResult()) {
-      return;
-    }
-    super.updateResultFromStatistics(statistics);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
-    if (hasFinalResult()) {
-      return;
-    }
-    if (dataInThisPage.hasCurrent()
-        && dataInThisPage.currentTime() < maxBound
-        && dataInThisPage.currentTime() >= minBound) {
-      updateMaxTimeResult(dataInThisPage.currentTime());
-    }
-  }
-
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    if (hasFinalResult()) {
-      return;
-    }
-    long time = -1;
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value != null) {
-        time = timestamps[i];
-        break;
-      }
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        if (hasFinalResult()) {
+            return;
+        }
+        super.updateResultFromStatistics(statistics);
     }
 
-    if (time != -1) {
-      updateMaxTimeResult(time);
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
+        if (hasFinalResult()) {
+            return;
+        }
+        if (dataInThisPage.hasCurrent()
+                && dataInThisPage.currentTime() < maxBound
+                && dataInThisPage.currentTime() >= minBound) {
+            updateMaxTimeResult(dataInThisPage.currentTime());
+        }
     }
-  }
 
-  @Override
-  public boolean hasFinalResult() {
-    return hasCandidateResult;
-  }
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        if (hasFinalResult()) {
+            return;
+        }
+        long time = -1;
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value != null) {
+                time = timestamps[i];
+                break;
+            }
+        }
 
-  @Override
-  public boolean isAscending() {
-    return false;
-  }
+        if (time != -1) {
+            updateMaxTimeResult(time);
+        }
+    }
+
+    @Override
+    public boolean hasFinalResult() {
+        return hasCandidateResult;
+    }
+
+    @Override
+    public boolean isAscending() {
+        return false;
+    }
 }

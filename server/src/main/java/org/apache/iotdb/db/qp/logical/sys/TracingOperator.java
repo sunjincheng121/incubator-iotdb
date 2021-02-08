@@ -22,15 +22,15 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class TracingOperator extends RootOperator {
 
-  private boolean isTracingon;
+    private boolean isTracingon;
 
-  public TracingOperator(int tokenIntType, boolean isTracingon) {
-    super(tokenIntType);
-    this.isTracingon = isTracingon;
-    operatorType = OperatorType.TRACING;
-  }
+    public TracingOperator(int tokenIntType, boolean isTracingon) {
+        super(tokenIntType);
+        this.isTracingon = isTracingon;
+        operatorType = OperatorType.TRACING;
+    }
 
-  public boolean isTracingon() {
-    return isTracingon;
-  }
+    public boolean isTracingon() {
+        return isTracingon;
+    }
 }

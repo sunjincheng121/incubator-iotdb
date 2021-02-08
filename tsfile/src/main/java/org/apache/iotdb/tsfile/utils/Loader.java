@@ -25,37 +25,33 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Loader {
-  private Loader() {
-  }
+    private Loader() {}
 
-  /**
-   * function for getting resources.
-   */
-  public static Set<URL> getResources(String resource, ClassLoader classLoader) throws IOException {
-    Set<URL> urlSet = new HashSet<>();
-    Enumeration<URL> urlEnum = classLoader.getResources(resource);
-    while (urlEnum.hasMoreElements()) {
-      urlSet.add(urlEnum.nextElement());
+    /** function for getting resources. */
+    public static Set<URL> getResources(String resource, ClassLoader classLoader)
+            throws IOException {
+        Set<URL> urlSet = new HashSet<>();
+        Enumeration<URL> urlEnum = classLoader.getResources(resource);
+        while (urlEnum.hasMoreElements()) {
+            urlSet.add(urlEnum.nextElement());
+        }
+        return urlSet;
     }
-    return urlSet;
-  }
 
-  public static URL getResource(String resource, ClassLoader classLoader) {
-    return classLoader.getResource(resource);
-  }
-
-  /**
-   * function for getting the class loader of the given object.
-   */
-  public static ClassLoader getClassLoaderOfObject(Object o) {
-    if (o == null) {
-      throw new NullPointerException("Input object cannot be null");
+    public static URL getResource(String resource, ClassLoader classLoader) {
+        return classLoader.getResource(resource);
     }
-    return getClassLoaderOfClass(o.getClass());
-  }
 
-  public static ClassLoader getClassLoaderOfClass(final Class<?> clazz) {
-    ClassLoader classLoader = clazz.getClassLoader();
-    return classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
-  }
+    /** function for getting the class loader of the given object. */
+    public static ClassLoader getClassLoaderOfObject(Object o) {
+        if (o == null) {
+            throw new NullPointerException("Input object cannot be null");
+        }
+        return getClassLoaderOfClass(o.getClass());
+    }
+
+    public static ClassLoader getClassLoaderOfClass(final Class<?> clazz) {
+        ClassLoader classLoader = clazz.getClassLoader();
+        return classLoader == null ? ClassLoader.getSystemClassLoader() : classLoader;
+    }
 }

@@ -23,27 +23,28 @@ import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
 
 public class VersionUtils {
 
-  private VersionUtils() {
-    throw new IllegalStateException("Utility class");
-  }
-
-  public static void applyVersion(List<ChunkMetadata> chunkMetadataList, List<Pair<Long, Long>> versionInfo) {
-    if (versionInfo == null || versionInfo.isEmpty()) {
-      return;
+    private VersionUtils() {
+        throw new IllegalStateException("Utility class");
     }
-    int versionIndex = 0;
-    for (ChunkMetadata chunkMetadata : chunkMetadataList) {
 
-      while (chunkMetadata.getOffsetOfChunkHeader() >= versionInfo.get(versionIndex).left) {
-        versionIndex++;
-        // When the TsFile is uncompleted,
-        // skip the chunkMetadatas those don't have their version information
-        if (versionIndex >= versionInfo.size()) {
-          return;
+    public static void applyVersion(
+            List<ChunkMetadata> chunkMetadataList, List<Pair<Long, Long>> versionInfo) {
+        if (versionInfo == null || versionInfo.isEmpty()) {
+            return;
         }
-      }
+        int versionIndex = 0;
+        for (ChunkMetadata chunkMetadata : chunkMetadataList) {
 
-      chunkMetadata.setVersion(versionInfo.get(versionIndex).right);
+            while (chunkMetadata.getOffsetOfChunkHeader() >= versionInfo.get(versionIndex).left) {
+                versionIndex++;
+                // When the TsFile is uncompleted,
+                // skip the chunkMetadatas those don't have their version information
+                if (versionIndex >= versionInfo.size()) {
+                    return;
+                }
+            }
+
+            chunkMetadata.setVersion(versionInfo.get(versionIndex).right);
+        }
     }
-  }
 }

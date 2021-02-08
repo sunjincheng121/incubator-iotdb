@@ -33,60 +33,74 @@ import org.slf4j.LoggerFactory;
 
 class HDFSConfUtil {
 
-  private static TSFileConfig tsFileConfig = TSFileDescriptor.getInstance().getConfig();
-  private static final Logger logger = LoggerFactory.getLogger(HDFSConfUtil.class);
+    private static TSFileConfig tsFileConfig = TSFileDescriptor.getInstance().getConfig();
+    private static final Logger logger = LoggerFactory.getLogger(HDFSConfUtil.class);
 
-  static Configuration setConf(Configuration conf) {
-    if (!tsFileConfig.getTSFileStorageFs().equals(FSType.HDFS)) {
-      return conf;
+    static Configuration setConf(Configuration conf) {
+        if (!tsFileConfig.getTSFileStorageFs().equals(FSType.HDFS)) {
+            return conf;
+        }
+        try {
+            conf.addResource(new File(tsFileConfig.getCoreSitePath()).toURI().toURL());
+            conf.addResource(new File(tsFileConfig.getHdfsSitePath()).toURI().toURL());
+        } catch (MalformedURLException e) {
+            logger.error(
+                    "Failed to add resource core-site.xml {} and hdfs-site.xml {}. ",
+                    tsFileConfig.getCoreSitePath(),
+                    tsFileConfig.getHdfsSitePath(),
+                    e);
+        }
+
+        conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
+        conf.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER");
+        conf.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true");
+
+        // HA configuration
+        String[] hdfsIps = tsFileConfig.getHdfsIp();
+        if (hdfsIps.length > 1) {
+            String dfsNameservices = tsFileConfig.getDfsNameServices();
+            String[] dfsHaNamenodes = tsFileConfig.getDfsHaNamenodes();
+            conf.set("dfs.nameservices", dfsNameservices);
+            conf.set("dfs.ha.namenodes." + dfsNameservices, String.join(",", dfsHaNamenodes));
+            for (int i = 0; i < dfsHaNamenodes.length; i++) {
+                conf.set(
+                        "dfs.namenode.rpc-address."
+                                + dfsNameservices
+                                + TsFileConstant.PATH_SEPARATOR
+                                + dfsHaNamenodes[i].trim(),
+                        hdfsIps[i] + ":" + tsFileConfig.getHdfsPort());
+            }
+            boolean dfsHaAutomaticFailoverEnabled = tsFileConfig.isDfsHaAutomaticFailoverEnabled();
+            conf.set(
+                    "dfs.ha.automatic-failover.enabled",
+                    String.valueOf(dfsHaAutomaticFailoverEnabled));
+            if (dfsHaAutomaticFailoverEnabled) {
+                conf.set(
+                        "dfs.client.failover.proxy.provider." + dfsNameservices,
+                        tsFileConfig.getDfsClientFailoverProxyProvider());
+            }
+        }
+
+        // Kerberos configuration
+        if (tsFileConfig.isUseKerberos()) {
+            conf.set("hadoop.security.authorization", "true");
+            conf.set("hadoop.security.authentication", "kerberos");
+            conf.set("dfs.block.access.token.enable", "true");
+
+            UserGroupInformation.setConfiguration(conf);
+            try {
+                UserGroupInformation.loginUserFromKeytab(
+                        tsFileConfig.getKerberosPrincipal(),
+                        tsFileConfig.getKerberosKeytabFilePath());
+            } catch (IOException e) {
+                logger.error(
+                        "Failed to login user from key tab. User: {}, path:{}. ",
+                        tsFileConfig.getKerberosPrincipal(),
+                        tsFileConfig.getKerberosKeytabFilePath(),
+                        e);
+            }
+        }
+
+        return conf;
     }
-    try {
-      conf.addResource(new File(tsFileConfig.getCoreSitePath()).toURI().toURL());
-      conf.addResource(new File(tsFileConfig.getHdfsSitePath()).toURI().toURL());
-    } catch (MalformedURLException e) {
-      logger.error("Failed to add resource core-site.xml {} and hdfs-site.xml {}. ",
-          tsFileConfig.getCoreSitePath(), tsFileConfig.getHdfsSitePath(), e);
-    }
-
-    conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
-    conf.set("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER");
-    conf.set("dfs.client.block.write.replace-datanode-on-failure.enable", "true");
-
-    // HA configuration
-    String[] hdfsIps = tsFileConfig.getHdfsIp();
-    if (hdfsIps.length > 1) {
-      String dfsNameservices = tsFileConfig.getDfsNameServices();
-      String[] dfsHaNamenodes = tsFileConfig.getDfsHaNamenodes();
-      conf.set("dfs.nameservices", dfsNameservices);
-      conf.set("dfs.ha.namenodes." + dfsNameservices, String.join(",", dfsHaNamenodes));
-      for (int i = 0; i < dfsHaNamenodes.length; i++) {
-        conf.set("dfs.namenode.rpc-address." + dfsNameservices + TsFileConstant.PATH_SEPARATOR + dfsHaNamenodes[i].trim(),
-            hdfsIps[i] + ":" + tsFileConfig.getHdfsPort());
-      }
-      boolean dfsHaAutomaticFailoverEnabled = tsFileConfig.isDfsHaAutomaticFailoverEnabled();
-      conf.set("dfs.ha.automatic-failover.enabled", String.valueOf(dfsHaAutomaticFailoverEnabled));
-      if (dfsHaAutomaticFailoverEnabled) {
-        conf.set("dfs.client.failover.proxy.provider." + dfsNameservices,
-            tsFileConfig.getDfsClientFailoverProxyProvider());
-      }
-    }
-
-    // Kerberos configuration
-    if (tsFileConfig.isUseKerberos()) {
-      conf.set("hadoop.security.authorization", "true");
-      conf.set("hadoop.security.authentication", "kerberos");
-      conf.set("dfs.block.access.token.enable", "true");
-
-      UserGroupInformation.setConfiguration(conf);
-      try {
-        UserGroupInformation.loginUserFromKeytab(tsFileConfig.getKerberosPrincipal(),
-            tsFileConfig.getKerberosKeytabFilePath());
-      } catch (IOException e) {
-        logger.error("Failed to login user from key tab. User: {}, path:{}. ",
-            tsFileConfig.getKerberosPrincipal(), tsFileConfig.getKerberosKeytabFilePath(), e);
-      }
-    }
-
-    return conf;
-  }
 }

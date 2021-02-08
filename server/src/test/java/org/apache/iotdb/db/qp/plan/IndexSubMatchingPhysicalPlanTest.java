@@ -49,112 +49,115 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * refer to org.apache.iotdb.db.qp.plan.PhysicalPlanTest
- */
+/** refer to org.apache.iotdb.db.qp.plan.PhysicalPlanTest */
 public class IndexSubMatchingPhysicalPlanTest {
 
-  private Planner processor = new Planner();
+    private Planner processor = new Planner();
 
-  @Before
-  public void before() throws MetadataException {
-    MManager.getInstance().init();
-    MManager.getInstance().setStorageGroup(new PartialPath("root.Wind"));
-    MManager.getInstance()
-        .createTimeseries(new PartialPath("root.Wind.AZQ02.Speed"), TSDataType.FLOAT,
-            TSEncoding.PLAIN, CompressionType.UNCOMPRESSED, null);
-  }
-
-  @After
-  public void clean() throws IOException {
-    MManager.getInstance().clear();
-    EnvironmentUtils.cleanAllDir();
-  }
-
-  @Test
-  public void testCreateIndex() throws QueryProcessException {
-    String sqlStr = "CREATE INDEX ON root.Wind.AZQ02.Speed WITH INDEX=ELB_INDEX, BLOCK_SIZE=5";
-
-    Planner processor = new Planner();
-    CreateIndexPlan plan = (CreateIndexPlan) processor.parseSQLToPhysicalPlan(sqlStr);
-    System.out.println(plan);
-    assertEquals(
-        "paths: [root.Wind.AZQ02.Speed], index type: ELB_INDEX, start time: 0, props: {BLOCK_SIZE=5}",
-        plan.toString());
-  }
-
-  @Test
-  public void testDropIndex() throws QueryProcessException {
-    String sqlStr = "DROP INDEX ELB_INDEX ON root.Wind.AZQ02.Speed";
-    Planner processor = new Planner();
-    DropIndexPlan plan = (DropIndexPlan) processor.parseSQLToPhysicalPlan(sqlStr);
-    assertEquals("paths: [root.Wind.AZQ02.Speed], index type: ELB_INDEX", plan.toString());
-  }
-
-  @Test
-  public void testQueryIndex() throws QueryProcessException {
-    String sqlStr = "SELECT Speed.* FROM root.Wind.AZQ02 WHERE Speed "
-        + "CONTAIN (15, 14, 12, 12, 12, 11) WITH TOLERANCE 1 "
-        + "CONCAT (10, 20, 25, 24, 14, 8) WITH TOLERANCE 2 "
-        + "CONCAT  (8, 9, 10, 14, 15, 15) WITH TOLERANCE 1";
-
-    PhysicalPlan plan = processor.parseSQLToPhysicalPlan(sqlStr);
-    Assert.assertEquals(QueryIndexPlan.class, plan.getClass());
-    QueryIndexPlan queryIndexPlan = (QueryIndexPlan) plan;
-    Assert.assertEquals(OperatorType.QUERY_INDEX, queryIndexPlan.getOperatorType());
-    Assert.assertEquals(IndexType.ELB_INDEX, queryIndexPlan.getIndexType());
-    Assert.assertEquals(1, queryIndexPlan.getPaths().size());
-    Assert.assertEquals("root.Wind.AZQ02.Speed", queryIndexPlan.getPaths().get(0).getFullPath());
-    Assert.assertEquals(2, queryIndexPlan.getProps().size());
-    Assert.assertEquals("[1.0, 2.0, 1.0]", queryIndexPlan.getProps().get(THRESHOLD).toString());
-    Assert.assertTrue(queryIndexPlan.getProps().get(PATTERN) instanceof List);
-    List pattern = (List) queryIndexPlan.getProps().get(PATTERN);
-    Assert.assertEquals("[15.0, 14.0, 12.0, 12.0, 12.0, 11.0]",
-        Arrays.toString((double[]) pattern.get(0)));
-    Assert.assertEquals("[10.0, 20.0, 25.0, 24.0, 14.0, 8.0]",
-        Arrays.toString((double[]) pattern.get(1)));
-    Assert.assertEquals("[8.0, 9.0, 10.0, 14.0, 15.0, 15.0]",
-        Arrays.toString((double[]) pattern.get(2)));
-  }
-
-  @Test
-  public void testCreateIndexSerialize()
-      throws QueryProcessException, IOException, IllegalPathException {
-    String sqlStr = "CREATE INDEX ON root.Wind.AZQ02.Speed WITH INDEX=ELB_INDEX, BLOCK_SIZE=5";
-    PhysicalPlan plan = processor.parseSQLToPhysicalPlan(sqlStr);
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
-      plan.serialize(dataOutputStream);
-      ByteBuffer buffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-      PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
-      assertEquals(plan, planB);
+    @Before
+    public void before() throws MetadataException {
+        MManager.getInstance().init();
+        MManager.getInstance().setStorageGroup(new PartialPath("root.Wind"));
+        MManager.getInstance()
+                .createTimeseries(
+                        new PartialPath("root.Wind.AZQ02.Speed"),
+                        TSDataType.FLOAT,
+                        TSEncoding.PLAIN,
+                        CompressionType.UNCOMPRESSED,
+                        null);
     }
 
-    ByteBuffer buffer = ByteBuffer.allocate(4096);
-    plan.serialize(buffer);
-    buffer.flip();
-    PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
-    assertEquals(plan, planB);
-  }
-
-  @Test
-  public void testDropIndexSerialize()
-      throws QueryProcessException, IOException, IllegalPathException {
-    String sqlStr = "DROP INDEX ELB_INDEX ON root.Wind.AZQ02.Speed";
-    PhysicalPlan plan = processor.parseSQLToPhysicalPlan(sqlStr);
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
-      plan.serialize(dataOutputStream);
-      ByteBuffer buffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-      PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
-      assertEquals(plan, planB);
+    @After
+    public void clean() throws IOException {
+        MManager.getInstance().clear();
+        EnvironmentUtils.cleanAllDir();
     }
 
-    ByteBuffer buffer = ByteBuffer.allocate(4096);
-    plan.serialize(buffer);
-    buffer.flip();
-    PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
-    assertEquals(plan, planB);
-  }
+    @Test
+    public void testCreateIndex() throws QueryProcessException {
+        String sqlStr = "CREATE INDEX ON root.Wind.AZQ02.Speed WITH INDEX=ELB_INDEX, BLOCK_SIZE=5";
 
+        Planner processor = new Planner();
+        CreateIndexPlan plan = (CreateIndexPlan) processor.parseSQLToPhysicalPlan(sqlStr);
+        System.out.println(plan);
+        assertEquals(
+                "paths: [root.Wind.AZQ02.Speed], index type: ELB_INDEX, start time: 0, props: {BLOCK_SIZE=5}",
+                plan.toString());
+    }
+
+    @Test
+    public void testDropIndex() throws QueryProcessException {
+        String sqlStr = "DROP INDEX ELB_INDEX ON root.Wind.AZQ02.Speed";
+        Planner processor = new Planner();
+        DropIndexPlan plan = (DropIndexPlan) processor.parseSQLToPhysicalPlan(sqlStr);
+        assertEquals("paths: [root.Wind.AZQ02.Speed], index type: ELB_INDEX", plan.toString());
+    }
+
+    @Test
+    public void testQueryIndex() throws QueryProcessException {
+        String sqlStr =
+                "SELECT Speed.* FROM root.Wind.AZQ02 WHERE Speed "
+                        + "CONTAIN (15, 14, 12, 12, 12, 11) WITH TOLERANCE 1 "
+                        + "CONCAT (10, 20, 25, 24, 14, 8) WITH TOLERANCE 2 "
+                        + "CONCAT  (8, 9, 10, 14, 15, 15) WITH TOLERANCE 1";
+
+        PhysicalPlan plan = processor.parseSQLToPhysicalPlan(sqlStr);
+        Assert.assertEquals(QueryIndexPlan.class, plan.getClass());
+        QueryIndexPlan queryIndexPlan = (QueryIndexPlan) plan;
+        Assert.assertEquals(OperatorType.QUERY_INDEX, queryIndexPlan.getOperatorType());
+        Assert.assertEquals(IndexType.ELB_INDEX, queryIndexPlan.getIndexType());
+        Assert.assertEquals(1, queryIndexPlan.getPaths().size());
+        Assert.assertEquals(
+                "root.Wind.AZQ02.Speed", queryIndexPlan.getPaths().get(0).getFullPath());
+        Assert.assertEquals(2, queryIndexPlan.getProps().size());
+        Assert.assertEquals("[1.0, 2.0, 1.0]", queryIndexPlan.getProps().get(THRESHOLD).toString());
+        Assert.assertTrue(queryIndexPlan.getProps().get(PATTERN) instanceof List);
+        List pattern = (List) queryIndexPlan.getProps().get(PATTERN);
+        Assert.assertEquals(
+                "[15.0, 14.0, 12.0, 12.0, 12.0, 11.0]", Arrays.toString((double[]) pattern.get(0)));
+        Assert.assertEquals(
+                "[10.0, 20.0, 25.0, 24.0, 14.0, 8.0]", Arrays.toString((double[]) pattern.get(1)));
+        Assert.assertEquals(
+                "[8.0, 9.0, 10.0, 14.0, 15.0, 15.0]", Arrays.toString((double[]) pattern.get(2)));
+    }
+
+    @Test
+    public void testCreateIndexSerialize()
+            throws QueryProcessException, IOException, IllegalPathException {
+        String sqlStr = "CREATE INDEX ON root.Wind.AZQ02.Speed WITH INDEX=ELB_INDEX, BLOCK_SIZE=5";
+        PhysicalPlan plan = processor.parseSQLToPhysicalPlan(sqlStr);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
+            plan.serialize(dataOutputStream);
+            ByteBuffer buffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
+            PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
+            assertEquals(plan, planB);
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(4096);
+        plan.serialize(buffer);
+        buffer.flip();
+        PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
+        assertEquals(plan, planB);
+    }
+
+    @Test
+    public void testDropIndexSerialize()
+            throws QueryProcessException, IOException, IllegalPathException {
+        String sqlStr = "DROP INDEX ELB_INDEX ON root.Wind.AZQ02.Speed";
+        PhysicalPlan plan = processor.parseSQLToPhysicalPlan(sqlStr);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
+            plan.serialize(dataOutputStream);
+            ByteBuffer buffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
+            PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
+            assertEquals(plan, planB);
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(4096);
+        plan.serialize(buffer);
+        buffer.flip();
+        PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
+        assertEquals(plan, planB);
+    }
 }

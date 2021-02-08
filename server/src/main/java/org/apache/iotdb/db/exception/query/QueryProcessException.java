@@ -24,21 +24,21 @@ import org.apache.iotdb.rpc.TSStatusCode;
 
 public class QueryProcessException extends IoTDBException {
 
-  private static final long serialVersionUID = -683191083844850054L;
+    private static final long serialVersionUID = -683191083844850054L;
 
-  public QueryProcessException(String message) {
-    super(message, TSStatusCode.QUERY_PROCESS_ERROR.getStatusCode());
-  }
+    public QueryProcessException(String message) {
+        super(message, TSStatusCode.QUERY_PROCESS_ERROR.getStatusCode());
+    }
 
-  public QueryProcessException(String message, int errorCode) {
-    super(message, errorCode);
-  }
+    public QueryProcessException(String message, int errorCode) {
+        super(message, errorCode);
+    }
 
-  public QueryProcessException(IoTDBException e) {
-    super(e, e.getErrorCode());
-  }
+    public QueryProcessException(IoTDBException e) {
+        super(e, e.getErrorCode());
+    }
 
-  public QueryProcessException(Throwable cause, int errorCode) {
-    super(cause, errorCode);
-  }
+    public QueryProcessException(Throwable cause, int errorCode) {
+        super(cause, errorCode);
+    }
 }

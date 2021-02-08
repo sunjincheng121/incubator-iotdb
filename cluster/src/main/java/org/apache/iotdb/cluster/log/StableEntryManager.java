@@ -24,32 +24,32 @@ import java.util.List;
 
 public interface StableEntryManager {
 
-  List<Log> getAllEntriesAfterAppliedIndex();
+    List<Log> getAllEntriesAfterAppliedIndex();
 
-  void append(List<Log> entries, long maxHaveAppliedCommitIndex) throws IOException;
+    void append(List<Log> entries, long maxHaveAppliedCommitIndex) throws IOException;
 
-  void flushLogBuffer();
+    void flushLogBuffer();
 
-  void forceFlushLogBuffer();
+    void forceFlushLogBuffer();
 
-  void removeCompactedEntries(long index);
+    void removeCompactedEntries(long index);
 
-  void setHardStateAndFlush(HardState state);
+    void setHardStateAndFlush(HardState state);
 
-  HardState getHardState();
+    HardState getHardState();
 
-  /**
-   * @param startIndex (inclusive) the log start index
-   * @param endIndex   (inclusive) the log end index
-   * @return the raft log which index between [startIndex, endIndex] or empty if not found
-   */
-  List<Log> getLogs(long startIndex, long endIndex);
+    /**
+     * @param startIndex (inclusive) the log start index
+     * @param endIndex (inclusive) the log end index
+     * @return the raft log which index between [startIndex, endIndex] or empty if not found
+     */
+    List<Log> getLogs(long startIndex, long endIndex);
 
-  void close();
+    void close();
 
-  /**
-   * clear all logs, this method mainly used for after a follower accept a snapshot, all the logs
-   * should be cleaned
-   */
-  void clearAllLogs(long commitIndex);
+    /**
+     * clear all logs, this method mainly used for after a follower accept a snapshot, all the logs
+     * should be cleaned
+     */
+    void clearAllLogs(long commitIndex);
 }

@@ -23,16 +23,16 @@ import org.apache.iotdb.db.engine.compaction.level.LevelCompactionTsFileManageme
 import org.apache.iotdb.db.engine.compaction.no.NoCompactionTsFileManagement;
 
 public enum CompactionStrategy {
-  LEVEL_COMPACTION,
-  NO_COMPACTION;
+    LEVEL_COMPACTION,
+    NO_COMPACTION;
 
-  public TsFileManagement getTsFileManagement(String storageGroupName, String storageGroupDir) {
-    switch (this) {
-      case LEVEL_COMPACTION:
-        return new LevelCompactionTsFileManagement(storageGroupName, storageGroupDir);
-      case NO_COMPACTION:
-      default:
-        return new NoCompactionTsFileManagement(storageGroupName, storageGroupDir);
+    public TsFileManagement getTsFileManagement(String storageGroupName, String storageGroupDir) {
+        switch (this) {
+            case LEVEL_COMPACTION:
+                return new LevelCompactionTsFileManagement(storageGroupName, storageGroupDir);
+            case NO_COMPACTION:
+            default:
+                return new NoCompactionTsFileManagement(storageGroupName, storageGroupDir);
+        }
     }
-  }
 }

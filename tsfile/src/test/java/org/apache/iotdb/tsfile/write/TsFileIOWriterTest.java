@@ -41,73 +41,80 @@ import org.junit.Test;
 
 public class TsFileIOWriterTest {
 
-  private static String tsfile = TestConstant.BASE_OUTPUT_PATH.concat("tsfileIOWriterTest.tsfile");
-  private static String deviceId = "device1";
+    private static String tsfile =
+            TestConstant.BASE_OUTPUT_PATH.concat("tsfileIOWriterTest.tsfile");
+    private static String deviceId = "device1";
 
-  @Before
-  public void before() throws IOException {
-    TsFileIOWriter writer = new TsFileIOWriter(new File(tsfile));
+    @Before
+    public void before() throws IOException {
+        TsFileIOWriter writer = new TsFileIOWriter(new File(tsfile));
 
-    // file schema
-    MeasurementSchema measurementSchema = TestHelper.createSimpleMeasurementSchema("sensor01");
-    Schema schema = new Schema();
-    schema.registerTimeseries(new Path(deviceId, "sensor01"), measurementSchema);
+        // file schema
+        MeasurementSchema measurementSchema = TestHelper.createSimpleMeasurementSchema("sensor01");
+        Schema schema = new Schema();
+        schema.registerTimeseries(new Path(deviceId, "sensor01"), measurementSchema);
 
-    // chunk statistics
-    Statistics statistics = Statistics.getStatsByType(measurementSchema.getType());
-    statistics.updateStats(0L, 0L);
+        // chunk statistics
+        Statistics statistics = Statistics.getStatsByType(measurementSchema.getType());
+        statistics.updateStats(0L, 0L);
 
-    // chunk group 1
-    writer.startChunkGroup(deviceId);
-    writer.startFlushChunk(measurementSchema, measurementSchema.getCompressor(),
-        measurementSchema.getType(),
-        measurementSchema.getEncodingType(), statistics, 0, 0);
-    writer.endCurrentChunk();
-    writer.endChunkGroup();
+        // chunk group 1
+        writer.startChunkGroup(deviceId);
+        writer.startFlushChunk(
+                measurementSchema,
+                measurementSchema.getCompressor(),
+                measurementSchema.getType(),
+                measurementSchema.getEncodingType(),
+                statistics,
+                0,
+                0);
+        writer.endCurrentChunk();
+        writer.endChunkGroup();
 
-    writer.writeVersion(0L);
-    // end file
-    writer.endFile();
-  }
-
-  @After
-  public void after() {
-    File file = new File(tsfile);
-    if (file.exists()) {
-      file.delete();
+        writer.writeVersion(0L);
+        // end file
+        writer.endFile();
     }
-  }
 
-  @Test
-  public void endFileTest() throws IOException {
-    TsFileSequenceReader reader = new TsFileSequenceReader(tsfile);
+    @After
+    public void after() {
+        File file = new File(tsfile);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
 
-    // magic_string
-    Assert.assertEquals(TSFileConfig.MAGIC_STRING, reader.readHeadMagic());
-    Assert.assertEquals(TSFileConfig.VERSION_NUMBER, reader.readVersionNumber());
-    Assert.assertEquals(TSFileConfig.MAGIC_STRING, reader.readTailMagic());
+    @Test
+    public void endFileTest() throws IOException {
+        TsFileSequenceReader reader = new TsFileSequenceReader(tsfile);
 
-    // chunk header
-    reader.position(TSFileConfig.MAGIC_STRING.getBytes().length + TSFileConfig.VERSION_NUMBER
-        .getBytes().length);
-    Assert.assertEquals(MetaMarker.CHUNK_HEADER, reader.readMarker());
-    ChunkHeader header = reader.readChunkHeader();
-    Assert.assertEquals(TimeSeriesMetadataTest.measurementUID, header.getMeasurementID());
+        // magic_string
+        Assert.assertEquals(TSFileConfig.MAGIC_STRING, reader.readHeadMagic());
+        Assert.assertEquals(TSFileConfig.VERSION_NUMBER, reader.readVersionNumber());
+        Assert.assertEquals(TSFileConfig.MAGIC_STRING, reader.readTailMagic());
 
-    // chunk group footer
-    Assert.assertEquals(MetaMarker.CHUNK_GROUP_FOOTER, reader.readMarker());
-    ChunkGroupFooter footer = reader.readChunkGroupFooter();
-    Assert.assertEquals(deviceId, footer.getDeviceID());
+        // chunk header
+        reader.position(
+                TSFileConfig.MAGIC_STRING.getBytes().length
+                        + TSFileConfig.VERSION_NUMBER.getBytes().length);
+        Assert.assertEquals(MetaMarker.CHUNK_HEADER, reader.readMarker());
+        ChunkHeader header = reader.readChunkHeader();
+        Assert.assertEquals(TimeSeriesMetadataTest.measurementUID, header.getMeasurementID());
 
-    // separator
-    Assert.assertEquals(MetaMarker.VERSION, reader.readMarker());
+        // chunk group footer
+        Assert.assertEquals(MetaMarker.CHUNK_GROUP_FOOTER, reader.readMarker());
+        ChunkGroupFooter footer = reader.readChunkGroupFooter();
+        Assert.assertEquals(deviceId, footer.getDeviceID());
 
-    reader.readVersion();
+        // separator
+        Assert.assertEquals(MetaMarker.VERSION, reader.readMarker());
 
-    Assert.assertEquals(MetaMarker.SEPARATOR, reader.readMarker());
+        reader.readVersion();
 
-    // FileMetaData
-    TsFileMetadata metaData = reader.readFileMetadata();
-    Assert.assertEquals(1, metaData.getMetadataIndex().getChildren().size());
-  }
+        Assert.assertEquals(MetaMarker.SEPARATOR, reader.readMarker());
+
+        // FileMetaData
+        TsFileMetadata metaData = reader.readFileMetadata();
+        Assert.assertEquals(1, metaData.getMetadataIndex().getChildren().size());
+    }
 }

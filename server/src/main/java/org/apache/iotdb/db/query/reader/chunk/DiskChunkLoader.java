@@ -28,26 +28,24 @@ import org.apache.iotdb.tsfile.read.TsFileSequenceReader;
 import org.apache.iotdb.tsfile.read.common.Chunk;
 import org.apache.iotdb.tsfile.read.controller.IChunkLoader;
 
-/**
- * To read one chunk from disk, and only used in iotdb server module
- */
+/** To read one chunk from disk, and only used in iotdb server module */
 public class DiskChunkLoader implements IChunkLoader {
 
-  private final TsFileResource resource;
+    private final TsFileResource resource;
 
-  public DiskChunkLoader(TsFileResource resource) {
-    this.resource = resource;
-  }
+    public DiskChunkLoader(TsFileResource resource) {
+        this.resource = resource;
+    }
 
-  @Override
-  public Chunk loadChunk(ChunkMetadata chunkMetaData) throws IOException {
-    TsFileSequenceReader tsFileSequenceReader =
-        FileReaderManager.getInstance().get(resource.getTsFilePath(), resource.isClosed());
-    return ChunkCache.getInstance().get(chunkMetaData, tsFileSequenceReader);
-  }
+    @Override
+    public Chunk loadChunk(ChunkMetadata chunkMetaData) throws IOException {
+        TsFileSequenceReader tsFileSequenceReader =
+                FileReaderManager.getInstance().get(resource.getTsFilePath(), resource.isClosed());
+        return ChunkCache.getInstance().get(chunkMetaData, tsFileSequenceReader);
+    }
 
-  @Override
-  public void close() throws IOException {
-    // do nothing
-  }
+    @Override
+    public void close() throws IOException {
+        // do nothing
+    }
 }

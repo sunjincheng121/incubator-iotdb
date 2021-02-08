@@ -23,22 +23,20 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
-/**
- * This class represents an external sort job. Every job will use a separated directory.
- */
+/** This class represents an external sort job. Every job will use a separated directory. */
 class ExternalSortJob {
 
-  private List<ExternalSortJobPart> partList;
+    private List<ExternalSortJobPart> partList;
 
-  ExternalSortJob(List<ExternalSortJobPart> partList) {
-    this.partList = partList;
-  }
-
-  List<IPointReader> executeForIPointReader() throws IOException {
-    List<IPointReader> readers = new ArrayList<>();
-    for (ExternalSortJobPart part : partList) {
-      readers.add(part.executeForIPointReader());
+    ExternalSortJob(List<ExternalSortJobPart> partList) {
+        this.partList = partList;
     }
-    return readers;
-  }
+
+    List<IPointReader> executeForIPointReader() throws IOException {
+        List<IPointReader> readers = new ArrayList<>();
+        for (ExternalSortJobPart part : partList) {
+            readers.add(part.executeForIPointReader());
+        }
+        return readers;
+    }
 }

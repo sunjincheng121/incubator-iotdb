@@ -41,85 +41,93 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class AsyncMetaClient extends AsyncClient {
 
-  private static final Logger logger = LoggerFactory.getLogger(AsyncMetaClient.class);
-  Node node;
-  AsyncClientPool pool;
+    private static final Logger logger = LoggerFactory.getLogger(AsyncMetaClient.class);
+    Node node;
+    AsyncClientPool pool;
 
-  public AsyncMetaClient(TProtocolFactory protocolFactory,
-      TAsyncClientManager clientManager,
-      TNonblockingTransport transport) {
-    super(protocolFactory, clientManager, transport);
-  }
-
-  public AsyncMetaClient(TProtocolFactory protocolFactory,
-      TAsyncClientManager clientManager, Node node, AsyncClientPool pool) throws IOException {
-    // the difference of the two clients lies in the port
-    super(protocolFactory, clientManager, new TNonblockingSocket(node.getIp(), node.getMetaPort(),
-        RaftServer.getConnectionTimeoutInMS()));
-    this.node = node;
-    this.pool = pool;
-  }
-
-  @Override
-  public void onComplete() {
-    super.onComplete();
-    // return itself to the pool if the job is done
-    if (pool != null) {
-      pool.putClient(node, this);
-      pool.onComplete(node);
+    public AsyncMetaClient(
+            TProtocolFactory protocolFactory,
+            TAsyncClientManager clientManager,
+            TNonblockingTransport transport) {
+        super(protocolFactory, clientManager, transport);
     }
-  }
 
-  @SuppressWarnings("squid:S1135")
-  @Override
-  public void onError(Exception e) {
-    super.onError(e);
-    pool.recreateClient(node);
-    //TODO: if e instance of network failure
-    pool.onError(node);
-  }
-
-  public static class FactoryAsync extends AsyncClientFactory {
-
-    public FactoryAsync(org.apache.thrift.protocol.TProtocolFactory protocolFactory) {
-      this.protocolFactory = protocolFactory;
+    public AsyncMetaClient(
+            TProtocolFactory protocolFactory,
+            TAsyncClientManager clientManager,
+            Node node,
+            AsyncClientPool pool)
+            throws IOException {
+        // the difference of the two clients lies in the port
+        super(
+                protocolFactory,
+                clientManager,
+                new TNonblockingSocket(
+                        node.getIp(), node.getMetaPort(), RaftServer.getConnectionTimeoutInMS()));
+        this.node = node;
+        this.pool = pool;
     }
 
     @Override
-    public RaftService.AsyncClient getAsyncClient(Node node, AsyncClientPool pool)
-        throws IOException {
-      TAsyncClientManager manager = managers[clientCnt.incrementAndGet() % managers.length];
-      manager = manager == null ? new TAsyncClientManager() : manager;
-      return new AsyncMetaClient(protocolFactory, manager, node, pool);
+    public void onComplete() {
+        super.onComplete();
+        // return itself to the pool if the job is done
+        if (pool != null) {
+            pool.putClient(node, this);
+            pool.onComplete(node);
+        }
     }
-  }
 
-  @Override
-  public String toString() {
-    return "MetaClient{" +
-        "node=" + node +
-        '}';
-  }
-
-
-  public void close() {
-    ___transport.close();
-    ___currentMethod = null;
-  }
-
-  public Node getNode() {
-    return node;
-  }
-
-  public boolean isReady() {
-    if (___currentMethod != null) {
-      logger.warn("Client {} is running {} and will timeout at {}", hashCode(), ___currentMethod,
-          new Date(___currentMethod.getTimeoutTimestamp()));
+    @SuppressWarnings("squid:S1135")
+    @Override
+    public void onError(Exception e) {
+        super.onError(e);
+        pool.recreateClient(node);
+        // TODO: if e instance of network failure
+        pool.onError(node);
     }
-    return ___currentMethod == null;
-  }
 
-  TAsyncMethodCall<Object> getCurrMethod() {
-    return ___currentMethod;
-  }
+    public static class FactoryAsync extends AsyncClientFactory {
+
+        public FactoryAsync(org.apache.thrift.protocol.TProtocolFactory protocolFactory) {
+            this.protocolFactory = protocolFactory;
+        }
+
+        @Override
+        public RaftService.AsyncClient getAsyncClient(Node node, AsyncClientPool pool)
+                throws IOException {
+            TAsyncClientManager manager = managers[clientCnt.incrementAndGet() % managers.length];
+            manager = manager == null ? new TAsyncClientManager() : manager;
+            return new AsyncMetaClient(protocolFactory, manager, node, pool);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "MetaClient{" + "node=" + node + '}';
+    }
+
+    public void close() {
+        ___transport.close();
+        ___currentMethod = null;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public boolean isReady() {
+        if (___currentMethod != null) {
+            logger.warn(
+                    "Client {} is running {} and will timeout at {}",
+                    hashCode(),
+                    ___currentMethod,
+                    new Date(___currentMethod.getTimeoutTimestamp()));
+        }
+        return ___currentMethod == null;
+    }
+
+    TAsyncMethodCall<Object> getCurrMethod() {
+        return ___currentMethod;
+    }
 }

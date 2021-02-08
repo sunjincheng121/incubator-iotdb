@@ -26,50 +26,50 @@ import org.slf4j.LoggerFactory;
 
 public class FlushSubTaskPoolManager extends AbstractPoolManager {
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(FlushSubTaskPoolManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlushSubTaskPoolManager.class);
 
-  private FlushSubTaskPoolManager() {
-    this.pool = IoTDBThreadPoolFactory
-        .newCachedThreadPool(ThreadName.FLUSH_SUB_TASK_SERVICE.getName());
-  }
-
-  public static FlushSubTaskPoolManager getInstance() {
-    return FlushSubTaskPoolManager.InstanceHolder.instance;
-  }
-
-  @Override
-  public Logger getLogger() {
-    return LOGGER;
-  }
-
-  @Override
-  public String getName() {
-    return "flush sub task";
-  }
-
-  @Override
-  public void start() {
-    if (pool == null) {
-      this.pool = IoTDBThreadPoolFactory
-          .newCachedThreadPool(ThreadName.FLUSH_SUB_TASK_SERVICE.getName());
-    }
-    LOGGER.info("Flush sub task manager started.");
-  }
-
-  @Override
-  public void stop() {
-    super.stop();
-    LOGGER.info("Flush sub task manager stopped");
-  }
-
-  private static class InstanceHolder {
-
-    private InstanceHolder() {
-      //allowed to do nothing
+    private FlushSubTaskPoolManager() {
+        this.pool =
+                IoTDBThreadPoolFactory.newCachedThreadPool(
+                        ThreadName.FLUSH_SUB_TASK_SERVICE.getName());
     }
 
-    private static FlushSubTaskPoolManager instance = new FlushSubTaskPoolManager();
-  }
+    public static FlushSubTaskPoolManager getInstance() {
+        return FlushSubTaskPoolManager.InstanceHolder.instance;
+    }
 
+    @Override
+    public Logger getLogger() {
+        return LOGGER;
+    }
+
+    @Override
+    public String getName() {
+        return "flush sub task";
+    }
+
+    @Override
+    public void start() {
+        if (pool == null) {
+            this.pool =
+                    IoTDBThreadPoolFactory.newCachedThreadPool(
+                            ThreadName.FLUSH_SUB_TASK_SERVICE.getName());
+        }
+        LOGGER.info("Flush sub task manager started.");
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        LOGGER.info("Flush sub task manager stopped");
+    }
+
+    private static class InstanceHolder {
+
+        private InstanceHolder() {
+            // allowed to do nothing
+        }
+
+        private static FlushSubTaskPoolManager instance = new FlushSubTaskPoolManager();
+    }
 }

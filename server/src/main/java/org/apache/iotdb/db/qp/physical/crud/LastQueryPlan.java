@@ -29,27 +29,27 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 
 public class LastQueryPlan extends RawDataQueryPlan {
 
-  public LastQueryPlan() {
-    super();
-    setOperatorType(Operator.OperatorType.LAST);
-  }
-
-  public void setExpression(IExpression expression) throws QueryProcessException {
-    if (isValidExpression(expression)) {
-      super.setExpression(expression);
-    } else {
-      throw new QueryProcessException("Only \'>\' and \'>=\' are supported in LAST query");
+    public LastQueryPlan() {
+        super();
+        setOperatorType(Operator.OperatorType.LAST);
     }
-  }
 
-  // Only > and >= are supported in time filter
-  private boolean isValidExpression(IExpression expression) {
-    if (expression instanceof GlobalTimeExpression) {
-      Filter filter = ((GlobalTimeExpression) expression).getFilter();
-      if (filter instanceof TimeGtEq || filter instanceof TimeGt) {
-        return true;
-      }
+    public void setExpression(IExpression expression) throws QueryProcessException {
+        if (isValidExpression(expression)) {
+            super.setExpression(expression);
+        } else {
+            throw new QueryProcessException("Only \'>\' and \'>=\' are supported in LAST query");
+        }
     }
-    return false;
-  }
+
+    // Only > and >= are supported in time filter
+    private boolean isValidExpression(IExpression expression) {
+        if (expression instanceof GlobalTimeExpression) {
+            Filter filter = ((GlobalTimeExpression) expression).getFilter();
+            if (filter instanceof TimeGtEq || filter instanceof TimeGt) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

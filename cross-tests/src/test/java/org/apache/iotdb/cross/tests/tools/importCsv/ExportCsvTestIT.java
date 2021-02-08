@@ -38,156 +38,188 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ExportCsvTestIT extends AbstractScript{
+public class ExportCsvTestIT extends AbstractScript {
 
-  private final String SQL_FILE = "target" + File.separator + "sql.txt";
+    private final String SQL_FILE = "target" + File.separator + "sql.txt";
 
-  private final String EXPORT_FILE = "target" + File.separator + "dump0.csv";
+    private final String EXPORT_FILE = "target" + File.separator + "dump0.csv";
 
-  @Before
-  public void setUp() {
-    EnvironmentUtils.closeStatMonitor();
-    EnvironmentUtils.envSetUp();
-  }
+    @Before
+    public void setUp() {
+        EnvironmentUtils.closeStatMonitor();
+        EnvironmentUtils.envSetUp();
+    }
 
-  @After
-  public void tearDown() throws Exception {
-    EnvironmentUtils.cleanEnv();
-  }
+    @After
+    public void tearDown() throws Exception {
+        EnvironmentUtils.cleanEnv();
+    }
 
-  @Override
-  protected void testOnWindows() throws IOException {
-    final String[] output = {
+    @Override
+    protected void testOnWindows() throws IOException {
+        final String[] output = {
             "------------------------------------------",
             "Starting IoTDB Client Export Script",
             "------------------------------------------",
             "Start to export data from sql statement",
             "successfully",
-    };
-    String dir = getCliPath();
-    ProcessBuilder builder = new ProcessBuilder("cmd.exe", "/c",
-        dir + File.separator + "tools" + File.separator + "export-csv.bat",
-        "-h", "127.0.0.1", "-p", "6667", "-u", "root", "-pw", "root", "-td", "./target",
-        "-s", SQL_FILE);
-    testOutput(builder, output);
-  }
-
-  @Override
-  protected void testOnUnix() throws IOException {
-    final String[] output = {
-        "------------------------------------------",
-        "Starting IoTDB Client Export Script",
-        "------------------------------------------",
-        "Start to export data from sql statement",
-        "successfully",
-    };
-    String dir = getCliPath();
-    ProcessBuilder builder = new ProcessBuilder("sh",
-        dir + File.separator + "tools" + File.separator + "export-csv.sh",
-        "-h", "127.0.0.1", "-p", "6667", "-u", "root", "-pw", "root", "-td", "./target",
-        "-s", SQL_FILE);
-    testOutput(builder, output);
-  }
-
-  private boolean generateSQLFile(String[] sql) {
-    BufferedWriter writer;
-    try {
-      writer = new BufferedWriter(new FileWriter(SQL_FILE));
-      writer.write("");
-      for (String s : sql) {
-        writer.write(s);
-        writer.newLine();
-      }
-      writer.flush();
-      writer.close();
-      return true;
-    } catch (IOException e) {
-      System.out.println("failed to create test csv");
+        };
+        String dir = getCliPath();
+        ProcessBuilder builder =
+                new ProcessBuilder(
+                        "cmd.exe",
+                        "/c",
+                        dir + File.separator + "tools" + File.separator + "export-csv.bat",
+                        "-h",
+                        "127.0.0.1",
+                        "-p",
+                        "6667",
+                        "-u",
+                        "root",
+                        "-pw",
+                        "root",
+                        "-td",
+                        "./target",
+                        "-s",
+                        SQL_FILE);
+        testOutput(builder, output);
     }
-    return false;
-  }
 
-  @Test
-  public void testRawDataQuery() throws IOException, StatementExecutionException, IoTDBConnectionException {
-    final String[] expectCsv = new String[]{"Time,root.sg1.d1.s3,root.sg1.d1.s1,root.sg1.d1.s2",
-        "abbe's,1.0,\"\\\"abc\\\",aa\""};
-    prepareData();
-    String os = System.getProperty("os.name").toLowerCase();
-    String[] sql = {"select * from root"};
-    assertTrue(generateSQLFile(sql));
-    if (os.startsWith("windows")) {
-      testOnWindows();
-    } else {
-      testOnUnix();
+    @Override
+    protected void testOnUnix() throws IOException {
+        final String[] output = {
+            "------------------------------------------",
+            "Starting IoTDB Client Export Script",
+            "------------------------------------------",
+            "Start to export data from sql statement",
+            "successfully",
+        };
+        String dir = getCliPath();
+        ProcessBuilder builder =
+                new ProcessBuilder(
+                        "sh",
+                        dir + File.separator + "tools" + File.separator + "export-csv.sh",
+                        "-h",
+                        "127.0.0.1",
+                        "-p",
+                        "6667",
+                        "-u",
+                        "root",
+                        "-pw",
+                        "root",
+                        "-td",
+                        "./target",
+                        "-s",
+                        SQL_FILE);
+        testOutput(builder, output);
     }
-    FileReader fileReader = new FileReader(EXPORT_FILE);
-    BufferedReader br = new BufferedReader(fileReader);
-    String line = br.readLine();
-    int i = 0;
-    while(line != null) {
-      if(i == 0) {
-        assertEquals(expectCsv[i], line);
-      } else {
-        String lineWithoutTime = line.substring(line.indexOf(',') + 1);
-        assertEquals(expectCsv[i], lineWithoutTime);
-      }
-      i++;
-      line = br.readLine();
-    }
-    File file = new File(EXPORT_FILE);
-    if (file.exists()) {
-      file.delete();
-    }
-  }
 
-  @Test
-  public void testAggregationQuery() throws StatementExecutionException, IoTDBConnectionException, IOException {
-    final String[] expectCsv = new String[]{"Time,count(root.sg1.d1.s3),count(root.sg1.d1.s1),count(root.sg1.d1.s2)",
-            "1,1,1"};
-    prepareData();
-    String os = System.getProperty("os.name").toLowerCase();
-    String[] sql = {"select count(*) from root"};
-    generateSQLFile(sql);
-    if (os.startsWith("windows")) {
-      testOnWindows();
-    } else {
-      testOnUnix();
+    private boolean generateSQLFile(String[] sql) {
+        BufferedWriter writer;
+        try {
+            writer = new BufferedWriter(new FileWriter(SQL_FILE));
+            writer.write("");
+            for (String s : sql) {
+                writer.write(s);
+                writer.newLine();
+            }
+            writer.flush();
+            writer.close();
+            return true;
+        } catch (IOException e) {
+            System.out.println("failed to create test csv");
+        }
+        return false;
     }
-    FileReader fileReader = new FileReader(EXPORT_FILE);
-    BufferedReader br = new BufferedReader(fileReader);
-    String line = br.readLine();
-    int i = 0;
-    while(line != null) {
-      if(i == 0) {
-        assertEquals(expectCsv[i], line);
-      } else {
-        String lineWithoutTime = line.substring(line.indexOf(',') + 1);
-        assertEquals(expectCsv[i], lineWithoutTime);
-      }
-      i++;
-      line = br.readLine();
+
+    @Test
+    public void testRawDataQuery()
+            throws IOException, StatementExecutionException, IoTDBConnectionException {
+        final String[] expectCsv =
+                new String[] {
+                    "Time,root.sg1.d1.s3,root.sg1.d1.s1,root.sg1.d1.s2",
+                    "abbe's,1.0,\"\\\"abc\\\",aa\""
+                };
+        prepareData();
+        String os = System.getProperty("os.name").toLowerCase();
+        String[] sql = {"select * from root"};
+        assertTrue(generateSQLFile(sql));
+        if (os.startsWith("windows")) {
+            testOnWindows();
+        } else {
+            testOnUnix();
+        }
+        FileReader fileReader = new FileReader(EXPORT_FILE);
+        BufferedReader br = new BufferedReader(fileReader);
+        String line = br.readLine();
+        int i = 0;
+        while (line != null) {
+            if (i == 0) {
+                assertEquals(expectCsv[i], line);
+            } else {
+                String lineWithoutTime = line.substring(line.indexOf(',') + 1);
+                assertEquals(expectCsv[i], lineWithoutTime);
+            }
+            i++;
+            line = br.readLine();
+        }
+        File file = new File(EXPORT_FILE);
+        if (file.exists()) {
+            file.delete();
+        }
     }
-    File file = new File(EXPORT_FILE);
-    if (file.exists()) {
-      file.delete();
+
+    @Test
+    public void testAggregationQuery()
+            throws StatementExecutionException, IoTDBConnectionException, IOException {
+        final String[] expectCsv =
+                new String[] {
+                    "Time,count(root.sg1.d1.s3),count(root.sg1.d1.s1),count(root.sg1.d1.s2)",
+                    "1,1,1"
+                };
+        prepareData();
+        String os = System.getProperty("os.name").toLowerCase();
+        String[] sql = {"select count(*) from root"};
+        generateSQLFile(sql);
+        if (os.startsWith("windows")) {
+            testOnWindows();
+        } else {
+            testOnUnix();
+        }
+        FileReader fileReader = new FileReader(EXPORT_FILE);
+        BufferedReader br = new BufferedReader(fileReader);
+        String line = br.readLine();
+        int i = 0;
+        while (line != null) {
+            if (i == 0) {
+                assertEquals(expectCsv[i], line);
+            } else {
+                String lineWithoutTime = line.substring(line.indexOf(',') + 1);
+                assertEquals(expectCsv[i], lineWithoutTime);
+            }
+            i++;
+            line = br.readLine();
+        }
+        File file = new File(EXPORT_FILE);
+        if (file.exists()) {
+            file.delete();
+        }
     }
-  }
 
-  private void prepareData() throws IoTDBConnectionException, StatementExecutionException {
-    Session session = new Session("127.0.0.1", 6667, "root", "root");
-    session.open();
+    private void prepareData() throws IoTDBConnectionException, StatementExecutionException {
+        Session session = new Session("127.0.0.1", 6667, "root", "root");
+        session.open();
 
-    String deviceId = "root.sg1.d1";
-    List<String> measurements = new ArrayList<>();
-    measurements.add("s1");
-    measurements.add("s2");
-    measurements.add("s3");
+        String deviceId = "root.sg1.d1";
+        List<String> measurements = new ArrayList<>();
+        measurements.add("s1");
+        measurements.add("s2");
+        measurements.add("s3");
 
-    List<String> values = new ArrayList<>();
-    values.add("1.0");
-    values.add("\"abc\",aa");
-    values.add("abbe's");
-    session.insertRecord(deviceId, 1L, measurements, values);
-  }
-
+        List<String> values = new ArrayList<>();
+        values.add("1.0");
+        values.add("\"abc\",aa");
+        values.add("abbe's");
+        session.insertRecord(deviceId, 1L, measurements, values);
+    }
 }

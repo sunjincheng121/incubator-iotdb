@@ -22,66 +22,65 @@ package org.apache.iotdb.cluster.query.manage;
 import java.util.Objects;
 import org.apache.iotdb.cluster.rpc.thrift.TNodeStatus;
 
-/**
- * NodeStatus contains the last-known spec and load of a node in the cluster.
- */
+/** NodeStatus contains the last-known spec and load of a node in the cluster. */
 @SuppressWarnings("java:S1135")
 public class NodeStatus implements Comparable<NodeStatus> {
 
-  private TNodeStatus status;
-  // when is the status last updated, millisecond timestamp, to judge whether we should update
-  // the status or not
-  private long lastUpdateTime;
-  // how long does it take to get the status in the last attempt, in nanoseconds, which partially
-  // reflect the node's load or network condition
-  private long lastResponseLatency;
+    private TNodeStatus status;
+    // when is the status last updated, millisecond timestamp, to judge whether we should update
+    // the status or not
+    private long lastUpdateTime;
+    // how long does it take to get the status in the last attempt, in nanoseconds, which partially
+    // reflect the node's load or network condition
+    private long lastResponseLatency;
 
-  //TODO-Cluster: decide what should be contained in NodeStatus and how two compare two NodeStatus
-  @Override
-  public int compareTo(NodeStatus o) {
-    return Long.compare(this.lastResponseLatency, o.lastResponseLatency);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    // TODO-Cluster: decide what should be contained in NodeStatus and how two compare two
+    // NodeStatus
+    @Override
+    public int compareTo(NodeStatus o) {
+        return Long.compare(this.lastResponseLatency, o.lastResponseLatency);
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        NodeStatus that = (NodeStatus) o;
+        return lastUpdateTime == that.lastUpdateTime
+                && lastResponseLatency == that.lastResponseLatency
+                && Objects.equals(status, that.status);
     }
-    NodeStatus that = (NodeStatus) o;
-    return lastUpdateTime == that.lastUpdateTime &&
-        lastResponseLatency == that.lastResponseLatency &&
-        Objects.equals(status, that.status);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(status, lastUpdateTime, lastResponseLatency);
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hash(status, lastUpdateTime, lastResponseLatency);
+    }
 
-  long getLastUpdateTime() {
-    return lastUpdateTime;
-  }
+    long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
 
-  long getLastResponseLatency() {
-    return lastResponseLatency;
-  }
+    long getLastResponseLatency() {
+        return lastResponseLatency;
+    }
 
-  public TNodeStatus getStatus() {
-    return status;
-  }
+    public TNodeStatus getStatus() {
+        return status;
+    }
 
-  public void setStatus(TNodeStatus status) {
-    this.status = status;
-  }
+    public void setStatus(TNodeStatus status) {
+        this.status = status;
+    }
 
-  void setLastUpdateTime(long lastUpdateTime) {
-    this.lastUpdateTime = lastUpdateTime;
-  }
+    void setLastUpdateTime(long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
 
-  void setLastResponseLatency(long lastResponseLatency) {
-    this.lastResponseLatency = lastResponseLatency;
-  }
+    void setLastResponseLatency(long lastResponseLatency) {
+        this.lastResponseLatency = lastResponseLatency;
+    }
 }

@@ -23,54 +23,52 @@ import java.util.List;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.qp.logical.Operator;
 
-/**
- * this class maintains information from select clause.
- */
+/** this class maintains information from select clause. */
 public final class SelectOperator extends Operator {
 
-  private List<PartialPath> suffixList;
-  private List<String> aggregations;
-  private boolean lastQuery;
+    private List<PartialPath> suffixList;
+    private List<String> aggregations;
+    private boolean lastQuery;
 
-  /**
-   * init with tokenIntType, default operatorType is <code>OperatorType.SELECT</code>.
-   */
-  public SelectOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.SELECT;
-    suffixList = new ArrayList<>();
-    aggregations = new ArrayList<>();
-    lastQuery = false;
-  }
+    /** init with tokenIntType, default operatorType is <code>OperatorType.SELECT</code>. */
+    public SelectOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.SELECT;
+        suffixList = new ArrayList<>();
+        aggregations = new ArrayList<>();
+        lastQuery = false;
+    }
 
-  public void addSelectPath(PartialPath suffixPath) {
-    suffixList.add(suffixPath);
-  }
+    public void addSelectPath(PartialPath suffixPath) {
+        suffixList.add(suffixPath);
+    }
 
-  public void addClusterPath(PartialPath suffixPath, String aggregation) {
-    suffixList.add(suffixPath);
-    aggregations.add(aggregation);
-  }
+    public void addClusterPath(PartialPath suffixPath, String aggregation) {
+        suffixList.add(suffixPath);
+        aggregations.add(aggregation);
+    }
 
-  public void setLastQuery() {
-    lastQuery = true;
-  }
+    public void setLastQuery() {
+        lastQuery = true;
+    }
 
-  public List<String> getAggregations() {
-    return this.aggregations;
-  }
+    public List<String> getAggregations() {
+        return this.aggregations;
+    }
 
-  public void setAggregations(List<String> aggregations) {
-    this.aggregations = aggregations;
-  }
+    public void setAggregations(List<String> aggregations) {
+        this.aggregations = aggregations;
+    }
 
-  public void setSuffixPathList(List<PartialPath> suffixPaths) {
-    suffixList = suffixPaths;
-  }
+    public void setSuffixPathList(List<PartialPath> suffixPaths) {
+        suffixList = suffixPaths;
+    }
 
-  public List<PartialPath> getSuffixPaths() {
-    return suffixList;
-  }
+    public List<PartialPath> getSuffixPaths() {
+        return suffixList;
+    }
 
-  public boolean isLastQuery() {return this.lastQuery; }
+    public boolean isLastQuery() {
+        return this.lastQuery;
+    }
 }

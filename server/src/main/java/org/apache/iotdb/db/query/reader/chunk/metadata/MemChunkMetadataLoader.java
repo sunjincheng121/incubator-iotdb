@@ -31,43 +31,52 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 
 public class MemChunkMetadataLoader implements IChunkMetadataLoader {
 
-  private TsFileResource resource;
-  private PartialPath seriesPath;
-  private QueryContext context;
-  private Filter timeFilter;
+    private TsFileResource resource;
+    private PartialPath seriesPath;
+    private QueryContext context;
+    private Filter timeFilter;
 
-  public MemChunkMetadataLoader(TsFileResource resource, PartialPath seriesPath, QueryContext context, Filter timeFilter) {
-    this.resource = resource;
-    this.seriesPath = seriesPath;
-    this.context = context;
-    this.timeFilter = timeFilter;
-  }
-
-  @Override
-  public List<ChunkMetadata> loadChunkMetadataList(TimeseriesMetadata timeseriesMetadata) {
-    List<ChunkMetadata> chunkMetadataList = resource.getChunkMetadataList();
-
-    DiskChunkMetadataLoader.setDiskChunkLoader(chunkMetadataList, resource, seriesPath, context);
-
-    List<ReadOnlyMemChunk> memChunks = resource.getReadOnlyMemChunk();
-    if (memChunks != null) {
-      for (ReadOnlyMemChunk readOnlyMemChunk : memChunks) {
-        if (!memChunks.isEmpty()) {
-          chunkMetadataList.add(readOnlyMemChunk.getChunkMetaData());
-        }
-      }
+    public MemChunkMetadataLoader(
+            TsFileResource resource,
+            PartialPath seriesPath,
+            QueryContext context,
+            Filter timeFilter) {
+        this.resource = resource;
+        this.seriesPath = seriesPath;
+        this.context = context;
+        this.timeFilter = timeFilter;
     }
-    /*
-     * remove not satisfied ChunkMetaData
-     */
-    chunkMetadataList.removeIf(chunkMetaData -> (timeFilter != null && !timeFilter
-            .satisfyStartEndTime(chunkMetaData.getStartTime(), chunkMetaData.getEndTime()))
-            || chunkMetaData.getStartTime() > chunkMetaData.getEndTime());
-    return chunkMetadataList;
-  }
 
-  @Override
-  public void setDiskChunkLoader(List<ChunkMetadata> chunkMetadataList) throws IOException {
-    // DO NOTHING
-  }
+    @Override
+    public List<ChunkMetadata> loadChunkMetadataList(TimeseriesMetadata timeseriesMetadata) {
+        List<ChunkMetadata> chunkMetadataList = resource.getChunkMetadataList();
+
+        DiskChunkMetadataLoader.setDiskChunkLoader(
+                chunkMetadataList, resource, seriesPath, context);
+
+        List<ReadOnlyMemChunk> memChunks = resource.getReadOnlyMemChunk();
+        if (memChunks != null) {
+            for (ReadOnlyMemChunk readOnlyMemChunk : memChunks) {
+                if (!memChunks.isEmpty()) {
+                    chunkMetadataList.add(readOnlyMemChunk.getChunkMetaData());
+                }
+            }
+        }
+        /*
+         * remove not satisfied ChunkMetaData
+         */
+        chunkMetadataList.removeIf(
+                chunkMetaData ->
+                        (timeFilter != null
+                                        && !timeFilter.satisfyStartEndTime(
+                                                chunkMetaData.getStartTime(),
+                                                chunkMetaData.getEndTime()))
+                                || chunkMetaData.getStartTime() > chunkMetaData.getEndTime());
+        return chunkMetadataList;
+    }
+
+    @Override
+    public void setDiskChunkLoader(List<ChunkMetadata> chunkMetadataList) throws IOException {
+        // DO NOTHING
+    }
 }

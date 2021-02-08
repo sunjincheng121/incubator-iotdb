@@ -33,72 +33,67 @@ import org.slf4j.LoggerFactory;
 
 public class JMXService implements IService {
 
-  private static final Logger logger = LoggerFactory.getLogger(JMXService.class);
+    private static final Logger logger = LoggerFactory.getLogger(JMXService.class);
 
-  private JMXService() {
-  }
+    private JMXService() {}
 
-  public static final JMXService getInstance() {
-    return JMXServerHolder.INSTANCE;
-  }
-
-  /**
-   * function for registering MBean.
-   */
-  public static void registerMBean(Object mbean, String name) {
-    try {
-      MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-      ObjectName objectName = new ObjectName(name);
-      if (!mbs.isRegistered(objectName)) {
-        mbs.registerMBean(mbean, objectName);
-      }
-    } catch (MalformedObjectNameException | InstanceAlreadyExistsException
-        | MBeanRegistrationException
-        | NotCompliantMBeanException e) {
-      logger.error("Failed to registerMBean {}", name, e);
+    public static final JMXService getInstance() {
+        return JMXServerHolder.INSTANCE;
     }
-  }
 
-  /**
-   * function for deregistering MBean.
-   */
-  public static void deregisterMBean(String name) {
-    try {
-      MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-      ObjectName objectName = new ObjectName(name);
-      if (mbs.isRegistered(objectName)) {
-        mbs.unregisterMBean(objectName);
-      }
-    } catch (MalformedObjectNameException | MBeanRegistrationException
-        | InstanceNotFoundException e) {
-      logger.error("Failed to unregisterMBean {}", name, e);
+    /** function for registering MBean. */
+    public static void registerMBean(Object mbean, String name) {
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            ObjectName objectName = new ObjectName(name);
+            if (!mbs.isRegistered(objectName)) {
+                mbs.registerMBean(mbean, objectName);
+            }
+        } catch (MalformedObjectNameException
+                | InstanceAlreadyExistsException
+                | MBeanRegistrationException
+                | NotCompliantMBeanException e) {
+            logger.error("Failed to registerMBean {}", name, e);
+        }
     }
-  }
 
-
-  @Override
-  public ServiceType getID() {
-    return ServiceType.JMX_SERVICE;
-  }
-
-  @Override
-  public void start() throws StartupException {
-    String jmxPort = System.getProperty(IoTDBConstant.IOTDB_JMX_PORT);
-    if (jmxPort == null) {
-      logger.debug("{} JMX port is undefined", this.getID().getName());
+    /** function for deregistering MBean. */
+    public static void deregisterMBean(String name) {
+        try {
+            MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+            ObjectName objectName = new ObjectName(name);
+            if (mbs.isRegistered(objectName)) {
+                mbs.unregisterMBean(objectName);
+            }
+        } catch (MalformedObjectNameException
+                | MBeanRegistrationException
+                | InstanceNotFoundException e) {
+            logger.error("Failed to unregisterMBean {}", name, e);
+        }
     }
-  }
 
-  @Override
-  public void stop() {
-    // do nothing.
-  }
-
-  private static class JMXServerHolder {
-
-    private static final JMXService INSTANCE = new JMXService();
-
-    private JMXServerHolder() {
+    @Override
+    public ServiceType getID() {
+        return ServiceType.JMX_SERVICE;
     }
-  }
+
+    @Override
+    public void start() throws StartupException {
+        String jmxPort = System.getProperty(IoTDBConstant.IOTDB_JMX_PORT);
+        if (jmxPort == null) {
+            logger.debug("{} JMX port is undefined", this.getID().getName());
+        }
+    }
+
+    @Override
+    public void stop() {
+        // do nothing.
+    }
+
+    private static class JMXServerHolder {
+
+        private static final JMXService INSTANCE = new JMXService();
+
+        private JMXServerHolder() {}
+    }
 }

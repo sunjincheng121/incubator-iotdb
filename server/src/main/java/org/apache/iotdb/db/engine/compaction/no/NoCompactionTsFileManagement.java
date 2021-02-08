@@ -30,122 +30,128 @@ import org.slf4j.LoggerFactory;
 
 public class NoCompactionTsFileManagement extends TsFileManagement {
 
-  private static final Logger logger = LoggerFactory.getLogger(NoCompactionTsFileManagement.class);
-  // includes sealed and unsealed sequence TsFiles
-  private TreeSet<TsFileResource> sequenceFileTreeSet = new TreeSet<>(
-      (o1, o2) -> {
-        int rangeCompare = Long.compare(Long.parseLong(o1.getTsFile().getParentFile().getName()),
-            Long.parseLong(o2.getTsFile().getParentFile().getName()));
-        return rangeCompare == 0 ? compareFileName(o1.getTsFile(), o2.getTsFile()) : rangeCompare;
-      });
+    private static final Logger logger =
+            LoggerFactory.getLogger(NoCompactionTsFileManagement.class);
+    // includes sealed and unsealed sequence TsFiles
+    private TreeSet<TsFileResource> sequenceFileTreeSet =
+            new TreeSet<>(
+                    (o1, o2) -> {
+                        int rangeCompare =
+                                Long.compare(
+                                        Long.parseLong(o1.getTsFile().getParentFile().getName()),
+                                        Long.parseLong(o2.getTsFile().getParentFile().getName()));
+                        return rangeCompare == 0
+                                ? compareFileName(o1.getTsFile(), o2.getTsFile())
+                                : rangeCompare;
+                    });
 
-  // includes sealed and unsealed unSequence TsFiles
-  private List<TsFileResource> unSequenceFileList = new ArrayList<>();
+    // includes sealed and unsealed unSequence TsFiles
+    private List<TsFileResource> unSequenceFileList = new ArrayList<>();
 
-  public NoCompactionTsFileManagement(String storageGroupName, String storageGroupDir) {
-    super(storageGroupName, storageGroupDir);
-  }
-
-  @Override
-  public List<TsFileResource> getStableTsFileList(boolean sequence) {
-    return getTsFileList(sequence);
-  }
-
-  @Override
-  public List<TsFileResource> getTsFileList(boolean sequence) {
-    if (sequence) {
-      return new ArrayList<>(sequenceFileTreeSet);
-    } else {
-      return new ArrayList<>(unSequenceFileList);
+    public NoCompactionTsFileManagement(String storageGroupName, String storageGroupDir) {
+        super(storageGroupName, storageGroupDir);
     }
-  }
 
-  @Override
-  public Iterator<TsFileResource> getIterator(boolean sequence) {
-    return getTsFileList(sequence).iterator();
-  }
-
-  @Override
-  public void remove(TsFileResource tsFileResource, boolean sequence) {
-    if (sequence) {
-      sequenceFileTreeSet.remove(tsFileResource);
-    } else {
-      unSequenceFileList.remove(tsFileResource);
+    @Override
+    public List<TsFileResource> getStableTsFileList(boolean sequence) {
+        return getTsFileList(sequence);
     }
-  }
 
-  @Override
-  public void removeAll(List<TsFileResource> tsFileResourceList, boolean sequence) {
-    if (sequence) {
-      sequenceFileTreeSet.removeAll(tsFileResourceList);
-    } else {
-      unSequenceFileList.removeAll(tsFileResourceList);
+    @Override
+    public List<TsFileResource> getTsFileList(boolean sequence) {
+        if (sequence) {
+            return new ArrayList<>(sequenceFileTreeSet);
+        } else {
+            return new ArrayList<>(unSequenceFileList);
+        }
     }
-  }
 
-  @Override
-  public void add(TsFileResource tsFileResource, boolean sequence) {
-    if (sequence) {
-      sequenceFileTreeSet.add(tsFileResource);
-    } else {
-      unSequenceFileList.add(tsFileResource);
+    @Override
+    public Iterator<TsFileResource> getIterator(boolean sequence) {
+        return getTsFileList(sequence).iterator();
     }
-  }
 
-  @Override
-  public void addAll(List<TsFileResource> tsFileResourceList, boolean sequence) {
-    if (sequence) {
-      sequenceFileTreeSet.addAll(tsFileResourceList);
-    } else {
-      unSequenceFileList.addAll(tsFileResourceList);
+    @Override
+    public void remove(TsFileResource tsFileResource, boolean sequence) {
+        if (sequence) {
+            sequenceFileTreeSet.remove(tsFileResource);
+        } else {
+            unSequenceFileList.remove(tsFileResource);
+        }
     }
-  }
 
-  @Override
-  public boolean contains(TsFileResource tsFileResource, boolean sequence) {
-    if (sequence) {
-      return sequenceFileTreeSet.contains(tsFileResource);
-    } else {
-      return unSequenceFileList.contains(tsFileResource);
+    @Override
+    public void removeAll(List<TsFileResource> tsFileResourceList, boolean sequence) {
+        if (sequence) {
+            sequenceFileTreeSet.removeAll(tsFileResourceList);
+        } else {
+            unSequenceFileList.removeAll(tsFileResourceList);
+        }
     }
-  }
 
-  @Override
-  public void clear() {
-    sequenceFileTreeSet.clear();
-    unSequenceFileList.clear();
-  }
-
-  @Override
-  public boolean isEmpty(boolean sequence) {
-    if (sequence) {
-      return sequenceFileTreeSet.isEmpty();
-    } else {
-      return unSequenceFileList.isEmpty();
+    @Override
+    public void add(TsFileResource tsFileResource, boolean sequence) {
+        if (sequence) {
+            sequenceFileTreeSet.add(tsFileResource);
+        } else {
+            unSequenceFileList.add(tsFileResource);
+        }
     }
-  }
 
-  @Override
-  public int size(boolean sequence) {
-    if (sequence) {
-      return sequenceFileTreeSet.size();
-    } else {
-      return unSequenceFileList.size();
+    @Override
+    public void addAll(List<TsFileResource> tsFileResourceList, boolean sequence) {
+        if (sequence) {
+            sequenceFileTreeSet.addAll(tsFileResourceList);
+        } else {
+            unSequenceFileList.addAll(tsFileResourceList);
+        }
     }
-  }
 
-  @Override
-  public void recover() {
-    logger.info("{} no recover logic", storageGroupName);
-  }
+    @Override
+    public boolean contains(TsFileResource tsFileResource, boolean sequence) {
+        if (sequence) {
+            return sequenceFileTreeSet.contains(tsFileResource);
+        } else {
+            return unSequenceFileList.contains(tsFileResource);
+        }
+    }
 
-  @Override
-  public void forkCurrentFileList(long timePartition) {
-    logger.info("{} do not need fork", storageGroupName);
-  }
+    @Override
+    public void clear() {
+        sequenceFileTreeSet.clear();
+        unSequenceFileList.clear();
+    }
 
-  @Override
-  protected void merge(long timePartition) {
-    logger.info("{} no merge logic", storageGroupName);
-  }
+    @Override
+    public boolean isEmpty(boolean sequence) {
+        if (sequence) {
+            return sequenceFileTreeSet.isEmpty();
+        } else {
+            return unSequenceFileList.isEmpty();
+        }
+    }
+
+    @Override
+    public int size(boolean sequence) {
+        if (sequence) {
+            return sequenceFileTreeSet.size();
+        } else {
+            return unSequenceFileList.size();
+        }
+    }
+
+    @Override
+    public void recover() {
+        logger.info("{} no recover logic", storageGroupName);
+    }
+
+    @Override
+    public void forkCurrentFileList(long timePartition) {
+        logger.info("{} do not need fork", storageGroupName);
+    }
+
+    @Override
+    protected void merge(long timePartition) {
+        logger.info("{} no merge logic", storageGroupName);
+    }
 }

@@ -26,43 +26,46 @@ import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
 
 public class PrimitiveMemTable extends AbstractMemTable {
 
-  public PrimitiveMemTable() {
-  }
+    public PrimitiveMemTable() {}
 
-  public PrimitiveMemTable(boolean enableMemControl) {
-    this.disableMemControl = !enableMemControl;
-  }
-  public PrimitiveMemTable(Map<String, Map<String, IWritableMemChunk>> memTableMap) {
-    super(memTableMap);
-  }
+    public PrimitiveMemTable(boolean enableMemControl) {
+        this.disableMemControl = !enableMemControl;
+    }
 
-  @Override
-  protected IWritableMemChunk genMemSeries(MeasurementSchema schema) {
-    return new WritableMemChunk(schema, TVListAllocator.getInstance().allocate(schema.getType()));
-  }
+    public PrimitiveMemTable(Map<String, Map<String, IWritableMemChunk>> memTableMap) {
+        super(memTableMap);
+    }
 
-  @Override
-  public IMemTable copy() {
-    Map<String, Map<String, IWritableMemChunk>> newMap = new HashMap<>(getMemTableMap());
+    @Override
+    protected IWritableMemChunk genMemSeries(MeasurementSchema schema) {
+        return new WritableMemChunk(
+                schema, TVListAllocator.getInstance().allocate(schema.getType()));
+    }
 
-    return new PrimitiveMemTable(newMap);
-  }
+    @Override
+    public IMemTable copy() {
+        Map<String, Map<String, IWritableMemChunk>> newMap = new HashMap<>(getMemTableMap());
 
-  @Override
-  public boolean isSignalMemTable() {
-    return false;
-  }
+        return new PrimitiveMemTable(newMap);
+    }
 
-  @Override
-  public int hashCode() {return (int) getVersion();}
+    @Override
+    public boolean isSignalMemTable() {
+        return false;
+    }
 
-  @Override
-  public boolean equals(Object obj) {
-    return this == obj;
-  }
+    @Override
+    public int hashCode() {
+        return (int) getVersion();
+    }
 
-  @Override
-  public String toString() {
-    return "PrimitiveMemTable{planIndex=[" + getMinPlanIndex() +"," + getMaxPlanIndex() + "]}";
-  }
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj;
+    }
+
+    @Override
+    public String toString() {
+        return "PrimitiveMemTable{planIndex=[" + getMinPlanIndex() + "," + getMaxPlanIndex() + "]}";
+    }
 }

@@ -30,124 +30,121 @@ import org.apache.iotdb.db.engine.merge.task.MergeTask;
 
 public abstract class MergeFuture extends FutureTask<Void> implements Comparable<MergeFuture> {
 
-  private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"
-      + ".SSS'Z'");
-  private Date createdTime;
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss" + ".SSS'Z'");
+    private Date createdTime;
 
-  public MergeFuture(Callable callable) {
-    super(callable);
-    createdTime = new Date(System.currentTimeMillis());
-  }
-
-  public String getCreatedTime() {
-    return dateFormat.format(createdTime);
-  }
-
-  public abstract String getTaskName();
-
-  public abstract String getProgress();
-
-  @Override
-  public int compareTo(MergeFuture future) {
-    return this.getTaskName().compareTo(future.getTaskName());
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public MergeFuture(Callable callable) {
+        super(callable);
+        createdTime = new Date(System.currentTimeMillis());
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public String getCreatedTime() {
+        return dateFormat.format(createdTime);
     }
-    MergeFuture future = (MergeFuture) o;
-    return Objects.equals(getTaskName(), future.getTaskName());
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(createdTime);
-  }
+    public abstract String getTaskName();
 
-  public static class MainMergeFuture extends MergeFuture {
-
-    private MergeTask bindingTask;
-
-    public MainMergeFuture(MergeTask task) {
-      super(task);
-      bindingTask = task;
-    }
+    public abstract String getProgress();
 
     @Override
-    public String getTaskName() {
-      return bindingTask.getTaskName();
-    }
-
-    @Override
-    public String getProgress() {
-      return bindingTask.getProgress();
+    public int compareTo(MergeFuture future) {
+        return this.getTaskName().compareTo(future.getTaskName());
     }
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      if (!super.equals(o)) {
-        return false;
-      }
-      MainMergeFuture that = (MainMergeFuture) o;
-      return Objects.equals(bindingTask, that.bindingTask);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MergeFuture future = (MergeFuture) o;
+        return Objects.equals(getTaskName(), future.getTaskName());
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(super.hashCode(), bindingTask);
-    }
-  }
-
-  public static class SubMergeFuture extends MergeFuture {
-
-    private MergeChunkHeapTask bindingTask;
-
-    public SubMergeFuture(MergeChunkHeapTask task) {
-      super(task);
-      bindingTask = task;
+        return Objects.hash(createdTime);
     }
 
-    @Override
-    public String getTaskName() {
-      return bindingTask.getTaskName();
+    public static class MainMergeFuture extends MergeFuture {
+
+        private MergeTask bindingTask;
+
+        public MainMergeFuture(MergeTask task) {
+            super(task);
+            bindingTask = task;
+        }
+
+        @Override
+        public String getTaskName() {
+            return bindingTask.getTaskName();
+        }
+
+        @Override
+        public String getProgress() {
+            return bindingTask.getProgress();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            MainMergeFuture that = (MainMergeFuture) o;
+            return Objects.equals(bindingTask, that.bindingTask);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), bindingTask);
+        }
     }
 
-    @Override
-    public String getProgress() {
-      return bindingTask.getProgress();
-    }
+    public static class SubMergeFuture extends MergeFuture {
 
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      if (!super.equals(o)) {
-        return false;
-      }
-      SubMergeFuture that = (SubMergeFuture) o;
-      return Objects.equals(bindingTask, that.bindingTask);
-    }
+        private MergeChunkHeapTask bindingTask;
 
-    @Override
-    public int hashCode() {
-      return Objects.hash(super.hashCode(), bindingTask);
+        public SubMergeFuture(MergeChunkHeapTask task) {
+            super(task);
+            bindingTask = task;
+        }
+
+        @Override
+        public String getTaskName() {
+            return bindingTask.getTaskName();
+        }
+
+        @Override
+        public String getProgress() {
+            return bindingTask.getProgress();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            SubMergeFuture that = (SubMergeFuture) o;
+            return Objects.equals(bindingTask, that.bindingTask);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(super.hashCode(), bindingTask);
+        }
     }
-  }
 }
-
-

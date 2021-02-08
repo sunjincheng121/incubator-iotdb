@@ -32,34 +32,35 @@ import org.apache.iotdb.db.qp.executor.PlanExecutor;
 
 public class TestLogApplier implements LogApplier {
 
-  private PlanExecutor planExecutor;
+    private PlanExecutor planExecutor;
 
-  @Override
-  public void apply(Log log) {
-    try {
-      if (log instanceof PhysicalPlanLog) {
-        PhysicalPlanLog physicalPlanLog = (PhysicalPlanLog) log;
-        getPlanExecutor().processNonQuery(physicalPlanLog.getPlan());
-      } else if (log instanceof CloseFileLog) {
-        CloseFileLog closeFileLog = ((CloseFileLog) log);
+    @Override
+    public void apply(Log log) {
         try {
-          StorageEngine.getInstance()
-              .closeStorageGroupProcessor(new PartialPath(closeFileLog.getStorageGroupName()),
-                  closeFileLog.getPartitionId(),
-                  closeFileLog.isSeq(), false);
-        } catch (StorageGroupNotSetException | IllegalPathException e) {
-          throw new QueryProcessException(e);
+            if (log instanceof PhysicalPlanLog) {
+                PhysicalPlanLog physicalPlanLog = (PhysicalPlanLog) log;
+                getPlanExecutor().processNonQuery(physicalPlanLog.getPlan());
+            } else if (log instanceof CloseFileLog) {
+                CloseFileLog closeFileLog = ((CloseFileLog) log);
+                try {
+                    StorageEngine.getInstance()
+                            .closeStorageGroupProcessor(
+                                    new PartialPath(closeFileLog.getStorageGroupName()),
+                                    closeFileLog.getPartitionId(),
+                                    closeFileLog.isSeq(),
+                                    false);
+                } catch (StorageGroupNotSetException | IllegalPathException e) {
+                    throw new QueryProcessException(e);
+                }
+            }
+        } catch (Exception e) {
+            log.setException(e);
+        } finally {
+            log.setApplied(true);
         }
-      }
-    } catch (Exception e) {
-      log.setException(e);
-    } finally {
-      log.setApplied(true);
     }
 
-  }
-
-  public PlanExecutor getPlanExecutor() throws QueryProcessException {
-    return planExecutor == null ? planExecutor = new PlanExecutor() : planExecutor;
-  }
+    public PlanExecutor getPlanExecutor() throws QueryProcessException {
+        return planExecutor == null ? planExecutor = new PlanExecutor() : planExecutor;
+    }
 }

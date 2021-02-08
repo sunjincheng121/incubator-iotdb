@@ -30,36 +30,38 @@ import java.io.IOException;
  */
 public interface ISyncSenderLogger {
 
-  String SYNC_DELETED_FILE_NAME_START = "sync deleted file names start";
-  String SYNC_TSFILE_START = "sync tsfile start";
+    String SYNC_DELETED_FILE_NAME_START = "sync deleted file names start";
+    String SYNC_TSFILE_START = "sync tsfile start";
 
-  /**
-   * Start to sync deleted files name
-   * @throws IOException
-   */
-  void startSyncDeletedFilesName() throws IOException;
+    /**
+     * Start to sync deleted files name
+     *
+     * @throws IOException
+     */
+    void startSyncDeletedFilesName() throws IOException;
 
-  /**
-   * After a deleted file name is synced to the receiver end, record it in sync log.
-   * @param file the deleted tsfile
-   * @throws IOException
-   */
-  void finishSyncDeletedFileName(File file) throws IOException;
+    /**
+     * After a deleted file name is synced to the receiver end, record it in sync log.
+     *
+     * @param file the deleted tsfile
+     * @throws IOException
+     */
+    void finishSyncDeletedFileName(File file) throws IOException;
 
-  /**
-   * Start to sync new tsfiles
-   * @throws IOException
-   */
-  void startSyncTsFiles() throws IOException;
+    /**
+     * Start to sync new tsfiles
+     *
+     * @throws IOException
+     */
+    void startSyncTsFiles() throws IOException;
 
-  /**
-   *
-   * After a new tsfile is synced to the receiver end, record it in sync log.
-   * @param file new tsfile
-   * @throws IOException
-   */
-  void finishSyncTsfile(File file) throws IOException;
+    /**
+     * After a new tsfile is synced to the receiver end, record it in sync log.
+     *
+     * @param file new tsfile
+     * @throws IOException
+     */
+    void finishSyncTsfile(File file) throws IOException;
 
-  void close() throws IOException;
-
+    void close() throws IOException;
 }
