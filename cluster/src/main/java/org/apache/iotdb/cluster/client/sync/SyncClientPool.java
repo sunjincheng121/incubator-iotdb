@@ -36,8 +36,7 @@ import org.slf4j.LoggerFactory;
 
 public class SyncClientPool {
 
-  private static final Logger logger = LoggerFactory.getLogger(
-      SyncClientPool.class);
+  private static final Logger logger = LoggerFactory.getLogger(SyncClientPool.class);
   private static final long WAIT_CLIENT_TIMEOUT_MS = 5 * 1000L;
   private int maxConnectionForEachNode;
   private Map<ClusterNode, Deque<Client>> clientCaches = new ConcurrentHashMap<>();
@@ -52,13 +51,14 @@ public class SyncClientPool {
 
   /**
    * Get a client of the given node from the cache if one is available, or create a new one.
+   *
    * @param node
    * @return
    * @throws IOException
    */
   public Client getClient(Node node) {
     ClusterNode clusterNode = new ClusterNode(node);
-    //As clientCaches is ConcurrentHashMap, computeIfAbsent is thread safety.
+    // As clientCaches is ConcurrentHashMap, computeIfAbsent is thread safety.
     Deque<Client> clientStack = clientCaches.computeIfAbsent(clusterNode, n -> new ArrayDeque<>());
     synchronized (this) {
       if (clientStack.isEmpty()) {
@@ -82,8 +82,10 @@ public class SyncClientPool {
     while (clientStack.isEmpty()) {
       try {
         this.wait(WAIT_CLIENT_TIMEOUT_MS);
-        if (clientStack.isEmpty() && System.currentTimeMillis() - waitStart >= WAIT_CLIENT_TIMEOUT_MS) {
-          logger.warn("Cannot get an available client after {}ms, create a new one",
+        if (clientStack.isEmpty()
+            && System.currentTimeMillis() - waitStart >= WAIT_CLIENT_TIMEOUT_MS) {
+          logger.warn(
+              "Cannot get an available client after {}ms, create a new one",
               WAIT_CLIENT_TIMEOUT_MS);
           nodeClientNumMap.put(node, nodeClientNum + 1);
           return createClient(node, nodeClientNum);
@@ -99,12 +101,13 @@ public class SyncClientPool {
 
   /**
    * Return a client of a node to the pool. Closed client should not be returned.
+   *
    * @param node
    * @param client
    */
   void putClient(Node node, Client client) {
     ClusterNode clusterNode = new ClusterNode(node);
-    //As clientCaches is ConcurrentHashMap, computeIfAbsent is thread safety.
+    // As clientCaches is ConcurrentHashMap, computeIfAbsent is thread safety.
     Deque<Client> clientStack = clientCaches.computeIfAbsent(clusterNode, n -> new ArrayDeque<>());
     synchronized (this) {
       if (client.getInputProtocol() != null && client.getInputProtocol().getTransport().isOpen()) {
@@ -125,7 +128,8 @@ public class SyncClientPool {
     try {
       return syncClientFactory.getSyncClient(node, this);
     } catch (TTransportException e) {
-      if (e.getCause() instanceof ConnectException || e.getCause() instanceof SocketTimeoutException) {
+      if (e.getCause() instanceof ConnectException
+          || e.getCause() instanceof SocketTimeoutException) {
         logger.debug("Cannot open transport for client {} : {}", node, e.getMessage());
       } else {
         logger.error("Cannot open transport for client {}", node, e);

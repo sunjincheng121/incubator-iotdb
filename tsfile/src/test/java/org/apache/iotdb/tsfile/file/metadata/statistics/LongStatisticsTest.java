@@ -18,10 +18,10 @@
  */
 package org.apache.iotdb.tsfile.file.metadata.statistics;
 
+import static org.junit.Assert.*;
+
 import org.apache.iotdb.tsfile.exception.filter.StatisticsClassException;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class LongStatisticsTest {
 
@@ -114,5 +114,4 @@ public class LongStatisticsTest {
     assertEquals(111L, (long) longStats3.getFirstValue());
     assertEquals(114L, (long) longStats3.getLastValue());
   }
-
 }

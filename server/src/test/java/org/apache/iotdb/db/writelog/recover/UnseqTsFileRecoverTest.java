@@ -72,19 +72,20 @@ public class UnseqTsFileRecoverTest {
   private String logNodePrefix = TestConstant.OUTPUT_DATA_DIR.concat("testNode/0");
   private Schema schema;
   private TsFileResource resource;
-  private VersionController versionController = new VersionController() {
-    private int i;
+  private VersionController versionController =
+      new VersionController() {
+        private int i;
 
-    @Override
-    public long nextVersion() {
-      return ++i;
-    }
+        @Override
+        public long nextVersion() {
+          return ++i;
+        }
 
-    @Override
-    public long currVersion() {
-      return i;
-    }
-  };
+        @Override
+        public long currVersion() {
+          return i;
+        }
+      };
 
   @Before
   public void setup() throws IOException, WriteProcessException, MetadataException {
@@ -95,30 +96,46 @@ public class UnseqTsFileRecoverTest {
     schema = new Schema();
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
-        PartialPath path = new PartialPath("root.sg.device" + i + IoTDBConstant.PATH_SEPARATOR + "sensor" + j);
-        MeasurementSchema measurementSchema = new MeasurementSchema("sensor" + j, TSDataType.INT64,
-            TSEncoding.PLAIN);
+        PartialPath path =
+            new PartialPath("root.sg.device" + i + IoTDBConstant.PATH_SEPARATOR + "sensor" + j);
+        MeasurementSchema measurementSchema =
+            new MeasurementSchema("sensor" + j, TSDataType.INT64, TSEncoding.PLAIN);
         schema.registerTimeseries(path.toTSFilePath(), measurementSchema);
-        IoTDB.metaManager.createTimeseries(path, measurementSchema.getType(),
-            measurementSchema.getEncodingType(), measurementSchema.getCompressor(),
+        IoTDB.metaManager.createTimeseries(
+            path,
+            measurementSchema.getType(),
+            measurementSchema.getEncodingType(),
+            measurementSchema.getCompressor(),
             measurementSchema.getProps());
       }
     }
-    schema.registerTimeseries(new Path(("root.sg.device99"), ("sensor4")),
+    schema.registerTimeseries(
+        new Path(("root.sg.device99"), ("sensor4")),
         new MeasurementSchema("sensor4", TSDataType.INT64, TSEncoding.PLAIN));
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.sg.device99.sensor4"), TSDataType.INT64, TSEncoding.PLAIN,
-            TSFileDescriptor.getInstance().getConfig().getCompressor(), Collections.emptyMap());
-    schema.registerTimeseries(new Path(("root.sg.device99"), ("sensor2")),
+    IoTDB.metaManager.createTimeseries(
+        new PartialPath("root.sg.device99.sensor4"),
+        TSDataType.INT64,
+        TSEncoding.PLAIN,
+        TSFileDescriptor.getInstance().getConfig().getCompressor(),
+        Collections.emptyMap());
+    schema.registerTimeseries(
+        new Path(("root.sg.device99"), ("sensor2")),
         new MeasurementSchema("sensor2", TSDataType.INT64, TSEncoding.PLAIN));
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.sg.device99.sensor2"), TSDataType.INT64, TSEncoding.PLAIN,
-            TSFileDescriptor.getInstance().getConfig().getCompressor(), Collections.emptyMap());
-    schema.registerTimeseries(new Path(("root.sg.device99"), ("sensor1")),
+    IoTDB.metaManager.createTimeseries(
+        new PartialPath("root.sg.device99.sensor2"),
+        TSDataType.INT64,
+        TSEncoding.PLAIN,
+        TSFileDescriptor.getInstance().getConfig().getCompressor(),
+        Collections.emptyMap());
+    schema.registerTimeseries(
+        new Path(("root.sg.device99"), ("sensor1")),
         new MeasurementSchema("sensor1", TSDataType.INT64, TSEncoding.PLAIN));
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.sg.device99.sensor1"), TSDataType.INT64, TSEncoding.PLAIN,
-            TSFileDescriptor.getInstance().getConfig().getCompressor(), Collections.emptyMap());
+    IoTDB.metaManager.createTimeseries(
+        new PartialPath("root.sg.device99.sensor1"),
+        TSDataType.INT64,
+        TSEncoding.PLAIN,
+        TSFileDescriptor.getInstance().getConfig().getCompressor(),
+        Collections.emptyMap());
     writer = new TsFileWriter(tsF, schema);
 
     TSRecord tsRecord = new TSRecord(100, "root.sg.device99");
@@ -132,8 +149,8 @@ public class UnseqTsFileRecoverTest {
       for (int j = 0; j < 10; j++) {
         tsRecord = new TSRecord(i, "root.sg.device" + j);
         for (int k = 0; k < 10; k++) {
-          tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.INT64, "sensor" + k,
-              String.valueOf(k)));
+          tsRecord.addTuple(
+              DataPoint.getDataPoint(TSDataType.INT64, "sensor" + k, String.valueOf(k)));
         }
         writer.write(tsRecord);
       }
@@ -153,15 +170,19 @@ public class UnseqTsFileRecoverTest {
           types[k] = TSDataType.INT64;
           values[k] = String.valueOf(k + 10);
         }
-        InsertRowPlan insertRowPlan = new InsertRowPlan(new PartialPath("root.sg.device" + j), i, measurements, types,
-            values);
+        InsertRowPlan insertRowPlan =
+            new InsertRowPlan(
+                new PartialPath("root.sg.device" + j), i, measurements, types, values);
         node.write(insertRowPlan);
       }
       node.notifyStartFlush();
     }
-    InsertRowPlan insertRowPlan = new InsertRowPlan(new PartialPath("root.sg.device99"), 1, "sensor4", TSDataType.INT64, "4");
+    InsertRowPlan insertRowPlan =
+        new InsertRowPlan(new PartialPath("root.sg.device99"), 1, "sensor4", TSDataType.INT64, "4");
     node.write(insertRowPlan);
-    insertRowPlan = new InsertRowPlan(new PartialPath("root.sg.device99"), 300, "sensor2", TSDataType.INT64, "2");
+    insertRowPlan =
+        new InsertRowPlan(
+            new PartialPath("root.sg.device99"), 300, "sensor2", TSDataType.INT64, "2");
     node.write(insertRowPlan);
     node.close();
 
@@ -178,8 +199,8 @@ public class UnseqTsFileRecoverTest {
 
   @Test
   public void test() throws StorageGroupProcessorException, IOException {
-    TsFileRecoverPerformer performer = new TsFileRecoverPerformer(logNodePrefix,
-        versionController, resource, false, false);
+    TsFileRecoverPerformer performer =
+        new TsFileRecoverPerformer(logNodePrefix, versionController, resource, false, false);
     performer.recover(true).close();
 
     assertEquals(1, resource.getStartTime("root.sg.device99"));
@@ -200,8 +221,7 @@ public class UnseqTsFileRecoverTest {
     for (ChunkMetadata chunkMetaData : metadataQuerier.getChunkMetaDataList(path)) {
       Chunk chunk = chunkLoader.loadChunk(chunkMetaData);
       ChunkReader chunkReader = new ChunkReader(chunk, null);
-      unSeqMergeReader
-          .addReader(new ChunkDataIterator(chunkReader), priorityValue);
+      unSeqMergeReader.addReader(new ChunkDataIterator(chunkReader), priorityValue);
       priorityValue++;
     }
 

@@ -73,8 +73,7 @@ public class HeartbeatThreadTest {
       }
 
       @Override
-      public void updateHardState(long currentTerm, Node leader) {
-      }
+      public void updateHardState(long currentTerm, Node leader) {}
 
       @Override
       public AsyncClient getAsyncClient(Node node) {
@@ -91,43 +90,46 @@ public class HeartbeatThreadTest {
   AsyncClient getClient(Node node) {
     return new TestAsyncClient(node.nodeIdentifier) {
       @Override
-      public void sendHeartbeat(HeartBeatRequest request,
-          AsyncMethodCallback<HeartBeatResponse> resultHandler) {
-        new Thread(() -> {
-          if (testHeartbeat) {
-            assertEquals(TestUtils.getNode(0), request.getLeader());
-            assertEquals(6, request.getCommitLogIndex());
-            assertEquals(10, request.getTerm());
-            assertNull(request.getHeader());
-            synchronized (receivedNodes) {
-              receivedNodes.add(getSerialNum());
-              for (int i = 1; i < 10; i++) {
-                if (!receivedNodes.contains(i)) {
-                  return;
-                }
-              }
-              testThread.interrupt();
-            }
-          } else if (respondToElection) {
-            synchronized (testThread) {
-              testThread.notifyAll();
-            }
-          }
-        }).start();
+      public void sendHeartbeat(
+          HeartBeatRequest request, AsyncMethodCallback<HeartBeatResponse> resultHandler) {
+        new Thread(
+                () -> {
+                  if (testHeartbeat) {
+                    assertEquals(TestUtils.getNode(0), request.getLeader());
+                    assertEquals(6, request.getCommitLogIndex());
+                    assertEquals(10, request.getTerm());
+                    assertNull(request.getHeader());
+                    synchronized (receivedNodes) {
+                      receivedNodes.add(getSerialNum());
+                      for (int i = 1; i < 10; i++) {
+                        if (!receivedNodes.contains(i)) {
+                          return;
+                        }
+                      }
+                      testThread.interrupt();
+                    }
+                  } else if (respondToElection) {
+                    synchronized (testThread) {
+                      testThread.notifyAll();
+                    }
+                  }
+                })
+            .start();
       }
 
       @Override
-      public void startElection(ElectionRequest request,
-          AsyncMethodCallback<Long> resultHandler) {
-        new Thread(() -> {
-          assertEquals(TestUtils.getNode(0), request.getElector());
-          assertEquals(11, request.getTerm());
-          assertEquals(6, request.getLastLogIndex());
-          assertEquals(6, request.getLastLogTerm());
-          if (respondToElection) {
-            resultHandler.onComplete(Response.RESPONSE_AGREE);
-          }
-        }).start();
+      public void startElection(ElectionRequest request, AsyncMethodCallback<Long> resultHandler) {
+        new Thread(
+                () -> {
+                  assertEquals(TestUtils.getNode(0), request.getElector());
+                  assertEquals(11, request.getTerm());
+                  assertEquals(6, request.getLastLogIndex());
+                  assertEquals(6, request.getLastLogTerm());
+                  if (respondToElection) {
+                    resultHandler.onComplete(Response.RESPONSE_AGREE);
+                  }
+                })
+            .start();
       }
     };
   }
@@ -209,9 +211,8 @@ public class HeartbeatThreadTest {
     respondToElection = false;
     try {
       testThread.start();
-      while (!NodeCharacter.ELECTOR.equals(member.getCharacter())) {
+      while (!NodeCharacter.ELECTOR.equals(member.getCharacter())) {}
 
-      }
       testThread.interrupt();
       testThread.join();
     } finally {
@@ -224,9 +225,8 @@ public class HeartbeatThreadTest {
     member.setCharacter(NodeCharacter.ELECTOR);
     respondToElection = true;
     testThread.start();
-    while (!NodeCharacter.LEADER.equals(member.getCharacter())) {
+    while (!NodeCharacter.LEADER.equals(member.getCharacter())) {}
 
-    }
     testThread.interrupt();
     testThread.join();
   }
@@ -237,9 +237,8 @@ public class HeartbeatThreadTest {
     member.getAllNodes().add(TestUtils.getNode(0));
     member.setCharacter(NodeCharacter.ELECTOR);
     testThread.start();
-    while (!NodeCharacter.LEADER.equals(member.getCharacter())) {
+    while (!NodeCharacter.LEADER.equals(member.getCharacter())) {}
 
-    }
     testThread.interrupt();
     testThread.join();
   }

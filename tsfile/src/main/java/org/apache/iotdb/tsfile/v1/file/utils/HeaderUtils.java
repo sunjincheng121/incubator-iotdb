@@ -22,7 +22,6 @@ package org.apache.iotdb.tsfile.v1.file.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 import org.apache.iotdb.tsfile.file.MetaMarker;
 import org.apache.iotdb.tsfile.file.header.ChunkHeader;
@@ -36,10 +35,9 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 import org.apache.iotdb.tsfile.v1.file.metadata.statistics.StatisticsV1;
 
 public class HeaderUtils {
-  
-  private HeaderUtils() {
-  }
-  
+
+  private HeaderUtils() {}
+
   public static PageHeader deserializePageHeaderV1(InputStream inputStream, TSDataType dataType)
       throws IOException {
     int uncompressedSize = ReadWriteIOUtils.readInt(inputStream);
@@ -48,8 +46,9 @@ public class HeaderUtils {
     long maxTimestamp = ReadWriteIOUtils.readLong(inputStream);
     long minTimestamp = ReadWriteIOUtils.readLong(inputStream);
     StatisticsV1<?> oldstatistics = StatisticsV1.deserialize(inputStream, dataType);
-    Statistics<?> statistics = StatisticsV1.upgradeOldStatistics(oldstatistics, dataType, 
-        numOfValues, maxTimestamp, minTimestamp);
+    Statistics<?> statistics =
+        StatisticsV1.upgradeOldStatistics(
+            oldstatistics, dataType, numOfValues, maxTimestamp, minTimestamp);
     return new PageHeader(uncompressedSize, compressedSize, statistics);
   }
 
@@ -61,8 +60,9 @@ public class HeaderUtils {
     long maxTimestamp = ReadWriteIOUtils.readLong(buffer);
     long minTimestamp = ReadWriteIOUtils.readLong(buffer);
     StatisticsV1<?> oldstatistics = StatisticsV1.deserialize(buffer, dataType);
-    Statistics<?> statistics = StatisticsV1.upgradeOldStatistics(oldstatistics, dataType, 
-        numOfValues, maxTimestamp, minTimestamp);
+    Statistics<?> statistics =
+        StatisticsV1.upgradeOldStatistics(
+            oldstatistics, dataType, numOfValues, maxTimestamp, minTimestamp);
     return new PageHeader(uncompressedSize, compressedSize, statistics);
   }
 
@@ -71,7 +71,7 @@ public class HeaderUtils {
    *
    * @param markerRead Whether the marker of the CHUNK_HEADER has been read
    */
-  public static ChunkHeader deserializeChunkHeaderV1(InputStream inputStream, boolean markerRead) 
+  public static ChunkHeader deserializeChunkHeaderV1(InputStream inputStream, boolean markerRead)
       throws IOException {
     if (!markerRead) {
       byte marker = (byte) inputStream.read();
@@ -88,22 +88,21 @@ public class HeaderUtils {
     TSEncoding encoding = ReadWriteIOUtils.readEncoding(inputStream);
     // read maxTombstoneTime from old TsFile, has been removed in newer versions of TsFile
     ReadWriteIOUtils.readLong(inputStream);
-    return new ChunkHeader(measurementID, dataSize, dataType, type, encoding,
-        numOfPages);
+    return new ChunkHeader(measurementID, dataSize, dataType, type, encoding, numOfPages);
   }
 
   /**
    * deserialize from TsFileInput.
    *
-   * @param input           TsFileInput
-   * @param offset          offset
+   * @param input TsFileInput
+   * @param offset offset
    * @param chunkHeaderSize the size of chunk's header
-   * @param markerRead      read marker (boolean type)
+   * @param markerRead read marker (boolean type)
    * @return CHUNK_HEADER object
    * @throws IOException IOException
    */
-  public static ChunkHeader deserializeChunkHeaderV1(TsFileInput input, long offset,
-      int chunkHeaderSize, boolean markerRead) throws IOException {
+  public static ChunkHeader deserializeChunkHeaderV1(
+      TsFileInput input, long offset, int chunkHeaderSize, boolean markerRead) throws IOException {
     long offsetVar = offset;
     if (!markerRead) {
       offsetVar++;
@@ -136,6 +135,6 @@ public class HeaderUtils {
         + CompressionType.getSerializedSize() // compressionType
         + TSEncoding.getSerializedSize() // encodingType
         + Integer.BYTES // numOfPages
-        + Long.BYTES;  // maxTombstoneTime
+        + Long.BYTES; // maxTombstoneTime
   }
 }

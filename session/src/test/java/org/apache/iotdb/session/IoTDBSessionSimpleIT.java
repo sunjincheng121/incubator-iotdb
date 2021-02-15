@@ -87,7 +87,7 @@ public class IoTDBSessionSimpleIT {
     values.add("1.0");
     session.insertRecord(deviceId, 1L, measurements, values);
 
-    String[] expected = new String[]{"root.sg1.d1.s1 "};
+    String[] expected = new String[] {"root.sg1.d1.s1 "};
 
     assertFalse(session.checkTimeseriesExists("root.sg1.d1.s1 "));
     SessionDataSet dataSet = session.executeQueryStatement("show timeseries");
@@ -201,9 +201,9 @@ public class IoTDBSessionSimpleIT {
     try {
       session.insertRecord(deviceId, 1L, measurements, values);
     } catch (Exception e) {
-      logger.error("" ,e);
+      logger.error("", e);
     }
-    
+
     SessionDataSet dataSet = session.executeQueryStatement("show timeseries root");
     Assert.assertFalse(dataSet.hasNext());
 
@@ -255,7 +255,8 @@ public class IoTDBSessionSimpleIT {
 
   @Test
   public void testCreateMultiTimeseries()
-      throws IoTDBConnectionException, BatchExecutionException, StatementExecutionException, MetadataException {
+      throws IoTDBConnectionException, BatchExecutionException, StatementExecutionException,
+          MetadataException {
     session = new Session("127.0.0.1", 6667, "root", "root");
     session.open();
 
@@ -278,14 +279,13 @@ public class IoTDBSessionSimpleIT {
     tagsList.add(tags);
     tagsList.add(tags);
 
-    session
-        .createMultiTimeseries(paths, tsDataTypes, tsEncodings, compressionTypes, null, tagsList,
-            null, null);
+    session.createMultiTimeseries(
+        paths, tsDataTypes, tsEncodings, compressionTypes, null, tagsList, null, null);
 
     assertTrue(session.checkTimeseriesExists("root.sg1.d1.s1"));
     assertTrue(session.checkTimeseriesExists("root.sg1.d1.s2"));
-    MeasurementMNode mNode = (MeasurementMNode) MManager
-        .getInstance().getNodeByPath(new PartialPath("root.sg1.d1.s1"));
+    MeasurementMNode mNode =
+        (MeasurementMNode) MManager.getInstance().getNodeByPath(new PartialPath("root.sg1.d1.s1"));
     assertNull(mNode.getSchema().getProps());
 
     session.close();
@@ -301,12 +301,7 @@ public class IoTDBSessionSimpleIT {
       return;
     }
     String storageGroup = "root.存储组1";
-    String[] devices = new String[]{
-        "设备1.指标1",
-        "设备1.s2",
-        "d2.s1",
-        "d2.指标2"
-    };
+    String[] devices = new String[] {"设备1.指标1", "设备1.s2", "d2.s1", "d2.指标2"};
     session.setStorageGroup(storageGroup);
     for (String path : devices) {
       String fullPath = storageGroup + TsFileConstant.PATH_SEPARATOR + path;
@@ -343,7 +338,8 @@ public class IoTDBSessionSimpleIT {
   }
 
   @Test
-  public void createTimeSeriesWithDoubleTicks() throws IoTDBConnectionException, StatementExecutionException {
+  public void createTimeSeriesWithDoubleTicks()
+      throws IoTDBConnectionException, StatementExecutionException {
     session = new Session("127.0.0.1", 6667, "root", "root");
     session.open();
     if (!System.getProperty("sun.jnu.encoding").contains("UTF-8")) {
@@ -354,7 +350,11 @@ public class IoTDBSessionSimpleIT {
     String storageGroup = "root.sg";
     session.setStorageGroup(storageGroup);
 
-    session.createTimeseries("root.sg.\"my.device.with.colon:\".s", TSDataType.INT64, TSEncoding.RLE, CompressionType.SNAPPY);
+    session.createTimeseries(
+        "root.sg.\"my.device.with.colon:\".s",
+        TSDataType.INT64,
+        TSEncoding.RLE,
+        CompressionType.SNAPPY);
 
     final SessionDataSet dataSet = session.executeQueryStatement("SHOW TIMESERIES");
     assertTrue(dataSet.hasNext());
@@ -376,10 +376,10 @@ public class IoTDBSessionSimpleIT {
     session.setStorageGroup(storageGroup);
 
     try {
-      session.createTimeseries("root.sg.d1..s1", TSDataType.INT64, TSEncoding.RLE,
-          CompressionType.SNAPPY);
+      session.createTimeseries(
+          "root.sg.d1..s1", TSDataType.INT64, TSEncoding.RLE, CompressionType.SNAPPY);
     } catch (IoTDBConnectionException | StatementExecutionException e) {
-      logger.error("",e);
+      logger.error("", e);
     }
 
     final SessionDataSet dataSet = session.executeQueryStatement("SHOW TIMESERIES");

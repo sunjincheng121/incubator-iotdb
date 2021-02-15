@@ -22,20 +22,15 @@ package org.apache.iotdb.tsfile.encoding.encoder;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 import org.apache.iotdb.tsfile.encoding.bitpacking.IntPacker;
 import org.apache.iotdb.tsfile.encoding.common.EndianType;
 import org.apache.iotdb.tsfile.utils.ReadWriteForEncodingUtils;
 
-/**
- * Encoder for int value using rle or bit-packing.
- */
+/** Encoder for int value using rle or bit-packing. */
 public class IntRleEncoder extends RleEncoder<Integer> {
 
-  /**
-   * Packer for packing int values.
-   */
+  /** Packer for packing int values. */
   private IntPacker packer;
 
   public IntRleEncoder(EndianType endianType) {
@@ -82,9 +77,7 @@ public class IntRleEncoder extends RleEncoder<Integer> {
     preValue = 0;
   }
 
-  /**
-   * write bytes to an outputStream using rle format: [header][value].
-   */
+  /** write bytes to an outputStream using rle format: [header][value]. */
   @Override
   protected void writeRleRun() throws IOException {
     endPreviousBitPackedRun(TSFileConfig.RLE_MIN_REPEATED_NUM);

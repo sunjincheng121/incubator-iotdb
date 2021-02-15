@@ -22,14 +22,11 @@ package org.apache.iotdb.tsfile.v1.file.metadata;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.iotdb.tsfile.utils.BloomFilter;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
 
-/**
- * TSFileMetaData collects all metadata info and saves in its data structure.
- */
+/** TSFileMetaData collects all metadata info and saves in its data structure. */
 public class TsFileMetadataV1 {
 
   private Map<String, TsDeviceMetadataIndexV1> deviceIndexMap = new HashMap<>();
@@ -38,7 +35,7 @@ public class TsFileMetadataV1 {
   private BloomFilter bloomFilter;
 
   public TsFileMetadataV1() {
-    //do nothing
+    // do nothing
   }
 
   /**
@@ -72,7 +69,7 @@ public class TsFileMetadataV1 {
     }
 
     if (ReadWriteIOUtils.readIsNull(buffer)) {
-       ReadWriteIOUtils.readString(buffer); // createdBy String
+      ReadWriteIOUtils.readString(buffer); // createdBy String
     }
     ReadWriteIOUtils.readInt(buffer); // totalChunkNum
     ReadWriteIOUtils.readInt(buffer); // invalidChunkNum
@@ -102,5 +99,4 @@ public class TsFileMetadataV1 {
   public TsDeviceMetadataIndexV1 getDeviceMetadataIndex(String deviceUid) {
     return this.deviceIndexMap.get(deviceUid);
   }
-
 }

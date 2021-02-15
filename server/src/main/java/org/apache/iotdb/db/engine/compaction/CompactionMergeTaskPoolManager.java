@@ -31,15 +31,13 @@ import org.apache.iotdb.db.service.ServiceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * CompactionMergeTaskPoolManager provides a ThreadPool to queue and run all compaction
- * tasks.
- */
+/** CompactionMergeTaskPoolManager provides a ThreadPool to queue and run all compaction tasks. */
 public class CompactionMergeTaskPoolManager implements IService {
 
-  private static final Logger logger = LoggerFactory
-      .getLogger(CompactionMergeTaskPoolManager.class);
-  private static final CompactionMergeTaskPoolManager INSTANCE = new CompactionMergeTaskPoolManager();
+  private static final Logger logger =
+      LoggerFactory.getLogger(CompactionMergeTaskPoolManager.class);
+  private static final CompactionMergeTaskPoolManager INSTANCE =
+      new CompactionMergeTaskPoolManager();
   private ExecutorService pool;
 
   public static CompactionMergeTaskPoolManager getInstance() {
@@ -49,8 +47,8 @@ public class CompactionMergeTaskPoolManager implements IService {
   @Override
   public void start() {
     if (pool == null) {
-      this.pool = IoTDBThreadPoolFactory
-          .newScheduledThreadPool(
+      this.pool =
+          IoTDBThreadPoolFactory.newScheduledThreadPool(
               IoTDBDescriptor.getInstance().getConfig().getCompactionThreadNum(),
               ThreadName.COMPACTION_SERVICE.getName());
     }
@@ -82,8 +80,10 @@ public class CompactionMergeTaskPoolManager implements IService {
       try {
         Thread.sleep(200);
       } catch (InterruptedException e) {
-        logger.error("CompactionMergeTaskPoolManager {} shutdown",
-            ThreadName.COMPACTION_SERVICE.getName(), e);
+        logger.error(
+            "CompactionMergeTaskPoolManager {} shutdown",
+            ThreadName.COMPACTION_SERVICE.getName(),
+            e);
         Thread.currentThread().interrupt();
       }
       timeMillis += 200;
@@ -122,5 +122,4 @@ public class CompactionMergeTaskPoolManager implements IService {
   public boolean isTerminated() {
     return pool == null || pool.isTerminated();
   }
-
 }

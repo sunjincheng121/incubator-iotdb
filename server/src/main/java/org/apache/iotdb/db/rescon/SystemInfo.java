@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-
 import org.apache.iotdb.db.conf.IoTDBConfig;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.engine.flush.FlushManager;
@@ -45,28 +44,33 @@ public class SystemInfo {
 
   private static final double FLUSH_THERSHOLD =
       config.getAllocateMemoryForWrite() * config.getFlushProportion();
-  private static final double REJECT_THERSHOLD = 
+  private static final double REJECT_THERSHOLD =
       config.getAllocateMemoryForWrite() * config.getRejectProportion();
 
   /**
-   * Report current mem cost of storage group to system. Called when the memory of
-   * storage group newly accumulates to IoTDBConfig.getStorageGroupSizeReportThreshold()
+   * Report current mem cost of storage group to system. Called when the memory of storage group
+   * newly accumulates to IoTDBConfig.getStorageGroupSizeReportThreshold()
    *
    * @param storageGroupInfo storage group
    */
   public synchronized void reportStorageGroupStatus(StorageGroupInfo storageGroupInfo) {
-    long delta = storageGroupInfo.getMemCost() -
-        reportedSgMemCostMap.getOrDefault(storageGroupInfo, 0L);
+    long delta =
+        storageGroupInfo.getMemCost() - reportedSgMemCostMap.getOrDefault(storageGroupInfo, 0L);
     totalSgMemCost += delta;
     if (logger.isDebugEnabled()) {
-      logger.debug("Report Storage Group Status to the system. "
-          + "After adding {}, current sg mem cost is {}.", delta, totalSgMemCost);
+      logger.debug(
+          "Report Storage Group Status to the system. "
+              + "After adding {}, current sg mem cost is {}.",
+          delta,
+          totalSgMemCost);
     }
     reportedSgMemCostMap.put(storageGroupInfo, storageGroupInfo.getMemCost());
     storageGroupInfo.setLastReportedSize(storageGroupInfo.getMemCost());
     if (totalSgMemCost >= FLUSH_THERSHOLD) {
-      logger.debug("The total storage group mem costs are too large, call for flushing. "
-          + "Current sg cost is {}", totalSgMemCost);
+      logger.debug(
+          "The total storage group mem costs are too large, call for flushing. "
+              + "Current sg cost is {}",
+          totalSgMemCost);
       chooseTSPToMarkFlush();
     }
     if (totalSgMemCost >= REJECT_THERSHOLD) {
@@ -76,16 +80,16 @@ public class SystemInfo {
   }
 
   /**
-   * Report resetting the mem cost of sg to system.
-   * It will be called after flushing, closing and failed to insert
+   * Report resetting the mem cost of sg to system. It will be called after flushing, closing and
+   * failed to insert
    *
    * @param storageGroupInfo storage group
    */
-  public synchronized void resetStorageGroupStatus(StorageGroupInfo storageGroupInfo,
-      boolean shouldInvokeFlush) {
+  public synchronized void resetStorageGroupStatus(
+      StorageGroupInfo storageGroupInfo, boolean shouldInvokeFlush) {
     if (reportedSgMemCostMap.containsKey(storageGroupInfo)) {
-      this.totalSgMemCost -= (reportedSgMemCostMap.get(storageGroupInfo) -
-          storageGroupInfo.getMemCost());
+      this.totalSgMemCost -=
+          (reportedSgMemCostMap.get(storageGroupInfo) - storageGroupInfo.getMemCost());
       storageGroupInfo.setLastReportedSize(storageGroupInfo.getMemCost());
       reportedSgMemCostMap.put(storageGroupInfo, storageGroupInfo.getMemCost());
       if (shouldInvokeFlush) {
@@ -103,14 +107,12 @@ public class SystemInfo {
       logCurrentTotalSGMemory();
       rejected = false;
       forceAsyncFlush();
-    }
-    else if (totalSgMemCost >= REJECT_THERSHOLD) {
+    } else if (totalSgMemCost >= REJECT_THERSHOLD) {
       logger.warn("Some sg memory released, but system is still in reject status.");
       logCurrentTotalSGMemory();
       rejected = true;
       forceAsyncFlush();
-    } 
-    else {
+    } else {
       logger.debug("Some sg memory released, system is in normal status.");
       logCurrentTotalSGMemory();
       rejected = false;
@@ -122,9 +124,9 @@ public class SystemInfo {
   }
 
   /**
-   * Order all tsfileProcessors in system by memory cost of actual data points in memtable.
-   * Mark the top K TSPs as to be flushed,
-   * so that after flushing the K TSPs, the memory cost should be less than FLUSH_THRESHOLD
+   * Order all tsfileProcessors in system by memory cost of actual data points in memtable. Mark the
+   * top K TSPs as to be flushed, so that after flushing the K TSPs, the memory cost should be less
+   * than FLUSH_THRESHOLD
    */
   private void chooseTSPToMarkFlush() {
     if (FlushManager.getInstance().getNumberOfWorkingTasks() > 0) {
@@ -143,9 +145,7 @@ public class SystemInfo {
     }
   }
 
-  /**
-   * Be Careful!! This method can only be called by flush thread!
-   */
+  /** Be Careful!! This method can only be called by flush thread! */
   private void forceAsyncFlush() {
     if (FlushManager.getInstance().getNumberOfWorkingTasks() > 0) {
       return;
@@ -162,8 +162,9 @@ public class SystemInfo {
   }
 
   private List<TsFileProcessor> getTsFileProcessorsToFlush() {
-    PriorityQueue<TsFileProcessor> tsps = new PriorityQueue<>(
-        (o1, o2) -> Long.compare(o2.getWorkMemTableRamCost(), o1.getWorkMemTableRamCost()));
+    PriorityQueue<TsFileProcessor> tsps =
+        new PriorityQueue<>(
+            (o1, o2) -> Long.compare(o2.getWorkMemTableRamCost(), o1.getWorkMemTableRamCost()));
     for (StorageGroupInfo sgInfo : reportedSgMemCostMap.keySet()) {
       tsps.addAll(sgInfo.getAllReportedTsp());
     }
@@ -196,8 +197,7 @@ public class SystemInfo {
 
   private static class InstanceHolder {
 
-    private InstanceHolder() {
-    }
+    private InstanceHolder() {}
 
     private static SystemInfo instance = new SystemInfo();
   }

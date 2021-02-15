@@ -55,18 +55,30 @@ public class SerializationTest {
   public void before() throws MetadataException {
     IoTDB.metaManager.init();
     IoTDB.metaManager.setStorageGroup(new PartialPath("root.vehicle"));
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.vehicle.d1.s1"), TSDataType.FLOAT, TSEncoding.PLAIN,
-            CompressionType.UNCOMPRESSED, null);
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.vehicle.d2.s1"), TSDataType.FLOAT, TSEncoding.PLAIN,
-            CompressionType.UNCOMPRESSED, null);
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.vehicle.d3.s1"), TSDataType.FLOAT, TSEncoding.PLAIN,
-            CompressionType.UNCOMPRESSED, null);
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.vehicle.d4.s1"), TSDataType.FLOAT, TSEncoding.PLAIN,
-            CompressionType.UNCOMPRESSED, null);
+    IoTDB.metaManager.createTimeseries(
+        new PartialPath("root.vehicle.d1.s1"),
+        TSDataType.FLOAT,
+        TSEncoding.PLAIN,
+        CompressionType.UNCOMPRESSED,
+        null);
+    IoTDB.metaManager.createTimeseries(
+        new PartialPath("root.vehicle.d2.s1"),
+        TSDataType.FLOAT,
+        TSEncoding.PLAIN,
+        CompressionType.UNCOMPRESSED,
+        null);
+    IoTDB.metaManager.createTimeseries(
+        new PartialPath("root.vehicle.d3.s1"),
+        TSDataType.FLOAT,
+        TSEncoding.PLAIN,
+        CompressionType.UNCOMPRESSED,
+        null);
+    IoTDB.metaManager.createTimeseries(
+        new PartialPath("root.vehicle.d4.s1"),
+        TSDataType.FLOAT,
+        TSEncoding.PLAIN,
+        CompressionType.UNCOMPRESSED,
+        null);
   }
 
   @After
@@ -98,8 +110,8 @@ public class SerializationTest {
   public void testFlush() throws IOException, IllegalPathException {
     Map<PartialPath, List<Pair<Long, Boolean>>> storageGroupPartitionIds = new HashMap<>();
 
-    Boolean isSeqArray[] = new Boolean[]{null, true};
-    boolean isSyncArray[] = new boolean[]{true, false};
+    Boolean isSeqArray[] = new Boolean[] {null, true};
+    boolean isSyncArray[] = new boolean[] {true, false};
     Random random = new Random();
     for (int i = 0; i < 10; i++) {
       List<Pair<Long, Boolean>> partitionIdPairs = new ArrayList<>();
@@ -107,7 +119,7 @@ public class SerializationTest {
         partitionIdPairs.add(new Pair<Long, Boolean>((long) i + j, isSyncArray[random.nextInt(1)]));
       }
 
-      storageGroupPartitionIds.put(new PartialPath(new String[]{"path_" + i}), partitionIdPairs);
+      storageGroupPartitionIds.put(new PartialPath(new String[] {"path_" + i}), partitionIdPairs);
     }
     for (Boolean isSeq : isSeqArray) {
       for (boolean isSync : isSyncArray) {
@@ -135,5 +147,4 @@ public class SerializationTest {
       }
     }
   }
-
 }

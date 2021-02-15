@@ -63,8 +63,12 @@ class MergeFileTask {
   private int currentMergeIndex;
   private String currMergeFile;
 
-  MergeFileTask(String taskName, MergeContext context, MergeLogger mergeLogger,
-      MergeResource resource, List<TsFileResource> unmergedSeqFiles) {
+  MergeFileTask(
+      String taskName,
+      MergeContext context,
+      MergeLogger mergeLogger,
+      MergeResource resource,
+      List<TsFileResource> unmergedSeqFiles) {
     this.taskName = taskName;
     this.context = context;
     this.mergeLogger = mergeLogger;
@@ -88,8 +92,12 @@ class MergeFileTask {
       int unmergedChunkNum = context.getUnmergedChunkCnt().getOrDefault(seqFile, 0);
 
       if (logger.isInfoEnabled()) {
-        logger.info("{} moving unmerged data of {} to the merged file, {} merged chunks, {} "
-                + "unmerged chunks", taskName, seqFile.getTsFile().getName(), mergedChunkNum,
+        logger.info(
+            "{} moving unmerged data of {} to the merged file, {} merged chunks, {} "
+                + "unmerged chunks",
+            taskName,
+            seqFile.getTsFile().getName(),
+            mergedChunkNum,
             unmergedChunkNum);
       }
       moveUnmergedToNew(seqFile);
@@ -102,22 +110,27 @@ class MergeFileTask {
       logProgress();
     }
     if (logger.isInfoEnabled()) {
-      logger.info("{} has merged all files after {}ms", taskName,
-          System.currentTimeMillis() - startTime);
+      logger.info(
+          "{} has merged all files after {}ms", taskName, System.currentTimeMillis() - startTime);
     }
     mergeLogger.logMergeEnd();
   }
 
   private void logProgress() {
     if (logger.isInfoEnabled()) {
-      logger.debug("{} has merged {}, processed {}/{} files", taskName, currMergeFile,
-          currentMergeIndex + 1, unmergedFiles.size());
+      logger.debug(
+          "{} has merged {}, processed {}/{} files",
+          taskName,
+          currMergeFile,
+          currentMergeIndex + 1,
+          unmergedFiles.size());
     }
   }
 
   public String getProgress() {
-    return String.format("Merging %s, processed %d/%d files", currMergeFile,
-        currentMergeIndex + 1, unmergedFiles.size());
+    return String.format(
+        "Merging %s, processed %d/%d files",
+        currMergeFile, currentMergeIndex + 1, unmergedFiles.size());
   }
 
   private void updatePlanIndexes(TsFileResource seqFile) {
@@ -157,8 +170,9 @@ class MergeFileTask {
         }
 
         fileWriter.startChunkGroup(path.getDevice());
-        long maxVersion = writeUnmergedChunks(chunkStartTimes, chunkMetadataList,
-            resource.getFileReader(seqFile), fileWriter);
+        long maxVersion =
+            writeUnmergedChunks(
+                chunkStartTimes, chunkMetadataList, resource.getFileReader(seqFile), fileWriter);
 
         if (Thread.interrupted()) {
           Thread.currentThread().interrupt();
@@ -201,9 +215,12 @@ class MergeFileTask {
     }
   }
 
-  private long writeUnmergedChunks(List<Long> chunkStartTimes,
-      List<ChunkMetadata> chunkMetadataList, TsFileSequenceReader reader,
-      RestorableTsFileIOWriter fileWriter) throws IOException {
+  private long writeUnmergedChunks(
+      List<Long> chunkStartTimes,
+      List<ChunkMetadata> chunkMetadataList,
+      TsFileSequenceReader reader,
+      RestorableTsFileIOWriter fileWriter)
+      throws IOException {
     long maxVersion = 0;
     int chunkIdx = 0;
     for (Long startTime : chunkStartTimes) {

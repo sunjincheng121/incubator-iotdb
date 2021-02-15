@@ -23,9 +23,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Boolean Statistics.
- */
+/** Boolean Statistics. */
 public class BooleanStatisticsV1 extends StatisticsV1<Boolean> {
 
   private boolean min;
@@ -76,5 +74,4 @@ public class BooleanStatisticsV1 extends StatisticsV1<Boolean> {
     this.last = ReadWriteIOUtils.readBool(inputStream);
     this.sum = ReadWriteIOUtils.readDouble(inputStream);
   }
-
 }

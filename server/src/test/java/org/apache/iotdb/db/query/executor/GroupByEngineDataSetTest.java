@@ -18,10 +18,8 @@
  */
 package org.apache.iotdb.db.query.executor;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
-
 import org.apache.iotdb.db.qp.physical.crud.GroupByTimePlan;
 import org.apache.iotdb.db.query.aggregation.impl.CountAggrResult;
 import org.apache.iotdb.db.query.dataset.groupby.GroupByEngineDataSet;
@@ -49,7 +47,8 @@ public class GroupByEngineDataSetTest {
     groupByTimePlan.setStartTime(startTime);
     groupByTimePlan.setEndTime(endTime);
 
-    GroupByEngineDataSet groupByEngine = new GroupByWithValueFilterDataSet(queryId, groupByTimePlan);
+    GroupByEngineDataSet groupByEngine =
+        new GroupByWithValueFilterDataSet(queryId, groupByTimePlan);
     int cnt = 0;
     while (groupByEngine.hasNext()) {
       Pair pair = groupByEngine.nextTimePartition();
@@ -77,7 +76,8 @@ public class GroupByEngineDataSetTest {
     groupByTimePlan.setSlidingStep(slidingStep);
     groupByTimePlan.setStartTime(startTime);
     groupByTimePlan.setEndTime(endTime);
-    GroupByEngineDataSet groupByEngine = new GroupByWithValueFilterDataSet(queryId, groupByTimePlan);
+    GroupByEngineDataSet groupByEngine =
+        new GroupByWithValueFilterDataSet(queryId, groupByTimePlan);
     int cnt = 0;
     while (groupByEngine.hasNext()) {
       Pair pair = groupByEngine.nextTimePartition();
@@ -105,7 +105,8 @@ public class GroupByEngineDataSetTest {
     groupByTimePlan.setSlidingStep(slidingStep);
     groupByTimePlan.setStartTime(startTime);
     groupByTimePlan.setEndTime(endTime);
-    GroupByEngineDataSet groupByEngine = new GroupByWithValueFilterDataSet(queryId, groupByTimePlan);
+    GroupByEngineDataSet groupByEngine =
+        new GroupByWithValueFilterDataSet(queryId, groupByTimePlan);
     int cnt = 0;
     while (groupByEngine.hasNext()) {
       Pair pair = groupByEngine.nextTimePartition();
@@ -133,7 +134,8 @@ public class GroupByEngineDataSetTest {
     groupByTimePlan.setSlidingStep(slidingStep);
     groupByTimePlan.setStartTime(startTime);
     groupByTimePlan.setEndTime(endTime);
-    GroupByEngineDataSet groupByEngine = new GroupByWithValueFilterDataSet(queryId, groupByTimePlan);
+    GroupByEngineDataSet groupByEngine =
+        new GroupByWithValueFilterDataSet(queryId, groupByTimePlan);
     int cnt = 0;
     while (groupByEngine.hasNext()) {
       Pair pair = groupByEngine.nextTimePartition();
@@ -163,7 +165,8 @@ public class GroupByEngineDataSetTest {
     groupByTimePlan.setEndTime(endTime);
     ArrayList<Object> aggrList = new ArrayList<>();
     aggrList.add(new CountAggrResult());
-    GroupByEngineDataSet groupByEngine = new GroupByWithValueFilterDataSet(queryId, groupByTimePlan);
+    GroupByEngineDataSet groupByEngine =
+        new GroupByWithValueFilterDataSet(queryId, groupByTimePlan);
     int cnt = 0;
     while (groupByEngine.hasNext()) {
       Pair pair = groupByEngine.nextTimePartition();

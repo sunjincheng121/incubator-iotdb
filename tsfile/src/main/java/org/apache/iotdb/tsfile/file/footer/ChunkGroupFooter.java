@@ -47,24 +47,32 @@ public class ChunkGroupFooter {
   /**
    * constructor of CHUNK_GROUP_FOOTER.
    *
-   * @param deviceID       device ID
-   * @param dataSize       data size
+   * @param deviceID device ID
+   * @param dataSize data size
    * @param numberOfChunks number of chunks
    */
-  public ChunkGroupFooter(String deviceID, long dataSize, int numberOfChunks, long minPlanIndex,
-      long maxPlanIndex) {
+  public ChunkGroupFooter(
+      String deviceID, long dataSize, int numberOfChunks, long minPlanIndex, long maxPlanIndex) {
     this.deviceID = deviceID;
     this.dataSize = dataSize;
     this.numberOfChunks = numberOfChunks;
     this.minPlanIndex = minPlanIndex;
     this.maxPlanIndex = maxPlanIndex;
     this.serializedSize =
-        Byte.BYTES + Integer.BYTES + deviceID.getBytes(TSFileConfig.STRING_CHARSET).length
-            + Long.BYTES + Integer.BYTES + Long.BYTES + Long.BYTES;
+        Byte.BYTES
+            + Integer.BYTES
+            + deviceID.getBytes(TSFileConfig.STRING_CHARSET).length
+            + Long.BYTES
+            + Integer.BYTES
+            + Long.BYTES
+            + Long.BYTES;
   }
 
   public static int getSerializedSize(String deviceID) {
-    return Byte.BYTES + Integer.BYTES + getSerializedSize(deviceID.length()) + Long.BYTES
+    return Byte.BYTES
+        + Integer.BYTES
+        + getSerializedSize(deviceID.length())
+        + Long.BYTES
         + Long.BYTES;
   }
 
@@ -161,10 +169,21 @@ public class ChunkGroupFooter {
 
   @Override
   public String toString() {
-    return "CHUNK_GROUP_FOOTER{" + "deviceID='" + deviceID + '\'' + ", dataSize=" + dataSize
+    return "CHUNK_GROUP_FOOTER{"
+        + "deviceID='"
+        + deviceID
+        + '\''
+        + ", dataSize="
+        + dataSize
         + ", numberOfChunks="
-        + numberOfChunks + ", serializedSize=" + serializedSize + ", logIndex=[" + minPlanIndex
-        + "," + maxPlanIndex + "]}";
+        + numberOfChunks
+        + ", serializedSize="
+        + serializedSize
+        + ", logIndex=["
+        + minPlanIndex
+        + ","
+        + maxPlanIndex
+        + "]}";
   }
 
   public long getMinPlanIndex() {

@@ -57,91 +57,97 @@ public abstract class DataSnapshotTest {
 
   @Before
   public void setUp() throws MetadataException, StartupException {
-    dataGroupMember = new TestDataGroupMember() {
-      @Override
-      public AsyncClient getAsyncClient(Node node) {
-        return new AsyncDataClient(null, null, null) {
+    dataGroupMember =
+        new TestDataGroupMember() {
           @Override
-          public void readFile(String filePath, long offset, int length,
-              AsyncMethodCallback<ByteBuffer> resultHandler) {
-            new Thread(() -> {
-              if (addNetFailure && (failureCnt++) % failureFrequency == 0) {
-                // insert 1 failure in every 10 requests
-                resultHandler.onError(new Exception("Faked network failure"));
-                return;
+          public AsyncClient getAsyncClient(Node node) {
+            return new AsyncDataClient(null, null, null) {
+              @Override
+              public void readFile(
+                  String filePath,
+                  long offset,
+                  int length,
+                  AsyncMethodCallback<ByteBuffer> resultHandler) {
+                new Thread(
+                        () -> {
+                          if (addNetFailure && (failureCnt++) % failureFrequency == 0) {
+                            // insert 1 failure in every 10 requests
+                            resultHandler.onError(new Exception("Faked network failure"));
+                            return;
+                          }
+                          try {
+                            resultHandler.onComplete(IOUtils.readFile(filePath, offset, length));
+                          } catch (IOException e) {
+                            resultHandler.onError(e);
+                          }
+                        })
+                    .start();
               }
-              try {
-                resultHandler.onComplete(IOUtils.readFile(filePath, offset, length));
-              } catch (IOException e) {
-                resultHandler.onError(e);
+
+              @Override
+              public void removeHardLink(
+                  String hardLinkPath, AsyncMethodCallback<Void> resultHandler) throws TException {
+                new Thread(
+                        () -> {
+                          try {
+                            Files.deleteIfExists(new File(hardLinkPath).toPath());
+                          } catch (IOException e) {
+                            // ignore
+                          }
+                        })
+                    .start();
               }
-            }).start();
+            };
           }
 
           @Override
-          public void removeHardLink(String hardLinkPath, AsyncMethodCallback<Void> resultHandler)
-              throws TException {
-            new Thread(() -> {
-              try {
-                Files.deleteIfExists(new File(hardLinkPath).toPath());
-              } catch (IOException e) {
-                // ignore
+          public Client getSyncClient(Node node) {
+            return new SyncDataClient(
+                new TBinaryProtocol(
+                    new TTransport() {
+                      @Override
+                      public boolean isOpen() {
+                        return false;
+                      }
+
+                      @Override
+                      public void open() {}
+
+                      @Override
+                      public void close() {}
+
+                      @Override
+                      public int read(byte[] bytes, int i, int i1) {
+                        return 0;
+                      }
+
+                      @Override
+                      public void write(byte[] bytes, int i, int i1) {}
+                    })) {
+              @Override
+              public ByteBuffer readFile(String filePath, long offset, int length)
+                  throws TException {
+                if (addNetFailure && (failureCnt++) % failureFrequency == 0) {
+                  // simulate failures
+                  throw new TException("Faked network failure");
+                }
+                try {
+                  return IOUtils.readFile(filePath, offset, length);
+                } catch (IOException e) {
+                  throw new TException(e);
+                }
               }
-            }).start();
+            };
           }
         };
-      }
-
-      @Override
-      public Client getSyncClient(Node node) {
-        return new SyncDataClient(new TBinaryProtocol(new TTransport() {
-          @Override
-          public boolean isOpen() {
-            return false;
-          }
-
-          @Override
-          public void open() {
-
-          }
-
-          @Override
-          public void close() {
-
-          }
-
-          @Override
-          public int read(byte[] bytes, int i, int i1) {
-            return 0;
-          }
-
-          @Override
-          public void write(byte[] bytes, int i, int i1) {
-
-          }
-        })) {
-          @Override
-          public ByteBuffer readFile(String filePath, long offset, int length) throws TException {
-            if (addNetFailure && (failureCnt++) % failureFrequency == 0) {
-              // simulate failures
-              throw new TException("Faked network failure");
-            }
-            try {
-              return IOUtils.readFile(filePath, offset, length);
-            } catch (IOException e) {
-              throw new TException(e);
-            }
-          }
-        };
-      }
-    };
     // do nothing
-    metaGroupMember = new TestMetaGroupMember() {
-      @Override
-      public void syncLeaderWithConsistencyCheck(boolean isWriteRequest) {
-        // do nothing
-      }
-    };
+    metaGroupMember =
+        new TestMetaGroupMember() {
+          @Override
+          public void syncLeaderWithConsistencyCheck(boolean isWriteRequest) {
+            // do nothing
+          }
+        };
     metaGroupMember.setPartitionTable(TestUtils.getPartitionTable(10));
     dataGroupMember.setMetaGroupMember(metaGroupMember);
     dataGroupMember.setLogManager(new TestLogManager(0));

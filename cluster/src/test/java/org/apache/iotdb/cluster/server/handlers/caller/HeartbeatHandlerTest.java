@@ -45,16 +45,16 @@ public class HeartbeatHandlerTest {
 
   @Before
   public void setUp() {
-    metaGroupMember = new TestMetaGroupMember() {
-      @Override
-      public void catchUp(Node follower, long lastLogIdx) {
-        synchronized (metaGroupMember) {
-          catchUpFlag = true;
-          metaGroupMember.notifyAll();
-        }
-      }
-
-    };
+    metaGroupMember =
+        new TestMetaGroupMember() {
+          @Override
+          public void catchUp(Node follower, long lastLogIdx) {
+            synchronized (metaGroupMember) {
+              catchUpFlag = true;
+              metaGroupMember.notifyAll();
+            }
+          }
+        };
     metaGroupMember.initPeerMap();
     metaGroupMember.setLogManager(new TestLogManager(1));
   }

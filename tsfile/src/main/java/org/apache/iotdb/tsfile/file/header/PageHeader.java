@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
@@ -100,8 +99,14 @@ public class PageHeader {
 
   @Override
   public String toString() {
-    return "PageHeader{" + "uncompressedSize=" + uncompressedSize + ", compressedSize="
-        + compressedSize + ", statistics=" + statistics + "}";
+    return "PageHeader{"
+        + "uncompressedSize="
+        + uncompressedSize
+        + ", compressedSize="
+        + compressedSize
+        + ", statistics="
+        + statistics
+        + "}";
   }
 
   public boolean isModified() {

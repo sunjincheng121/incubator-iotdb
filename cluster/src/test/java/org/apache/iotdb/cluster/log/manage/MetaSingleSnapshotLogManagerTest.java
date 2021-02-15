@@ -50,8 +50,7 @@ public class MetaSingleSnapshotLogManagerTest extends IoTDBTest {
     super.setUp();
     MetaGroupMember metaGroupMember = new MetaGroupMember();
     metaGroupMember.setPartitionTable(new SlotPartitionTable(new Node()));
-    logManager =
-        new MetaSingleSnapshotLogManager(new TestLogApplier(), metaGroupMember);
+    logManager = new MetaSingleSnapshotLogManager(new TestLogApplier(), metaGroupMember);
   }
 
   @Override
@@ -73,8 +72,7 @@ public class MetaSingleSnapshotLogManagerTest extends IoTDBTest {
       logManager.takeSnapshot();
       MetaSimpleSnapshot snapshot = (MetaSimpleSnapshot) logManager.getSnapshot();
       Map<PartialPath, Long> storageGroupTTLMap = snapshot.getStorageGroupTTLMap();
-      PartialPath[] storageGroups = storageGroupTTLMap.keySet()
-          .toArray(new PartialPath[0]);
+      PartialPath[] storageGroups = storageGroupTTLMap.keySet().toArray(new PartialPath[0]);
       Arrays.sort(storageGroups);
 
       assertEquals(10, storageGroups.length);
@@ -86,6 +84,5 @@ public class MetaSingleSnapshotLogManagerTest extends IoTDBTest {
     } finally {
       logManager.close();
     }
-
   }
 }

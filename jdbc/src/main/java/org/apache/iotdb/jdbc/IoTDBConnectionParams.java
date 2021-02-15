@@ -78,5 +78,4 @@ public class IoTDBConnectionParams {
   public void setPassword(String password) {
     this.password = password;
   }
-
 }

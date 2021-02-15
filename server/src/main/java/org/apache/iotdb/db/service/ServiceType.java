@@ -24,7 +24,7 @@ import org.apache.iotdb.db.conf.IoTDBConstant;
 public enum ServiceType {
   STORAGE_ENGINE_SERVICE("Storage Engine ServerService", ""),
   JMX_SERVICE("JMX ServerService", "JMX ServerService"),
-  METRICS_SERVICE("Metrics ServerService","MetricsService"),
+  METRICS_SERVICE("Metrics ServerService", "MetricsService"),
   RPC_SERVICE("RPC ServerService", "RPCService"),
   MQTT_SERVICE("MQTTService", ""),
   MONITOR_SERVICE("Monitor ServerService", "Monitor"),
@@ -40,11 +40,12 @@ public enum ServiceType {
   COMPACTION_SERVICE("Compaction Manager", "Compaction Manager"),
   PERFORMANCE_STATISTIC_SERVICE("PERFORMANCE_STATISTIC_SERVICE", "PERFORMANCE_STATISTIC_SERVICE"),
   TVLIST_ALLOCATOR_SERVICE("TVList Allocator", ""),
-  CACHE_HIT_RATIO_DISPLAY_SERVICE("CACHE_HIT_RATIO_DISPLAY_SERVICE",
+  CACHE_HIT_RATIO_DISPLAY_SERVICE(
+      "CACHE_HIT_RATIO_DISPLAY_SERVICE",
       generateJmxName(IoTDBConstant.IOTDB_PACKAGE, "Cache Hit Ratio")),
 
-  FLUSH_SERVICE("Flush ServerService",
-      generateJmxName("org.apache.iotdb.db.engine.pool", "Flush Manager")),
+  FLUSH_SERVICE(
+      "Flush ServerService", generateJmxName("org.apache.iotdb.db.engine.pool", "Flush Manager")),
   CLUSTER_MONITOR_SERVICE("Cluster Monitor ServerService", "Cluster Monitor");
 
   private String name;
@@ -64,7 +65,6 @@ public enum ServiceType {
   }
 
   private static String generateJmxName(String packageName, String jmxName) {
-    return String
-        .format("%s:type=%s", packageName, jmxName);
+    return String.format("%s:type=%s", packageName, jmxName);
   }
 }

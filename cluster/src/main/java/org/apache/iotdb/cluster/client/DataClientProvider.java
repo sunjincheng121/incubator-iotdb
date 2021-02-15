@@ -35,6 +35,7 @@ public class DataClientProvider {
    * nodes
    */
   private AsyncClientPool dataAsyncClientPool;
+
   private SyncClientPool dataSyncClientPool;
 
   public DataClientProvider(TProtocolFactory factory) {

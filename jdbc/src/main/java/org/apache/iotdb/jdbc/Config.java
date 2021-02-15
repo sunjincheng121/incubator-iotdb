@@ -20,22 +20,16 @@ package org.apache.iotdb.jdbc;
 
 public class Config {
 
-  private Config(){}
+  private Config() {}
 
-  /**
-   * The required prefix for the connection URL.
-   */
+  /** The required prefix for the connection URL. */
   public static final String IOTDB_URL_PREFIX = "jdbc:iotdb://";
 
   static final String IOTDB_DEFAULT_HOST = "localhost";
-  /**
-   * If host is provided, without a port.
-   */
+  /** If host is provided, without a port. */
   static final int IOTDB_DEFAULT_PORT = 6667;
 
-  /**
-   * tsfile's default series name.
-   */
+  /** tsfile's default series name. */
   static final String DEFAULT_SERIES_NAME = "default";
 
   static final String AUTH_USER = "user";
@@ -53,5 +47,4 @@ public class Config {
   public static final String JDBC_DRIVER_NAME = "org.apache.iotdb.jdbc.IoTDBDriver";
 
   public static boolean rpcThriftCompressionEnable = false;
-
 }

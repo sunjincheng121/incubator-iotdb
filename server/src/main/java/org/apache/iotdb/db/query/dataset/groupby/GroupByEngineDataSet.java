@@ -44,21 +44,21 @@ public abstract class GroupByEngineDataSet extends QueryDataSet {
 
   protected boolean leftCRightO;
 
-  public GroupByEngineDataSet() {
-  }
+  public GroupByEngineDataSet() {}
 
-  /**
-   * groupBy query.
-   */
+  /** groupBy query. */
   public GroupByEngineDataSet(QueryContext context, GroupByTimePlan groupByTimePlan) {
-    super(new ArrayList<>(groupByTimePlan.getDeduplicatedPaths()),
-        groupByTimePlan.getDeduplicatedDataTypes(), groupByTimePlan.isAscending());
+    super(
+        new ArrayList<>(groupByTimePlan.getDeduplicatedPaths()),
+        groupByTimePlan.getDeduplicatedDataTypes(),
+        groupByTimePlan.isAscending());
 
     // find the startTime of the first aggregation interval
     initGroupByEngineDataSetFields(context, groupByTimePlan);
   }
 
-  protected void initGroupByEngineDataSetFields(QueryContext context, GroupByTimePlan groupByTimePlan) {
+  protected void initGroupByEngineDataSetFields(
+      QueryContext context, GroupByTimePlan groupByTimePlan) {
     this.queryId = context.getQueryId();
     this.interval = groupByTimePlan.getInterval();
     this.slidingStep = groupByTimePlan.getSlidingStep();
@@ -89,7 +89,7 @@ public abstract class GroupByEngineDataSet extends QueryDataSet {
     // check if the next interval out of range
     if (ascending) {
       curStartTime += slidingStep;
-      //This is an open interval , [0-100)
+      // This is an open interval , [0-100)
       if (curStartTime >= endTime) {
         return false;
       }

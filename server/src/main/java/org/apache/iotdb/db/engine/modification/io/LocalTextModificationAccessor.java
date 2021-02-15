@@ -34,10 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * LocalTextModificationAccessor uses a file on local file system to store the modifications
- * in text format, and writes modifications by appending to the tail of the file.
+ * LocalTextModificationAccessor uses a file on local file system to store the modifications in text
+ * format, and writes modifications by appending to the tail of the file.
  */
-public class LocalTextModificationAccessor implements ModificationReader, ModificationWriter, AutoCloseable {
+public class LocalTextModificationAccessor
+    implements ModificationReader, ModificationWriter, AutoCloseable {
 
   private static final Logger logger = LoggerFactory.getLogger(LocalTextModificationAccessor.class);
   private static final String SEPARATOR = ",";
@@ -64,7 +65,7 @@ public class LocalTextModificationAccessor implements ModificationReader, Modifi
 
     String line;
     List<Modification> modificationList = new ArrayList<>();
-    try(BufferedReader reader = FSFactoryProducer.getFSFactory().getBufferedReader(filePath)) {
+    try (BufferedReader reader = FSFactoryProducer.getFSFactory().getBufferedReader(filePath)) {
       while ((line = reader.readLine()) != null) {
         if (line.equals(ABORT_MARK) && !modificationList.isEmpty()) {
           modificationList.remove(modificationList.size() - 1);
@@ -73,8 +74,10 @@ public class LocalTextModificationAccessor implements ModificationReader, Modifi
         }
       }
     } catch (IOException e) {
-      logger.error("An error occurred when reading modifications, and the remaining modifications "
-          + "were ignored.", e);
+      logger.error(
+          "An error occurred when reading modifications, and the remaining modifications "
+              + "were ignored.",
+          e);
     }
     return modificationList;
   }
@@ -108,8 +111,7 @@ public class LocalTextModificationAccessor implements ModificationReader, Modifi
   }
 
   private static String encodeModification(Modification mod) {
-    if (mod instanceof Deletion)
-      return encodeDeletion((Deletion) mod);
+    if (mod instanceof Deletion) return encodeDeletion((Deletion) mod);
     return null;
   }
 
@@ -122,9 +124,15 @@ public class LocalTextModificationAccessor implements ModificationReader, Modifi
   }
 
   private static String encodeDeletion(Deletion del) {
-    return del.getType().toString() + SEPARATOR + del.getPathString()
-        + SEPARATOR + del.getVersionNum() + SEPARATOR
-        + del.getStartTime() + SEPARATOR + del.getEndTime();
+    return del.getType().toString()
+        + SEPARATOR
+        + del.getPathString()
+        + SEPARATOR
+        + del.getVersionNum()
+        + SEPARATOR
+        + del.getStartTime()
+        + SEPARATOR
+        + del.getEndTime();
   }
 
   private static Deletion decodeDeletion(String[] fields) throws IOException {
@@ -154,6 +162,5 @@ public class LocalTextModificationAccessor implements ModificationReader, Modifi
     } catch (NumberFormatException | IllegalPathException e) {
       throw new IOException("Invalid timestamp: " + e.getMessage());
     }
-
   }
 }

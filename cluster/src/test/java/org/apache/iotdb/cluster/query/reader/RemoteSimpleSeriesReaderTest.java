@@ -68,44 +68,50 @@ public class RemoteSimpleSeriesReaderTest {
     batchData = TestUtils.genBatchData(TSDataType.DOUBLE, 0, 100);
     batchUsed = false;
     metaGroupMember = new TestMetaGroupMember();
-    metaGroupMember.setClientProvider(new DataClientProvider(new Factory()) {
-      @Override
-      public AsyncDataClient getAsyncDataClient(Node node, int timeout) throws IOException {
-        return new AsyncDataClient(null, null, node, null) {
+    metaGroupMember.setClientProvider(
+        new DataClientProvider(new Factory()) {
           @Override
-          public void fetchSingleSeries(Node header, long readerId,
-              AsyncMethodCallback<ByteBuffer> resultHandler)
-              throws TException {
-            if (failedNodes.contains(node)) {
-              throw new TException("Node down.");
-            }
+          public AsyncDataClient getAsyncDataClient(Node node, int timeout) throws IOException {
+            return new AsyncDataClient(null, null, node, null) {
+              @Override
+              public void fetchSingleSeries(
+                  Node header, long readerId, AsyncMethodCallback<ByteBuffer> resultHandler)
+                  throws TException {
+                if (failedNodes.contains(node)) {
+                  throw new TException("Node down.");
+                }
 
-            new Thread(() -> {
-              if (batchUsed) {
-                resultHandler.onComplete(ByteBuffer.allocate(0));
-              } else {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-                SerializeUtils.serializeBatchData(batchData, dataOutputStream);
-                batchUsed = true;
-                resultHandler.onComplete(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
+                new Thread(
+                        () -> {
+                          if (batchUsed) {
+                            resultHandler.onComplete(ByteBuffer.allocate(0));
+                          } else {
+                            ByteArrayOutputStream byteArrayOutputStream =
+                                new ByteArrayOutputStream();
+                            DataOutputStream dataOutputStream =
+                                new DataOutputStream(byteArrayOutputStream);
+                            SerializeUtils.serializeBatchData(batchData, dataOutputStream);
+                            batchUsed = true;
+                            resultHandler.onComplete(
+                                ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
+                          }
+                        })
+                    .start();
               }
-            }).start();
-          }
 
-          @Override
-          public void querySingleSeries(SingleSeriesQueryRequest request,
-              AsyncMethodCallback<Long> resultHandler)
-              throws TException {
-            if (failedNodes.contains(node)) {
-              throw new TException("Node down.");
-            }
+              @Override
+              public void querySingleSeries(
+                  SingleSeriesQueryRequest request, AsyncMethodCallback<Long> resultHandler)
+                  throws TException {
+                if (failedNodes.contains(node)) {
+                  throw new TException("Node down.");
+                }
 
-            new Thread(() -> resultHandler.onComplete(1L)).start();
+                new Thread(() -> resultHandler.onComplete(1L)).start();
+              }
+            };
           }
-        };
-      }
-    });
+        });
   }
 
   @After
@@ -123,8 +129,8 @@ public class RemoteSimpleSeriesReaderTest {
     SingleSeriesQueryRequest request = new SingleSeriesQueryRequest();
     RemoteQueryContext context = new RemoteQueryContext(1);
 
-    DataSourceInfo sourceInfo = new DataSourceInfo(group, TSDataType.DOUBLE,
-        request, context, metaGroupMember, group);
+    DataSourceInfo sourceInfo =
+        new DataSourceInfo(group, TSDataType.DOUBLE, request, context, metaGroupMember, group);
     sourceInfo.hasNextDataClient(false, Long.MIN_VALUE);
 
     reader = new RemoteSimpleSeriesReader(sourceInfo);
@@ -153,8 +159,8 @@ public class RemoteSimpleSeriesReaderTest {
     SingleSeriesQueryRequest request = new SingleSeriesQueryRequest();
     RemoteQueryContext context = new RemoteQueryContext(1);
 
-    DataSourceInfo sourceInfo = new DataSourceInfo(group, TSDataType.DOUBLE,
-        request, context, metaGroupMember, group);
+    DataSourceInfo sourceInfo =
+        new DataSourceInfo(group, TSDataType.DOUBLE, request, context, metaGroupMember, group);
     sourceInfo.hasNextDataClient(false, Long.MIN_VALUE);
     reader = new RemoteSimpleSeriesReader(sourceInfo);
 

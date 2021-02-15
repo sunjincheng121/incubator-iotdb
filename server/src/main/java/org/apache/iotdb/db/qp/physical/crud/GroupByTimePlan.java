@@ -77,5 +77,4 @@ public class GroupByTimePlan extends AggregationPlan {
   public void setLeftCRightO(boolean leftCRightO) {
     this.leftCRightO = leftCRightO;
   }
-
 }

@@ -24,25 +24,17 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class TsDeviceMetadataIndexV1 {
 
-  /**
-   * The offset of the TsDeviceMetadata.
-   */
+  /** The offset of the TsDeviceMetadata. */
   private long offset;
-  /**
-   * The size of the TsDeviceMetadata in the disk.
-   */
+  /** The size of the TsDeviceMetadata in the disk. */
   private int len;
-  /**
-   * The start time of the device.
-   */
+  /** The start time of the device. */
   private long startTime;
-  /**
-   * The end time of the device.
-   */
+  /** The end time of the device. */
   private long endTime;
 
   public TsDeviceMetadataIndexV1() {
-    //do nothing
+    // do nothing
   }
 
   /**

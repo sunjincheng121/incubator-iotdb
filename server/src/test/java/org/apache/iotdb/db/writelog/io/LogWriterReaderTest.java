@@ -32,7 +32,6 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import org.apache.iotdb.db.qp.physical.crud.DeletePlan;
 import org.apache.iotdb.db.qp.physical.crud.InsertRowPlan;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
-import org.apache.iotdb.tsfile.read.common.Path;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,13 +46,20 @@ public class LogWriterReaderTest {
     if (new File(filePath).exists()) {
       new File(filePath).delete();
     }
-    InsertRowPlan insertRowPlan1 = new InsertRowPlan(new PartialPath(
-        "d1"), 10L, new String[]{"s1", "s2"},
-        new TSDataType[]{TSDataType.INT64, TSDataType.INT64},
-        new String[]{"1", "2"});
-    InsertRowPlan insertRowPlan2 = new InsertRowPlan(new PartialPath("d1"), 10L, new String[]{"s1", "s2"},
-        new TSDataType[]{TSDataType.INT64, TSDataType.INT64},
-        new String[]{"1", "2"});
+    InsertRowPlan insertRowPlan1 =
+        new InsertRowPlan(
+            new PartialPath("d1"),
+            10L,
+            new String[] {"s1", "s2"},
+            new TSDataType[] {TSDataType.INT64, TSDataType.INT64},
+            new String[] {"1", "2"});
+    InsertRowPlan insertRowPlan2 =
+        new InsertRowPlan(
+            new PartialPath("d1"),
+            10L,
+            new String[] {"s1", "s2"},
+            new TSDataType[] {TSDataType.INT64, TSDataType.INT64},
+            new String[] {"1", "2"});
     DeletePlan deletePlan = new DeletePlan(Long.MIN_VALUE, 10L, new PartialPath("root.d1.s1"));
     plans.add(insertRowPlan1);
     plans.add(insertRowPlan2);

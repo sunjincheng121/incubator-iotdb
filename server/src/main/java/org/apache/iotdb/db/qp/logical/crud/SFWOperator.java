@@ -51,9 +51,7 @@ public abstract class SFWOperator extends RootOperator {
     return selectOperator;
   }
 
-  /**
-   * set selectOperator, then init hasAggregation according to selectOperator.
-   */
+  /** set selectOperator, then init hasAggregation according to selectOperator. */
   public void setSelectOperator(SelectOperator sel) {
     this.selectOperator = sel;
     if (!sel.getAggregations().isEmpty()) {

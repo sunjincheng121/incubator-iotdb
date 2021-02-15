@@ -27,11 +27,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import org.junit.Test;
-
-import org.apache.iotdb.tsfile.utils.BytesUtils;
 import org.apache.iotdb.tsfile.constant.TestConstant;
+import org.junit.Test;
 
 public class BytesUtilsTest {
 
@@ -56,7 +53,6 @@ public class BytesUtilsTest {
     int rb2 = BytesUtils.bytesToInt(ret, 4);
     assertEquals("testBytesToFloat", b1, rb1);
     assertEquals("testBytesToFloat", b2, rb2);
-
   }
 
   @Test
@@ -390,5 +386,4 @@ public class BytesUtilsTest {
     InputStream in = new ByteArrayInputStream(bs);
     assertEquals(l, BytesUtils.readBool(in));
   }
-
 }

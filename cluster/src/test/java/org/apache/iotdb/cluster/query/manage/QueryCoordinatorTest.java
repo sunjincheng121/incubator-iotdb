@@ -66,29 +66,32 @@ public class QueryCoordinatorTest {
       nodeLatencyMap.put(node, i * 200L);
     }
 
-    MetaGroupMember metaGroupMember = new MetaGroupMember() {
-      @Override
-      public AsyncClient getAsyncClient(Node node) {
-        try {
-          return new TestAsyncMetaClient(new Factory(),  null, node, null) {
-            @Override
-            public void queryNodeStatus(AsyncMethodCallback<TNodeStatus> resultHandler) {
-              new Thread(() -> {
-                try {
-                  Thread.sleep(nodeLatencyMap.get(getNode()));
-                } catch (InterruptedException e) {
-                  // ignored
+    MetaGroupMember metaGroupMember =
+        new MetaGroupMember() {
+          @Override
+          public AsyncClient getAsyncClient(Node node) {
+            try {
+              return new TestAsyncMetaClient(new Factory(), null, node, null) {
+                @Override
+                public void queryNodeStatus(AsyncMethodCallback<TNodeStatus> resultHandler) {
+                  new Thread(
+                          () -> {
+                            try {
+                              Thread.sleep(nodeLatencyMap.get(getNode()));
+                            } catch (InterruptedException e) {
+                              // ignored
+                            }
+                            resultHandler.onComplete(nodeStatusMap.get(getNode()).getStatus());
+                          })
+                      .start();
                 }
-                resultHandler.onComplete(nodeStatusMap.get(getNode()).getStatus());
-              }).start();
+              };
+            } catch (IOException e) {
+              fail(e.getMessage());
+              return null;
             }
-          };
-        } catch (IOException e) {
-          fail(e.getMessage());
-          return null;
-        }
-      }
-    };
+          }
+        };
     coordinator.setMetaGroupMember(metaGroupMember);
     coordinator.clear();
   }

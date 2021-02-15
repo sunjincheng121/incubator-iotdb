@@ -67,20 +67,24 @@ public class UpgradeTask extends WrappedRunnable {
           File upgradedFile = upgradedResource.getTsFile();
           long partition = upgradedResource.getTimePartition();
           String storageGroupPath = upgradedFile.getParentFile().getParentFile().getParent();
-          File partitionDir = FSFactoryProducer.getFSFactory()
-              .getFile(storageGroupPath, partition + "");
+          File partitionDir =
+              FSFactoryProducer.getFSFactory().getFile(storageGroupPath, partition + "");
           if (!partitionDir.exists()) {
             partitionDir.mkdir();
           }
-          FSFactoryProducer.getFSFactory().moveFile(upgradedFile,
-              FSFactoryProducer.getFSFactory().getFile(partitionDir, upgradedFile.getName()));
+          FSFactoryProducer.getFSFactory()
+              .moveFile(
+                  upgradedFile,
+                  FSFactoryProducer.getFSFactory().getFile(partitionDir, upgradedFile.getName()));
           upgradedResource.setFile(
               FSFactoryProducer.getFSFactory().getFile(partitionDir, upgradedFile.getName()));
           // copy mods file to partition directories
           if (modificationFile.exists()) {
-            Files.copy(modificationFile.toPath(),
-                FSFactoryProducer.getFSFactory().getFile(partitionDir, upgradedFile.getName()
-                    + ModificationFile.FILE_SUFFIX).toPath());
+            Files.copy(
+                modificationFile.toPath(),
+                FSFactoryProducer.getFSFactory()
+                    .getFile(partitionDir, upgradedFile.getName() + ModificationFile.FILE_SUFFIX)
+                    .toPath());
           }
           upgradedResource.serialize();
           // delete tmp partition folder when it is empty
@@ -94,12 +98,11 @@ public class UpgradeTask extends WrappedRunnable {
           fsFactory.moveFile(upgradedFile, zeroMergeVersionFile);
           fsFactory.moveFile(
               fsFactory.getFile(upgradedFile.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX),
-              fsFactory
-                  .getFile(
-                      zeroMergeVersionFile.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX));
+              fsFactory.getFile(
+                  zeroMergeVersionFile.getAbsolutePath() + TsFileResource.RESOURCE_SUFFIX));
           upgradedResource.setFile(upgradedFile);
         }
-        // delete old modificationFile 
+        // delete old modificationFile
         if (modificationFile.exists()) {
           Files.delete(modificationFile.toPath());
         }
@@ -116,11 +119,13 @@ public class UpgradeTask extends WrappedRunnable {
         upgradeResource.writeUnlock();
       }
       UpgradeSevice.setCntUpgradeFileNum(UpgradeSevice.getCntUpgradeFileNum() - 1);
-      logger.info("Upgrade completes, file path:{} , the remaining upgraded file num: {}",
-          oldTsfilePath, UpgradeSevice.getCntUpgradeFileNum());
+      logger.info(
+          "Upgrade completes, file path:{} , the remaining upgraded file num: {}",
+          oldTsfilePath,
+          UpgradeSevice.getCntUpgradeFileNum());
     } catch (Exception e) {
-      logger.error("meet error when upgrade file:{}", upgradeResource.getTsFile().getAbsolutePath(),
-          e);
+      logger.error(
+          "meet error when upgrade file:{}", upgradeResource.getTsFile().getAbsolutePath(), e);
     }
   }
 
@@ -135,8 +140,7 @@ public class UpgradeTask extends WrappedRunnable {
       UpgradeLog.writeUpgradeLogFile(
           oldTsfilePath + COMMA_SEPERATOR + UpgradeCheckStatus.AFTER_UPGRADE_FILE);
     } catch (IOException e) {
-      logger
-          .error("generate upgrade file failed, the file to be upgraded:{}", oldTsfilePath, e);
+      logger.error("generate upgrade file failed, the file to be upgraded:{}", oldTsfilePath, e);
     } finally {
       upgradeResource.readUnlock();
     }
@@ -144,11 +148,15 @@ public class UpgradeTask extends WrappedRunnable {
   }
 
   private File getMaxMergeVersionFile(File seqFile) {
-    String[] splits = seqFile.getName().replace(TSFILE_SUFFIX, "")
-        .split(IoTDBConstant.FILE_NAME_SEPARATOR);
-    return fsFactory.getFile(seqFile.getParentFile(),
-        splits[0] + IoTDBConstant.FILE_NAME_SEPARATOR + splits[1]
-            + IoTDBConstant.FILE_NAME_SEPARATOR + (maxLevelNum - 1) + TSFILE_SUFFIX);
+    String[] splits =
+        seqFile.getName().replace(TSFILE_SUFFIX, "").split(IoTDBConstant.FILE_NAME_SEPARATOR);
+    return fsFactory.getFile(
+        seqFile.getParentFile(),
+        splits[0]
+            + IoTDBConstant.FILE_NAME_SEPARATOR
+            + splits[1]
+            + IoTDBConstant.FILE_NAME_SEPARATOR
+            + (maxLevelNum - 1)
+            + TSFILE_SUFFIX);
   }
-
 }

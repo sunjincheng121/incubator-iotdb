@@ -33,4 +33,3 @@ public class ShowStorageGroupPlan extends ShowPlan {
     return this.path;
   }
 }
-

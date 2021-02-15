@@ -23,18 +23,14 @@ import java.util.List;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.qp.logical.Operator;
 
-/**
- * this class maintains information from select clause.
- */
+/** this class maintains information from select clause. */
 public final class SelectOperator extends Operator {
 
   private List<PartialPath> suffixList;
   private List<String> aggregations;
   private boolean lastQuery;
 
-  /**
-   * init with tokenIntType, default operatorType is <code>OperatorType.SELECT</code>.
-   */
+  /** init with tokenIntType, default operatorType is <code>OperatorType.SELECT</code>. */
   public SelectOperator(int tokenIntType) {
     super(tokenIntType);
     operatorType = OperatorType.SELECT;
@@ -72,5 +68,7 @@ public final class SelectOperator extends Operator {
     return suffixList;
   }
 
-  public boolean isLastQuery() {return this.lastQuery; }
+  public boolean isLastQuery() {
+    return this.lastQuery;
+  }
 }

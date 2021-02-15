@@ -21,10 +21,9 @@ package org.apache.iotdb.tsfile.utils;
 import java.io.ByteArrayOutputStream;
 
 /**
- * A subclass extending <code>ByteArrayOutputStream</code>. It's used to return
- * the byte array directly. Note that the size of byte array is large than
- * actual size of valid contents, thus it's used cooperating with
- * <code>size()</code> or <code>capacity = size</code>
+ * A subclass extending <code>ByteArrayOutputStream</code>. It's used to return the byte array
+ * directly. Note that the size of byte array is large than actual size of valid contents, thus it's
+ * used cooperating with <code>size()</code> or <code>capacity = size</code>
  */
 public class PublicBAOS extends ByteArrayOutputStream {
 
@@ -45,5 +44,4 @@ public class PublicBAOS extends ByteArrayOutputStream {
 
     return this.buf;
   }
-
 }

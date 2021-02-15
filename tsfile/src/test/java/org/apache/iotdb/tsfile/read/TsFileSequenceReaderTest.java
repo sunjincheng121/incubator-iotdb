@@ -64,8 +64,9 @@ public class TsFileSequenceReaderTest {
   @Test
   public void testReadTsFileSequently() throws IOException {
     TsFileSequenceReader reader = new TsFileSequenceReader(FILE_PATH);
-    reader.position(TSFileConfig.MAGIC_STRING.getBytes().length + TSFileConfig.VERSION_NUMBER
-        .getBytes().length);
+    reader.position(
+        TSFileConfig.MAGIC_STRING.getBytes().length
+            + TSFileConfig.VERSION_NUMBER.getBytes().length);
     Map<String, List<Pair<Long, Long>>> deviceChunkGroupMetadataOffsets = new HashMap<>();
 
     long startOffset = reader.position();
@@ -84,8 +85,8 @@ public class TsFileSequenceReaderTest {
           long endOffset = reader.position();
           Pair<Long, Long> pair = new Pair<>(startOffset, endOffset);
           deviceChunkGroupMetadataOffsets.putIfAbsent(footer.getDeviceID(), new ArrayList<>());
-          List<Pair<Long, Long>> metadatas = deviceChunkGroupMetadataOffsets
-              .get(footer.getDeviceID());
+          List<Pair<Long, Long>> metadatas =
+              deviceChunkGroupMetadataOffsets.get(footer.getDeviceID());
           metadatas.add(pair);
           startOffset = endOffset;
           break;
@@ -105,8 +106,8 @@ public class TsFileSequenceReaderTest {
 
     for (String device : reader.getAllDevices()) {
       Map<String, Set<Chunk>> expectedChunksInDevice = new HashMap<>();
-      for (Entry<String, List<ChunkMetadata>> entry : reader.readChunkMetadataInDevice(device)
-          .entrySet()) {
+      for (Entry<String, List<ChunkMetadata>> entry :
+          reader.readChunkMetadataInDevice(device).entrySet()) {
         expectedChunksInDevice.putIfAbsent(entry.getKey(), new HashSet<>());
         for (ChunkMetadata chunkMetadata : entry.getValue()) {
           expectedChunksInDevice.get(entry.getKey()).add(reader.readMemChunk(chunkMetadata));
@@ -116,12 +117,16 @@ public class TsFileSequenceReaderTest {
       Map<String, List<Chunk>> actualChunksInDevice = reader.readChunksInDevice(device);
 
       for (Entry<String, Set<Chunk>> entry : expectedChunksInDevice.entrySet()) {
-        Set<String> expectedChunkStrings = entry.getValue().stream()
-            .map(chunk -> chunk.getHeader().toString()).collect(Collectors.toSet());
+        Set<String> expectedChunkStrings =
+            entry.getValue().stream()
+                .map(chunk -> chunk.getHeader().toString())
+                .collect(Collectors.toSet());
 
         Assert.assertTrue(actualChunksInDevice.containsKey(entry.getKey()));
-        Set<String> actualChunkStrings = actualChunksInDevice.get(entry.getKey()).stream()
-            .map(chunk -> chunk.getHeader().toString()).collect(Collectors.toSet());
+        Set<String> actualChunkStrings =
+            actualChunksInDevice.get(entry.getKey()).stream()
+                .map(chunk -> chunk.getHeader().toString())
+                .collect(Collectors.toSet());
 
         Assert.assertEquals(expectedChunkStrings, actualChunkStrings);
       }
@@ -135,9 +140,8 @@ public class TsFileSequenceReaderTest {
     TsFileSequenceReader reader = new TsFileSequenceReader(FILE_PATH);
 
     // test for exist device "d2"
-    Map<String, List<ChunkMetadata>> chunkMetadataMap = reader
-        .readChunkMetadataInDevice("d2");
-    int[] res = new int[]{20, 75, 100, 13};
+    Map<String, List<ChunkMetadata>> chunkMetadataMap = reader.readChunkMetadataInDevice("d2");
+    int[] res = new int[] {20, 75, 100, 13};
 
     Assert.assertEquals(4, chunkMetadataMap.size());
     for (int i = 0; i < chunkMetadataMap.size(); i++) {

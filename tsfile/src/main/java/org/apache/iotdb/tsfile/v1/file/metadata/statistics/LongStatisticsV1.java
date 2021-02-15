@@ -23,9 +23,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Statistics for long type.
- */
+/** Statistics for long type. */
 public class LongStatisticsV1 extends StatisticsV1<Long> {
 
   private long min;
@@ -76,5 +74,4 @@ public class LongStatisticsV1 extends StatisticsV1<Long> {
     this.last = ReadWriteIOUtils.readLong(inputStream);
     this.sum = ReadWriteIOUtils.readDouble(inputStream);
   }
-
 }

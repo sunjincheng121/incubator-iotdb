@@ -21,7 +21,6 @@ package org.apache.iotdb.tsfile.v1.file.metadata.statistics;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-
 import org.apache.iotdb.tsfile.exception.write.UnknownColumnTypeException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.statistics.BinaryStatistics;
@@ -39,8 +38,8 @@ import org.apache.iotdb.tsfile.v1.file.metadata.TsDigestV1;
 /**
  * This class is used for recording statistic information of each measurement in a delta file. While
  * writing processing, the processor records the digest information. Statistics includes maximum,
- * minimum and null value count up to version 0.0.1.<br> Each data type extends this Statistic as
- * super class.<br>
+ * minimum and null value count up to version 0.0.1.<br>
+ * Each data type extends this Statistic as super class.<br>
  *
  * @param <T> data type for Statistics
  */
@@ -78,17 +77,20 @@ public abstract class StatisticsV1<T> {
     return statistics;
   }
 
-  public static StatisticsV1 deserialize(ByteBuffer buffer, TSDataType dataType) throws IOException {
+  public static StatisticsV1 deserialize(ByteBuffer buffer, TSDataType dataType)
+      throws IOException {
     StatisticsV1<?> statistics = getStatsByType(dataType);
     statistics.deserialize(buffer);
     return statistics;
   }
 
-  /**
-   * For upgrading 0.9.x/v1 -> 0.10/v2
-   */
-  public static Statistics upgradeOldStatistics(StatisticsV1<?> oldstatistics,
-      TSDataType dataType, int numOfValues, long maxTimestamp, long minTimestamp) {
+  /** For upgrading 0.9.x/v1 -> 0.10/v2 */
+  public static Statistics upgradeOldStatistics(
+      StatisticsV1<?> oldstatistics,
+      TSDataType dataType,
+      int numOfValues,
+      long maxTimestamp,
+      long minTimestamp) {
     Statistics<?> statistics = Statistics.getStatsByType(dataType);
     statistics.setStartTime(minTimestamp);
     statistics.setEndTime(maxTimestamp);
@@ -97,57 +99,61 @@ public abstract class StatisticsV1<T> {
     switch (dataType) {
       case INT32:
         ((IntegerStatistics) statistics)
-        .initializeStats(((IntegerStatisticsV1) oldstatistics).getMin(),
-            ((IntegerStatisticsV1) oldstatistics).getMax(),
-            ((IntegerStatisticsV1) oldstatistics).getFirst(),
-            ((IntegerStatisticsV1) oldstatistics).getLast(),
-            ((IntegerStatisticsV1) oldstatistics).getSum());
+            .initializeStats(
+                ((IntegerStatisticsV1) oldstatistics).getMin(),
+                ((IntegerStatisticsV1) oldstatistics).getMax(),
+                ((IntegerStatisticsV1) oldstatistics).getFirst(),
+                ((IntegerStatisticsV1) oldstatistics).getLast(),
+                ((IntegerStatisticsV1) oldstatistics).getSum());
         break;
       case INT64:
         ((LongStatistics) statistics)
-        .initializeStats(((LongStatisticsV1) oldstatistics).getMin(),
-            ((LongStatisticsV1) oldstatistics).getMax(),
-            ((LongStatisticsV1) oldstatistics).getFirst(),
-            ((LongStatisticsV1) oldstatistics).getLast(),
-            ((LongStatisticsV1) oldstatistics).getSum());
+            .initializeStats(
+                ((LongStatisticsV1) oldstatistics).getMin(),
+                ((LongStatisticsV1) oldstatistics).getMax(),
+                ((LongStatisticsV1) oldstatistics).getFirst(),
+                ((LongStatisticsV1) oldstatistics).getLast(),
+                ((LongStatisticsV1) oldstatistics).getSum());
         break;
       case TEXT:
         ((BinaryStatistics) statistics)
-        .initializeStats(((BinaryStatisticsV1) oldstatistics).getFirst(),
-            ((BinaryStatisticsV1) oldstatistics).getLast());
+            .initializeStats(
+                ((BinaryStatisticsV1) oldstatistics).getFirst(),
+                ((BinaryStatisticsV1) oldstatistics).getLast());
         break;
       case BOOLEAN:
         ((BooleanStatistics) statistics)
-        .initializeStats(((BooleanStatisticsV1) oldstatistics).getFirst(),
-            ((BooleanStatisticsV1) oldstatistics).getLast());
+            .initializeStats(
+                ((BooleanStatisticsV1) oldstatistics).getFirst(),
+                ((BooleanStatisticsV1) oldstatistics).getLast());
         break;
       case DOUBLE:
         ((DoubleStatistics) statistics)
-        .initializeStats(((DoubleStatisticsV1) oldstatistics).getMin(),
-            ((DoubleStatisticsV1) oldstatistics).getMax(),
-            ((DoubleStatisticsV1) oldstatistics).getFirst(),
-            ((DoubleStatisticsV1) oldstatistics).getLast(),
-            ((DoubleStatisticsV1) oldstatistics).getSum());
+            .initializeStats(
+                ((DoubleStatisticsV1) oldstatistics).getMin(),
+                ((DoubleStatisticsV1) oldstatistics).getMax(),
+                ((DoubleStatisticsV1) oldstatistics).getFirst(),
+                ((DoubleStatisticsV1) oldstatistics).getLast(),
+                ((DoubleStatisticsV1) oldstatistics).getSum());
         break;
       case FLOAT:
         ((FloatStatistics) statistics)
-        .initializeStats(((FloatStatisticsV1) oldstatistics).getMin(),
-            ((FloatStatisticsV1) oldstatistics).getMax(),
-            ((FloatStatisticsV1) oldstatistics).getFirst(),
-            ((FloatStatisticsV1) oldstatistics).getLast(),
-            ((FloatStatisticsV1) oldstatistics).getSum());
+            .initializeStats(
+                ((FloatStatisticsV1) oldstatistics).getMin(),
+                ((FloatStatisticsV1) oldstatistics).getMax(),
+                ((FloatStatisticsV1) oldstatistics).getFirst(),
+                ((FloatStatisticsV1) oldstatistics).getLast(),
+                ((FloatStatisticsV1) oldstatistics).getSum());
         break;
       default:
-        throw new UnknownColumnTypeException(statistics.getType()
-            .toString());
+        throw new UnknownColumnTypeException(statistics.getType().toString());
     }
     return statistics;
   }
 
-  /**
-   * For upgrading 0.9.x/v1 -> 0.10.x/v2
-   */
-  public static Statistics constructStatisticsFromOldChunkMetadata(ChunkMetadataV1 oldChunkMetadata) {
+  /** For upgrading 0.9.x/v1 -> 0.10.x/v2 */
+  public static Statistics constructStatisticsFromOldChunkMetadata(
+      ChunkMetadataV1 oldChunkMetadata) {
     Statistics<?> statistics = Statistics.getStatsByType(oldChunkMetadata.getTsDataType());
     statistics.setStartTime(oldChunkMetadata.getStartTime());
     statistics.setEndTime(oldChunkMetadata.getEndTime());
@@ -158,49 +164,51 @@ public abstract class StatisticsV1<T> {
     switch (statistics.getType()) {
       case INT32:
         ((IntegerStatistics) statistics)
-        .initializeStats(ReadWriteIOUtils.readInt(buffers[0]),
-            ReadWriteIOUtils.readInt(buffers[1]),
-            ReadWriteIOUtils.readInt(buffers[2]),
-            ReadWriteIOUtils.readInt(buffers[3]),
-            ReadWriteIOUtils.readDouble(buffers[4]));
+            .initializeStats(
+                ReadWriteIOUtils.readInt(buffers[0]),
+                ReadWriteIOUtils.readInt(buffers[1]),
+                ReadWriteIOUtils.readInt(buffers[2]),
+                ReadWriteIOUtils.readInt(buffers[3]),
+                ReadWriteIOUtils.readDouble(buffers[4]));
         break;
       case INT64:
         ((LongStatistics) statistics)
-        .initializeStats(ReadWriteIOUtils.readLong(buffers[0]),
-            ReadWriteIOUtils.readLong(buffers[1]),
-            ReadWriteIOUtils.readLong(buffers[2]),
-            ReadWriteIOUtils.readLong(buffers[3]),
-            ReadWriteIOUtils.readDouble(buffers[4]));
+            .initializeStats(
+                ReadWriteIOUtils.readLong(buffers[0]),
+                ReadWriteIOUtils.readLong(buffers[1]),
+                ReadWriteIOUtils.readLong(buffers[2]),
+                ReadWriteIOUtils.readLong(buffers[3]),
+                ReadWriteIOUtils.readDouble(buffers[4]));
         break;
       case TEXT:
         ((BinaryStatistics) statistics)
-        .initializeStats(new Binary(buffers[2].array()),
-            new Binary(buffers[3].array()));
+            .initializeStats(new Binary(buffers[2].array()), new Binary(buffers[3].array()));
         break;
       case BOOLEAN:
         ((BooleanStatistics) statistics)
-        .initializeStats(ReadWriteIOUtils.readBool(buffers[2]),
-            ReadWriteIOUtils.readBool(buffers[3]));
+            .initializeStats(
+                ReadWriteIOUtils.readBool(buffers[2]), ReadWriteIOUtils.readBool(buffers[3]));
         break;
       case DOUBLE:
         ((DoubleStatistics) statistics)
-        .initializeStats(ReadWriteIOUtils.readDouble(buffers[0]),
-            ReadWriteIOUtils.readDouble(buffers[1]),
-            ReadWriteIOUtils.readDouble(buffers[2]),
-            ReadWriteIOUtils.readDouble(buffers[3]),
-            ReadWriteIOUtils.readDouble(buffers[4]));
+            .initializeStats(
+                ReadWriteIOUtils.readDouble(buffers[0]),
+                ReadWriteIOUtils.readDouble(buffers[1]),
+                ReadWriteIOUtils.readDouble(buffers[2]),
+                ReadWriteIOUtils.readDouble(buffers[3]),
+                ReadWriteIOUtils.readDouble(buffers[4]));
         break;
       case FLOAT:
         ((FloatStatistics) statistics)
-        .initializeStats(ReadWriteIOUtils.readFloat(buffers[0]),
-            ReadWriteIOUtils.readFloat(buffers[1]),
-            ReadWriteIOUtils.readFloat(buffers[2]),
-            ReadWriteIOUtils.readFloat(buffers[3]),
-            ReadWriteIOUtils.readDouble(buffers[4]));
+            .initializeStats(
+                ReadWriteIOUtils.readFloat(buffers[0]),
+                ReadWriteIOUtils.readFloat(buffers[1]),
+                ReadWriteIOUtils.readFloat(buffers[2]),
+                ReadWriteIOUtils.readFloat(buffers[3]),
+                ReadWriteIOUtils.readDouble(buffers[4]));
         break;
       default:
-        throw new UnknownColumnTypeException(statistics.getType()
-            .toString());
+        throw new UnknownColumnTypeException(statistics.getType().toString());
     }
     return statistics;
   }
@@ -215,11 +223,8 @@ public abstract class StatisticsV1<T> {
 
   public abstract double getSum();
 
-  /**
-   * read data from the inputStream.
-   */
+  /** read data from the inputStream. */
   abstract void deserialize(InputStream inputStream) throws IOException;
 
   abstract void deserialize(ByteBuffer byteBuffer) throws IOException;
-
 }

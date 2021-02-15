@@ -37,8 +37,8 @@ public abstract class AsyncClientFactory {
 
   static {
     managers =
-        new TAsyncClientManager[ClusterDescriptor.getInstance().getConfig()
-            .getSelectorNumOfClientPool()];
+        new TAsyncClientManager
+            [ClusterDescriptor.getInstance().getConfig().getSelectorNumOfClientPool()];
     if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
       for (int i = 0; i < managers.length; i++) {
         try {
@@ -52,6 +52,7 @@ public abstract class AsyncClientFactory {
 
   /**
    * Get a client which will connect the given node and be cached in the given pool.
+   *
    * @param node the cluster node the client will connect.
    * @param pool the pool that will cache the client for reusing.
    * @return

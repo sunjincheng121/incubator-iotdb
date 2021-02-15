@@ -75,7 +75,7 @@ public class ClusterPlanRouter {
     } else if (plan instanceof ShowChildPathsPlan) {
       return routePlan((ShowChildPathsPlan) plan);
     }
-    //the if clause can be removed after the program is stable
+    // the if clause can be removed after the program is stable
     if (PartitionUtils.isLocalNonQueryPlan(plan)) {
       logger.error("{} is a local plan. Please run it locally directly", plan);
     } else if (PartitionUtils.isGlobalMetaPlan(plan) || PartitionUtils.isGlobalDataPlan(plan)) {
@@ -87,23 +87,21 @@ public class ClusterPlanRouter {
     throw new UnsupportedPlanException(plan);
   }
 
-  private PartitionGroup routePlan(InsertRowPlan plan)
-      throws MetadataException {
+  private PartitionGroup routePlan(InsertRowPlan plan) throws MetadataException {
     return partitionTable.partitionByPathTime(plan.getDeviceId(), plan.getTime());
   }
 
-  private PartitionGroup routePlan(CreateTimeSeriesPlan plan)
-      throws MetadataException {
+  private PartitionGroup routePlan(CreateTimeSeriesPlan plan) throws MetadataException {
     return partitionTable.partitionByPathTime(plan.getPath(), 0);
   }
 
   private PartitionGroup routePlan(ShowChildPathsPlan plan) {
     try {
-      return partitionTable.route(getMManager().getStorageGroupPath(plan.getPath()).getFullPath()
-          , 0);
+      return partitionTable.route(
+          getMManager().getStorageGroupPath(plan.getPath()).getFullPath(), 0);
     } catch (MetadataException e) {
-      //the path is too short to have no a storage group name, e.g., "root"
-      //so we can do it locally.
+      // the path is too short to have no a storage group name, e.g., "root"
+      // so we can do it locally.
       return partitionTable.getLocalGroups().get(0);
     }
   }
@@ -125,7 +123,7 @@ public class ClusterPlanRouter {
     } else if (plan instanceof CreateMultiTimeSeriesPlan) {
       return splitAndRoutePlan((CreateMultiTimeSeriesPlan) plan);
     }
-    //the if clause can be removed after the program is stable
+    // the if clause can be removed after the program is stable
     if (PartitionUtils.isLocalNonQueryPlan(plan)) {
       logger.error("{} is a local plan. Please run it locally directly", plan);
     } else if (PartitionUtils.isGlobalMetaPlan(plan) || PartitionUtils.isGlobalDataPlan(plan)) {
@@ -139,22 +137,20 @@ public class ClusterPlanRouter {
 
   private Map<PhysicalPlan, PartitionGroup> splitAndRoutePlan(InsertRowPlan plan)
       throws MetadataException {
-    PartitionGroup partitionGroup = partitionTable.partitionByPathTime(plan.getDeviceId(),
-        plan.getTime());
+    PartitionGroup partitionGroup =
+        partitionTable.partitionByPathTime(plan.getDeviceId(), plan.getTime());
     return Collections.singletonMap(plan, partitionGroup);
   }
 
   private Map<PhysicalPlan, PartitionGroup> splitAndRoutePlan(AlterTimeSeriesPlan plan)
       throws MetadataException {
-    PartitionGroup partitionGroup =
-        partitionTable.partitionByPathTime(plan.getPath(), 0);
+    PartitionGroup partitionGroup = partitionTable.partitionByPathTime(plan.getPath(), 0);
     return Collections.singletonMap(plan, partitionGroup);
   }
 
   private Map<PhysicalPlan, PartitionGroup> splitAndRoutePlan(CreateTimeSeriesPlan plan)
       throws MetadataException {
-    PartitionGroup partitionGroup =
-        partitionTable.partitionByPathTime(plan.getPath(), 0);
+    PartitionGroup partitionGroup = partitionTable.partitionByPathTime(plan.getPath(), 0);
     return Collections.singletonMap(plan, partitionGroup);
   }
 
@@ -167,37 +163,38 @@ public class ClusterPlanRouter {
     if (times.length == 0) {
       return Collections.emptyMap();
     }
-    long startTime = (times[0] / StorageEngine.getTimePartitionInterval()) * StorageEngine
-        .getTimePartitionInterval();//included
-    long endTime = startTime + StorageEngine.getTimePartitionInterval();//excluded
-    int startLoc = 0; //included
+    long startTime =
+        (times[0] / StorageEngine.getTimePartitionInterval())
+            * StorageEngine.getTimePartitionInterval(); // included
+    long endTime = startTime + StorageEngine.getTimePartitionInterval(); // excluded
+    int startLoc = 0; // included
 
     Map<PartitionGroup, List<Integer>> splitMap = new HashMap<>();
-    //for each List in split, they are range1.start, range1.end, range2.start, range2.end, ...
-    for (int i = 1; i < times.length; i++) {// times are sorted in session API.
+    // for each List in split, they are range1.start, range1.end, range2.start, range2.end, ...
+    for (int i = 1; i < times.length; i++) { // times are sorted in session API.
       if (times[i] >= endTime) {
         // a new range.
         PartitionGroup group = partitionTable.route(storageGroup.getFullPath(), startTime);
         List<Integer> ranges = splitMap.computeIfAbsent(group, x -> new ArrayList<>());
-        ranges.add(startLoc);//included
-        ranges.add(i);//excluded
-        //next init
+        ranges.add(startLoc); // included
+        ranges.add(i); // excluded
+        // next init
         startLoc = i;
         startTime = endTime;
         endTime =
-            (times[i] / StorageEngine.getTimePartitionInterval() + 1) * StorageEngine
-                .getTimePartitionInterval();
+            (times[i] / StorageEngine.getTimePartitionInterval() + 1)
+                * StorageEngine.getTimePartitionInterval();
       }
     }
-    //the final range
+    // the final range
     PartitionGroup group = partitionTable.route(storageGroup.getFullPath(), startTime);
     List<Integer> ranges = splitMap.computeIfAbsent(group, x -> new ArrayList<>());
-    ranges.add(startLoc);//included
-    ranges.add(times.length);//excluded
+    ranges.add(startLoc); // included
+    ranges.add(times.length); // excluded
 
     List<Integer> locs;
     for (Map.Entry<PartitionGroup, List<Integer>> entry : splitMap.entrySet()) {
-      //generate a new times and values
+      // generate a new times and values
       locs = entry.getValue();
       int count = 0;
       for (int i = 0; i < locs.size(); i += 2) {
@@ -259,36 +256,42 @@ public class ClusterPlanRouter {
 
   private Map<PhysicalPlan, PartitionGroup> splitAndRoutePlan(CountPlan plan)
       throws StorageGroupNotSetException, IllegalPathException {
-    //CountPlan is quite special because it has the behavior of wildcard at the tail of the path
+    // CountPlan is quite special because it has the behavior of wildcard at the tail of the path
     // even though there is no wildcard
-    Map<String, String> sgPathMap = getMManager()
-        .determineStorageGroup(plan.getPath());
+    Map<String, String> sgPathMap = getMManager().determineStorageGroup(plan.getPath());
     if (sgPathMap.isEmpty()) {
       throw new StorageGroupNotSetException(plan.getPath().getFullPath());
     }
     Map<PhysicalPlan, PartitionGroup> result = new HashMap<>();
     if (plan.getShowContentType().equals(ShowContentType.COUNT_TIMESERIES)) {
-      //support wildcard
+      // support wildcard
       for (Map.Entry<String, String> entry : sgPathMap.entrySet()) {
-        CountPlan plan1 = new CountPlan(ShowContentType.COUNT_TIMESERIES,
-            new PartialPath(entry.getValue()), plan.getLevel());
+        CountPlan plan1 =
+            new CountPlan(
+                ShowContentType.COUNT_TIMESERIES,
+                new PartialPath(entry.getValue()),
+                plan.getLevel());
         result.put(plan1, partitionTable.route(entry.getKey(), 0));
       }
     } else {
-      //do not support wildcard
+      // do not support wildcard
       if (sgPathMap.size() == 1) {
         // the path of the original plan has only one SG, or there is only one SG in the system.
         for (Map.Entry<String, String> entry : sgPathMap.entrySet()) {
-          //actually, there is only one entry
+          // actually, there is only one entry
           result.put(plan, partitionTable.route(entry.getKey(), 0));
         }
       } else {
-        // the path of the original plan contains more than one SG, and we added a wildcard at the tail.
+        // the path of the original plan contains more than one SG, and we added a wildcard at the
+        // tail.
         // we have to remove it.
         for (Map.Entry<String, String> entry : sgPathMap.entrySet()) {
-          CountPlan plan1 = new CountPlan(ShowContentType.COUNT_TIMESERIES,
-              new PartialPath(entry.getValue().substring(0, entry.getValue().lastIndexOf(".*"))),
-              plan.getLevel());
+          CountPlan plan1 =
+              new CountPlan(
+                  ShowContentType.COUNT_TIMESERIES,
+                  new PartialPath(
+                      entry.getValue().substring(0, entry.getValue().lastIndexOf(".*"))),
+                  plan.getLevel());
           result.put(plan1, partitionTable.route(entry.getKey(), 0));
         }
       }
@@ -306,8 +309,7 @@ public class ClusterPlanRouter {
       if (plan.getResults().containsKey(i)) {
         continue;
       }
-      PartitionGroup partitionGroup =
-          partitionTable.partitionByPathTime(path, 0);
+      PartitionGroup partitionGroup = partitionTable.partitionByPathTime(path, 0);
       CreateMultiTimeSeriesPlan subPlan;
       if (groupHoldPlan.get(partitionGroup) == null) {
         subPlan = createSubPlan(plan);

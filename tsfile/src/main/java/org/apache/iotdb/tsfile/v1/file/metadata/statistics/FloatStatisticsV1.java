@@ -23,9 +23,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Statistics for float type.
- */
+/** Statistics for float type. */
 public class FloatStatisticsV1 extends StatisticsV1<Float> {
 
   private float min;

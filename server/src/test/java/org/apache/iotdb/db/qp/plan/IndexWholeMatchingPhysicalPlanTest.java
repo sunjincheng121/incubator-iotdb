@@ -48,9 +48,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * refer to org.apache.iotdb.db.qp.plan.PhysicalPlanTest
- */
+/** refer to org.apache.iotdb.db.qp.plan.PhysicalPlanTest */
 public class IndexWholeMatchingPhysicalPlanTest {
 
   private Planner processor = new Planner();
@@ -60,14 +58,26 @@ public class IndexWholeMatchingPhysicalPlanTest {
     MManager.getInstance().init();
     MManager.getInstance().setStorageGroup(new PartialPath("root.Ery"));
     MManager.getInstance()
-        .createTimeseries(new PartialPath("root.Ery.Ferm01.Glu"), TSDataType.FLOAT,
-            TSEncoding.PLAIN, CompressionType.UNCOMPRESSED, null);
+        .createTimeseries(
+            new PartialPath("root.Ery.Ferm01.Glu"),
+            TSDataType.FLOAT,
+            TSEncoding.PLAIN,
+            CompressionType.UNCOMPRESSED,
+            null);
     MManager.getInstance()
-        .createTimeseries(new PartialPath("root.Ery.Ferm02.Glu"), TSDataType.FLOAT,
-            TSEncoding.PLAIN, CompressionType.UNCOMPRESSED, null);
+        .createTimeseries(
+            new PartialPath("root.Ery.Ferm02.Glu"),
+            TSDataType.FLOAT,
+            TSEncoding.PLAIN,
+            CompressionType.UNCOMPRESSED,
+            null);
     MManager.getInstance()
-        .createTimeseries(new PartialPath("root.Ery.Ferm03.Glu"), TSDataType.FLOAT,
-            TSEncoding.PLAIN, CompressionType.UNCOMPRESSED, null);
+        .createTimeseries(
+            new PartialPath("root.Ery.Ferm03.Glu"),
+            TSDataType.FLOAT,
+            TSEncoding.PLAIN,
+            CompressionType.UNCOMPRESSED,
+            null);
   }
 
   @After
@@ -78,7 +88,8 @@ public class IndexWholeMatchingPhysicalPlanTest {
 
   @Test
   public void testCreateIndex() throws QueryProcessException {
-    String sqlStr = "CREATE INDEX ON root.Ery.*.Glu WHERE time > 50 WITH INDEX=RTREE_PAA, PAA_DIM=8";
+    String sqlStr =
+        "CREATE INDEX ON root.Ery.*.Glu WHERE time > 50 WITH INDEX=RTREE_PAA, PAA_DIM=8";
 
     Planner processor = new Planner();
     CreateIndexPlan plan = (CreateIndexPlan) processor.parseSQLToPhysicalPlan(sqlStr);
@@ -97,7 +108,8 @@ public class IndexWholeMatchingPhysicalPlanTest {
 
   @Test
   public void testQueryIndex() throws QueryProcessException {
-    String sqlStr = "SELECT TOP 2 Glu FROM root.Ery.* WHERE Glu LIKE (0, 120, 20, 80, 120, 100, 80, 0)";
+    String sqlStr =
+        "SELECT TOP 2 Glu FROM root.Ery.* WHERE Glu LIKE (0, 120, 20, 80, 120, 100, 80, 0)";
     PhysicalPlan plan = processor.parseSQLToPhysicalPlan(sqlStr);
     Assert.assertEquals(QueryIndexPlan.class, plan.getClass());
     QueryIndexPlan queryIndexPlan = (QueryIndexPlan) plan;
@@ -107,14 +119,16 @@ public class IndexWholeMatchingPhysicalPlanTest {
     Assert.assertEquals("root.Ery.*.Glu", queryIndexPlan.getPaths().get(0).getFullPath());
     Assert.assertEquals(2, queryIndexPlan.getProps().size());
     Assert.assertEquals(2, (int) queryIndexPlan.getProps().get(TOP_K));
-    Assert.assertEquals("[0.0, 120.0, 20.0, 80.0, 120.0, 100.0, 80.0, 0.0]",
+    Assert.assertEquals(
+        "[0.0, 120.0, 20.0, 80.0, 120.0, 100.0, 80.0, 0.0]",
         Arrays.toString((double[]) queryIndexPlan.getProps().get(PATTERN)));
   }
 
   @Test
   public void testCreateIndexSerialize()
       throws QueryProcessException, IOException, IllegalPathException {
-    String sqlStr = "CREATE INDEX ON root.Ery.*.Glu WHERE time > 50 WITH INDEX=RTREE_PAA, PAA_DIM=8";
+    String sqlStr =
+        "CREATE INDEX ON root.Ery.*.Glu WHERE time > 50 WITH INDEX=RTREE_PAA, PAA_DIM=8";
     PhysicalPlan plan = processor.parseSQLToPhysicalPlan(sqlStr);
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
     try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
@@ -150,5 +164,4 @@ public class IndexWholeMatchingPhysicalPlanTest {
     PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
     assertEquals(plan, planB);
   }
-
 }

@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.cluster.log.snapshot;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -53,15 +52,17 @@ public class MetaSimpleSnapshotTest extends IoTDBTest {
   @Override
   @Before
   public void setUp()
-      throws org.apache.iotdb.db.exception.StartupException, org.apache.iotdb.db.exception.query.QueryProcessException, IllegalPathException {
+      throws org.apache.iotdb.db.exception.StartupException,
+          org.apache.iotdb.db.exception.query.QueryProcessException, IllegalPathException {
     super.setUp();
     subServerInitialized = false;
-    metaGroupMember = new TestMetaGroupMember() {
-      @Override
-      protected void startSubServers() {
-        subServerInitialized = true;
-      }
-    };
+    metaGroupMember =
+        new TestMetaGroupMember() {
+          @Override
+          protected void startSubServers() {
+            subServerInitialized = true;
+          }
+        };
   }
 
   @Override
@@ -99,8 +100,8 @@ public class MetaSimpleSnapshotTest extends IoTDBTest {
         roleMap.put(roleName, role);
       }
 
-      MetaSimpleSnapshot metaSimpleSnapshot = new MetaSimpleSnapshot(storageGroupTTLMap, userMap,
-          roleMap, partitionTable.serialize());
+      MetaSimpleSnapshot metaSimpleSnapshot =
+          new MetaSimpleSnapshot(storageGroupTTLMap, userMap, roleMap, partitionTable.serialize());
 
       metaSimpleSnapshot.setLastLogIndex(lastLogIndex);
       metaSimpleSnapshot.setLastLogTerm(lastLogTerm);
@@ -152,8 +153,8 @@ public class MetaSimpleSnapshotTest extends IoTDBTest {
       roleMap.put(roleName, role);
     }
 
-    MetaSimpleSnapshot metaSimpleSnapshot = new MetaSimpleSnapshot(storageGroupTTLMap, userMap,
-        roleMap, partitionTable.serialize());
+    MetaSimpleSnapshot metaSimpleSnapshot =
+        new MetaSimpleSnapshot(storageGroupTTLMap, userMap, roleMap, partitionTable.serialize());
     metaSimpleSnapshot.setLastLogIndex(lastLogIndex);
     metaSimpleSnapshot.setLastLogTerm(lastLogTerm);
 
@@ -184,4 +185,3 @@ public class MetaSimpleSnapshotTest extends IoTDBTest {
     assertTrue(subServerInitialized);
   }
 }
-

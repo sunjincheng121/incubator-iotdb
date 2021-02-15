@@ -27,7 +27,8 @@ public class VersionUtils {
     throw new IllegalStateException("Utility class");
   }
 
-  public static void applyVersion(List<ChunkMetadata> chunkMetadataList, List<Pair<Long, Long>> versionInfo) {
+  public static void applyVersion(
+      List<ChunkMetadata> chunkMetadataList, List<Pair<Long, Long>> versionInfo) {
     if (versionInfo == null || versionInfo.isEmpty()) {
       return;
     }

@@ -29,7 +29,6 @@ import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import org.apache.iotdb.db.qp.physical.crud.DeletePlan;
-import org.apache.iotdb.tsfile.read.common.Path;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,10 +47,11 @@ public class MultiFileLogReaderTest {
     for (int i = 0; i < fileNum; i++) {
       logFiles[i] = new File(i + ".log");
       for (int j = 0; j < logsPerFile; j++) {
-        fileLogs[i][j] = new DeletePlan(Long.MIN_VALUE, i * logsPerFile + j, new PartialPath("path" + j));
+        fileLogs[i][j] =
+            new DeletePlan(Long.MIN_VALUE, i * logsPerFile + j, new PartialPath("path" + j));
       }
 
-      ByteBuffer buffer = ByteBuffer.allocate(64*1024);
+      ByteBuffer buffer = ByteBuffer.allocate(64 * 1024);
       for (PhysicalPlan plan : fileLogs[i]) {
         plan.serialize(buffer);
       }
@@ -75,8 +75,8 @@ public class MultiFileLogReaderTest {
     int i = 0;
     while (reader.hasNext()) {
       PhysicalPlan plan = reader.next();
-      assertEquals(fileLogs[i/logsPerFile][i%logsPerFile], plan);
-      i ++;
+      assertEquals(fileLogs[i / logsPerFile][i % logsPerFile], plan);
+      i++;
     }
     reader.close();
     assertEquals(fileNum * logsPerFile, i);

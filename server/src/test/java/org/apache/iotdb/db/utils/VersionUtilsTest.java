@@ -50,6 +50,4 @@ public class VersionUtilsTest {
     Assert.assertEquals(2L, chunkMetadataList.get(3).getVersion());
     Assert.assertEquals(0L, chunkMetadataList.get(4).getVersion());
   }
-
-
 }

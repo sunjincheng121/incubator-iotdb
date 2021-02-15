@@ -62,8 +62,9 @@ public class IoTDBCreateSnapshotIT {
   @Test
   public void createSnapshotTest() throws ClassNotFoundException {
     Class.forName(Config.JDBC_DRIVER_NAME);
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+    try (Connection connection =
+            DriverManager.getConnection(
+                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
         Statement statement = connection.createStatement()) {
 
       // test before creating snapshot
@@ -77,10 +78,17 @@ public class IoTDBCreateSnapshotIT {
       Assert.assertTrue(snapshotFile.exists());
 
       // test snapshot content correct
-      Set<String> e1 = new HashSet<>(Arrays.asList("2,s0,,1,2,1,,-1,0", "2,s1,,2,2,1,,-1,0",
-          "2,s2,,3,2,1,,-1,0", "2,s3,,5,0,1,,-1,0", "2,s4,,0,0,1,,-1,0"));
-      Set<String> e2 = new HashSet<>(Arrays.asList("2,s0,,1,2,1,,-1,0", "2,s1,,5,0,1,,-1,0",
-          "2,s2,,0,0,1,,-1,0"));
+      Set<String> e1 =
+          new HashSet<>(
+              Arrays.asList(
+                  "2,s0,,1,2,1,,-1,0",
+                  "2,s1,,2,2,1,,-1,0",
+                  "2,s2,,3,2,1,,-1,0",
+                  "2,s3,,5,0,1,,-1,0",
+                  "2,s4,,0,0,1,,-1,0"));
+      Set<String> e2 =
+          new HashSet<>(
+              Arrays.asList("2,s0,,1,2,1,,-1,0", "2,s1,,5,0,1,,-1,0", "2,s2,,0,0,1,,-1,0"));
 
       try (BufferedReader br = new BufferedReader(new FileReader(snapshotFile))) {
         for (int i = 0; i < 5; ++i) {
@@ -113,9 +121,9 @@ public class IoTDBCreateSnapshotIT {
       Assert.fail();
     }
 
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
-            "root");
+    try (Connection connection =
+            DriverManager.getConnection(
+                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
         Statement statement = connection.createStatement()) {
       checkShowTimeseries(statement);
     } catch (Exception e) {
@@ -125,23 +133,24 @@ public class IoTDBCreateSnapshotIT {
   }
 
   private static void prepareData() throws SQLException {
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
-            "root");
+    try (Connection connection =
+            DriverManager.getConnection(
+                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
         Statement statement = connection.createStatement()) {
 
-      String[] creationSqls = new String[]{
-          "SET STORAGE GROUP TO root.vehicle.d0",
-          "SET STORAGE GROUP TO root.vehicle.d1",
-          "CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32, ENCODING=RLE",
-          "CREATE TIMESERIES root.vehicle.d0.s1 WITH DATATYPE=INT64, ENCODING=RLE",
-          "CREATE TIMESERIES root.vehicle.d0.s2 WITH DATATYPE=FLOAT, ENCODING=RLE",
-          "CREATE TIMESERIES root.vehicle.d0.s3 WITH DATATYPE=TEXT, ENCODING=PLAIN",
-          "CREATE TIMESERIES root.vehicle.d0.s4 WITH DATATYPE=BOOLEAN, ENCODING=PLAIN",
-          "CREATE TIMESERIES root.vehicle.d1.s0 WITH DATATYPE=INT32, ENCODING=RLE",
-          "CREATE TIMESERIES root.vehicle.d1.s1 WITH DATATYPE=TEXT, ENCODING=PLAIN",
-          "CREATE TIMESERIES root.vehicle.d1.s2 WITH DATATYPE=BOOLEAN, ENCODING=PLAIN"
-      };
+      String[] creationSqls =
+          new String[] {
+            "SET STORAGE GROUP TO root.vehicle.d0",
+            "SET STORAGE GROUP TO root.vehicle.d1",
+            "CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32, ENCODING=RLE",
+            "CREATE TIMESERIES root.vehicle.d0.s1 WITH DATATYPE=INT64, ENCODING=RLE",
+            "CREATE TIMESERIES root.vehicle.d0.s2 WITH DATATYPE=FLOAT, ENCODING=RLE",
+            "CREATE TIMESERIES root.vehicle.d0.s3 WITH DATATYPE=TEXT, ENCODING=PLAIN",
+            "CREATE TIMESERIES root.vehicle.d0.s4 WITH DATATYPE=BOOLEAN, ENCODING=PLAIN",
+            "CREATE TIMESERIES root.vehicle.d1.s0 WITH DATATYPE=INT32, ENCODING=RLE",
+            "CREATE TIMESERIES root.vehicle.d1.s1 WITH DATATYPE=TEXT, ENCODING=PLAIN",
+            "CREATE TIMESERIES root.vehicle.d1.s2 WITH DATATYPE=BOOLEAN, ENCODING=PLAIN"
+          };
 
       for (String sql : creationSqls) {
         statement.execute(sql);

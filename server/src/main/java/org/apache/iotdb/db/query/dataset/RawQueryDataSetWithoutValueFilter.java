@@ -54,8 +54,8 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
     private final String pathName;
     private BlockingQueue<BatchData> blockingQueue;
 
-    public ReadTask(ManagedSeriesReader reader,
-        BlockingQueue<BatchData> blockingQueue, String pathName) {
+    public ReadTask(
+        ManagedSeriesReader reader, BlockingQueue<BatchData> blockingQueue, String pathName) {
       this.reader = reader;
       this.blockingQueue = blockingQueue;
       this.pathName = pathName;
@@ -100,8 +100,10 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
         Thread.currentThread().interrupt();
         reader.setHasRemaining(false);
       } catch (IOException e) {
-        putExceptionBatchData(e, String
-            .format("Something gets wrong while reading from the series reader %s: ", pathName));
+        putExceptionBatchData(
+            e,
+            String.format(
+                "Something gets wrong while reading from the series reader %s: ", pathName));
       } catch (Exception e) {
         putExceptionBatchData(e, "Something gets wrong: ");
       }
@@ -117,7 +119,6 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
         Thread.currentThread().interrupt();
       }
     }
-
   }
 
   private List<ManagedSeriesReader> seriesReaderList;
@@ -144,19 +145,21 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
 
   private static final QueryTaskPoolManager TASK_POOL_MANAGER = QueryTaskPoolManager.getInstance();
 
-  private static final Logger LOGGER = LoggerFactory
-      .getLogger(RawQueryDataSetWithoutValueFilter.class);
-
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(RawQueryDataSetWithoutValueFilter.class);
 
   /**
    * constructor of EngineDataSetWithoutValueFilter.
    *
-   * @param paths     paths in List structure
+   * @param paths paths in List structure
    * @param dataTypes time series data type
-   * @param readers   readers in List(IPointReader) structure
+   * @param readers readers in List(IPointReader) structure
    */
-  public RawQueryDataSetWithoutValueFilter(List<PartialPath> paths, List<TSDataType> dataTypes,
-      List<ManagedSeriesReader> readers, boolean ascending)
+  public RawQueryDataSetWithoutValueFilter(
+      List<PartialPath> paths,
+      List<TSDataType> dataTypes,
+      List<ManagedSeriesReader> readers,
+      boolean ascending)
       throws IOException, InterruptedException {
     super(new ArrayList<>(paths), dataTypes, ascending);
     this.seriesReaderList = readers;
@@ -170,14 +173,13 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
   }
 
   private void init() throws IOException, InterruptedException {
-    timeHeap = new TreeSet<>(
-        super.ascending ? Long::compareTo : Collections.reverseOrder());
+    timeHeap = new TreeSet<>(super.ascending ? Long::compareTo : Collections.reverseOrder());
     for (int i = 0; i < seriesReaderList.size(); i++) {
       ManagedSeriesReader reader = seriesReaderList.get(i);
       reader.setHasRemaining(true);
       reader.setManagedByQueryManager(true);
-      TASK_POOL_MANAGER
-          .submit(new ReadTask(reader, blockingQueueArray[i], paths.get(i).getFullPath()));
+      TASK_POOL_MANAGER.submit(
+          new ReadTask(reader, blockingQueueArray[i], paths.get(i).getFullPath()));
     }
     for (int i = 0; i < seriesReaderList.size(); i++) {
       fillCache(i);
@@ -188,7 +190,6 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
       }
     }
   }
-
 
   /**
    * for RPC in RawData query between client and server fill time buffer, value buffers and bitmap
@@ -268,13 +269,12 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
                 ReadWriteIOUtils.write(doubleValue, valueBAOSList[seriesIndex]);
                 break;
               case BOOLEAN:
-                ReadWriteIOUtils.write(cachedBatchDataArray[seriesIndex].getBoolean(),
-                    valueBAOSList[seriesIndex]);
+                ReadWriteIOUtils.write(
+                    cachedBatchDataArray[seriesIndex].getBoolean(), valueBAOSList[seriesIndex]);
                 break;
               case TEXT:
-                ReadWriteIOUtils
-                    .write(cachedBatchDataArray[seriesIndex].getBinary(),
-                        valueBAOSList[seriesIndex]);
+                ReadWriteIOUtils.write(
+                    cachedBatchDataArray[seriesIndex].getBinary(), valueBAOSList[seriesIndex]);
                 break;
               default:
                 throw new UnSupportedDataTypeException(
@@ -296,7 +296,6 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
             long time = cachedBatchDataArray[seriesIndex].currentTime();
             timeHeap.add(time);
           }
-
         }
       }
 
@@ -304,8 +303,8 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
         rowCount++;
         if (rowCount % 8 == 0) {
           for (int seriesIndex = 0; seriesIndex < seriesNum; seriesIndex++) {
-            ReadWriteIOUtils
-                .write((byte) currentBitmapList[seriesIndex], bitmapBAOSList[seriesIndex]);
+            ReadWriteIOUtils.write(
+                (byte) currentBitmapList[seriesIndex], bitmapBAOSList[seriesIndex]);
             // we should clear the bitmap every 8 row record
             currentBitmapList[seriesIndex] = 0;
           }
@@ -326,7 +325,8 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
       int remaining = rowCount % 8;
       if (remaining != 0) {
         for (int seriesIndex = 0; seriesIndex < seriesNum; seriesIndex++) {
-          ReadWriteIOUtils.write((byte) (currentBitmapList[seriesIndex] << (8 - remaining)),
+          ReadWriteIOUtils.write(
+              (byte) (currentBitmapList[seriesIndex] << (8 - remaining)),
               bitmapBAOSList[seriesIndex]);
         }
       }
@@ -372,7 +372,7 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
         throw (RuntimeException) exceptionBatchData.getException();
       }
 
-    } else {   // there are more batch data in this time series queue
+    } else { // there are more batch data in this time series queue
       cachedBatchDataArray[seriesIndex] = batchData;
 
       synchronized (seriesReaderList.get(seriesIndex)) {
@@ -384,34 +384,30 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
           // now we should submit it again
           if (!reader.isManagedByQueryManager() && reader.hasRemaining()) {
             reader.setManagedByQueryManager(true);
-            TASK_POOL_MANAGER.submit(new ReadTask(reader, blockingQueueArray[seriesIndex],
-                paths.get(seriesIndex).getFullPath()));
+            TASK_POOL_MANAGER.submit(
+                new ReadTask(
+                    reader, blockingQueueArray[seriesIndex], paths.get(seriesIndex).getFullPath()));
           }
         }
       }
     }
   }
 
-  private void putPBOSToBuffer(PublicBAOS[] bitmapBAOSList, List<ByteBuffer> bitmapBufferList,
-      int tsIndex) {
+  private void putPBOSToBuffer(
+      PublicBAOS[] bitmapBAOSList, List<ByteBuffer> bitmapBufferList, int tsIndex) {
     ByteBuffer bitmapBuffer = ByteBuffer.allocate(bitmapBAOSList[tsIndex].size());
     bitmapBuffer.put(bitmapBAOSList[tsIndex].getBuf(), 0, bitmapBAOSList[tsIndex].size());
     bitmapBuffer.flip();
     bitmapBufferList.add(bitmapBuffer);
   }
 
-
-  /**
-   * for spark/hadoop/hive integration and test
-   */
+  /** for spark/hadoop/hive integration and test */
   @Override
   protected boolean hasNextWithoutConstraint() {
     return !timeHeap.isEmpty();
   }
 
-  /**
-   * for spark/hadoop/hive integration and test
-   */
+  /** for spark/hadoop/hive integration and test */
   @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
   @Override
   protected RowRecord nextWithoutConstraint() throws IOException {
@@ -456,5 +452,4 @@ public class RawQueryDataSetWithoutValueFilter extends QueryDataSet {
 
     return record;
   }
-
 }

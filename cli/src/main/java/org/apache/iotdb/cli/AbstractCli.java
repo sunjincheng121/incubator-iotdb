@@ -129,7 +129,6 @@ public abstract class AbstractCli {
     keywordSet.add("-" + RPC_COMPRESS_ARGS);
   }
 
-
   private static String getTimestampPrecision() {
     return TIMESTAMP_PRECISION;
   }
@@ -152,50 +151,72 @@ public abstract class AbstractCli {
     timeFormat.setRequired(false);
     options.addOption(timeFormat);
 
-    Option host = Option.builder(HOST_ARGS).argName(HOST_NAME).hasArg()
-        .desc("Host Name (optional, default 127.0.0.1)").build();
+    Option host =
+        Option.builder(HOST_ARGS)
+            .argName(HOST_NAME)
+            .hasArg()
+            .desc("Host Name (optional, default 127.0.0.1)")
+            .build();
     options.addOption(host);
 
-    Option port = Option.builder(PORT_ARGS).argName(PORT_NAME).hasArg()
-        .desc("Port (optional, default 6667)")
-        .build();
+    Option port =
+        Option.builder(PORT_ARGS)
+            .argName(PORT_NAME)
+            .hasArg()
+            .desc("Port (optional, default 6667)")
+            .build();
     options.addOption(port);
 
-    Option username = Option.builder(USERNAME_ARGS).argName(USERNAME_NAME).hasArg()
-        .desc("User name (required)")
-        .required().build();
+    Option username =
+        Option.builder(USERNAME_ARGS)
+            .argName(USERNAME_NAME)
+            .hasArg()
+            .desc("User name (required)")
+            .required()
+            .build();
     options.addOption(username);
 
-    Option password = Option.builder(PASSWORD_ARGS).argName(PASSWORD_NAME).hasArg()
-        .desc("password (optional)")
-        .build();
+    Option password =
+        Option.builder(PASSWORD_ARGS)
+            .argName(PASSWORD_NAME)
+            .hasArg()
+            .desc("password (optional)")
+            .build();
     options.addOption(password);
 
-    Option execute = Option.builder(EXECUTE_ARGS).argName(EXECUTE_NAME).hasArg()
-        .desc("execute statement (optional)")
-        .build();
+    Option execute =
+        Option.builder(EXECUTE_ARGS)
+            .argName(EXECUTE_NAME)
+            .hasArg()
+            .desc("execute statement (optional)")
+            .build();
     options.addOption(execute);
 
-    Option maxPrintCount = Option.builder(MAX_PRINT_ROW_COUNT_ARGS)
-        .argName(MAX_PRINT_ROW_COUNT_NAME).hasArg()
-        .desc("Maximum number of rows displayed (optional)").build();
+    Option maxPrintCount =
+        Option.builder(MAX_PRINT_ROW_COUNT_ARGS)
+            .argName(MAX_PRINT_ROW_COUNT_NAME)
+            .hasArg()
+            .desc("Maximum number of rows displayed (optional)")
+            .build();
     options.addOption(maxPrintCount);
 
-    Option isRpcCompressed = Option.builder(RPC_COMPRESS_ARGS)
-        .argName(RPC_COMPRESS_NAME)
-        .desc("Rpc Compression enabled or not").build();
+    Option isRpcCompressed =
+        Option.builder(RPC_COMPRESS_ARGS)
+            .argName(RPC_COMPRESS_NAME)
+            .desc("Rpc Compression enabled or not")
+            .build();
     options.addOption(isRpcCompressed);
     return options;
   }
 
   @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  public static String parseLongToDateWithPrecision(DateTimeFormatter formatter,
-      long timestamp, ZoneId zoneid, String timestampPrecision) {
+  public static String parseLongToDateWithPrecision(
+      DateTimeFormatter formatter, long timestamp, ZoneId zoneid, String timestampPrecision) {
     if (timestampPrecision.equals("ms")) {
       long integerofDate = timestamp / 1000;
       StringBuilder digits = new StringBuilder(Long.toString(timestamp % 1000));
-      ZonedDateTime dateTime = ZonedDateTime
-          .ofInstant(Instant.ofEpochSecond(integerofDate), zoneid);
+      ZonedDateTime dateTime =
+          ZonedDateTime.ofInstant(Instant.ofEpochSecond(integerofDate), zoneid);
       String datetime = dateTime.format(formatter);
       int length = digits.length();
       if (length != 3) {
@@ -207,8 +228,8 @@ public abstract class AbstractCli {
     } else if (timestampPrecision.equals("us")) {
       long integerofDate = timestamp / 1000_000;
       StringBuilder digits = new StringBuilder(Long.toString(timestamp % 1000_000));
-      ZonedDateTime dateTime = ZonedDateTime
-          .ofInstant(Instant.ofEpochSecond(integerofDate), zoneid);
+      ZonedDateTime dateTime =
+          ZonedDateTime.ofInstant(Instant.ofEpochSecond(integerofDate), zoneid);
       String datetime = dateTime.format(formatter);
       int length = digits.length();
       if (length != 6) {
@@ -220,8 +241,8 @@ public abstract class AbstractCli {
     } else {
       long integerofDate = timestamp / 1000_000_000L;
       StringBuilder digits = new StringBuilder(Long.toString(timestamp % 1000_000_000L));
-      ZonedDateTime dateTime = ZonedDateTime
-          .ofInstant(Instant.ofEpochSecond(integerofDate), zoneid);
+      ZonedDateTime dateTime =
+          ZonedDateTime.ofInstant(Instant.ofEpochSecond(integerofDate), zoneid);
       String datetime = dateTime.format(formatter);
       int length = digits.length();
       if (length != 9) {
@@ -249,20 +270,21 @@ public abstract class AbstractCli {
     }
   }
 
-  static String checkRequiredArg(String arg, String name, CommandLine commandLine,
-      boolean isRequired,
-      String defaultValue) throws ArgsErrorException {
+  static String checkRequiredArg(
+      String arg, String name, CommandLine commandLine, boolean isRequired, String defaultValue)
+      throws ArgsErrorException {
     String str = commandLine.getOptionValue(arg);
     if (str == null) {
       if (isRequired) {
-        String msg = String
-            .format("%s: Required values for option '%s' not provided", IOTDB_CLI_PREFIX, name);
+        String msg =
+            String.format(
+                "%s: Required values for option '%s' not provided", IOTDB_CLI_PREFIX, name);
         println(msg);
         println("Use -help for more information");
         throw new ArgsErrorException(msg);
       } else if (defaultValue == null) {
-        String msg = String
-            .format("%s: Required values for option '%s' is null.", IOTDB_CLI_PREFIX, name);
+        String msg =
+            String.format("%s: Required values for option '%s' is null.", IOTDB_CLI_PREFIX, name);
         throw new ArgsErrorException(msg);
       } else {
         return defaultValue;
@@ -320,8 +342,9 @@ public abstract class AbstractCli {
         break;
       }
     }
-    if (index >= 0 && ((index + 1 >= args.length) || (index + 1 < args.length && keywordSet
-        .contains(args[index + 1])))) {
+    if (index >= 0
+        && ((index + 1 >= args.length)
+            || (index + 1 < args.length && keywordSet.contains(args[index + 1])))) {
       return ArrayUtils.remove(args, index);
     }
     return args;
@@ -336,8 +359,9 @@ public abstract class AbstractCli {
         break;
       }
     }
-    if (index >= 0 && ((index + 1 >= args.length) || (index + 1 < args.length && keywordSet
-        .contains(args[index + 1])))) {
+    if (index >= 0
+        && ((index + 1 >= args.length)
+            || (index + 1 < args.length && keywordSet.contains(args[index + 1])))) {
       return ArrayUtils.remove(args, index);
     } else if (index == -1) {
       return args;
@@ -365,13 +389,16 @@ public abstract class AbstractCli {
   }
 
   static void displayLogo(String version) {
-    println(" _____       _________  ______   ______    \n"
-        + "|_   _|     |  _   _  ||_   _ `.|_   _ \\   \n"
-        + "  | |   .--.|_/ | | \\_|  | | `. \\ | |_) |  \n"
-        + "  | | / .'`\\ \\  | |      | |  | | |  __'.  \n"
-        + " _| |_| \\__. | _| |_    _| |_.' /_| |__) | \n"
-        + "|_____|'.__.' |_____|  |______.'|_______/  version " + version + "\n"
-        + "                                           \n");
+    println(
+        " _____       _________  ______   ______    \n"
+            + "|_   _|     |  _   _  ||_   _ `.|_   _ \\   \n"
+            + "  | |   .--.|_/ | | \\_|  | | `. \\ | |_) |  \n"
+            + "  | | / .'`\\ \\  | |      | |  | | |  __'.  \n"
+            + " _| |_| \\__. | _| |_    _| |_.' /_| |__) | \n"
+            + "|_____|'.__.' |_____|  |______.'|_______/  version "
+            + version
+            + "\n"
+            + "                                           \n");
   }
 
   static void echoStarting() {
@@ -434,27 +461,31 @@ public abstract class AbstractCli {
 
   private static void showHelp() {
     println("    <your-sql>\t\t\t execute your sql statment");
-    println(String.format("    %s\t\t show how many timeseries are in iotdb",
-        SHOW_METADATA_COMMAND));
-    println(String.format("    %s=xxx\t eg. long, default, ISO8601, yyyy-MM-dd HH:mm:ss.",
-        SET_TIMESTAMP_DISPLAY));
+    println(
+        String.format("    %s\t\t show how many timeseries are in iotdb", SHOW_METADATA_COMMAND));
+    println(
+        String.format(
+            "    %s=xxx\t eg. long, default, ISO8601, yyyy-MM-dd HH:mm:ss.",
+            SET_TIMESTAMP_DISPLAY));
     println(String.format("    %s\t show time display type", SHOW_TIMESTAMP_DISPLAY));
     println(String.format("    %s=xxx\t\t eg. +08:00, Asia/Shanghai.", SET_TIME_ZONE));
     println(String.format("    %s\t\t show cli time zone", SHOW_TIMEZONE));
     println(
-        String.format("    %s=xxx\t\t set fetch size when querying data from server.",
-            SET_FETCH_SIZE));
+        String.format(
+            "    %s=xxx\t\t set fetch size when querying data from server.", SET_FETCH_SIZE));
     println(String.format("    %s\t\t show fetch size", SHOW_FETCH_SIZE));
     println(
-        String.format("    %s=xxx\t eg. set max lines for cli to ouput, -1 equals to unlimited.",
+        String.format(
+            "    %s=xxx\t eg. set max lines for cli to ouput, -1 equals to unlimited.",
             SET_MAX_DISPLAY_NUM));
   }
 
   private static void setTimestampDisplay(String specialCmd, String cmd) {
     String[] values = specialCmd.split("=");
     if (values.length != 2) {
-      println(String.format("Time display format error, please input like %s=ISO8601",
-          SET_TIMESTAMP_DISPLAY));
+      println(
+          String.format(
+              "Time display format error, please input like %s=ISO8601", SET_TIMESTAMP_DISPLAY));
       return;
     }
     try {
@@ -467,8 +498,9 @@ public abstract class AbstractCli {
   }
 
   /**
-   * if cli has not specified a zondId, it will be set to cli's system timezone by default
-   * otherwise for insert and query accuracy cli should set timezone the same for all sessions
+   * if cli has not specified a zondId, it will be set to cli's system timezone by default otherwise
+   * for insert and query accuracy cli should set timezone the same for all sessions
+   *
    * @param specialCmd
    * @param cmd
    * @param connection
@@ -476,8 +508,7 @@ public abstract class AbstractCli {
   private static void setTimeZone(String specialCmd, String cmd, IoTDBConnection connection) {
     String[] values = specialCmd.split("=");
     if (values.length != 2) {
-      println(
-          String.format("Time zone format error, please input like %s=+08:00", SET_TIME_ZONE));
+      println(String.format("Time zone format error, please input like %s=+08:00", SET_TIME_ZONE));
       return;
     }
     try {
@@ -492,8 +523,7 @@ public abstract class AbstractCli {
   private static void setFetchSize(String specialCmd, String cmd) {
     String[] values = specialCmd.split("=");
     if (values.length != 2) {
-      println(String
-          .format("Fetch size format error, please input like %s=10000", SET_FETCH_SIZE));
+      println(String.format("Fetch size format error, please input like %s=10000", SET_FETCH_SIZE));
       return;
     }
     try {
@@ -508,8 +538,10 @@ public abstract class AbstractCli {
   private static void setMaxDisplayNum(String specialCmd, String cmd) {
     String[] values = specialCmd.split("=");
     if (values.length != 2) {
-      println(String.format("Max display number format error, please input like %s = 10000",
-          SET_MAX_DISPLAY_NUM));
+      println(
+          String.format(
+              "Max display number format error, please input like %s = 10000",
+              SET_MAX_DISPLAY_NUM));
       return;
     }
     try {
@@ -532,13 +564,14 @@ public abstract class AbstractCli {
   private static void importCmd(String specialCmd, String cmd, IoTDBConnection connection) {
     String[] values = specialCmd.split(" ");
     if (values.length != 2) {
-      println("Please input like: import /User/myfile. "
-          + "Noted that your file path cannot contain any space character)");
+      println(
+          "Please input like: import /User/myfile. "
+              + "Noted that your file path cannot contain any space character)");
       return;
     }
     println(cmd.split(" ")[1]);
-    ImportCsv.importCsvFromFile(host, port, username, password, cmd.split(" ")[1],
-        connection.getTimeZone());
+    ImportCsv.importCsvFromFile(
+        host, port, username, password, cmd.split(" ")[1], connection.getTimeZone());
   }
 
   private static void executeQuery(IoTDBConnection connection, String cmd) {
@@ -553,21 +586,22 @@ public abstract class AbstractCli {
           ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
           int columnLength = resultSetMetaData.getColumnCount();
           List<Integer> maxSizeList = new ArrayList<>(columnLength);
-          List<List<String>> lists = cacheResult(resultSet, maxSizeList, columnLength,
-              resultSetMetaData, zoneId);
+          List<List<String>> lists =
+              cacheResult(resultSet, maxSizeList, columnLength, resultSetMetaData, zoneId);
           output(lists, maxSizeList);
           long costTime = System.currentTimeMillis() - startTime;
           println(String.format("It costs %.3fs", costTime / 1000.0));
           while (!isReachEnd) {
-            println(String.format(
-                "Reach the max_display_num = %s. Press ENTER to show more, input 'q' to quit.",
-                maxPrintRowCount));
+            println(
+                String.format(
+                    "Reach the max_display_num = %s. Press ENTER to show more, input 'q' to quit.",
+                    maxPrintRowCount));
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             try {
               if (br.readLine().equals("")) {
                 maxSizeList = new ArrayList<>(columnLength);
-                lists = cacheResult(resultSet, maxSizeList, columnLength,
-                    resultSetMetaData, zoneId);
+                lists =
+                    cacheResult(resultSet, maxSizeList, columnLength, resultSetMetaData, zoneId);
                 output(lists, maxSizeList);
               } else {
                 break;
@@ -590,17 +624,22 @@ public abstract class AbstractCli {
   /**
    * cache all results
    *
-   * @param resultSet         jdbc resultSet
-   * @param maxSizeList       the longest result of every column
-   * @param columnCount       the number of column
+   * @param resultSet jdbc resultSet
+   * @param maxSizeList the longest result of every column
+   * @param columnCount the number of column
    * @param resultSetMetaData jdbc resultSetMetaData
-   * @param zoneId            your time zone
+   * @param zoneId your time zone
    * @return List<List<String>> result
    * @throws SQLException throw exception
    */
   @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  private static List<List<String>> cacheResult(ResultSet resultSet, List<Integer> maxSizeList,
-      int columnCount, ResultSetMetaData resultSetMetaData, ZoneId zoneId) throws SQLException {
+  private static List<List<String>> cacheResult(
+      ResultSet resultSet,
+      List<Integer> maxSizeList,
+      int columnCount,
+      ResultSetMetaData resultSetMetaData,
+      ZoneId zoneId)
+      throws SQLException {
     List<List<String>> lists = new ArrayList<>(columnCount);
     if (resultSet instanceof IoTDBJDBCResultSet) {
       for (int i = 1; i <= columnCount; i++) {
@@ -710,7 +749,9 @@ public abstract class AbstractCli {
   }
 
   enum OperationResult {
-    STOP_OPER, CONTINUE_OPER, NO_OPER
+    STOP_OPER,
+    CONTINUE_OPER,
+    NO_OPER
   }
 
   private static void printf(String format, Object... args) {

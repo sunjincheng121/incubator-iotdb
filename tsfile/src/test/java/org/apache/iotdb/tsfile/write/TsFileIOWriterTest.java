@@ -59,9 +59,14 @@ public class TsFileIOWriterTest {
 
     // chunk group 1
     writer.startChunkGroup(deviceId);
-    writer.startFlushChunk(measurementSchema, measurementSchema.getCompressor(),
+    writer.startFlushChunk(
+        measurementSchema,
+        measurementSchema.getCompressor(),
         measurementSchema.getType(),
-        measurementSchema.getEncodingType(), statistics, 0, 0);
+        measurementSchema.getEncodingType(),
+        statistics,
+        0,
+        0);
     writer.endCurrentChunk();
     writer.endChunkGroup();
 
@@ -88,8 +93,9 @@ public class TsFileIOWriterTest {
     Assert.assertEquals(TSFileConfig.MAGIC_STRING, reader.readTailMagic());
 
     // chunk header
-    reader.position(TSFileConfig.MAGIC_STRING.getBytes().length + TSFileConfig.VERSION_NUMBER
-        .getBytes().length);
+    reader.position(
+        TSFileConfig.MAGIC_STRING.getBytes().length
+            + TSFileConfig.VERSION_NUMBER.getBytes().length);
     Assert.assertEquals(MetaMarker.CHUNK_HEADER, reader.readMarker());
     ChunkHeader header = reader.readChunkHeader();
     Assert.assertEquals(TimeSeriesMetadataTest.measurementUID, header.getMeasurementID());
