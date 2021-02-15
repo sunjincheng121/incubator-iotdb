@@ -28,123 +28,122 @@ import org.apache.iotdb.tsfile.read.expression.IExpression;
 
 public class AlignByDevicePlan extends QueryPlan {
 
-  private List<String> measurements; // to record result measurement columns, e.g. temperature, status, speed
-  private Map<String, String> measurementAliasMap; // select s1, s2 as speed from root, then s2 -> speed
-  // to check data type consistency for the same name sensor of different devices
-  private List<PartialPath> devices;
-  // to record the datatype of the column in the result set
-  private Map<String, TSDataType> columnDataTypeMap;
-  private Map<String, IExpression> deviceToFilterMap;
-  // to record different kinds of measurement
-  private Map<String, MeasurementType> measurementTypeMap;
+    private List<String>
+            measurements; // to record result measurement columns, e.g. temperature, status, speed
+    private Map<String, String>
+            measurementAliasMap; // select s1, s2 as speed from root, then s2 -> speed
+    // to check data type consistency for the same name sensor of different devices
+    private List<PartialPath> devices;
+    // to record the datatype of the column in the result set
+    private Map<String, TSDataType> columnDataTypeMap;
+    private Map<String, IExpression> deviceToFilterMap;
+    // to record different kinds of measurement
+    private Map<String, MeasurementType> measurementTypeMap;
 
-  // to record the real type of the measurement
-  private Map<String, TSDataType> measurementDataTypeMap;
+    // to record the real type of the measurement
+    private Map<String, TSDataType> measurementDataTypeMap;
 
-  private GroupByTimePlan groupByTimePlan;
+    private GroupByTimePlan groupByTimePlan;
 
-  private FillQueryPlan fillQueryPlan;
-  private AggregationPlan aggregationPlan;
+    private FillQueryPlan fillQueryPlan;
+    private AggregationPlan aggregationPlan;
 
-  public AlignByDevicePlan() {
-    super();
-  }
+    public AlignByDevicePlan() {
+        super();
+    }
 
-  public void setMeasurements(List<String> measurements) {
-    this.measurements = measurements;
-  }
+    public void setMeasurements(List<String> measurements) {
+        this.measurements = measurements;
+    }
 
-  public List<String> getMeasurements() {
-    return measurements;
-  }
+    public List<String> getMeasurements() {
+        return measurements;
+    }
 
-  public void setMeasurementAliasMap(
-      Map<String, String> measurementAliasMap) {
-    this.measurementAliasMap = measurementAliasMap;
-  }
+    public void setMeasurementAliasMap(Map<String, String> measurementAliasMap) {
+        this.measurementAliasMap = measurementAliasMap;
+    }
 
-  public Map<String, String> getMeasurementAliasMap() {
-    return measurementAliasMap;
-  }
+    public Map<String, String> getMeasurementAliasMap() {
+        return measurementAliasMap;
+    }
 
-  public void setDevices(List<PartialPath> devices) {
-    this.devices = devices;
-  }
+    public void setDevices(List<PartialPath> devices) {
+        this.devices = devices;
+    }
 
-  public List<PartialPath> getDevices() {
-    return devices;
-  }
+    public List<PartialPath> getDevices() {
+        return devices;
+    }
 
-  public void setColumnDataTypeMap(
-      Map<String, TSDataType> columnDataTypeMap) {
-    this.columnDataTypeMap = columnDataTypeMap;
-  }
+    public void setColumnDataTypeMap(Map<String, TSDataType> columnDataTypeMap) {
+        this.columnDataTypeMap = columnDataTypeMap;
+    }
 
-  public Map<String, TSDataType> getColumnDataTypeMap() {
-    return columnDataTypeMap;
-  }
+    public Map<String, TSDataType> getColumnDataTypeMap() {
+        return columnDataTypeMap;
+    }
 
-  public Map<String, IExpression> getDeviceToFilterMap() {
-    return deviceToFilterMap;
-  }
+    public Map<String, IExpression> getDeviceToFilterMap() {
+        return deviceToFilterMap;
+    }
 
-  public void setDeviceToFilterMap(Map<String, IExpression> deviceToFilterMap) {
-    this.deviceToFilterMap = deviceToFilterMap;
-  }
+    public void setDeviceToFilterMap(Map<String, IExpression> deviceToFilterMap) {
+        this.deviceToFilterMap = deviceToFilterMap;
+    }
 
-  public Map<String, MeasurementType> getMeasurementTypeMap() {
-    return measurementTypeMap;
-  }
+    public Map<String, MeasurementType> getMeasurementTypeMap() {
+        return measurementTypeMap;
+    }
 
-  public void setMeasurementTypeMap(
-      Map<String, MeasurementType> measurementTypeMap) {
-    this.measurementTypeMap = measurementTypeMap;
-  }
+    public void setMeasurementTypeMap(Map<String, MeasurementType> measurementTypeMap) {
+        this.measurementTypeMap = measurementTypeMap;
+    }
 
-  public Map<String, TSDataType> getMeasurementDataTypeMap() {
-    return measurementDataTypeMap;
-  }
+    public Map<String, TSDataType> getMeasurementDataTypeMap() {
+        return measurementDataTypeMap;
+    }
 
-  public void setMeasurementDataTypeMap(Map<String, TSDataType> measurementDataTypeMap) {
-    this.measurementDataTypeMap = measurementDataTypeMap;
-  }
+    public void setMeasurementDataTypeMap(Map<String, TSDataType> measurementDataTypeMap) {
+        this.measurementDataTypeMap = measurementDataTypeMap;
+    }
 
+    public GroupByTimePlan getGroupByTimePlan() {
+        return groupByTimePlan;
+    }
 
-  public GroupByTimePlan getGroupByTimePlan() {
-    return groupByTimePlan;
-  }
+    public void setGroupByTimePlan(GroupByTimePlan groupByTimePlan) {
+        this.groupByTimePlan = groupByTimePlan;
+        this.setOperatorType(OperatorType.GROUPBYTIME);
+    }
 
-  public void setGroupByTimePlan(GroupByTimePlan groupByTimePlan) {
-    this.groupByTimePlan = groupByTimePlan;
-    this.setOperatorType(OperatorType.GROUPBYTIME);
-  }
+    public FillQueryPlan getFillQueryPlan() {
+        return fillQueryPlan;
+    }
 
-  public FillQueryPlan getFillQueryPlan() {
-    return fillQueryPlan;
-  }
+    public void setFillQueryPlan(FillQueryPlan fillQueryPlan) {
+        this.fillQueryPlan = fillQueryPlan;
+        this.setOperatorType(OperatorType.FILL);
+    }
 
-  public void setFillQueryPlan(FillQueryPlan fillQueryPlan) {
-    this.fillQueryPlan = fillQueryPlan;
-    this.setOperatorType(OperatorType.FILL);
-  }
+    public AggregationPlan getAggregationPlan() {
+        return aggregationPlan;
+    }
 
-  public AggregationPlan getAggregationPlan() {
-    return aggregationPlan;
-  }
+    public void setAggregationPlan(AggregationPlan aggregationPlan) {
+        this.aggregationPlan = aggregationPlan;
+        this.setOperatorType(Operator.OperatorType.AGGREGATION);
+    }
 
-  public void setAggregationPlan(AggregationPlan aggregationPlan) {
-    this.aggregationPlan = aggregationPlan;
-    this.setOperatorType(Operator.OperatorType.AGGREGATION);
-  }
-
-  /**
-   * Exist: the measurements which don't belong to NonExist and Constant.
-   * NonExist: the measurements that do not exist in any device, data type is considered as String.
-   * The value is considered as null.
-   * Constant: the measurements that have quotation mark. e.g. "abc",'11'.
-   * The data type is considered as String and the value is the measurement name.
-   */
-  public enum MeasurementType {
-    Exist, NonExist, Constant
-  }
+    /**
+     * Exist: the measurements which don't belong to NonExist and Constant. NonExist: the
+     * measurements that do not exist in any device, data type is considered as String. The value is
+     * considered as null. Constant: the measurements that have quotation mark. e.g. "abc",'11'. The
+     * data type is considered as String and the value is the measurement name.
+     */
+    public enum MeasurementType {
+        Exist,
+        NonExist,
+        Constant
+    }
 }

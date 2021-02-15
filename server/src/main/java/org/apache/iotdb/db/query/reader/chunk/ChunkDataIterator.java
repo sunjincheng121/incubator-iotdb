@@ -28,47 +28,51 @@ import org.apache.iotdb.tsfile.read.reader.chunk.ChunkReader;
 
 /**
  * To read chunk data on disk, this class implements an interface {@link IPointReader} based on the
- * data reader {@link ChunkReader}. <p> Note that <code>ChunkReader</code> is an abstract class with
- * three concrete classes, two of which are used here: <code>ChunkReaderWithoutFilter</code> and
- * <code>ChunkReaderWithFilter</code>. <p>
+ * data reader {@link ChunkReader}.
+ *
+ * <p>Note that <code>ChunkReader</code> is an abstract class with three concrete classes, two of
+ * which are used here: <code>ChunkReaderWithoutFilter</code> and <code>ChunkReaderWithFilter</code>
+ * .
+ *
+ * <p>
  */
 public class ChunkDataIterator implements IPointReader {
 
-  private IChunkReader chunkReader;
-  private BatchData data;
+    private IChunkReader chunkReader;
+    private BatchData data;
 
-  public ChunkDataIterator(IChunkReader chunkReader) {
-    this.chunkReader = chunkReader;
-  }
-
-  @Override
-  public boolean hasNextTimeValuePair() throws IOException {
-    if (data != null && data.hasCurrent()) {
-      return true;
+    public ChunkDataIterator(IChunkReader chunkReader) {
+        this.chunkReader = chunkReader;
     }
-    while (chunkReader.hasNextSatisfiedPage()) {
-      data = chunkReader.nextPageData();
-      if (data.hasCurrent()) {
-        return true;
-      }
+
+    @Override
+    public boolean hasNextTimeValuePair() throws IOException {
+        if (data != null && data.hasCurrent()) {
+            return true;
+        }
+        while (chunkReader.hasNextSatisfiedPage()) {
+            data = chunkReader.nextPageData();
+            if (data.hasCurrent()) {
+                return true;
+            }
+        }
+        return false;
     }
-    return false;
-  }
 
-  @Override
-  public TimeValuePair nextTimeValuePair() {
-    TimeValuePair timeValuePair = TimeValuePairUtils.getCurrentTimeValuePair(data);
-    data.next();
-    return timeValuePair;
-  }
+    @Override
+    public TimeValuePair nextTimeValuePair() {
+        TimeValuePair timeValuePair = TimeValuePairUtils.getCurrentTimeValuePair(data);
+        data.next();
+        return timeValuePair;
+    }
 
-  @Override
-  public TimeValuePair currentTimeValuePair() {
-    return TimeValuePairUtils.getCurrentTimeValuePair(data);
-  }
+    @Override
+    public TimeValuePair currentTimeValuePair() {
+        return TimeValuePairUtils.getCurrentTimeValuePair(data);
+    }
 
-  @Override
-  public void close() throws IOException {
-    this.chunkReader.close();
-  }
+    @Override
+    public void close() throws IOException {
+        this.chunkReader.close();
+    }
 }

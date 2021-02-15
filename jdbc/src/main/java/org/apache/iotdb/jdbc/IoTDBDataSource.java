@@ -16,129 +16,122 @@
  */
 package org.apache.iotdb.jdbc;
 
-import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import javax.sql.DataSource;
 import org.apache.thrift.transport.TTransportException;
 
-
-  
 public class IoTDBDataSource implements DataSource {
 
+    private String url;
+    private String user;
+    private String password;
+    private static final String PWD_STR = "password";
+    private Properties properties;
+    private Integer port = 6667;
 
-  private String url;
-  private String user;
-  private String password;
-  private static final String PWD_STR = "password";
-  private Properties properties;
-  private Integer port = 6667;
-
-  public IoTDBDataSource() {
-    properties = new Properties();
-  }
-
-  public IoTDBDataSource(String url, String user, String password, Integer port) {
-    this.url = url;
-    this.properties = new Properties();
-    properties.setProperty("user", user);
-    properties.setProperty(PWD_STR, password);
-    if (port != 0) {
-      this.port = port;
+    public IoTDBDataSource() {
+        properties = new Properties();
     }
-  }
 
-  public String getUser() {
-    return user;
-  }
-
-  public void setUser(String user) {
-    this.user = user;
-    properties.setProperty("user", user);
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-    properties.setProperty(PWD_STR, password);
-  }
-
-  public Integer getPort() {
-    return port;
-  }
-
-  public void setPort(Integer port) {
-    this.port = port;
-  }
-
-  public String getUrl() {
-    return url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
-  }
-
-  @Override
-  public Connection getConnection() throws SQLException {
-    try {
-      return new IoTDBConnection(url, properties);
-    } catch (TTransportException e) {
-      e.printStackTrace();
+    public IoTDBDataSource(String url, String user, String password, Integer port) {
+        this.url = url;
+        this.properties = new Properties();
+        properties.setProperty("user", user);
+        properties.setProperty(PWD_STR, password);
+        if (port != 0) {
+            this.port = port;
+        }
     }
-    return null;
-  }
 
-  @Override
-  public Connection getConnection(String username, String password) throws SQLException {
-    try {
-      Properties newProp = new Properties();
-      newProp.setProperty("user", username);
-      newProp.setProperty(PWD_STR, password);
-      return new IoTDBConnection(url, newProp);
-    } catch (Exception e) {
-      e.printStackTrace();
+    public String getUser() {
+        return user;
     }
-    return null;
-  }
 
-  @Override
-  public PrintWriter getLogWriter() throws SQLException {
-    return null;
-  }
+    public void setUser(String user) {
+        this.user = user;
+        properties.setProperty("user", user);
+    }
 
-  @Override
-  public void setLogWriter(PrintWriter printWriter) throws SQLException {
+    public String getPassword() {
+        return password;
+    }
 
-  }
+    public void setPassword(String password) {
+        this.password = password;
+        properties.setProperty(PWD_STR, password);
+    }
 
-  @Override
-  public void setLoginTimeout(int i) throws SQLException {
+    public Integer getPort() {
+        return port;
+    }
 
-  }
+    public void setPort(Integer port) {
+        this.port = port;
+    }
 
-  @Override
-  public int getLoginTimeout() throws SQLException {
-    return 0;
-  }
+    public String getUrl() {
+        return url;
+    }
 
-  @Override
-  public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
-    return null;
-  }
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
-  @Override
-  public <T> T unwrap(Class<T> aClass) throws SQLException {
-    return null;
-  }
+    @Override
+    public Connection getConnection() throws SQLException {
+        try {
+            return new IoTDBConnection(url, properties);
+        } catch (TTransportException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-  @Override
-  public boolean isWrapperFor(Class<?> aClass) throws SQLException {
-    return false;
-  }
+    @Override
+    public Connection getConnection(String username, String password) throws SQLException {
+        try {
+            Properties newProp = new Properties();
+            newProp.setProperty("user", username);
+            newProp.setProperty(PWD_STR, password);
+            return new IoTDBConnection(url, newProp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public PrintWriter getLogWriter() throws SQLException {
+        return null;
+    }
+
+    @Override
+    public void setLogWriter(PrintWriter printWriter) throws SQLException {}
+
+    @Override
+    public void setLoginTimeout(int i) throws SQLException {}
+
+    @Override
+    public int getLoginTimeout() throws SQLException {
+        return 0;
+    }
+
+    @Override
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return null;
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> aClass) throws SQLException {
+        return null;
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> aClass) throws SQLException {
+        return false;
+    }
 }

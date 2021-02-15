@@ -22,12 +22,11 @@ import org.apache.iotdb.db.exception.StartupException;
 
 public interface MetricsServiceMBean {
 
-  int getMetricsPort();
+    int getMetricsPort();
 
-  void startService() throws StartupException;
+    void startService() throws StartupException;
 
-  void restartService() throws StartupException;
+    void restartService() throws StartupException;
 
-  void stopService();
-
+    void stopService();
 }

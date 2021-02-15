@@ -23,9 +23,9 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public interface IBatchReader {
 
-  boolean hasNextBatch() throws IOException;
+    boolean hasNextBatch() throws IOException;
 
-  BatchData nextBatch() throws IOException;
+    BatchData nextBatch() throws IOException;
 
-  void close() throws IOException;
+    void close() throws IOException;
 }

@@ -27,64 +27,61 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.metadata.PartialPath;
 
-/**
- * MergeContext records the shared information between merge sub-tasks.
- */
+/** MergeContext records the shared information between merge sub-tasks. */
 public class MergeContext {
 
-  private Map<TsFileResource, Integer> mergedChunkCnt = new HashMap<>();
-  private Map<TsFileResource, Integer> unmergedChunkCnt = new HashMap<>();
-  private Map<TsFileResource, Map<PartialPath, List<Long>>> unmergedChunkStartTimes = new HashMap<>();
+    private Map<TsFileResource, Integer> mergedChunkCnt = new HashMap<>();
+    private Map<TsFileResource, Integer> unmergedChunkCnt = new HashMap<>();
+    private Map<TsFileResource, Map<PartialPath, List<Long>>> unmergedChunkStartTimes =
+            new HashMap<>();
 
-  private AtomicInteger totalChunkWritten = new AtomicInteger();
-  private AtomicLong totalPointWritten = new AtomicLong();
+    private AtomicInteger totalChunkWritten = new AtomicInteger();
+    private AtomicLong totalPointWritten = new AtomicLong();
 
-  public void clear() {
-    mergedChunkCnt.clear();
-    unmergedChunkCnt.clear();
-    unmergedChunkStartTimes.clear();
-  }
+    public void clear() {
+        mergedChunkCnt.clear();
+        unmergedChunkCnt.clear();
+        unmergedChunkStartTimes.clear();
+    }
 
-  public Map<TsFileResource, Integer> getMergedChunkCnt() {
-    return mergedChunkCnt;
-  }
+    public Map<TsFileResource, Integer> getMergedChunkCnt() {
+        return mergedChunkCnt;
+    }
 
-  public void setMergedChunkCnt(
-      Map<TsFileResource, Integer> mergedChunkCnt) {
-    this.mergedChunkCnt = mergedChunkCnt;
-  }
+    public void setMergedChunkCnt(Map<TsFileResource, Integer> mergedChunkCnt) {
+        this.mergedChunkCnt = mergedChunkCnt;
+    }
 
-  public Map<TsFileResource, Integer> getUnmergedChunkCnt() {
-    return unmergedChunkCnt;
-  }
+    public Map<TsFileResource, Integer> getUnmergedChunkCnt() {
+        return unmergedChunkCnt;
+    }
 
-  public void setUnmergedChunkCnt(
-      Map<TsFileResource, Integer> unmergedChunkCnt) {
-    this.unmergedChunkCnt = unmergedChunkCnt;
-  }
+    public void setUnmergedChunkCnt(Map<TsFileResource, Integer> unmergedChunkCnt) {
+        this.unmergedChunkCnt = unmergedChunkCnt;
+    }
 
-  public Map<TsFileResource, Map<PartialPath, List<Long>>> getUnmergedChunkStartTimes() {
-    return unmergedChunkStartTimes;
-  }
+    public Map<TsFileResource, Map<PartialPath, List<Long>>> getUnmergedChunkStartTimes() {
+        return unmergedChunkStartTimes;
+    }
 
-  public void setUnmergedChunkStartTimes(
-      Map<TsFileResource, Map<PartialPath, List<Long>>> unmergedChunkStartTimes) {
-    this.unmergedChunkStartTimes = unmergedChunkStartTimes;
-  }
+    public void setUnmergedChunkStartTimes(
+            Map<TsFileResource, Map<PartialPath, List<Long>>> unmergedChunkStartTimes) {
+        this.unmergedChunkStartTimes = unmergedChunkStartTimes;
+    }
 
-  public int getTotalChunkWritten() {
-    return totalChunkWritten.get();
-  }
+    public int getTotalChunkWritten() {
+        return totalChunkWritten.get();
+    }
 
-  public void incTotalChunkWritten() {
-    this.totalChunkWritten.incrementAndGet();
-  }
+    public void incTotalChunkWritten() {
+        this.totalChunkWritten.incrementAndGet();
+    }
 
-  public void incTotalPointWritten(long increment) {
-    totalPointWritten.addAndGet(increment);
-  }
+    public void incTotalPointWritten(long increment) {
+        totalPointWritten.addAndGet(increment);
+    }
 
-  public long getTotalPointWritten() {
-    return totalPointWritten.get();
-  }
+    public long getTotalPointWritten() {
+        return totalPointWritten.get();
+    }
 }

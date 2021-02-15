@@ -22,70 +22,69 @@ package org.apache.iotdb.db.engine.modification;
 import java.util.Objects;
 import org.apache.iotdb.db.metadata.PartialPath;
 
-/**
- * Deletion is a delete operation on a timeseries.
- */
+/** Deletion is a delete operation on a timeseries. */
 public class Deletion extends Modification {
 
-  /**
-   * data within the interval [startTime, endTime] are to be deleted.
-   */
-  private long startTime;
-  private long endTime;
+    /** data within the interval [startTime, endTime] are to be deleted. */
+    private long startTime;
 
-  /**
-   * constructor of Deletion, the start time is set to Long.MIN_VALUE
-   * @param endTime end time of delete interval
-   * @param path time series path
-   */
-  public Deletion(PartialPath path, long versionNum, long endTime) {
-    super(Type.DELETION, path, versionNum);
-    this.startTime = Long.MIN_VALUE;
-    this.endTime = endTime;
-  }
+    private long endTime;
 
-  /**
-   * constructor of Deletion
-   * @param startTime start time of delete interval
-   * @param endTime end time of delete interval
-   * @param path time series path
-   */
-  public Deletion(PartialPath path, long versionNum, long startTime, long endTime) {
-    super(Type.DELETION, path, versionNum);
-    this.startTime = startTime;
-    this.endTime = endTime;
-  }
-
-  public long getStartTime() {
-    return startTime;
-  }
-
-  public void setStartTime(long timestamp) {
-    this.startTime = timestamp;
-  }
-
-  public long getEndTime() {
-    return endTime;
-  }
-
-  public void setEndTime(long timestamp) {
-    this.endTime = timestamp;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
+    /**
+     * constructor of Deletion, the start time is set to Long.MIN_VALUE
+     *
+     * @param endTime end time of delete interval
+     * @param path time series path
+     */
+    public Deletion(PartialPath path, long versionNum, long endTime) {
+        super(Type.DELETION, path, versionNum);
+        this.startTime = Long.MIN_VALUE;
+        this.endTime = endTime;
     }
-    if (!(obj instanceof Deletion)) {
-      return false;
-    }
-    Deletion del = (Deletion) obj;
-    return super.equals(obj) && del.startTime == this.startTime && del.endTime == this.endTime;
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(super.hashCode(), startTime, endTime);
-  }
+    /**
+     * constructor of Deletion
+     *
+     * @param startTime start time of delete interval
+     * @param endTime end time of delete interval
+     * @param path time series path
+     */
+    public Deletion(PartialPath path, long versionNum, long startTime, long endTime) {
+        super(Type.DELETION, path, versionNum);
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long timestamp) {
+        this.startTime = timestamp;
+    }
+
+    public long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(long timestamp) {
+        this.endTime = timestamp;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Deletion)) {
+            return false;
+        }
+        Deletion del = (Deletion) obj;
+        return super.equals(obj) && del.startTime == this.startTime && del.endTime == this.endTime;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), startTime, endTime);
+    }
 }

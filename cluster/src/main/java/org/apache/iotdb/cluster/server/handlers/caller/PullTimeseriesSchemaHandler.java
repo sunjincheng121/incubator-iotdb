@@ -32,38 +32,40 @@ import org.slf4j.LoggerFactory;
 
 public class PullTimeseriesSchemaHandler implements AsyncMethodCallback<PullSchemaResp> {
 
-  private static final Logger logger = LoggerFactory.getLogger(PullTimeseriesSchemaHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(PullTimeseriesSchemaHandler.class);
 
-  private Node owner;
-  private List<String> prefixPaths;
-  private AtomicReference<List<TimeseriesSchema>> timeseriesSchemas;
+    private Node owner;
+    private List<String> prefixPaths;
+    private AtomicReference<List<TimeseriesSchema>> timeseriesSchemas;
 
-  public PullTimeseriesSchemaHandler(Node owner, List<String> prefixPaths,
-      AtomicReference<List<TimeseriesSchema>> timeseriesSchemas) {
-    this.owner = owner;
-    this.prefixPaths = prefixPaths;
-    this.timeseriesSchemas = timeseriesSchemas;
-  }
-
-  @Override
-  public void onComplete(PullSchemaResp response) {
-    ByteBuffer buffer = response.schemaBytes;
-    int size = buffer.getInt();
-    List<TimeseriesSchema> schemas = new ArrayList<>(size);
-    for (int i = 0; i < size; i++) {
-      schemas.add(TimeseriesSchema.deserializeFrom(buffer));
+    public PullTimeseriesSchemaHandler(
+            Node owner,
+            List<String> prefixPaths,
+            AtomicReference<List<TimeseriesSchema>> timeseriesSchemas) {
+        this.owner = owner;
+        this.prefixPaths = prefixPaths;
+        this.timeseriesSchemas = timeseriesSchemas;
     }
-    synchronized (timeseriesSchemas) {
-      timeseriesSchemas.set(schemas);
-      timeseriesSchemas.notifyAll();
-    }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    logger.error("Cannot pull time series schema of {} from {}", prefixPaths, owner, exception);
-    synchronized (timeseriesSchemas) {
-      timeseriesSchemas.notifyAll();
+    @Override
+    public void onComplete(PullSchemaResp response) {
+        ByteBuffer buffer = response.schemaBytes;
+        int size = buffer.getInt();
+        List<TimeseriesSchema> schemas = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            schemas.add(TimeseriesSchema.deserializeFrom(buffer));
+        }
+        synchronized (timeseriesSchemas) {
+            timeseriesSchemas.set(schemas);
+            timeseriesSchemas.notifyAll();
+        }
     }
-  }
+
+    @Override
+    public void onError(Exception exception) {
+        logger.error("Cannot pull time series schema of {} from {}", prefixPaths, owner, exception);
+        synchronized (timeseriesSchemas) {
+            timeseriesSchemas.notifyAll();
+        }
+    }
 }

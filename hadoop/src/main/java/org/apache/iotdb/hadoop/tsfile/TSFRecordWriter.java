@@ -18,46 +18,44 @@
  */
 package org.apache.iotdb.hadoop.tsfile;
 
+import java.io.IOException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.iotdb.hadoop.fileSystem.HDFSOutput;
-import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
 import org.apache.iotdb.hadoop.tsfile.record.HDFSTSRecord;
+import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
 import org.apache.iotdb.tsfile.write.TsFileWriter;
 import org.apache.iotdb.tsfile.write.schema.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 public class TSFRecordWriter extends RecordWriter<NullWritable, HDFSTSRecord> {
 
-  private static final Logger logger = LoggerFactory.getLogger(TSFRecordWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(TSFRecordWriter.class);
 
-  private TsFileWriter writer;
+    private TsFileWriter writer;
 
-
-  public TSFRecordWriter(TaskAttemptContext job, Path path, Schema schema) throws IOException {
-    HDFSOutput hdfsOutput = new HDFSOutput(path.toString(), job.getConfiguration(), false);
-    writer = new TsFileWriter(hdfsOutput, schema);
-  }
-
-  @Override
-  public synchronized void write(NullWritable key, HDFSTSRecord value)
-      throws IOException, InterruptedException {
-    try {
-      writer.write(value.convertToTSRecord());
-    } catch (WriteProcessException e) {
-      throw new InterruptedException(String.format("Write tsfile record error %s", e));
+    public TSFRecordWriter(TaskAttemptContext job, Path path, Schema schema) throws IOException {
+        HDFSOutput hdfsOutput = new HDFSOutput(path.toString(), job.getConfiguration(), false);
+        writer = new TsFileWriter(hdfsOutput, schema);
     }
-  }
 
-  @Override
-  public void close(TaskAttemptContext context) throws IOException, InterruptedException {
-    logger.info("Close the record writer, the task attempt id is {}", context.getTaskAttemptID());
-    writer.close();
-  }
+    @Override
+    public synchronized void write(NullWritable key, HDFSTSRecord value)
+            throws IOException, InterruptedException {
+        try {
+            writer.write(value.convertToTSRecord());
+        } catch (WriteProcessException e) {
+            throw new InterruptedException(String.format("Write tsfile record error %s", e));
+        }
+    }
 
+    @Override
+    public void close(TaskAttemptContext context) throws IOException, InterruptedException {
+        logger.info(
+                "Close the record writer, the task attempt id is {}", context.getTaskAttemptID());
+        writer.close();
+    }
 }

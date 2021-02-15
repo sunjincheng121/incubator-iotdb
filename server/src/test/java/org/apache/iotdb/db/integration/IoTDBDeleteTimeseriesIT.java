@@ -35,150 +35,147 @@ import org.junit.Test;
 
 public class IoTDBDeleteTimeseriesIT {
 
-  private long memtableSizeThreshold;
-  private CompactionStrategy tsFileManagementStrategy;
+    private long memtableSizeThreshold;
+    private CompactionStrategy tsFileManagementStrategy;
 
-  @Before
-  public void setUp() throws Exception {
-    EnvironmentUtils.closeStatMonitor();
-    EnvironmentUtils.envSetUp();
-    memtableSizeThreshold = IoTDBDescriptor.getInstance().getConfig().getMemtableSizeThreshold();
-    IoTDBDescriptor.getInstance().getConfig().setMemtableSizeThreshold(16);
-    tsFileManagementStrategy = IoTDBDescriptor.getInstance().getConfig()
-        .getCompactionStrategy();
-    IoTDBDescriptor.getInstance().getConfig()
-        .setCompactionStrategy(CompactionStrategy.NO_COMPACTION);
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    IoTDBDescriptor.getInstance().getConfig().setMemtableSizeThreshold(memtableSizeThreshold);
-    IoTDBDescriptor.getInstance().getConfig()
-        .setCompactionStrategy(tsFileManagementStrategy);
-    EnvironmentUtils.cleanEnv();
-  }
-
-  @Test
-  public void deleteTimeseriesAndCreateDifferentTypeTest() throws Exception {
-    Class.forName(Config.JDBC_DRIVER_NAME);
-    String[] retArray = new String[]{
-        "1,1,",
-        "2,1.1,"
-    };
-    int cnt = 0;
-
-    try (Connection connection = DriverManager.
-        getConnection("jdbc:iotdb://127.0.0.1:6667/", "root", "root");
-        Statement statement = connection.createStatement()) {
-      statement.execute(
-          "create timeseries root.turbine1.d1.s1 with datatype=INT64, encoding=PLAIN, compression=SNAPPY");
-      statement.execute(
-          "create timeseries root.turbine1.d1.s2 with datatype=INT64, encoding=PLAIN, compression=SNAPPY");
-      statement.execute("INSERT INTO root.turbine1.d1(timestamp,s1,s2) VALUES(1,1,2)");
-      boolean hasResult = statement.execute("SELECT s1 FROM root.turbine1.d1");
-      Assert.assertTrue(hasResult);
-      try (ResultSet resultSet = statement.getResultSet()) {
-        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        while (resultSet.next()) {
-          StringBuilder builder = new StringBuilder();
-          for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
-            builder.append(resultSet.getString(i)).append(",");
-          }
-          Assert.assertEquals(retArray[cnt], builder.toString());
-          cnt++;
-        }
-      }
-      statement.execute("DELETE timeseries root.turbine1.d1.s1");
-      statement.execute(
-          "create timeseries root.turbine1.d1.s1 with datatype=DOUBLE, encoding=PLAIN, compression=SNAPPY");
-      statement.execute("INSERT INTO root.turbine1.d1(timestamp,s1) VALUES(2,1.1)");
-      statement.execute("FLUSH");
-
-      hasResult = statement.execute("SELECT s1 FROM root.turbine1.d1");
-      Assert.assertTrue(hasResult);
-      try (ResultSet resultSet = statement.getResultSet()) {
-        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        while (resultSet.next()) {
-          StringBuilder builder = new StringBuilder();
-          for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
-            builder.append(resultSet.getString(i)).append(",");
-          }
-          Assert.assertEquals(retArray[cnt], builder.toString());
-          cnt++;
-        }
-      }
+    @Before
+    public void setUp() throws Exception {
+        EnvironmentUtils.closeStatMonitor();
+        EnvironmentUtils.envSetUp();
+        memtableSizeThreshold =
+                IoTDBDescriptor.getInstance().getConfig().getMemtableSizeThreshold();
+        IoTDBDescriptor.getInstance().getConfig().setMemtableSizeThreshold(16);
+        tsFileManagementStrategy =
+                IoTDBDescriptor.getInstance().getConfig().getCompactionStrategy();
+        IoTDBDescriptor.getInstance()
+                .getConfig()
+                .setCompactionStrategy(CompactionStrategy.NO_COMPACTION);
     }
 
-    EnvironmentUtils.restartDaemon();
-
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
-            "root");
-        Statement statement = connection.createStatement()) {
-      boolean hasResult = statement.execute("SELECT * FROM root");
-      Assert.assertTrue(hasResult);
+    @After
+    public void tearDown() throws Exception {
+        IoTDBDescriptor.getInstance().getConfig().setMemtableSizeThreshold(memtableSizeThreshold);
+        IoTDBDescriptor.getInstance().getConfig().setCompactionStrategy(tsFileManagementStrategy);
+        EnvironmentUtils.cleanEnv();
     }
-  }
 
-  @Test
-  public void deleteTimeseriesAndCreateSameTypeTest() throws Exception {
-    Class.forName(Config.JDBC_DRIVER_NAME);
-    String[] retArray = new String[]{
-        "1,1,",
-        "2,5,"
-    };
-    int cnt = 0;
+    @Test
+    public void deleteTimeseriesAndCreateDifferentTypeTest() throws Exception {
+        Class.forName(Config.JDBC_DRIVER_NAME);
+        String[] retArray = new String[] {"1,1,", "2,1.1,"};
+        int cnt = 0;
 
-    try (Connection connection = DriverManager.
-        getConnection("jdbc:iotdb://127.0.0.1:6667/", "root", "root");
-        Statement statement = connection.createStatement()) {
-      statement.execute(
-          "create timeseries root.turbine1.d1.s1 with datatype=INT64, encoding=PLAIN, compression=SNAPPY");
-      statement.execute(
-          "create timeseries root.turbine1.d1.s2 with datatype=INT64, encoding=PLAIN, compression=SNAPPY");
-      statement.execute("INSERT INTO root.turbine1.d1(timestamp,s1,s2) VALUES(1,1,2)");
-      boolean hasResult = statement.execute("SELECT s1 FROM root.turbine1.d1");
-      Assert.assertTrue(hasResult);
-      try (ResultSet resultSet = statement.getResultSet()) {
-        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        while (resultSet.next()) {
-          StringBuilder builder = new StringBuilder();
-          for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
-            builder.append(resultSet.getString(i)).append(",");
-          }
-          Assert.assertEquals(retArray[cnt], builder.toString());
-          cnt++;
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                "jdbc:iotdb://127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            statement.execute(
+                    "create timeseries root.turbine1.d1.s1 with datatype=INT64, encoding=PLAIN, compression=SNAPPY");
+            statement.execute(
+                    "create timeseries root.turbine1.d1.s2 with datatype=INT64, encoding=PLAIN, compression=SNAPPY");
+            statement.execute("INSERT INTO root.turbine1.d1(timestamp,s1,s2) VALUES(1,1,2)");
+            boolean hasResult = statement.execute("SELECT s1 FROM root.turbine1.d1");
+            Assert.assertTrue(hasResult);
+            try (ResultSet resultSet = statement.getResultSet()) {
+                ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+                while (resultSet.next()) {
+                    StringBuilder builder = new StringBuilder();
+                    for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+                        builder.append(resultSet.getString(i)).append(",");
+                    }
+                    Assert.assertEquals(retArray[cnt], builder.toString());
+                    cnt++;
+                }
+            }
+            statement.execute("DELETE timeseries root.turbine1.d1.s1");
+            statement.execute(
+                    "create timeseries root.turbine1.d1.s1 with datatype=DOUBLE, encoding=PLAIN, compression=SNAPPY");
+            statement.execute("INSERT INTO root.turbine1.d1(timestamp,s1) VALUES(2,1.1)");
+            statement.execute("FLUSH");
+
+            hasResult = statement.execute("SELECT s1 FROM root.turbine1.d1");
+            Assert.assertTrue(hasResult);
+            try (ResultSet resultSet = statement.getResultSet()) {
+                ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+                while (resultSet.next()) {
+                    StringBuilder builder = new StringBuilder();
+                    for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+                        builder.append(resultSet.getString(i)).append(",");
+                    }
+                    Assert.assertEquals(retArray[cnt], builder.toString());
+                    cnt++;
+                }
+            }
         }
-      }
-      statement.execute("DELETE timeseries root.turbine1.d1.s1");
-      statement.execute(
-          "create timeseries root.turbine1.d1.s1 with datatype=INT64, encoding=PLAIN, compression=SNAPPY");
-      statement.execute("INSERT INTO root.turbine1.d1(timestamp,s1) VALUES(2,5)");
-      statement.execute("FLUSH");
 
-      hasResult = statement.execute("SELECT s1 FROM root.turbine1.d1");
-      Assert.assertTrue(hasResult);
-      try (ResultSet resultSet = statement.getResultSet()) {
-        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        while (resultSet.next()) {
-          StringBuilder builder = new StringBuilder();
-          for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
-            builder.append(resultSet.getString(i)).append(",");
-          }
-          Assert.assertEquals(retArray[cnt], builder.toString());
-          cnt++;
+        EnvironmentUtils.restartDaemon();
+
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            boolean hasResult = statement.execute("SELECT * FROM root");
+            Assert.assertTrue(hasResult);
         }
-      }
     }
 
-    EnvironmentUtils.restartDaemon();
+    @Test
+    public void deleteTimeseriesAndCreateSameTypeTest() throws Exception {
+        Class.forName(Config.JDBC_DRIVER_NAME);
+        String[] retArray = new String[] {"1,1,", "2,5,"};
+        int cnt = 0;
 
-    try(Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
-            "root");
-        Statement statement = connection.createStatement()){
-      boolean hasResult = statement.execute("SELECT * FROM root");
-      Assert.assertTrue(hasResult);
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                "jdbc:iotdb://127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            statement.execute(
+                    "create timeseries root.turbine1.d1.s1 with datatype=INT64, encoding=PLAIN, compression=SNAPPY");
+            statement.execute(
+                    "create timeseries root.turbine1.d1.s2 with datatype=INT64, encoding=PLAIN, compression=SNAPPY");
+            statement.execute("INSERT INTO root.turbine1.d1(timestamp,s1,s2) VALUES(1,1,2)");
+            boolean hasResult = statement.execute("SELECT s1 FROM root.turbine1.d1");
+            Assert.assertTrue(hasResult);
+            try (ResultSet resultSet = statement.getResultSet()) {
+                ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+                while (resultSet.next()) {
+                    StringBuilder builder = new StringBuilder();
+                    for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+                        builder.append(resultSet.getString(i)).append(",");
+                    }
+                    Assert.assertEquals(retArray[cnt], builder.toString());
+                    cnt++;
+                }
+            }
+            statement.execute("DELETE timeseries root.turbine1.d1.s1");
+            statement.execute(
+                    "create timeseries root.turbine1.d1.s1 with datatype=INT64, encoding=PLAIN, compression=SNAPPY");
+            statement.execute("INSERT INTO root.turbine1.d1(timestamp,s1) VALUES(2,5)");
+            statement.execute("FLUSH");
+
+            hasResult = statement.execute("SELECT s1 FROM root.turbine1.d1");
+            Assert.assertTrue(hasResult);
+            try (ResultSet resultSet = statement.getResultSet()) {
+                ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+                while (resultSet.next()) {
+                    StringBuilder builder = new StringBuilder();
+                    for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+                        builder.append(resultSet.getString(i)).append(",");
+                    }
+                    Assert.assertEquals(retArray[cnt], builder.toString());
+                    cnt++;
+                }
+            }
+        }
+
+        EnvironmentUtils.restartDaemon();
+
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            boolean hasResult = statement.execute("SELECT * FROM root");
+            Assert.assertTrue(hasResult);
+        }
     }
-  }
 }

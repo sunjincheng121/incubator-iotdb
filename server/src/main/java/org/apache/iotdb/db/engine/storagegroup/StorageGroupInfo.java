@@ -21,86 +21,77 @@ package org.apache.iotdb.db.engine.storagegroup;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.rescon.SystemInfo;
 
-/**
- * The storageGroupInfo records the total memory cost of the Storage Group.
- */
+/** The storageGroupInfo records the total memory cost of the Storage Group. */
 public class StorageGroupInfo {
 
-  private StorageGroupProcessor storageGroupProcessor;
+    private StorageGroupProcessor storageGroupProcessor;
 
-  /**
-   * The total Storage group memory cost,
-   * including unsealed TsFileResource, ChunkMetadata, WAL, primitive arrays and TEXT values
-   */
-  private AtomicLong memoryCost;
+    /**
+     * The total Storage group memory cost, including unsealed TsFileResource, ChunkMetadata, WAL,
+     * primitive arrays and TEXT values
+     */
+    private AtomicLong memoryCost;
 
-  /**
-   * The threshold of reporting it's size to SystemInfo
-   */
-  private long storageGroupSizeReportThreshold = 
-      IoTDBDescriptor.getInstance().getConfig().getStorageGroupSizeReportThreshold();
+    /** The threshold of reporting it's size to SystemInfo */
+    private long storageGroupSizeReportThreshold =
+            IoTDBDescriptor.getInstance().getConfig().getStorageGroupSizeReportThreshold();
 
-  private AtomicLong lastReportedSize = new AtomicLong();
+    private AtomicLong lastReportedSize = new AtomicLong();
 
-  /**
-   * A set of all unclosed TsFileProcessors in this SG
-   */
-  private List<TsFileProcessor> reportedTsps = new CopyOnWriteArrayList<>();
+    /** A set of all unclosed TsFileProcessors in this SG */
+    private List<TsFileProcessor> reportedTsps = new CopyOnWriteArrayList<>();
 
-  public StorageGroupInfo(StorageGroupProcessor storageGroupProcessor) {
-    this.storageGroupProcessor = storageGroupProcessor;
-    memoryCost = new AtomicLong();
-  }
-
-  public StorageGroupProcessor getStorageGroupProcessor() {
-    return storageGroupProcessor;
-  }
-
-  /**
-   * When create a new TsFileProcessor, call this method
-   */
-  public void initTsFileProcessorInfo(TsFileProcessor tsFileProcessor) {
-    if (reportedTsps.add(tsFileProcessor)) {
-      memoryCost.getAndAdd(IoTDBDescriptor.getInstance().getConfig().getWalBufferSize());
+    public StorageGroupInfo(StorageGroupProcessor storageGroupProcessor) {
+        this.storageGroupProcessor = storageGroupProcessor;
+        memoryCost = new AtomicLong();
     }
-  }
 
-  public void addStorageGroupMemCost(long cost) {
-    memoryCost.getAndAdd(cost);
-  }
+    public StorageGroupProcessor getStorageGroupProcessor() {
+        return storageGroupProcessor;
+    }
 
-  public void releaseStorageGroupMemCost(long cost) {
-    memoryCost.getAndAdd(-cost);
-  }
+    /** When create a new TsFileProcessor, call this method */
+    public void initTsFileProcessorInfo(TsFileProcessor tsFileProcessor) {
+        if (reportedTsps.add(tsFileProcessor)) {
+            memoryCost.getAndAdd(IoTDBDescriptor.getInstance().getConfig().getWalBufferSize());
+        }
+    }
 
-  public long getMemCost() {
-    return memoryCost.get();
-  }
+    public void addStorageGroupMemCost(long cost) {
+        memoryCost.getAndAdd(cost);
+    }
 
-  public List<TsFileProcessor> getAllReportedTsp() {
-    return reportedTsps;
-  }
+    public void releaseStorageGroupMemCost(long cost) {
+        memoryCost.getAndAdd(-cost);
+    }
 
-  public boolean needToReportToSystem() {
-    return memoryCost.get() - lastReportedSize.get() > storageGroupSizeReportThreshold;
-  }
+    public long getMemCost() {
+        return memoryCost.get();
+    }
 
-  public void setLastReportedSize(long size) {
-    lastReportedSize.set(size);
-  }
+    public List<TsFileProcessor> getAllReportedTsp() {
+        return reportedTsps;
+    }
 
-  /**
-   * When a TsFileProcessor is closing, remove it from reportedTsps, and report to systemInfo
-   * to update SG cost.
-   * 
-   * @param tsFileProcessor
-   */
-  public void closeTsFileProcessorAndReportToSystem(TsFileProcessor tsFileProcessor) {
-    reportedTsps.remove(tsFileProcessor);
-    SystemInfo.getInstance().resetStorageGroupStatus(this, true);
-  }
+    public boolean needToReportToSystem() {
+        return memoryCost.get() - lastReportedSize.get() > storageGroupSizeReportThreshold;
+    }
+
+    public void setLastReportedSize(long size) {
+        lastReportedSize.set(size);
+    }
+
+    /**
+     * When a TsFileProcessor is closing, remove it from reportedTsps, and report to systemInfo to
+     * update SG cost.
+     *
+     * @param tsFileProcessor
+     */
+    public void closeTsFileProcessorAndReportToSystem(TsFileProcessor tsFileProcessor) {
+        reportedTsps.remove(tsFileProcessor);
+        SystemInfo.getInstance().resetStorageGroupStatus(this, true);
+    }
 }

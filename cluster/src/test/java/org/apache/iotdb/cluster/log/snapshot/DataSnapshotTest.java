@@ -49,115 +49,129 @@ import org.junit.Before;
 
 public abstract class DataSnapshotTest {
 
-  DataGroupMember dataGroupMember;
-  MetaGroupMember metaGroupMember;
-  final int failureFrequency = 10;
-  int failureCnt;
-  boolean addNetFailure = false;
+    DataGroupMember dataGroupMember;
+    MetaGroupMember metaGroupMember;
+    final int failureFrequency = 10;
+    int failureCnt;
+    boolean addNetFailure = false;
 
-  @Before
-  public void setUp() throws MetadataException, StartupException {
-    dataGroupMember = new TestDataGroupMember() {
-      @Override
-      public AsyncClient getAsyncClient(Node node) {
-        return new AsyncDataClient(null, null, null) {
-          @Override
-          public void readFile(String filePath, long offset, int length,
-              AsyncMethodCallback<ByteBuffer> resultHandler) {
-            new Thread(() -> {
-              if (addNetFailure && (failureCnt++) % failureFrequency == 0) {
-                // insert 1 failure in every 10 requests
-                resultHandler.onError(new Exception("Faked network failure"));
-                return;
-              }
-              try {
-                resultHandler.onComplete(IOUtils.readFile(filePath, offset, length));
-              } catch (IOException e) {
-                resultHandler.onError(e);
-              }
-            }).start();
-          }
+    @Before
+    public void setUp() throws MetadataException, StartupException {
+        dataGroupMember =
+                new TestDataGroupMember() {
+                    @Override
+                    public AsyncClient getAsyncClient(Node node) {
+                        return new AsyncDataClient(null, null, null) {
+                            @Override
+                            public void readFile(
+                                    String filePath,
+                                    long offset,
+                                    int length,
+                                    AsyncMethodCallback<ByteBuffer> resultHandler) {
+                                new Thread(
+                                                () -> {
+                                                    if (addNetFailure
+                                                            && (failureCnt++) % failureFrequency
+                                                                    == 0) {
+                                                        // insert 1 failure in every 10 requests
+                                                        resultHandler.onError(
+                                                                new Exception(
+                                                                        "Faked network failure"));
+                                                        return;
+                                                    }
+                                                    try {
+                                                        resultHandler.onComplete(
+                                                                IOUtils.readFile(
+                                                                        filePath, offset, length));
+                                                    } catch (IOException e) {
+                                                        resultHandler.onError(e);
+                                                    }
+                                                })
+                                        .start();
+                            }
 
-          @Override
-          public void removeHardLink(String hardLinkPath, AsyncMethodCallback<Void> resultHandler)
-              throws TException {
-            new Thread(() -> {
-              try {
-                Files.deleteIfExists(new File(hardLinkPath).toPath());
-              } catch (IOException e) {
-                // ignore
-              }
-            }).start();
-          }
-        };
-      }
+                            @Override
+                            public void removeHardLink(
+                                    String hardLinkPath, AsyncMethodCallback<Void> resultHandler)
+                                    throws TException {
+                                new Thread(
+                                                () -> {
+                                                    try {
+                                                        Files.deleteIfExists(
+                                                                new File(hardLinkPath).toPath());
+                                                    } catch (IOException e) {
+                                                        // ignore
+                                                    }
+                                                })
+                                        .start();
+                            }
+                        };
+                    }
 
-      @Override
-      public Client getSyncClient(Node node) {
-        return new SyncDataClient(new TBinaryProtocol(new TTransport() {
-          @Override
-          public boolean isOpen() {
-            return false;
-          }
+                    @Override
+                    public Client getSyncClient(Node node) {
+                        return new SyncDataClient(
+                                new TBinaryProtocol(
+                                        new TTransport() {
+                                            @Override
+                                            public boolean isOpen() {
+                                                return false;
+                                            }
 
-          @Override
-          public void open() {
+                                            @Override
+                                            public void open() {}
 
-          }
+                                            @Override
+                                            public void close() {}
 
-          @Override
-          public void close() {
+                                            @Override
+                                            public int read(byte[] bytes, int i, int i1) {
+                                                return 0;
+                                            }
 
-          }
-
-          @Override
-          public int read(byte[] bytes, int i, int i1) {
-            return 0;
-          }
-
-          @Override
-          public void write(byte[] bytes, int i, int i1) {
-
-          }
-        })) {
-          @Override
-          public ByteBuffer readFile(String filePath, long offset, int length) throws TException {
-            if (addNetFailure && (failureCnt++) % failureFrequency == 0) {
-              // simulate failures
-              throw new TException("Faked network failure");
-            }
-            try {
-              return IOUtils.readFile(filePath, offset, length);
-            } catch (IOException e) {
-              throw new TException(e);
-            }
-          }
-        };
-      }
-    };
-    // do nothing
-    metaGroupMember = new TestMetaGroupMember() {
-      @Override
-      public void syncLeaderWithConsistencyCheck(boolean isWriteRequest) {
+                                            @Override
+                                            public void write(byte[] bytes, int i, int i1) {}
+                                        })) {
+                            @Override
+                            public ByteBuffer readFile(String filePath, long offset, int length)
+                                    throws TException {
+                                if (addNetFailure && (failureCnt++) % failureFrequency == 0) {
+                                    // simulate failures
+                                    throw new TException("Faked network failure");
+                                }
+                                try {
+                                    return IOUtils.readFile(filePath, offset, length);
+                                } catch (IOException e) {
+                                    throw new TException(e);
+                                }
+                            }
+                        };
+                    }
+                };
         // do nothing
-      }
-    };
-    metaGroupMember.setPartitionTable(TestUtils.getPartitionTable(10));
-    dataGroupMember.setMetaGroupMember(metaGroupMember);
-    dataGroupMember.setLogManager(new TestLogManager(0));
-    EnvironmentUtils.envSetUp();
-    for (int i = 0; i < 10; i++) {
-      IoTDB.metaManager.setStorageGroup(new PartialPath(TestUtils.getTestSg(i)));
+        metaGroupMember =
+                new TestMetaGroupMember() {
+                    @Override
+                    public void syncLeaderWithConsistencyCheck(boolean isWriteRequest) {
+                        // do nothing
+                    }
+                };
+        metaGroupMember.setPartitionTable(TestUtils.getPartitionTable(10));
+        dataGroupMember.setMetaGroupMember(metaGroupMember);
+        dataGroupMember.setLogManager(new TestLogManager(0));
+        EnvironmentUtils.envSetUp();
+        for (int i = 0; i < 10; i++) {
+            IoTDB.metaManager.setStorageGroup(new PartialPath(TestUtils.getTestSg(i)));
+        }
+        addNetFailure = false;
     }
-    addNetFailure = false;
-  }
 
-  @After
-  public void tearDown() throws Exception {
-    metaGroupMember.closeLogManager();
-    dataGroupMember.closeLogManager();
-    metaGroupMember.stop();
-    dataGroupMember.stop();
-    EnvironmentUtils.cleanEnv();
-  }
+    @After
+    public void tearDown() throws Exception {
+        metaGroupMember.closeLogManager();
+        dataGroupMember.closeLogManager();
+        metaGroupMember.stop();
+        dataGroupMember.stop();
+        EnvironmentUtils.cleanEnv();
+    }
 }

@@ -23,67 +23,65 @@ import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.read.common.BatchData;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
-/**
- * only for test now
- */
+/** only for test now */
 public class SeriesRawDataPointReader implements IPointReader {
 
-  private final SeriesRawDataBatchReader batchReader;
+    private final SeriesRawDataBatchReader batchReader;
 
-  private boolean hasCachedTimeValuePair;
-  private BatchData batchData;
-  private TimeValuePair timeValuePair;
+    private boolean hasCachedTimeValuePair;
+    private BatchData batchData;
+    private TimeValuePair timeValuePair;
 
-  public SeriesRawDataPointReader(SeriesReader seriesReader) {
-    this.batchReader = new SeriesRawDataBatchReader(seriesReader);
-  }
-
-
-  @Override
-  public boolean hasNextTimeValuePair() throws IOException {
-    if (hasCachedTimeValuePair) {
-      return true;
+    public SeriesRawDataPointReader(SeriesReader seriesReader) {
+        this.batchReader = new SeriesRawDataBatchReader(seriesReader);
     }
 
-    if (batchData != null && batchData.hasCurrent()) {
-      timeValuePair = new TimeValuePair(batchData.currentTime(),
-          batchData.currentTsPrimitiveType());
-      hasCachedTimeValuePair = true;
-      batchData.next();
-      return true;
+    @Override
+    public boolean hasNextTimeValuePair() throws IOException {
+        if (hasCachedTimeValuePair) {
+            return true;
+        }
+
+        if (batchData != null && batchData.hasCurrent()) {
+            timeValuePair =
+                    new TimeValuePair(batchData.currentTime(), batchData.currentTsPrimitiveType());
+            hasCachedTimeValuePair = true;
+            batchData.next();
+            return true;
+        }
+
+        while (batchReader.hasNextBatch()) {
+            batchData = batchReader.nextBatch();
+            if (batchData.hasCurrent()) {
+                timeValuePair =
+                        new TimeValuePair(
+                                batchData.currentTime(), batchData.currentTsPrimitiveType());
+                hasCachedTimeValuePair = true;
+                batchData.next();
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    while (batchReader.hasNextBatch()) {
-      batchData = batchReader.nextBatch();
-      if (batchData.hasCurrent()) {
-        timeValuePair = new TimeValuePair(batchData.currentTime(),
-            batchData.currentTsPrimitiveType());
-        hasCachedTimeValuePair = true;
-        batchData.next();
-        return true;
-      }
+    @Override
+    public TimeValuePair nextTimeValuePair() throws IOException {
+        if (hasCachedTimeValuePair || hasNextTimeValuePair()) {
+            hasCachedTimeValuePair = false;
+            return timeValuePair;
+        } else {
+            throw new IOException("no next data");
+        }
     }
 
-    return false;
-  }
-
-  @Override
-  public TimeValuePair nextTimeValuePair() throws IOException {
-    if (hasCachedTimeValuePair || hasNextTimeValuePair()) {
-      hasCachedTimeValuePair = false;
-      return timeValuePair;
-    } else {
-      throw new IOException("no next data");
+    @Override
+    public TimeValuePair currentTimeValuePair() {
+        return timeValuePair;
     }
-  }
 
-  @Override
-  public TimeValuePair currentTimeValuePair() {
-    return timeValuePair;
-  }
-
-  @Override
-  public void close() throws IOException {
-    // no resources need to close
-  }
+    @Override
+    public void close() throws IOException {
+        // no resources need to close
+    }
 }

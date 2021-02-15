@@ -23,5 +23,5 @@ import org.apache.iotdb.db.exception.StorageEngineException;
 @FunctionalInterface
 public interface IoTDBMBean {
 
-  void stop() throws StorageEngineException;
+    void stop() throws StorageEngineException;
 }

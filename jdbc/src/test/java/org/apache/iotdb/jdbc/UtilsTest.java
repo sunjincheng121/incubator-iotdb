@@ -18,103 +18,100 @@
  */
 package org.apache.iotdb.jdbc;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.util.Properties;
 import org.apache.iotdb.rpc.RpcUtils;
 import org.apache.iotdb.rpc.TSStatusCode;
-import org.apache.iotdb.service.rpc.thrift.TSStatus;
 import org.apache.iotdb.service.rpc.thrift.TSStatus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Properties;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 public class UtilsTest {
 
-  @Before
-  public void setUp() throws Exception {
-  }
+    @Before
+    public void setUp() throws Exception {}
 
-  @After
-  public void tearDown() throws Exception {
-  }
+    @After
+    public void tearDown() throws Exception {}
 
-  @Test
-  public void testParseURL() throws IoTDBURLException {
-    String userName = "test";
-    String userPwd = "test";
-    String host1 = "localhost";
-    int port = 6667;
-    Properties properties = new Properties();
-    properties.setProperty(Config.AUTH_USER, userName);
-    properties.setProperty(Config.AUTH_PASSWORD, userPwd);
-    IoTDBConnectionParams params = Utils
-        .parseUrl(String.format(Config.IOTDB_URL_PREFIX + "%s:%s/", host1, port),
-            properties);
-    assertEquals(host1, params.getHost());
-    assertEquals(port, params.getPort());
-    assertEquals(userName, params.getUsername());
-    assertEquals(userPwd, params.getPassword());
+    @Test
+    public void testParseURL() throws IoTDBURLException {
+        String userName = "test";
+        String userPwd = "test";
+        String host1 = "localhost";
+        int port = 6667;
+        Properties properties = new Properties();
+        properties.setProperty(Config.AUTH_USER, userName);
+        properties.setProperty(Config.AUTH_PASSWORD, userPwd);
+        IoTDBConnectionParams params =
+                Utils.parseUrl(
+                        String.format(Config.IOTDB_URL_PREFIX + "%s:%s/", host1, port), properties);
+        assertEquals(host1, params.getHost());
+        assertEquals(port, params.getPort());
+        assertEquals(userName, params.getUsername());
+        assertEquals(userPwd, params.getPassword());
 
-    params = Utils.parseUrl(String.format(Config.IOTDB_URL_PREFIX + "%s:%s", host1, port), properties);
-    assertEquals(params.getHost(), host1);
-    assertEquals(params.getPort(), port);
-    assertEquals(params.getUsername(), userName);
-    assertEquals(params.getPassword(), userPwd);
-  }
-
-  @Test(expected = IoTDBURLException.class)
-  public void testParseWrongUrl1() throws IoTDBURLException {
-    Properties properties = new Properties();
-    Utils.parseUrl("jdbc:iotdb//test6667", properties);
-  }
-
-  @Test
-  public void testParseDomainName() throws IoTDBURLException {
-    Properties properties = new Properties();
-    final IoTDBConnectionParams params = Utils.parseUrl("jdbc:iotdb://test:6667", properties);
-
-    assertEquals("test", params.getHost());
-    assertEquals(6667, params.getPort());
-  }
-
-  @Test(expected = IoTDBURLException.class)
-  public void testParseWrongUrl2() throws IoTDBURLException {
-    Properties properties = new Properties();
-    Utils.parseUrl("jdbc:iotdb//test:test:test:6667:6667", properties);
-  }
-
-  @Test(expected = IoTDBURLException.class)
-  public void testParseWrongPort() throws IoTDBURLException {
-    String userName = "test";
-    String userPwd = "test";
-    String host = "localhost";
-    int port = 66699999;
-    Properties properties = new Properties();
-    properties.setProperty(Config.AUTH_USER, userName);
-    properties.setProperty(Config.AUTH_PASSWORD, userPwd);
-    IoTDBConnectionParams params = Utils
-        .parseUrl(String.format(Config.IOTDB_URL_PREFIX + "%s:%s/", host, port),
-            properties);
-  }
-
-  @Test
-  public void testVerifySuccess() {
-    try {
-      RpcUtils.verifySuccess(RpcUtils.SUCCESS_STATUS);
-    } catch (Exception e) {
-      fail();
+        params =
+                Utils.parseUrl(
+                        String.format(Config.IOTDB_URL_PREFIX + "%s:%s", host1, port), properties);
+        assertEquals(params.getHost(), host1);
+        assertEquals(params.getPort(), port);
+        assertEquals(params.getUsername(), userName);
+        assertEquals(params.getPassword(), userPwd);
     }
 
-    try {
-      TSStatus errorStatus = new TSStatus(TSStatusCode.INTERNAL_SERVER_ERROR.getStatusCode());
-      RpcUtils.verifySuccess(errorStatus);
-    } catch (Exception e) {
-      return;
+    @Test(expected = IoTDBURLException.class)
+    public void testParseWrongUrl1() throws IoTDBURLException {
+        Properties properties = new Properties();
+        Utils.parseUrl("jdbc:iotdb//test6667", properties);
     }
-    fail();
-  }
 
+    @Test
+    public void testParseDomainName() throws IoTDBURLException {
+        Properties properties = new Properties();
+        final IoTDBConnectionParams params = Utils.parseUrl("jdbc:iotdb://test:6667", properties);
+
+        assertEquals("test", params.getHost());
+        assertEquals(6667, params.getPort());
+    }
+
+    @Test(expected = IoTDBURLException.class)
+    public void testParseWrongUrl2() throws IoTDBURLException {
+        Properties properties = new Properties();
+        Utils.parseUrl("jdbc:iotdb//test:test:test:6667:6667", properties);
+    }
+
+    @Test(expected = IoTDBURLException.class)
+    public void testParseWrongPort() throws IoTDBURLException {
+        String userName = "test";
+        String userPwd = "test";
+        String host = "localhost";
+        int port = 66699999;
+        Properties properties = new Properties();
+        properties.setProperty(Config.AUTH_USER, userName);
+        properties.setProperty(Config.AUTH_PASSWORD, userPwd);
+        IoTDBConnectionParams params =
+                Utils.parseUrl(
+                        String.format(Config.IOTDB_URL_PREFIX + "%s:%s/", host, port), properties);
+    }
+
+    @Test
+    public void testVerifySuccess() {
+        try {
+            RpcUtils.verifySuccess(RpcUtils.SUCCESS_STATUS);
+        } catch (Exception e) {
+            fail();
+        }
+
+        try {
+            TSStatus errorStatus = new TSStatus(TSStatusCode.INTERNAL_SERVER_ERROR.getStatusCode());
+            RpcUtils.verifySuccess(errorStatus);
+        } catch (Exception e) {
+            return;
+        }
+        fail();
+    }
 }

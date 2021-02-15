@@ -33,58 +33,57 @@ import org.apache.iotdb.tsfile.read.filter.operator.OrFilter;
 
 public class FilterFactory {
 
-  public static AndFilter and(Filter left, Filter right) {
-    return new AndFilter(left, right);
-  }
-
-  public static OrFilter or(Filter left, Filter right) {
-    return new OrFilter(left, right);
-  }
-
-  public static NotFilter not(Filter filter) {
-    return new NotFilter(filter);
-  }
-
-  public static Filter deserialize(ByteBuffer buffer) {
-    FilterSerializeId id = FilterSerializeId.values()[buffer.get()];
-
-    Filter filter;
-    switch (id) {
-      case EQ:
-        filter = new Eq<>();
-        break;
-      case GT:
-        filter = new Gt<>();
-        break;
-      case LT:
-        filter = new Lt<>();
-        break;
-      case OR:
-        filter = new OrFilter();
-        break;
-      case AND:
-        filter = new AndFilter();
-        break;
-      case NEQ:
-        filter = new NotEq<>();
-        break;
-      case NOT:
-        filter = new NotFilter();
-        break;
-      case GTEQ:
-        filter = new GtEq<>();
-        break;
-      case LTEQ:
-        filter = new LtEq<>();
-        break;
-      case GROUP_BY:
-        filter = new GroupByFilter();
-        break;
-      default:
-        throw new UnsupportedOperationException("Unknown filter type " + id);
+    public static AndFilter and(Filter left, Filter right) {
+        return new AndFilter(left, right);
     }
-    filter.deserialize(buffer);
-    return filter;
-  }
 
+    public static OrFilter or(Filter left, Filter right) {
+        return new OrFilter(left, right);
+    }
+
+    public static NotFilter not(Filter filter) {
+        return new NotFilter(filter);
+    }
+
+    public static Filter deserialize(ByteBuffer buffer) {
+        FilterSerializeId id = FilterSerializeId.values()[buffer.get()];
+
+        Filter filter;
+        switch (id) {
+            case EQ:
+                filter = new Eq<>();
+                break;
+            case GT:
+                filter = new Gt<>();
+                break;
+            case LT:
+                filter = new Lt<>();
+                break;
+            case OR:
+                filter = new OrFilter();
+                break;
+            case AND:
+                filter = new AndFilter();
+                break;
+            case NEQ:
+                filter = new NotEq<>();
+                break;
+            case NOT:
+                filter = new NotFilter();
+                break;
+            case GTEQ:
+                filter = new GtEq<>();
+                break;
+            case LTEQ:
+                filter = new LtEq<>();
+                break;
+            case GROUP_BY:
+                filter = new GroupByFilter();
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown filter type " + id);
+        }
+        filter.deserialize(buffer);
+        return filter;
+    }
 }

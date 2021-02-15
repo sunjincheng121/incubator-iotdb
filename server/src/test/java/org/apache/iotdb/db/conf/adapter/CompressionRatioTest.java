@@ -35,74 +35,122 @@ import org.junit.Test;
 
 public class CompressionRatioTest {
 
-  private static final IoTDBConfig CONFIG = IoTDBDescriptor.getInstance().getConfig();
+    private static final IoTDBConfig CONFIG = IoTDBDescriptor.getInstance().getConfig();
 
-  private CompressionRatio compressionRatio = CompressionRatio.getInstance();
+    private CompressionRatio compressionRatio = CompressionRatio.getInstance();
 
-  private static final String directory = FilePathUtils.regularizePath(CONFIG.getSystemDir())
-      + CompressionRatio.COMPRESSION_RATIO_DIR;
+    private static final String directory =
+            FilePathUtils.regularizePath(CONFIG.getSystemDir())
+                    + CompressionRatio.COMPRESSION_RATIO_DIR;
 
-  @Before
-  public void setUp() throws Exception {
-    EnvironmentUtils.closeStatMonitor();
-    EnvironmentUtils.envSetUp();
-    FileUtils.forceMkdir(new File(directory));
-    compressionRatio.reset();
-    compressionRatio.restore();
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    EnvironmentUtils.cleanEnv();
-  }
-
-  @Test
-  public void testCompressionRatio() throws IOException {
-    double compressionRatioSum = 0;
-    int calcuTimes = 0;
-    if (new File(directory, String.format(Locale.ENGLISH, CompressionRatio.RATIO_FILE_PATH_FORMAT, compressionRatioSum , calcuTimes)).exists()) {
-      fail();
+    @Before
+    public void setUp() throws Exception {
+        EnvironmentUtils.closeStatMonitor();
+        EnvironmentUtils.envSetUp();
+        FileUtils.forceMkdir(new File(directory));
+        compressionRatio.reset();
+        compressionRatio.restore();
     }
-    double compressionRatio = 10;
-    for(int i = 0; i < 500 ; i+= compressionRatio){
-      this.compressionRatio.updateRatio(compressionRatio);
-      if (new File(directory, String.format(Locale.ENGLISH, CompressionRatio.RATIO_FILE_PATH_FORMAT, compressionRatioSum , calcuTimes)).exists()) {
-        fail();
-      }
-      calcuTimes++;
-      compressionRatioSum += compressionRatio;
-      if (!new File(directory, String.format(Locale.ENGLISH, CompressionRatio.RATIO_FILE_PATH_FORMAT, compressionRatioSum , calcuTimes)).exists()) {
-        fail();
-      }
-      assertEquals(0, Double
-          .compare(compressionRatioSum / calcuTimes, this.compressionRatio.getRatio()));
-    }
-  }
 
-  @Test
-  public void testRestore() throws IOException {
-    double compressionRatioSum = 0;
-    int calcuTimes = 0;
-    if (new File(directory, String.format(Locale.ENGLISH, CompressionRatio.RATIO_FILE_PATH_FORMAT, compressionRatioSum , calcuTimes)).exists()) {
-      fail();
+    @After
+    public void tearDown() throws Exception {
+        EnvironmentUtils.cleanEnv();
     }
-    int compressionRatio = 10;
-    for(int i = 0; i < 100 ; i+= compressionRatio){
-      this.compressionRatio.updateRatio(compressionRatio);
-      if (new File(directory, String.format(Locale.ENGLISH, CompressionRatio.RATIO_FILE_PATH_FORMAT, compressionRatioSum , calcuTimes)).exists()) {
-        fail();
-      }
-      calcuTimes++;
-      compressionRatioSum += compressionRatio;
-      if (!new File(directory, String.format(Locale.ENGLISH, CompressionRatio.RATIO_FILE_PATH_FORMAT, compressionRatioSum , calcuTimes)).exists()) {
-        fail();
-      }
-      assertEquals(0, Double
-          .compare(compressionRatioSum / calcuTimes, this.compressionRatio.getRatio()));
+
+    @Test
+    public void testCompressionRatio() throws IOException {
+        double compressionRatioSum = 0;
+        int calcuTimes = 0;
+        if (new File(
+                        directory,
+                        String.format(
+                                Locale.ENGLISH,
+                                CompressionRatio.RATIO_FILE_PATH_FORMAT,
+                                compressionRatioSum,
+                                calcuTimes))
+                .exists()) {
+            fail();
+        }
+        double compressionRatio = 10;
+        for (int i = 0; i < 500; i += compressionRatio) {
+            this.compressionRatio.updateRatio(compressionRatio);
+            if (new File(
+                            directory,
+                            String.format(
+                                    Locale.ENGLISH,
+                                    CompressionRatio.RATIO_FILE_PATH_FORMAT,
+                                    compressionRatioSum,
+                                    calcuTimes))
+                    .exists()) {
+                fail();
+            }
+            calcuTimes++;
+            compressionRatioSum += compressionRatio;
+            if (!new File(
+                            directory,
+                            String.format(
+                                    Locale.ENGLISH,
+                                    CompressionRatio.RATIO_FILE_PATH_FORMAT,
+                                    compressionRatioSum,
+                                    calcuTimes))
+                    .exists()) {
+                fail();
+            }
+            assertEquals(
+                    0,
+                    Double.compare(
+                            compressionRatioSum / calcuTimes, this.compressionRatio.getRatio()));
+        }
     }
-    this.compressionRatio.restore();
-    assertEquals(10, this.compressionRatio.getCalcTimes());
-    assertEquals(0, Double
-        .compare(compressionRatioSum / calcuTimes, this.compressionRatio.getRatio()));
-  }
+
+    @Test
+    public void testRestore() throws IOException {
+        double compressionRatioSum = 0;
+        int calcuTimes = 0;
+        if (new File(
+                        directory,
+                        String.format(
+                                Locale.ENGLISH,
+                                CompressionRatio.RATIO_FILE_PATH_FORMAT,
+                                compressionRatioSum,
+                                calcuTimes))
+                .exists()) {
+            fail();
+        }
+        int compressionRatio = 10;
+        for (int i = 0; i < 100; i += compressionRatio) {
+            this.compressionRatio.updateRatio(compressionRatio);
+            if (new File(
+                            directory,
+                            String.format(
+                                    Locale.ENGLISH,
+                                    CompressionRatio.RATIO_FILE_PATH_FORMAT,
+                                    compressionRatioSum,
+                                    calcuTimes))
+                    .exists()) {
+                fail();
+            }
+            calcuTimes++;
+            compressionRatioSum += compressionRatio;
+            if (!new File(
+                            directory,
+                            String.format(
+                                    Locale.ENGLISH,
+                                    CompressionRatio.RATIO_FILE_PATH_FORMAT,
+                                    compressionRatioSum,
+                                    calcuTimes))
+                    .exists()) {
+                fail();
+            }
+            assertEquals(
+                    0,
+                    Double.compare(
+                            compressionRatioSum / calcuTimes, this.compressionRatio.getRatio()));
+        }
+        this.compressionRatio.restore();
+        assertEquals(10, this.compressionRatio.getCalcTimes());
+        assertEquals(
+                0,
+                Double.compare(compressionRatioSum / calcuTimes, this.compressionRatio.getRatio()));
+    }
 }

@@ -31,50 +31,51 @@ import org.junit.Before;
 
 public abstract class BaseSingleNodeTest {
 
-  private MetaClusterServer metaServer;
+    private MetaClusterServer metaServer;
 
-  private boolean useAsyncServer;
-  private List<String> seedNodeUrls;
-  private int replicaNum;
-  private boolean autoCreateSchema;
+    private boolean useAsyncServer;
+    private List<String> seedNodeUrls;
+    private int replicaNum;
+    private boolean autoCreateSchema;
 
-  @Before
-  public void setUp() throws Exception {
-    initConfigs();
-    metaServer = new MetaClusterServer();
-    metaServer.start();
-    metaServer.buildCluster();
-  }
+    @Before
+    public void setUp() throws Exception {
+        initConfigs();
+        metaServer = new MetaClusterServer();
+        metaServer.start();
+        metaServer.buildCluster();
+    }
 
-  @After
-  public void tearDown() throws Exception {
-    metaServer.stop();
-    recoverConfigs();
-    EnvironmentUtils.cleanEnv();
-  }
+    @After
+    public void tearDown() throws Exception {
+        metaServer.stop();
+        recoverConfigs();
+        EnvironmentUtils.cleanEnv();
+    }
 
-  private void initConfigs() {
-    useAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
-    seedNodeUrls = ClusterDescriptor.getInstance().getConfig().getSeedNodeUrls();
-    replicaNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
-    autoCreateSchema = ClusterDescriptor.getInstance().getConfig().isEnableAutoCreateSchema();
-    ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(true);
-    ClusterDescriptor.getInstance().getConfig().setSeedNodeUrls(Collections.singletonList(
-        "127.0.0.1:9003:40011:55560"));
-    ClusterDescriptor.getInstance().getConfig().setReplicationNum(1);
-    ClusterDescriptor.getInstance().getConfig().setEnableAutoCreateSchema(true);
-  }
+    private void initConfigs() {
+        useAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
+        seedNodeUrls = ClusterDescriptor.getInstance().getConfig().getSeedNodeUrls();
+        replicaNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
+        autoCreateSchema = ClusterDescriptor.getInstance().getConfig().isEnableAutoCreateSchema();
+        ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(true);
+        ClusterDescriptor.getInstance()
+                .getConfig()
+                .setSeedNodeUrls(Collections.singletonList("127.0.0.1:9003:40011:55560"));
+        ClusterDescriptor.getInstance().getConfig().setReplicationNum(1);
+        ClusterDescriptor.getInstance().getConfig().setEnableAutoCreateSchema(true);
+    }
 
-  private void recoverConfigs() {
-    ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(useAsyncServer);
-    ClusterDescriptor.getInstance().getConfig().setSeedNodeUrls(seedNodeUrls);
-    ClusterDescriptor.getInstance().getConfig().setReplicationNum(replicaNum);
-    ClusterDescriptor.getInstance().getConfig().setEnableAutoCreateSchema(autoCreateSchema);
-  }
+    private void recoverConfigs() {
+        ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(useAsyncServer);
+        ClusterDescriptor.getInstance().getConfig().setSeedNodeUrls(seedNodeUrls);
+        ClusterDescriptor.getInstance().getConfig().setReplicationNum(replicaNum);
+        ClusterDescriptor.getInstance().getConfig().setEnableAutoCreateSchema(autoCreateSchema);
+    }
 
-  public Session openSession() throws IoTDBConnectionException {
-    Session session = new Session("127.0.0.1", 55560);
-    session.open();
-    return session;
-  }
+    public Session openSession() throws IoTDBConnectionException {
+        Session session = new Session("127.0.0.1", 55560);
+        session.open();
+        return session;
+    }
 }

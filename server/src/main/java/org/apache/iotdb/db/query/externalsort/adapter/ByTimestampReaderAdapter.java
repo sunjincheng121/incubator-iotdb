@@ -23,44 +23,42 @@ import org.apache.iotdb.db.query.reader.series.IReaderByTimestamp;
 import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
-/**
- * This class is an adapter which makes IPointReader implement IReaderByTimestamp interface.
- */
+/** This class is an adapter which makes IPointReader implement IReaderByTimestamp interface. */
 public class ByTimestampReaderAdapter implements IReaderByTimestamp {
 
-  private IPointReader pointReader;
+    private IPointReader pointReader;
 
-  // only cache the first point that >= timestamp
-  private boolean hasCached;
-  private TimeValuePair pair;
+    // only cache the first point that >= timestamp
+    private boolean hasCached;
+    private TimeValuePair pair;
 
-  public ByTimestampReaderAdapter(IPointReader pointReader) {
-    this.pointReader = pointReader;
-  }
-
-  @Override
-  public Object getValueInTimestamp(long timestamp) throws IOException {
-    if (hasCached) {
-      if (pair.getTimestamp() < timestamp) {
-        hasCached = false;
-      } else if (pair.getTimestamp() == timestamp) {
-        hasCached = false;
-        return pair.getValue().getValue();
-      } else {
-        return null;
-      }
+    public ByTimestampReaderAdapter(IPointReader pointReader) {
+        this.pointReader = pointReader;
     }
 
-    while (pointReader.hasNextTimeValuePair()) {
-      pair = pointReader.nextTimeValuePair();
-      if (pair.getTimestamp() == timestamp) {
-        return pair.getValue().getValue();
-      } else if (pair.getTimestamp() > timestamp) {
-        hasCached = true;
-        return null;
-      }
-    }
+    @Override
+    public Object getValueInTimestamp(long timestamp) throws IOException {
+        if (hasCached) {
+            if (pair.getTimestamp() < timestamp) {
+                hasCached = false;
+            } else if (pair.getTimestamp() == timestamp) {
+                hasCached = false;
+                return pair.getValue().getValue();
+            } else {
+                return null;
+            }
+        }
 
-    return null;
-  }
+        while (pointReader.hasNextTimeValuePair()) {
+            pair = pointReader.nextTimeValuePair();
+            if (pair.getTimestamp() == timestamp) {
+                return pair.getValue().getValue();
+            } else if (pair.getTimestamp() > timestamp) {
+                hasCached = true;
+                return null;
+            }
+        }
+
+        return null;
+    }
 }

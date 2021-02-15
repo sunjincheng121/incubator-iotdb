@@ -26,27 +26,29 @@ import org.apache.iotdb.rpc.TSStatusCode;
  */
 public class LogicalOperatorException extends QueryProcessException {
 
-  private static final long serialVersionUID = 7573857366601268706L;
+    private static final long serialVersionUID = 7573857366601268706L;
 
-  public LogicalOperatorException() {
-    super("Error format in SQL statement, please check whether SQL statement is correct.",
-        TSStatusCode.LOGICAL_OPERATOR_ERROR.getStatusCode());
-  }
+    public LogicalOperatorException() {
+        super(
+                "Error format in SQL statement, please check whether SQL statement is correct.",
+                TSStatusCode.LOGICAL_OPERATOR_ERROR.getStatusCode());
+    }
 
-  public LogicalOperatorException(String message) {
-    super(message, TSStatusCode.LOGICAL_OPERATOR_ERROR.getStatusCode());
-  }
+    public LogicalOperatorException(String message) {
+        super(message, TSStatusCode.LOGICAL_OPERATOR_ERROR.getStatusCode());
+    }
 
-  public LogicalOperatorException(String message, int errorCode) {
-    super(message, errorCode);
-  }
+    public LogicalOperatorException(String message, int errorCode) {
+        super(message, errorCode);
+    }
 
-  public LogicalOperatorException(String type, String message) {
-    super(String.format("Unsupported type: [%s]. %s", type, message),
-        TSStatusCode.LOGICAL_OPERATOR_ERROR.getStatusCode());
-  }
+    public LogicalOperatorException(String type, String message) {
+        super(
+                String.format("Unsupported type: [%s]. %s", type, message),
+                TSStatusCode.LOGICAL_OPERATOR_ERROR.getStatusCode());
+    }
 
-  public LogicalOperatorException(IoTDBException e) {
-    super(e);
-  }
+    public LogicalOperatorException(IoTDBException e) {
+        super(e);
+    }
 }

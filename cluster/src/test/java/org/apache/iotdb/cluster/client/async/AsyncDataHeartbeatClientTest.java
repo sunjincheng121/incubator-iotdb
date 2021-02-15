@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.iotdb.cluster.client.async;
 
 import java.io.IOException;
@@ -30,12 +29,12 @@ import org.junit.Test;
 
 public class AsyncDataHeartbeatClientTest extends TestCase {
 
-  @Test
-  public void test() throws IOException {
-    FactoryAsync factoryAsync = new FactoryAsync(new Factory());
-    AsyncClient asyncClient = factoryAsync.getAsyncClient(TestUtils.getNode(0), null);
-    assertEquals(
-        "AsyncDataHeartbeatClient{node=Node(ip:192.168.0.0, metaPort:9003, nodeIdentifier:0, dataPort:40010, clientPort:0),dataHeartbeatPort=40011}",
-        asyncClient.toString());
-  }
+    @Test
+    public void test() throws IOException {
+        FactoryAsync factoryAsync = new FactoryAsync(new Factory());
+        AsyncClient asyncClient = factoryAsync.getAsyncClient(TestUtils.getNode(0), null);
+        assertEquals(
+                "AsyncDataHeartbeatClient{node=Node(ip:192.168.0.0, metaPort:9003, nodeIdentifier:0, dataPort:40010, clientPort:0),dataHeartbeatPort=40011}",
+                asyncClient.toString());
+    }
 }

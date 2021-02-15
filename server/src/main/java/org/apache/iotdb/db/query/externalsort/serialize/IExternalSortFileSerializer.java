@@ -23,7 +23,7 @@ import org.apache.iotdb.tsfile.read.TimeValuePair;
 
 public interface IExternalSortFileSerializer {
 
-  void write(TimeValuePair timeValuePair) throws IOException;
+    void write(TimeValuePair timeValuePair) throws IOException;
 
-  void close() throws IOException;
+    void close() throws IOException;
 }

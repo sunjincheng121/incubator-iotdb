@@ -26,32 +26,29 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 
 public class EncodingInferenceUtils {
 
-  private EncodingInferenceUtils() {
-    // util class
-  }
-
-  /**
-   * Get default encoding by dataType
-   */
-  public static TSEncoding getDefaultEncoding(TSDataType dataType) {
-    IoTDBConfig conf = IoTDBDescriptor.getInstance().getConfig();
-    switch (dataType) {
-      case BOOLEAN:
-        return conf.getDefaultBooleanEncoding();
-      case INT32:
-        return conf.getDefaultInt32Encoding();
-      case INT64:
-        return conf.getDefaultInt64Encoding();
-      case FLOAT:
-        return conf.getDefaultFloatEncoding();
-      case DOUBLE:
-        return conf.getDefaultDoubleEncoding();
-      case TEXT:
-        return conf.getDefaultTextEncoding();
-      default:
-        throw new UnSupportedDataTypeException(
-            String.format("Data type %s is not supported.", dataType.toString()));
+    private EncodingInferenceUtils() {
+        // util class
     }
 
-  }
+    /** Get default encoding by dataType */
+    public static TSEncoding getDefaultEncoding(TSDataType dataType) {
+        IoTDBConfig conf = IoTDBDescriptor.getInstance().getConfig();
+        switch (dataType) {
+            case BOOLEAN:
+                return conf.getDefaultBooleanEncoding();
+            case INT32:
+                return conf.getDefaultInt32Encoding();
+            case INT64:
+                return conf.getDefaultInt64Encoding();
+            case FLOAT:
+                return conf.getDefaultFloatEncoding();
+            case DOUBLE:
+                return conf.getDefaultDoubleEncoding();
+            case TEXT:
+                return conf.getDefaultTextEncoding();
+            default:
+                throw new UnSupportedDataTypeException(
+                        String.format("Data type %s is not supported.", dataType.toString()));
+        }
+    }
 }

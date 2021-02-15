@@ -31,82 +31,79 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public class MinValueAggrResult extends AggregateResult {
 
-  public MinValueAggrResult(TSDataType dataType) {
-    super(dataType, AggregationType.MIN_VALUE);
-    reset();
-  }
-
-  @Override
-  public Object getResult() {
-    return hasCandidateResult() ? getValue() : null;
-  }
-
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    Comparable<Object> minVal = (Comparable<Object>) statistics.getMinValue();
-    updateResult(minVal);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage) throws IOException {
-    updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound)
-      throws IOException {
-    while (dataInThisPage.hasCurrent()
-        && dataInThisPage.currentTime() < maxBound
-        && dataInThisPage.currentTime() >= minBound) {
-      updateResult((Comparable<Object>) dataInThisPage.currentValue());
-      dataInThisPage.next();
+    public MinValueAggrResult(TSDataType dataType) {
+        super(dataType, AggregationType.MIN_VALUE);
+        reset();
     }
-  }
 
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    Comparable<Object> minVal = null;
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value == null) {
-        continue;
-      }
-      if (minVal == null || minVal.compareTo(value) > 0) {
-        minVal = (Comparable<Object>) value;
-      }
+    @Override
+    public Object getResult() {
+        return hasCandidateResult() ? getValue() : null;
     }
-    updateResult(minVal);
-  }
 
-  @Override
-  public boolean hasFinalResult() {
-    return false;
-  }
-
-  @Override
-  public void merge(AggregateResult another) {
-    if (another.getResult() != null) {
-      Object value = another.getResult();
-      this.updateResult((Comparable<Object>) value);
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        Comparable<Object> minVal = (Comparable<Object>) statistics.getMinValue();
+        updateResult(minVal);
     }
-  }
 
-  @Override
-  protected void deserializeSpecificFields(ByteBuffer buffer) {
-  }
-
-  @Override
-  protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
-  }
-
-  private void updateResult(Comparable<Object> minVal) {
-    if (minVal == null) {
-      return;
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage) throws IOException {
+        updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
     }
-    if (!hasCandidateResult() || minVal.compareTo(getValue()) < 0) {
-      setValue(minVal);
-    }
-  }
 
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound)
+            throws IOException {
+        while (dataInThisPage.hasCurrent()
+                && dataInThisPage.currentTime() < maxBound
+                && dataInThisPage.currentTime() >= minBound) {
+            updateResult((Comparable<Object>) dataInThisPage.currentValue());
+            dataInThisPage.next();
+        }
+    }
+
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        Comparable<Object> minVal = null;
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value == null) {
+                continue;
+            }
+            if (minVal == null || minVal.compareTo(value) > 0) {
+                minVal = (Comparable<Object>) value;
+            }
+        }
+        updateResult(minVal);
+    }
+
+    @Override
+    public boolean hasFinalResult() {
+        return false;
+    }
+
+    @Override
+    public void merge(AggregateResult another) {
+        if (another.getResult() != null) {
+            Object value = another.getResult();
+            this.updateResult((Comparable<Object>) value);
+        }
+    }
+
+    @Override
+    protected void deserializeSpecificFields(ByteBuffer buffer) {}
+
+    @Override
+    protected void serializeSpecificFields(OutputStream outputStream) throws IOException {}
+
+    private void updateResult(Comparable<Object> minVal) {
+        if (minVal == null) {
+            return;
+        }
+        if (!hasCandidateResult() || minVal.compareTo(getValue()) < 0) {
+            setValue(minVal);
+        }
+    }
 }

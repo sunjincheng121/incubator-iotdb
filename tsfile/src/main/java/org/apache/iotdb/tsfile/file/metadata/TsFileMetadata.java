@@ -31,178 +31,177 @@ import org.apache.iotdb.tsfile.utils.BloomFilter;
 import org.apache.iotdb.tsfile.utils.Pair;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * TSFileMetaData collects all metadata info and saves in its data structure.
- */
+/** TSFileMetaData collects all metadata info and saves in its data structure. */
 public class TsFileMetadata {
 
-  // fields below are IoTDB extensions and they does not affect TsFile's
-  // stand-alone functionality
-  private int totalChunkNum;
-  // invalid means a chunk has been rewritten by merge and the chunk's data is in
-  // another new chunk
-  private int invalidChunkNum;
+    // fields below are IoTDB extensions and they does not affect TsFile's
+    // stand-alone functionality
+    private int totalChunkNum;
+    // invalid means a chunk has been rewritten by merge and the chunk's data is in
+    // another new chunk
+    private int invalidChunkNum;
 
-  // bloom filter
-  private BloomFilter bloomFilter;
+    // bloom filter
+    private BloomFilter bloomFilter;
 
-  // List of <name, offset, childMetadataIndexType>
-  private MetadataIndexNode metadataIndex;
+    // List of <name, offset, childMetadataIndexType>
+    private MetadataIndexNode metadataIndex;
 
-  // offset -> version
-  private List<Pair<Long, Long>> versionInfo;
+    // offset -> version
+    private List<Pair<Long, Long>> versionInfo;
 
-  // offset of MetaMarker.SEPARATOR
-  private long metaOffset;
+    // offset of MetaMarker.SEPARATOR
+    private long metaOffset;
 
-  /**
-   * deserialize data from the buffer.
-   *
-   * @param buffer -buffer use to deserialize
-   * @return -a instance of TsFileMetaData
-   */
-  public static TsFileMetadata deserializeFrom(ByteBuffer buffer) {
-    TsFileMetadata fileMetaData = new TsFileMetadata();
+    /**
+     * deserialize data from the buffer.
+     *
+     * @param buffer -buffer use to deserialize
+     * @return -a instance of TsFileMetaData
+     */
+    public static TsFileMetadata deserializeFrom(ByteBuffer buffer) {
+        TsFileMetadata fileMetaData = new TsFileMetadata();
 
-    // metadataIndex
-    fileMetaData.metadataIndex = MetadataIndexNode.deserializeFrom(buffer);
-    fileMetaData.totalChunkNum = ReadWriteIOUtils.readInt(buffer);
-    fileMetaData.invalidChunkNum = ReadWriteIOUtils.readInt(buffer);
+        // metadataIndex
+        fileMetaData.metadataIndex = MetadataIndexNode.deserializeFrom(buffer);
+        fileMetaData.totalChunkNum = ReadWriteIOUtils.readInt(buffer);
+        fileMetaData.invalidChunkNum = ReadWriteIOUtils.readInt(buffer);
 
-    // versionInfo
-    List<Pair<Long, Long>> versionInfo = new ArrayList<>();
-    int versionSize = ReadWriteIOUtils.readInt(buffer);
-    for (int i = 0; i < versionSize; i++) {
-      long versionPos = ReadWriteIOUtils.readLong(buffer);
-      long version = ReadWriteIOUtils.readLong(buffer);
-      versionInfo.add(new Pair<>(versionPos, version));
-    }
-    fileMetaData.setVersionInfo(versionInfo);
+        // versionInfo
+        List<Pair<Long, Long>> versionInfo = new ArrayList<>();
+        int versionSize = ReadWriteIOUtils.readInt(buffer);
+        for (int i = 0; i < versionSize; i++) {
+            long versionPos = ReadWriteIOUtils.readLong(buffer);
+            long version = ReadWriteIOUtils.readLong(buffer);
+            versionInfo.add(new Pair<>(versionPos, version));
+        }
+        fileMetaData.setVersionInfo(versionInfo);
 
-    // metaOffset
-    long metaOffset = ReadWriteIOUtils.readLong(buffer);
-    fileMetaData.setMetaOffset(metaOffset);
+        // metaOffset
+        long metaOffset = ReadWriteIOUtils.readLong(buffer);
+        fileMetaData.setMetaOffset(metaOffset);
 
-    // read bloom filter
-    if (buffer.hasRemaining()) {
-      byte[] bytes = ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(buffer).array();
-      int filterSize = ReadWriteIOUtils.readInt(buffer);
-      int hashFunctionSize = ReadWriteIOUtils.readInt(buffer);
-      fileMetaData.bloomFilter = BloomFilter.buildBloomFilter(bytes, filterSize, hashFunctionSize);
-    }
+        // read bloom filter
+        if (buffer.hasRemaining()) {
+            byte[] bytes = ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(buffer).array();
+            int filterSize = ReadWriteIOUtils.readInt(buffer);
+            int hashFunctionSize = ReadWriteIOUtils.readInt(buffer);
+            fileMetaData.bloomFilter =
+                    BloomFilter.buildBloomFilter(bytes, filterSize, hashFunctionSize);
+        }
 
-    return fileMetaData;
-  }
-
-  public BloomFilter getBloomFilter() {
-    return bloomFilter;
-  }
-
-  /**
-   * use the given outputStream to serialize.
-   *
-   * @param outputStream -output stream to determine byte length
-   * @return -byte length
-   */
-  public int serializeTo(OutputStream outputStream) throws IOException {
-    int byteLen = 0;
-
-    // metadataIndex
-    if (metadataIndex != null) {
-      byteLen += metadataIndex.serializeTo(outputStream);
-    } else {
-      byteLen += ReadWriteIOUtils.write(0, outputStream);
+        return fileMetaData;
     }
 
-    // totalChunkNum, invalidChunkNum
-    byteLen += ReadWriteIOUtils.write(totalChunkNum, outputStream);
-    byteLen += ReadWriteIOUtils.write(invalidChunkNum, outputStream);
-
-    // versionInfo
-    byteLen += ReadWriteIOUtils.write(versionInfo.size(), outputStream);
-    for (Pair<Long, Long> versionPair : versionInfo) {
-      byteLen += ReadWriteIOUtils.write(versionPair.left, outputStream);
-      byteLen += ReadWriteIOUtils.write(versionPair.right, outputStream);
+    public BloomFilter getBloomFilter() {
+        return bloomFilter;
     }
 
-    // metaOffset
-    byteLen += ReadWriteIOUtils.write(metaOffset, outputStream);
+    /**
+     * use the given outputStream to serialize.
+     *
+     * @param outputStream -output stream to determine byte length
+     * @return -byte length
+     */
+    public int serializeTo(OutputStream outputStream) throws IOException {
+        int byteLen = 0;
 
-    return byteLen;
-  }
+        // metadataIndex
+        if (metadataIndex != null) {
+            byteLen += metadataIndex.serializeTo(outputStream);
+        } else {
+            byteLen += ReadWriteIOUtils.write(0, outputStream);
+        }
 
-  /**
-   * use the given outputStream to serialize bloom filter.
-   *
-   * @param outputStream -output stream to determine byte length
-   * @return -byte length
-   */
-  public int serializeBloomFilter(OutputStream outputStream, Set<Path> paths)
-      throws IOException {
-    int byteLen = 0;
-    BloomFilter filter = buildBloomFilter(paths);
+        // totalChunkNum, invalidChunkNum
+        byteLen += ReadWriteIOUtils.write(totalChunkNum, outputStream);
+        byteLen += ReadWriteIOUtils.write(invalidChunkNum, outputStream);
 
-    byte[] bytes = filter.serialize();
-    byteLen += ReadWriteIOUtils.write(bytes.length, outputStream);
-    outputStream.write(bytes);
-    byteLen += bytes.length;
-    byteLen += ReadWriteIOUtils.write(filter.getSize(), outputStream);
-    byteLen += ReadWriteIOUtils.write(filter.getHashFunctionSize(), outputStream);
-    return byteLen;
-  }
+        // versionInfo
+        byteLen += ReadWriteIOUtils.write(versionInfo.size(), outputStream);
+        for (Pair<Long, Long> versionPair : versionInfo) {
+            byteLen += ReadWriteIOUtils.write(versionPair.left, outputStream);
+            byteLen += ReadWriteIOUtils.write(versionPair.right, outputStream);
+        }
 
-  /**
-   * build bloom filter
-   *
-   * @return bloom filter
-   */
-  private BloomFilter buildBloomFilter(Set<Path> paths) {
-    BloomFilter filter = BloomFilter
-        .getEmptyBloomFilter(TSFileDescriptor.getInstance().getConfig().getBloomFilterErrorRate(),
-            paths.size());
-    for (Path path : paths) {
-      filter.add(path.toString());
+        // metaOffset
+        byteLen += ReadWriteIOUtils.write(metaOffset, outputStream);
+
+        return byteLen;
     }
-    return filter;
-  }
 
-  public int getTotalChunkNum() {
-    return totalChunkNum;
-  }
+    /**
+     * use the given outputStream to serialize bloom filter.
+     *
+     * @param outputStream -output stream to determine byte length
+     * @return -byte length
+     */
+    public int serializeBloomFilter(OutputStream outputStream, Set<Path> paths) throws IOException {
+        int byteLen = 0;
+        BloomFilter filter = buildBloomFilter(paths);
 
-  public void setTotalChunkNum(int totalChunkNum) {
-    this.totalChunkNum = totalChunkNum;
-  }
+        byte[] bytes = filter.serialize();
+        byteLen += ReadWriteIOUtils.write(bytes.length, outputStream);
+        outputStream.write(bytes);
+        byteLen += bytes.length;
+        byteLen += ReadWriteIOUtils.write(filter.getSize(), outputStream);
+        byteLen += ReadWriteIOUtils.write(filter.getHashFunctionSize(), outputStream);
+        return byteLen;
+    }
 
-  public int getInvalidChunkNum() {
-    return invalidChunkNum;
-  }
+    /**
+     * build bloom filter
+     *
+     * @return bloom filter
+     */
+    private BloomFilter buildBloomFilter(Set<Path> paths) {
+        BloomFilter filter =
+                BloomFilter.getEmptyBloomFilter(
+                        TSFileDescriptor.getInstance().getConfig().getBloomFilterErrorRate(),
+                        paths.size());
+        for (Path path : paths) {
+            filter.add(path.toString());
+        }
+        return filter;
+    }
 
-  public void setInvalidChunkNum(int invalidChunkNum) {
-    this.invalidChunkNum = invalidChunkNum;
-  }
+    public int getTotalChunkNum() {
+        return totalChunkNum;
+    }
 
-  public long getMetaOffset() {
-    return metaOffset;
-  }
+    public void setTotalChunkNum(int totalChunkNum) {
+        this.totalChunkNum = totalChunkNum;
+    }
 
-  public void setMetaOffset(long metaOffset) {
-    this.metaOffset = metaOffset;
-  }
+    public int getInvalidChunkNum() {
+        return invalidChunkNum;
+    }
 
-  public MetadataIndexNode getMetadataIndex() {
-    return metadataIndex;
-  }
+    public void setInvalidChunkNum(int invalidChunkNum) {
+        this.invalidChunkNum = invalidChunkNum;
+    }
 
-  public void setMetadataIndex(MetadataIndexNode metadataIndex) {
-    this.metadataIndex = metadataIndex;
-  }
+    public long getMetaOffset() {
+        return metaOffset;
+    }
 
-  public void setVersionInfo(List<Pair<Long, Long>> versionInfo) {
-    this.versionInfo = versionInfo;
-  }
+    public void setMetaOffset(long metaOffset) {
+        this.metaOffset = metaOffset;
+    }
 
-  public List<Pair<Long, Long>> getVersionInfo() {
-    return versionInfo;
-  }
+    public MetadataIndexNode getMetadataIndex() {
+        return metadataIndex;
+    }
+
+    public void setMetadataIndex(MetadataIndexNode metadataIndex) {
+        this.metadataIndex = metadataIndex;
+    }
+
+    public void setVersionInfo(List<Pair<Long, Long>> versionInfo) {
+        this.versionInfo = versionInfo;
+    }
+
+    public List<Pair<Long, Long>> getVersionInfo() {
+        return versionInfo;
+    }
 }

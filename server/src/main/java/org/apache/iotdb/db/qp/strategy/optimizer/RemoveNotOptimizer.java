@@ -31,70 +31,71 @@ import org.apache.iotdb.db.qp.logical.crud.FunctionOperator;
 
 public class RemoveNotOptimizer implements IFilterOptimizer {
 
-  /**
-   * get DNF(disjunctive normal form) for this filter operator tree. Before getDNF, this op tree
-   * must be binary, in another word, each non-leaf node has exactly two children.
-   *
-   * @return optimized operator
-   * @throws LogicalOperatorException exception in RemoveNot optimizing
-   */
-  @Override
-  public FilterOperator optimize(FilterOperator filter) throws LogicalOperatorException {
-    return removeNot(filter);
-  }
-
-  private FilterOperator removeNot(FilterOperator filter) throws LogicalOperatorException {
-    if (filter.isLeaf()) {
-      return filter;
+    /**
+     * get DNF(disjunctive normal form) for this filter operator tree. Before getDNF, this op tree
+     * must be binary, in another word, each non-leaf node has exactly two children.
+     *
+     * @return optimized operator
+     * @throws LogicalOperatorException exception in RemoveNot optimizing
+     */
+    @Override
+    public FilterOperator optimize(FilterOperator filter) throws LogicalOperatorException {
+        return removeNot(filter);
     }
-    int tokenInt = filter.getTokenIntType();
-    switch (tokenInt) {
-      case KW_AND:
-      case KW_OR:
-        // replace children in-place for efficiency
-        List<FilterOperator> children = filter.getChildren();
-        if(children.size() < 2){
-         throw new LogicalOptimizeException("Filter has some time series don't correspond to any known time series");
+
+    private FilterOperator removeNot(FilterOperator filter) throws LogicalOperatorException {
+        if (filter.isLeaf()) {
+            return filter;
         }
-        children.set(0, removeNot(children.get(0)));
-        children.set(1, removeNot(children.get(1)));
-        return filter;
-      case KW_NOT:
-        if(filter.getChildren().size() < 1){
-          throw new LogicalOptimizeException("Filter has some time series don't correspond to any known time series");
+        int tokenInt = filter.getTokenIntType();
+        switch (tokenInt) {
+            case KW_AND:
+            case KW_OR:
+                // replace children in-place for efficiency
+                List<FilterOperator> children = filter.getChildren();
+                if (children.size() < 2) {
+                    throw new LogicalOptimizeException(
+                            "Filter has some time series don't correspond to any known time series");
+                }
+                children.set(0, removeNot(children.get(0)));
+                children.set(1, removeNot(children.get(1)));
+                return filter;
+            case KW_NOT:
+                if (filter.getChildren().size() < 1) {
+                    throw new LogicalOptimizeException(
+                            "Filter has some time series don't correspond to any known time series");
+                }
+                return reverseFilter(filter.getChildren().get(0));
+            default:
+                throw new LogicalOptimizeException("removeNot", tokenInt);
         }
-        return reverseFilter(filter.getChildren().get(0));
-      default:
-        throw new LogicalOptimizeException("removeNot", tokenInt);
     }
-  }
 
-  /**
-   * reverse given filter to reversed expression.
-   *
-   * @param filter BasicFunctionOperator
-   * @return FilterOperator reversed BasicFunctionOperator
-   * @throws LogicalOptimizeException exception in reverse filter
-   */
-  private FilterOperator reverseFilter(FilterOperator filter) throws LogicalOperatorException {
-    int tokenInt = filter.getTokenIntType();
-    if (filter.isLeaf()) {
-      ((FunctionOperator)filter).reverseFunc();
-      return filter;
+    /**
+     * reverse given filter to reversed expression.
+     *
+     * @param filter BasicFunctionOperator
+     * @return FilterOperator reversed BasicFunctionOperator
+     * @throws LogicalOptimizeException exception in reverse filter
+     */
+    private FilterOperator reverseFilter(FilterOperator filter) throws LogicalOperatorException {
+        int tokenInt = filter.getTokenIntType();
+        if (filter.isLeaf()) {
+            ((FunctionOperator) filter).reverseFunc();
+            return filter;
+        }
+        switch (tokenInt) {
+            case KW_AND:
+            case KW_OR:
+                List<FilterOperator> children = filter.getChildren();
+                children.set(0, reverseFilter(children.get(0)));
+                children.set(1, reverseFilter(children.get(1)));
+                filter.setTokenIntType(SQLConstant.reverseWords.get(tokenInt));
+                return filter;
+            case KW_NOT:
+                return removeNot(filter.getChildren().get(0));
+            default:
+                throw new LogicalOptimizeException("reverseFilter", tokenInt);
+        }
     }
-    switch (tokenInt) {
-      case KW_AND:
-      case KW_OR:
-        List<FilterOperator> children = filter.getChildren();
-        children.set(0, reverseFilter(children.get(0)));
-        children.set(1, reverseFilter(children.get(1)));
-        filter.setTokenIntType(SQLConstant.reverseWords.get(tokenInt));
-        return filter;
-      case KW_NOT:
-        return removeNot(filter.getChildren().get(0));
-      default:
-        throw new LogicalOptimizeException("reverseFilter", tokenInt);
-    }
-  }
-
 }

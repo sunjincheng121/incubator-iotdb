@@ -28,23 +28,24 @@ import org.apache.thrift.protocol.TProtocolFactory;
 
 public class TestAsyncMetaClient extends AsyncMetaClient {
 
-  private Node node;
+    private Node node;
 
-  public TestAsyncMetaClient(TProtocolFactory protocolFactory,
-      TAsyncClientManager clientManager,
-      Node node, AsyncClientPool pool)
-      throws IOException {
-    super(protocolFactory, clientManager, node, pool);
-    this.node = node;
-  }
+    public TestAsyncMetaClient(
+            TProtocolFactory protocolFactory,
+            TAsyncClientManager clientManager,
+            Node node,
+            AsyncClientPool pool)
+            throws IOException {
+        super(protocolFactory, clientManager, node, pool);
+        this.node = node;
+    }
 
-  @Override
-  public Node getNode() {
-    return node;
-  }
+    @Override
+    public Node getNode() {
+        return node;
+    }
 
-  public void setNode(Node node) {
-    this.node = node;
-  }
-
+    public void setNode(Node node) {
+        this.node = node;
+    }
 }

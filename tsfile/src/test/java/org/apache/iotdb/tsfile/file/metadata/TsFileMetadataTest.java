@@ -34,72 +34,71 @@ import org.junit.Test;
 
 public class TsFileMetadataTest {
 
-  final String PATH = TestConstant.BASE_OUTPUT_PATH.concat("output1.tsfile");
+    final String PATH = TestConstant.BASE_OUTPUT_PATH.concat("output1.tsfile");
 
-  @Before
-  public void setUp() {
-  }
+    @Before
+    public void setUp() {}
 
-  @After
-  public void tearDown() {
-    File file = new File(PATH);
-    if (file.exists()) {
-      file.delete();
-    }
-  }
-
-  @Test
-  public void testWriteFileMetaData() throws IOException {
-    TsFileMetadata tsfMetaData = TestHelper.createSimpleFileMetaData();
-    serialized(tsfMetaData);
-    TsFileMetadata readMetaData = deSerialized();
-    Assert.assertTrue(Utils.isFileMetaDataEqual(tsfMetaData, readMetaData));
-  }
-
-  private TsFileMetadata deSerialized() {
-    FileInputStream fileInputStream = null;
-    TsFileMetadata metaData = null;
-    try {
-      fileInputStream = new FileInputStream(new File(PATH));
-      FileChannel channel = fileInputStream.getChannel();
-      ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
-      channel.read(buffer);
-      buffer.rewind();
-      metaData = TsFileMetadata.deserializeFrom(buffer);
-      return metaData;
-    } catch (IOException e) {
-      e.printStackTrace();
-    } finally {
-      if (fileInputStream != null) {
-        try {
-          fileInputStream.close();
-        } catch (IOException e) {
-          e.printStackTrace();
+    @After
+    public void tearDown() {
+        File file = new File(PATH);
+        if (file.exists()) {
+            file.delete();
         }
-      }
     }
-    return metaData;
-  }
 
-  private void serialized(TsFileMetadata metaData) {
-    File file = new File(PATH);
-    if (file.exists()) {
-      file.delete();
+    @Test
+    public void testWriteFileMetaData() throws IOException {
+        TsFileMetadata tsfMetaData = TestHelper.createSimpleFileMetaData();
+        serialized(tsfMetaData);
+        TsFileMetadata readMetaData = deSerialized();
+        Assert.assertTrue(Utils.isFileMetaDataEqual(tsfMetaData, readMetaData));
     }
-    FileOutputStream fos = null;
-    try {
-      fos = new FileOutputStream(file);
-      metaData.serializeTo(fos);
-    } catch (IOException e) {
-      e.printStackTrace();
-    } finally {
-      if (fos != null) {
+
+    private TsFileMetadata deSerialized() {
+        FileInputStream fileInputStream = null;
+        TsFileMetadata metaData = null;
         try {
-          fos.close();
+            fileInputStream = new FileInputStream(new File(PATH));
+            FileChannel channel = fileInputStream.getChannel();
+            ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
+            channel.read(buffer);
+            buffer.rewind();
+            metaData = TsFileMetadata.deserializeFrom(buffer);
+            return metaData;
         } catch (IOException e) {
-          e.printStackTrace();
+            e.printStackTrace();
+        } finally {
+            if (fileInputStream != null) {
+                try {
+                    fileInputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-      }
+        return metaData;
     }
-  }
+
+    private void serialized(TsFileMetadata metaData) {
+        File file = new File(PATH);
+        if (file.exists()) {
+            file.delete();
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file);
+            metaData.serializeTo(fos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

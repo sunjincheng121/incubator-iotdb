@@ -21,7 +21,7 @@ package org.apache.iotdb.cluster.exception;
 
 public class QueryTimeOutException extends Exception {
 
-  public QueryTimeOutException(String query) {
-    super("Query: " + query + " timed out");
-  }
+    public QueryTimeOutException(String query) {
+        super("Query: " + query + " timed out");
+    }
 }

@@ -23,10 +23,11 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 
 public class UnSupportedFillTypeException extends QueryProcessException {
 
-  private static final long serialVersionUID = 2166251102397630376L;
+    private static final long serialVersionUID = 2166251102397630376L;
 
-  public UnSupportedFillTypeException(TSDataType dataType) {
-    super(String.format("Unsupported linear fill data type: [%s]", dataType.toString()),
-        TSStatusCode.UNSUPPORTED_FILL_TYPE_ERROR.getStatusCode());
-  }
+    public UnSupportedFillTypeException(TSDataType dataType) {
+        super(
+                String.format("Unsupported linear fill data type: [%s]", dataType.toString()),
+                TSStatusCode.UNSUPPORTED_FILL_TYPE_ERROR.getStatusCode());
+    }
 }

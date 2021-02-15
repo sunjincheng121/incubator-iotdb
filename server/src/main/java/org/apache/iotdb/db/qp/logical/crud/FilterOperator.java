@@ -46,252 +46,256 @@ import org.apache.iotdb.tsfile.utils.StringContainer;
  */
 public class FilterOperator extends Operator implements Comparable<FilterOperator> {
 
-  // it is the symbol of token. e.g. AND is & and OR is |
-  String tokenSymbol;
+    // it is the symbol of token. e.g. AND is & and OR is |
+    String tokenSymbol;
 
-  private List<FilterOperator> childOperators;
-  // leaf filter operator means it doesn't have left and right child filterOperator. Leaf filter
-  // should set FunctionOperator.
-  protected boolean isLeaf;
-  // isSingle being true means all recursive children of this filter belong to one seriesPath.
-  boolean isSingle = false;
-  // if isSingle = false, singlePath must be null
-  PartialPath singlePath = null;
-  // all paths involved in this filter
-  Set<PartialPath> pathSet;
+    private List<FilterOperator> childOperators;
+    // leaf filter operator means it doesn't have left and right child filterOperator. Leaf filter
+    // should set FunctionOperator.
+    protected boolean isLeaf;
+    // isSingle being true means all recursive children of this filter belong to one seriesPath.
+    boolean isSingle = false;
+    // if isSingle = false, singlePath must be null
+    PartialPath singlePath = null;
+    // all paths involved in this filter
+    Set<PartialPath> pathSet;
 
-  public FilterOperator(int tokenType) {
-    super(tokenType);
-    operatorType = OperatorType.FILTER;
-    childOperators = new ArrayList<>();
-    this.tokenIntType = tokenType;
-    isLeaf = false;
-    tokenSymbol = SQLConstant.tokenSymbol.get(tokenType);
-  }
+    public FilterOperator(int tokenType) {
+        super(tokenType);
+        operatorType = OperatorType.FILTER;
+        childOperators = new ArrayList<>();
+        this.tokenIntType = tokenType;
+        isLeaf = false;
+        tokenSymbol = SQLConstant.tokenSymbol.get(tokenType);
+    }
 
-  public FilterOperator(int tokenType, boolean isSingle) {
-    this(tokenType);
-    this.isSingle = isSingle;
-  }
+    public FilterOperator(int tokenType, boolean isSingle) {
+        this(tokenType);
+        this.isSingle = isSingle;
+    }
 
-  @Override
-  public int getTokenIntType() {
-    return tokenIntType;
-  }
+    @Override
+    public int getTokenIntType() {
+        return tokenIntType;
+    }
 
-  public void setTokenIntType(int intType) {
-    this.tokenIntType = intType;
-    this.tokenName = SQLConstant.tokenNames.get(tokenIntType);
-    this.tokenSymbol = SQLConstant.tokenSymbol.get(tokenIntType);
-  }
+    public void setTokenIntType(int intType) {
+        this.tokenIntType = intType;
+        this.tokenName = SQLConstant.tokenNames.get(tokenIntType);
+        this.tokenSymbol = SQLConstant.tokenSymbol.get(tokenIntType);
+    }
 
-  public List<FilterOperator> getChildren() {
-    return childOperators;
-  }
+    public List<FilterOperator> getChildren() {
+        return childOperators;
+    }
 
-  public void setChildren(List<FilterOperator> children) {
-    this.childOperators = children;
-  }
+    public void setChildren(List<FilterOperator> children) {
+        this.childOperators = children;
+    }
 
-  public void setIsSingle(boolean b) {
-    this.isSingle = b;
-  }
+    public void setIsSingle(boolean b) {
+        this.isSingle = b;
+    }
 
-  public PartialPath getSinglePath() {
-    return singlePath;
-  }
+    public PartialPath getSinglePath() {
+        return singlePath;
+    }
 
-  public void setSinglePath(PartialPath singlePath) {
-    this.singlePath = singlePath;
-  }
+    public void setSinglePath(PartialPath singlePath) {
+        this.singlePath = singlePath;
+    }
 
-  public boolean addChildOperator(FilterOperator op) {
-    childOperators.add(op);
-    return true;
-  }
+    public boolean addChildOperator(FilterOperator op) {
+        childOperators.add(op);
+        return true;
+    }
 
-  public void setPathSet(Set<PartialPath> pathSet) {
-    this.pathSet = pathSet;
-  }
+    public void setPathSet(Set<PartialPath> pathSet) {
+        this.pathSet = pathSet;
+    }
 
-  public Set<PartialPath> getPathSet() {
-    return pathSet;
-  }
+    public Set<PartialPath> getPathSet() {
+        return pathSet;
+    }
 
-  /**
-   * For a filter operator, if isSingle, call transformToSingleQueryFilter.<br> FilterOperator
-   * cannot be leaf.
-   *
-   * @return QueryFilter in TsFile
-   * @param pathTSDataTypeHashMap
-   */
-  public IExpression transformToExpression(
-      Map<PartialPath, TSDataType> pathTSDataTypeHashMap) throws QueryProcessException {
-    if (isSingle) {
-      Pair<IUnaryExpression, String> ret;
-      try {
-        ret = transformToSingleQueryFilter(pathTSDataTypeHashMap);
-      } catch (MetadataException e) {
-        throw new QueryProcessException(e);
-      }
-      return ret.left;
-    } else {
-      if (childOperators.isEmpty()) {
-        throw new LogicalOperatorException(String.valueOf(tokenIntType),
-            "this filter is not leaf, but it's empty");
-      }
-      IExpression retFilter = childOperators.get(0).transformToExpression(pathTSDataTypeHashMap);
-      IExpression currentFilter;
-      for (int i = 1; i < childOperators.size(); i++) {
-        currentFilter = childOperators.get(i).transformToExpression(pathTSDataTypeHashMap);
-        switch (tokenIntType) {
-          case KW_AND:
-            retFilter = BinaryExpression.and(retFilter, currentFilter);
-            break;
-          case KW_OR:
-            retFilter = BinaryExpression.or(retFilter, currentFilter);
-            break;
-          default:
-            throw new LogicalOperatorException(String.valueOf(tokenIntType),
-                "Maybe it means " + SQLConstant.tokenNames.get(tokenIntType));
+    /**
+     * For a filter operator, if isSingle, call transformToSingleQueryFilter.<br>
+     * FilterOperator cannot be leaf.
+     *
+     * @return QueryFilter in TsFile
+     * @param pathTSDataTypeHashMap
+     */
+    public IExpression transformToExpression(Map<PartialPath, TSDataType> pathTSDataTypeHashMap)
+            throws QueryProcessException {
+        if (isSingle) {
+            Pair<IUnaryExpression, String> ret;
+            try {
+                ret = transformToSingleQueryFilter(pathTSDataTypeHashMap);
+            } catch (MetadataException e) {
+                throw new QueryProcessException(e);
+            }
+            return ret.left;
+        } else {
+            if (childOperators.isEmpty()) {
+                throw new LogicalOperatorException(
+                        String.valueOf(tokenIntType), "this filter is not leaf, but it's empty");
+            }
+            IExpression retFilter =
+                    childOperators.get(0).transformToExpression(pathTSDataTypeHashMap);
+            IExpression currentFilter;
+            for (int i = 1; i < childOperators.size(); i++) {
+                currentFilter = childOperators.get(i).transformToExpression(pathTSDataTypeHashMap);
+                switch (tokenIntType) {
+                    case KW_AND:
+                        retFilter = BinaryExpression.and(retFilter, currentFilter);
+                        break;
+                    case KW_OR:
+                        retFilter = BinaryExpression.or(retFilter, currentFilter);
+                        break;
+                    default:
+                        throw new LogicalOperatorException(
+                                String.valueOf(tokenIntType),
+                                "Maybe it means " + SQLConstant.tokenNames.get(tokenIntType));
+                }
+            }
+            return retFilter;
         }
-      }
-      return retFilter;
     }
-  }
 
-  /**
-   * it will be used in BasicFunction Operator.
-   *
-   * @return - pair.left: UnaryQueryFilter constructed by its one child; pair.right: Path
-   * represented by this child.
-   * @throws MetadataException exception in filter transforming
-   * @param pathTSDataTypeHashMap
-   */
-  protected Pair<IUnaryExpression, String> transformToSingleQueryFilter(
-      Map<PartialPath, TSDataType> pathTSDataTypeHashMap)
-      throws LogicalOperatorException, MetadataException {
-    if (childOperators.isEmpty()) {
-      throw new LogicalOperatorException(String.valueOf(tokenIntType),
-          "TransformToSingleFilter: this filter is not a leaf, but it's empty.");
-    }
-    Pair<IUnaryExpression, String> currentPair = childOperators.get(0)
-        .transformToSingleQueryFilter(pathTSDataTypeHashMap);
+    /**
+     * it will be used in BasicFunction Operator.
+     *
+     * @return - pair.left: UnaryQueryFilter constructed by its one child; pair.right: Path
+     *     represented by this child.
+     * @throws MetadataException exception in filter transforming
+     * @param pathTSDataTypeHashMap
+     */
+    protected Pair<IUnaryExpression, String> transformToSingleQueryFilter(
+            Map<PartialPath, TSDataType> pathTSDataTypeHashMap)
+            throws LogicalOperatorException, MetadataException {
+        if (childOperators.isEmpty()) {
+            throw new LogicalOperatorException(
+                    String.valueOf(tokenIntType),
+                    "TransformToSingleFilter: this filter is not a leaf, but it's empty.");
+        }
+        Pair<IUnaryExpression, String> currentPair =
+                childOperators.get(0).transformToSingleQueryFilter(pathTSDataTypeHashMap);
 
-    IUnaryExpression retFilter = currentPair.left;
-    String path = currentPair.right;
+        IUnaryExpression retFilter = currentPair.left;
+        String path = currentPair.right;
 
-    for (int i = 1; i < childOperators.size(); i++) {
-      currentPair = childOperators.get(i).transformToSingleQueryFilter(pathTSDataTypeHashMap);
-      if (!path.equals(currentPair.right)) {
-        throw new LogicalOperatorException(
-            "TransformToSingleFilter: paths among children are not inconsistent: one is: "
-                + path + ", another is: " + currentPair.right);
-      }
-      switch (tokenIntType) {
-        case KW_AND:
-          retFilter.setFilter(FilterFactory.and(retFilter.getFilter(),
-              currentPair.left.getFilter()));
-          break;
-        case KW_OR:
-          retFilter.setFilter(FilterFactory.or(retFilter.getFilter(),
-              currentPair.left.getFilter()));
-          break;
-        default:
-          throw new LogicalOperatorException(String.valueOf(tokenIntType),
-              "Maybe it means " + SQLConstant.tokenNames.get(tokenIntType));
-      }
+        for (int i = 1; i < childOperators.size(); i++) {
+            currentPair = childOperators.get(i).transformToSingleQueryFilter(pathTSDataTypeHashMap);
+            if (!path.equals(currentPair.right)) {
+                throw new LogicalOperatorException(
+                        "TransformToSingleFilter: paths among children are not inconsistent: one is: "
+                                + path
+                                + ", another is: "
+                                + currentPair.right);
+            }
+            switch (tokenIntType) {
+                case KW_AND:
+                    retFilter.setFilter(
+                            FilterFactory.and(retFilter.getFilter(), currentPair.left.getFilter()));
+                    break;
+                case KW_OR:
+                    retFilter.setFilter(
+                            FilterFactory.or(retFilter.getFilter(), currentPair.left.getFilter()));
+                    break;
+                default:
+                    throw new LogicalOperatorException(
+                            String.valueOf(tokenIntType),
+                            "Maybe it means " + SQLConstant.tokenNames.get(tokenIntType));
+            }
+        }
+        return new Pair<>(retFilter, path);
     }
-    return new Pair<>(retFilter, path);
-  }
 
-  /**
-   * a filter with null path is no smaller than any other filter.
-   */
-  @Override
-  public int compareTo(FilterOperator fil) {
-    if (singlePath == null && fil.singlePath == null) {
-      return 0;
+    /** a filter with null path is no smaller than any other filter. */
+    @Override
+    public int compareTo(FilterOperator fil) {
+        if (singlePath == null && fil.singlePath == null) {
+            return 0;
+        }
+        if (singlePath == null) {
+            return 1;
+        }
+        if (fil.singlePath == null) {
+            return -1;
+        }
+        return fil.singlePath.getFullPath().compareTo(singlePath.getFullPath());
     }
-    if (singlePath == null) {
-      return 1;
-    }
-    if (fil.singlePath == null) {
-      return -1;
-    }
-    return fil.singlePath.getFullPath().compareTo(singlePath.getFullPath());
-  }
 
-  @Override
-  public boolean equals(Object fil) {
-    if (!(fil instanceof FilterOperator)) {
-      return false;
+    @Override
+    public boolean equals(Object fil) {
+        if (!(fil instanceof FilterOperator)) {
+            return false;
+        }
+        // if child is leaf, will execute BasicFunctionOperator.equals()
+        FilterOperator operator = (FilterOperator) fil;
+        return this.tokenIntType == operator.tokenIntType
+                && this.getChildren().equals(operator.getChildren());
     }
-    // if child is leaf, will execute BasicFunctionOperator.equals()
-    FilterOperator operator = (FilterOperator) fil;
-    return this.tokenIntType == operator.tokenIntType
-        && this.getChildren().equals(operator.getChildren());
-  }
 
-  @Override
-  public int hashCode() {
-    return tokenSymbol.hashCode();
-  }
+    @Override
+    public int hashCode() {
+        return tokenSymbol.hashCode();
+    }
 
-  public boolean isLeaf() {
-    return isLeaf;
-  }
+    public boolean isLeaf() {
+        return isLeaf;
+    }
 
-  public boolean isSingle() {
-    return isSingle;
-  }
+    public boolean isSingle() {
+        return isSingle;
+    }
 
-  public String showTree() {
-    return showTree(0);
-  }
+    public String showTree() {
+        return showTree(0);
+    }
 
-  public String showTree(int spaceNum) {
-    StringContainer sc = new StringContainer();
-    for (int i = 0; i < spaceNum; i++) {
-      sc.addTail("  ");
+    public String showTree(int spaceNum) {
+        StringContainer sc = new StringContainer();
+        for (int i = 0; i < spaceNum; i++) {
+            sc.addTail("  ");
+        }
+        sc.addTail(this.tokenName);
+        if (isSingle) {
+            sc.addTail("[single:", getSinglePath().getFullPath(), "]");
+        }
+        sc.addTail("\n");
+        for (FilterOperator filter : childOperators) {
+            sc.addTail(filter.showTree(spaceNum + 1));
+        }
+        return sc.toString();
     }
-    sc.addTail(this.tokenName);
-    if (isSingle) {
-      sc.addTail("[single:", getSinglePath().getFullPath(), "]");
-    }
-    sc.addTail("\n");
-    for (FilterOperator filter : childOperators) {
-      sc.addTail(filter.showTree(spaceNum + 1));
-    }
-    return sc.toString();
-  }
 
-  @Override
-  public String toString() {
-    StringContainer sc = new StringContainer();
-    sc.addTail("[", this.tokenName);
-    if (isSingle) {
-      sc.addTail("[single:", getSinglePath().getFullPath(), "]");
+    @Override
+    public String toString() {
+        StringContainer sc = new StringContainer();
+        sc.addTail("[", this.tokenName);
+        if (isSingle) {
+            sc.addTail("[single:", getSinglePath().getFullPath(), "]");
+        }
+        sc.addTail(" ");
+        for (FilterOperator filter : childOperators) {
+            sc.addTail(filter.toString());
+        }
+        sc.addTail("]");
+        return sc.toString();
     }
-    sc.addTail(" ");
-    for (FilterOperator filter : childOperators) {
-      sc.addTail(filter.toString());
-    }
-    sc.addTail("]");
-    return sc.toString();
-  }
 
-  public FilterOperator copy() {
-    FilterOperator ret = new FilterOperator(this.tokenIntType);
-    ret.tokenSymbol = tokenSymbol;
-    ret.isLeaf = isLeaf;
-    ret.isSingle = isSingle;
-    if (singlePath != null) {
-      ret.singlePath = new PartialPath(singlePath.getNodes().clone());
+    public FilterOperator copy() {
+        FilterOperator ret = new FilterOperator(this.tokenIntType);
+        ret.tokenSymbol = tokenSymbol;
+        ret.isLeaf = isLeaf;
+        ret.isSingle = isSingle;
+        if (singlePath != null) {
+            ret.singlePath = new PartialPath(singlePath.getNodes().clone());
+        }
+        for (FilterOperator filterOperator : this.childOperators) {
+            ret.addChildOperator(filterOperator.copy());
+        }
+        return ret;
     }
-    for (FilterOperator filterOperator : this.childOperators) {
-      ret.addChildOperator(filterOperator.copy());
-    }
-    return ret;
-  }
 }

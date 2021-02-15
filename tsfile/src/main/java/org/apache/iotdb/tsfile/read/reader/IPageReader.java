@@ -18,24 +18,22 @@
  */
 package org.apache.iotdb.tsfile.read.reader;
 
+import java.io.IOException;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.read.common.BatchData;
-
-import java.io.IOException;
 import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 
 public interface IPageReader {
 
+    default BatchData getAllSatisfiedPageData() throws IOException {
+        return getAllSatisfiedPageData(true);
+    }
 
-  default BatchData getAllSatisfiedPageData() throws IOException {
-    return getAllSatisfiedPageData(true);
-  }
+    BatchData getAllSatisfiedPageData(boolean ascending) throws IOException;
 
-  BatchData getAllSatisfiedPageData(boolean ascending) throws IOException;
+    Statistics getStatistics();
 
-  Statistics getStatistics();
+    void setFilter(Filter filter);
 
-  void setFilter(Filter filter);
-
-  boolean isModified();
+    boolean isModified();
 }

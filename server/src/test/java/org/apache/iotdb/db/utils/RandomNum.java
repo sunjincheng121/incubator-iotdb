@@ -22,49 +22,44 @@ import java.util.Random;
 
 public class RandomNum {
 
-  private static Random random = new Random();
+    private static Random random = new Random();
 
-  private RandomNum() {
-    throw new IllegalStateException("Utility class");
-  }
-
-  public static long getRandomLong(long min, long max) {
-    return random.nextLong() % (max - min + 1) + min;
-  }
-
-  public static int getRandomInt(int min, int max) {
-    return (random.nextInt(10000) % (max - min) + min);
-  }
-
-  /**
-   * get random float between min and max.
-   */
-  public static float getRandomFloat(float min, float max) {
-
-    return (random.nextFloat() * (max - min) + min);
-  }
-
-  /**
-   * get random int between 0 and frequency.
-   */
-  public static int getAbnormalData(int frequency) {
-    return random.nextInt() % frequency;
-  }
-
-  /**
-   * get random text consisting of lowercase letters and numbers.
-   *
-   * @param length -the size of random text
-   */
-  public static String getRandomText(int length) {
-
-    String base = "abcdefghijklmnopqrstuvwxyz0123456789";
-    StringBuilder st = new StringBuilder();
-    for (int i = 0; i < length; i++) {
-      int number = random.nextInt(base.length());
-      st = st.append(base.charAt(number));
+    private RandomNum() {
+        throw new IllegalStateException("Utility class");
     }
-    return st.toString();
 
-  }
+    public static long getRandomLong(long min, long max) {
+        return random.nextLong() % (max - min + 1) + min;
+    }
+
+    public static int getRandomInt(int min, int max) {
+        return (random.nextInt(10000) % (max - min) + min);
+    }
+
+    /** get random float between min and max. */
+    public static float getRandomFloat(float min, float max) {
+
+        return (random.nextFloat() * (max - min) + min);
+    }
+
+    /** get random int between 0 and frequency. */
+    public static int getAbnormalData(int frequency) {
+        return random.nextInt() % frequency;
+    }
+
+    /**
+     * get random text consisting of lowercase letters and numbers.
+     *
+     * @param length -the size of random text
+     */
+    public static String getRandomText(int length) {
+
+        String base = "abcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder st = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int number = random.nextInt(base.length());
+            st = st.append(base.charAt(number));
+        }
+        return st.toString();
+    }
 }

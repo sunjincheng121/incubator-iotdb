@@ -39,96 +39,111 @@ import org.slf4j.LoggerFactory;
 
 public class MergeGroupByExecutor implements GroupByExecutor {
 
-  private static final Logger logger = LoggerFactory.getLogger(MergeGroupByExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(MergeGroupByExecutor.class);
 
-  private List<AggregateResult> results = new ArrayList<>();
-  private List<Integer> aggregationTypes = new ArrayList<>();
-  private PartialPath path;
-  private Set<String> deviceMeasurements;
-  private TSDataType dataType;
-  private QueryContext context;
-  private Filter timeFilter;
-  private ClusterReaderFactory readerFactory;
-  private boolean ascending;
+    private List<AggregateResult> results = new ArrayList<>();
+    private List<Integer> aggregationTypes = new ArrayList<>();
+    private PartialPath path;
+    private Set<String> deviceMeasurements;
+    private TSDataType dataType;
+    private QueryContext context;
+    private Filter timeFilter;
+    private ClusterReaderFactory readerFactory;
+    private boolean ascending;
 
-  private List<GroupByExecutor> groupByExecutors;
+    private List<GroupByExecutor> groupByExecutors;
 
-  MergeGroupByExecutor(PartialPath path, Set<String> deviceMeasurements, TSDataType dataType,
-      QueryContext context, Filter timeFilter,
-      MetaGroupMember metaGroupMember, boolean ascending) {
-    this.path = path;
-    this.deviceMeasurements = deviceMeasurements;
-    this.dataType = dataType;
-    this.context = context;
-    this.timeFilter = timeFilter;
-    this.readerFactory = new ClusterReaderFactory(metaGroupMember);
-    this.ascending = ascending;
-  }
-
-  @Override
-  public void addAggregateResult(AggregateResult aggrResult) {
-    results.add(aggrResult);
-    aggregationTypes.add(aggrResult.getAggregationType().ordinal());
-  }
-
-  private void resetAggregateResults() {
-    for (AggregateResult result : results) {
-      result.reset();
-    }
-  }
-
-  @Override
-  public List<AggregateResult> calcResult(long curStartTime, long curEndTime)
-      throws QueryProcessException, IOException {
-    if (groupByExecutors == null) {
-      initExecutors();
-    }
-    resetAggregateResults();
-    for (GroupByExecutor groupByExecutor : groupByExecutors) {
-      List<AggregateResult> subResults = groupByExecutor
-          .calcResult(curStartTime, curEndTime);
-      for (int i = 0; i < subResults.size(); i++) {
-        results.get(i).merge(subResults.get(i));
-      }
-    }
-    logger.debug("Aggregation result of {}@[{}, {}] is {}", path, curStartTime, curEndTime,
-        results);
-    return results;
-  }
-
-  @Override
-  public Pair<Long, Object> peekNextNotNullValue(long nextStartTime, long nextEndTime)
-      throws IOException {
-    if (groupByExecutors == null) {
-      try {
-        initExecutors();
-      } catch (QueryProcessException e) {
-        throw new IOException(e);
-      }
+    MergeGroupByExecutor(
+            PartialPath path,
+            Set<String> deviceMeasurements,
+            TSDataType dataType,
+            QueryContext context,
+            Filter timeFilter,
+            MetaGroupMember metaGroupMember,
+            boolean ascending) {
+        this.path = path;
+        this.deviceMeasurements = deviceMeasurements;
+        this.dataType = dataType;
+        this.context = context;
+        this.timeFilter = timeFilter;
+        this.readerFactory = new ClusterReaderFactory(metaGroupMember);
+        this.ascending = ascending;
     }
 
-    Pair<Long, Object> result = null;
-    for (GroupByExecutor groupByExecutor : groupByExecutors) {
-      Pair<Long, Object> pair = groupByExecutor
-          .peekNextNotNullValue(nextStartTime, nextEndTime);
-      if (pair == null) {
-        continue;
-      }
-      if (result == null || result.left > pair.left) {
-        result = pair;
-      }
+    @Override
+    public void addAggregateResult(AggregateResult aggrResult) {
+        results.add(aggrResult);
+        aggregationTypes.add(aggrResult.getAggregationType().ordinal());
     }
-    logger.debug("peekNextNotNullValue result of {}@[{}, {}] is {}", path, nextStartTime, nextEndTime,
-        results);
-    return result;
-  }
 
-  private void initExecutors() throws QueryProcessException {
-    try {
-      groupByExecutors = readerFactory.getGroupByExecutors(path, deviceMeasurements, dataType,
-          context, timeFilter, aggregationTypes, ascending);
-    } catch (StorageEngineException e) {
-      throw new QueryProcessException(e);
+    private void resetAggregateResults() {
+        for (AggregateResult result : results) {
+            result.reset();
+        }
     }
-  }
+
+    @Override
+    public List<AggregateResult> calcResult(long curStartTime, long curEndTime)
+            throws QueryProcessException, IOException {
+        if (groupByExecutors == null) {
+            initExecutors();
+        }
+        resetAggregateResults();
+        for (GroupByExecutor groupByExecutor : groupByExecutors) {
+            List<AggregateResult> subResults = groupByExecutor.calcResult(curStartTime, curEndTime);
+            for (int i = 0; i < subResults.size(); i++) {
+                results.get(i).merge(subResults.get(i));
+            }
+        }
+        logger.debug(
+                "Aggregation result of {}@[{}, {}] is {}", path, curStartTime, curEndTime, results);
+        return results;
+    }
+
+    @Override
+    public Pair<Long, Object> peekNextNotNullValue(long nextStartTime, long nextEndTime)
+            throws IOException {
+        if (groupByExecutors == null) {
+            try {
+                initExecutors();
+            } catch (QueryProcessException e) {
+                throw new IOException(e);
+            }
+        }
+
+        Pair<Long, Object> result = null;
+        for (GroupByExecutor groupByExecutor : groupByExecutors) {
+            Pair<Long, Object> pair =
+                    groupByExecutor.peekNextNotNullValue(nextStartTime, nextEndTime);
+            if (pair == null) {
+                continue;
+            }
+            if (result == null || result.left > pair.left) {
+                result = pair;
+            }
+        }
+        logger.debug(
+                "peekNextNotNullValue result of {}@[{}, {}] is {}",
+                path,
+                nextStartTime,
+                nextEndTime,
+                results);
+        return result;
+    }
+
+    private void initExecutors() throws QueryProcessException {
+        try {
+            groupByExecutors =
+                    readerFactory.getGroupByExecutors(
+                            path,
+                            deviceMeasurements,
+                            dataType,
+                            context,
+                            timeFilter,
+                            aggregationTypes,
+                            ascending);
+        } catch (StorageEngineException e) {
+            throw new QueryProcessException(e);
+        }
+    }
 }

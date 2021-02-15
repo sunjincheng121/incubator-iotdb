@@ -61,189 +61,223 @@ import org.slf4j.LoggerFactory;
 
 public class ClusterLastQueryExecutor extends LastQueryExecutor {
 
-  private static final Logger logger = LoggerFactory.getLogger(ClusterLastQueryExecutor.class);
-  private MetaGroupMember metaGroupMember;
+    private static final Logger logger = LoggerFactory.getLogger(ClusterLastQueryExecutor.class);
+    private MetaGroupMember metaGroupMember;
 
-  private static ExecutorService lastQueryPool =
-      Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private static ExecutorService lastQueryPool =
+            Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-  public ClusterLastQueryExecutor(LastQueryPlan lastQueryPlan, MetaGroupMember metaGroupMember) {
-    super(lastQueryPlan);
-    this.metaGroupMember = metaGroupMember;
-  }
-
-  @Override
-  protected List<Pair<Boolean, TimeValuePair>> calculateLastPairForSeries(
-      List<PartialPath> seriesPaths, List<TSDataType> dataTypes, QueryContext context,
-      IExpression expression, RawDataQueryPlan lastQueryPlan)
-      throws QueryProcessException, IOException {
-    return calculateLastPairsForSeries(seriesPaths, dataTypes, context, expression, lastQueryPlan);
-  }
-
-  private List<Pair<Boolean, TimeValuePair>> calculateLastPairsForSeries(
-      List<PartialPath> seriesPaths,
-      List<TSDataType> dataTypes, QueryContext context,
-      IExpression expression, RawDataQueryPlan lastQueryPlan)
-      throws IOException, QueryProcessException {
-    // calculate the global last from all data groups
-    try {
-      metaGroupMember.syncLeaderWithConsistencyCheck(false);
-    } catch (CheckConsistencyException e) {
-      throw new IOException(e);
-    }
-    List<Pair<Boolean, TimeValuePair>> results = new ArrayList<>(seriesPaths.size());
-    for (int i = 0; i < seriesPaths.size(); i++) {
-      results.add(new Pair<>(true, new TimeValuePair(Long.MIN_VALUE, null)));
-    }
-
-    List<PartitionGroup> globalGroups = metaGroupMember.getPartitionTable().getGlobalGroups();
-    List<Future<List<Pair<Boolean, TimeValuePair>>>> groupFutures = new ArrayList<>(
-        globalGroups.size());
-    List<Integer> dataTypeOrdinals = new ArrayList<>(dataTypes.size());
-    for (TSDataType dataType : dataTypes) {
-      dataTypeOrdinals.add(dataType.ordinal());
-    }
-    for (PartitionGroup globalGroup : globalGroups) {
-      GroupLastTask task = new GroupLastTask(globalGroup, seriesPaths, dataTypes, context,
-          expression, lastQueryPlan, dataTypeOrdinals);
-      groupFutures.add(lastQueryPool.submit(task));
-    }
-    for (Future<List<Pair<Boolean, TimeValuePair>>> groupFuture : groupFutures) {
-      try {
-        // merge results from each group
-        List<Pair<Boolean, TimeValuePair>> timeValuePairs = groupFuture.get();
-        for (int i = 0; i < timeValuePairs.size(); i++) {
-          if (timeValuePairs.get(i) != null && timeValuePairs.get(i).right.getTimestamp() > results
-              .get(i).right.getTimestamp()) {
-            results.get(i).right = timeValuePairs.get(i).right;
-          }
-        }
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        logger.warn("Query last of {} interrupted", seriesPaths);
-      } catch (ExecutionException e) {
-        throw new QueryProcessException(e, TSStatusCode.QUERY_PROCESS_ERROR.getStatusCode());
-      }
-    }
-    return results;
-  }
-
-  class GroupLastTask implements Callable<List<Pair<Boolean, TimeValuePair>>> {
-
-    private PartitionGroup group;
-    private List<PartialPath> seriesPaths;
-    private List<TSDataType> dataTypes;
-    private List<Integer> dataTypeOrdinals;
-    private QueryContext queryContext;
-    private RawDataQueryPlan queryPlan;
-    private IExpression expression;
-
-    GroupLastTask(PartitionGroup group, List<PartialPath> seriesPaths,
-        List<TSDataType> dataTypes, QueryContext context,
-        IExpression expression, RawDataQueryPlan lastQueryPlan,
-        List<Integer> dataTypeOrdinals) {
-      this.group = group;
-      this.seriesPaths = seriesPaths;
-      this.dataTypes = dataTypes;
-      this.queryContext = context;
-      this.queryPlan = lastQueryPlan;
-      this.expression = expression;
-      this.dataTypeOrdinals = dataTypeOrdinals;
+    public ClusterLastQueryExecutor(LastQueryPlan lastQueryPlan, MetaGroupMember metaGroupMember) {
+        super(lastQueryPlan);
+        this.metaGroupMember = metaGroupMember;
     }
 
     @Override
-    public List<Pair<Boolean, TimeValuePair>> call() throws Exception {
-      return calculateSeriesLast(group, seriesPaths, queryContext);
+    protected List<Pair<Boolean, TimeValuePair>> calculateLastPairForSeries(
+            List<PartialPath> seriesPaths,
+            List<TSDataType> dataTypes,
+            QueryContext context,
+            IExpression expression,
+            RawDataQueryPlan lastQueryPlan)
+            throws QueryProcessException, IOException {
+        return calculateLastPairsForSeries(
+                seriesPaths, dataTypes, context, expression, lastQueryPlan);
     }
 
-    private List<Pair<Boolean, TimeValuePair>> calculateSeriesLast(PartitionGroup group,
-        List<PartialPath> seriesPaths
-        , QueryContext context)
-        throws QueryProcessException, StorageEngineException, IOException {
-      if (group.contains(metaGroupMember.getThisNode())) {
-        ClusterQueryUtils.checkPathExistence(seriesPaths);
-        return calculateSeriesLastLocally(group, seriesPaths, context);
-      } else {
-        return calculateSeriesLastRemotely(group, seriesPaths, context);
-      }
-    }
-
-    private List<Pair<Boolean, TimeValuePair>> calculateSeriesLastLocally(PartitionGroup group,
-        List<PartialPath> seriesPaths,
-        QueryContext context)
-        throws StorageEngineException, QueryProcessException, IOException {
-      DataGroupMember localDataMember = metaGroupMember.getLocalDataMember(group.getHeader());
-      try {
-        localDataMember.syncLeaderWithConsistencyCheck(false);
-      } catch (CheckConsistencyException e) {
-        throw new QueryProcessException(e.getMessage());
-      }
-      return calculateLastPairForSeriesLocally(seriesPaths, dataTypes, context, expression,
-          queryPlan.getDeviceToMeasurements());
-    }
-
-    private List<Pair<Boolean, TimeValuePair>> calculateSeriesLastRemotely(PartitionGroup group,
-        List<PartialPath> seriesPaths,
-        QueryContext context) {
-      for (Node node : group) {
+    private List<Pair<Boolean, TimeValuePair>> calculateLastPairsForSeries(
+            List<PartialPath> seriesPaths,
+            List<TSDataType> dataTypes,
+            QueryContext context,
+            IExpression expression,
+            RawDataQueryPlan lastQueryPlan)
+            throws IOException, QueryProcessException {
+        // calculate the global last from all data groups
         try {
-          ByteBuffer buffer;
-          if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
-            buffer = lastAsync(node, context);
-          } else {
-            buffer = lastSync(node, context);
-          }
-          if (buffer == null) {
-            continue;
-          }
-
-          List<TimeValuePair> timeValuePairs = new ArrayList<>();
-          for (int i = 0; i < seriesPaths.size(); i++) {
-            timeValuePairs.add(SerializeUtils.deserializeTVPair(buffer));
-          }
-          List<Pair<Boolean, TimeValuePair>> results = new ArrayList<>();
-          for (int i = 0; i < seriesPaths.size(); i++) {
-            TimeValuePair pair = timeValuePairs.get(i);
-            results.add(new Pair<>(true, pair));
-          }
-          return results;
-        } catch (TException e) {
-          logger.warn("Query last of {} from {} errored", group, seriesPaths, e);
-          return Collections.emptyList();
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-          logger.warn("Query last of {} from {} interrupted", group, seriesPaths, e);
-          return Collections.emptyList();
+            metaGroupMember.syncLeaderWithConsistencyCheck(false);
+        } catch (CheckConsistencyException e) {
+            throw new IOException(e);
         }
-      }
-      return Collections.emptyList();
+        List<Pair<Boolean, TimeValuePair>> results = new ArrayList<>(seriesPaths.size());
+        for (int i = 0; i < seriesPaths.size(); i++) {
+            results.add(new Pair<>(true, new TimeValuePair(Long.MIN_VALUE, null)));
+        }
+
+        List<PartitionGroup> globalGroups = metaGroupMember.getPartitionTable().getGlobalGroups();
+        List<Future<List<Pair<Boolean, TimeValuePair>>>> groupFutures =
+                new ArrayList<>(globalGroups.size());
+        List<Integer> dataTypeOrdinals = new ArrayList<>(dataTypes.size());
+        for (TSDataType dataType : dataTypes) {
+            dataTypeOrdinals.add(dataType.ordinal());
+        }
+        for (PartitionGroup globalGroup : globalGroups) {
+            GroupLastTask task =
+                    new GroupLastTask(
+                            globalGroup,
+                            seriesPaths,
+                            dataTypes,
+                            context,
+                            expression,
+                            lastQueryPlan,
+                            dataTypeOrdinals);
+            groupFutures.add(lastQueryPool.submit(task));
+        }
+        for (Future<List<Pair<Boolean, TimeValuePair>>> groupFuture : groupFutures) {
+            try {
+                // merge results from each group
+                List<Pair<Boolean, TimeValuePair>> timeValuePairs = groupFuture.get();
+                for (int i = 0; i < timeValuePairs.size(); i++) {
+                    if (timeValuePairs.get(i) != null
+                            && timeValuePairs.get(i).right.getTimestamp()
+                                    > results.get(i).right.getTimestamp()) {
+                        results.get(i).right = timeValuePairs.get(i).right;
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.warn("Query last of {} interrupted", seriesPaths);
+            } catch (ExecutionException e) {
+                throw new QueryProcessException(
+                        e, TSStatusCode.QUERY_PROCESS_ERROR.getStatusCode());
+            }
+        }
+        return results;
     }
 
-    private ByteBuffer lastAsync(Node node, QueryContext context)
-        throws TException, InterruptedException {
-      ByteBuffer buffer;
-      AsyncDataClient asyncDataClient;
-      try {
-        asyncDataClient = metaGroupMember
-            .getClientProvider().getAsyncDataClient(node, RaftServer.getReadOperationTimeoutMS());
-      } catch (IOException e) {
-        return null;
-      }
-      buffer = SyncClientAdaptor
-          .last(asyncDataClient, seriesPaths, dataTypeOrdinals, context, queryPlan.getDeviceToMeasurements(),
-              group.getHeader());
-      return buffer;
-    }
+    class GroupLastTask implements Callable<List<Pair<Boolean, TimeValuePair>>> {
 
-    private ByteBuffer lastSync(Node node, QueryContext context) throws TException {
-      SyncDataClient syncDataClient = metaGroupMember
-          .getClientProvider().getSyncDataClient(node, RaftServer.getReadOperationTimeoutMS());
-      ByteBuffer result = syncDataClient
-          .last(new LastQueryRequest(PartialPath.toStringList(seriesPaths), dataTypeOrdinals,
-              context.getQueryId(), queryPlan.getDeviceToMeasurements(), group.getHeader(),
-              syncDataClient.getNode()));
-      ClientUtils.putBackSyncClient(syncDataClient);
-      return result;
+        private PartitionGroup group;
+        private List<PartialPath> seriesPaths;
+        private List<TSDataType> dataTypes;
+        private List<Integer> dataTypeOrdinals;
+        private QueryContext queryContext;
+        private RawDataQueryPlan queryPlan;
+        private IExpression expression;
+
+        GroupLastTask(
+                PartitionGroup group,
+                List<PartialPath> seriesPaths,
+                List<TSDataType> dataTypes,
+                QueryContext context,
+                IExpression expression,
+                RawDataQueryPlan lastQueryPlan,
+                List<Integer> dataTypeOrdinals) {
+            this.group = group;
+            this.seriesPaths = seriesPaths;
+            this.dataTypes = dataTypes;
+            this.queryContext = context;
+            this.queryPlan = lastQueryPlan;
+            this.expression = expression;
+            this.dataTypeOrdinals = dataTypeOrdinals;
+        }
+
+        @Override
+        public List<Pair<Boolean, TimeValuePair>> call() throws Exception {
+            return calculateSeriesLast(group, seriesPaths, queryContext);
+        }
+
+        private List<Pair<Boolean, TimeValuePair>> calculateSeriesLast(
+                PartitionGroup group, List<PartialPath> seriesPaths, QueryContext context)
+                throws QueryProcessException, StorageEngineException, IOException {
+            if (group.contains(metaGroupMember.getThisNode())) {
+                ClusterQueryUtils.checkPathExistence(seriesPaths);
+                return calculateSeriesLastLocally(group, seriesPaths, context);
+            } else {
+                return calculateSeriesLastRemotely(group, seriesPaths, context);
+            }
+        }
+
+        private List<Pair<Boolean, TimeValuePair>> calculateSeriesLastLocally(
+                PartitionGroup group, List<PartialPath> seriesPaths, QueryContext context)
+                throws StorageEngineException, QueryProcessException, IOException {
+            DataGroupMember localDataMember = metaGroupMember.getLocalDataMember(group.getHeader());
+            try {
+                localDataMember.syncLeaderWithConsistencyCheck(false);
+            } catch (CheckConsistencyException e) {
+                throw new QueryProcessException(e.getMessage());
+            }
+            return calculateLastPairForSeriesLocally(
+                    seriesPaths,
+                    dataTypes,
+                    context,
+                    expression,
+                    queryPlan.getDeviceToMeasurements());
+        }
+
+        private List<Pair<Boolean, TimeValuePair>> calculateSeriesLastRemotely(
+                PartitionGroup group, List<PartialPath> seriesPaths, QueryContext context) {
+            for (Node node : group) {
+                try {
+                    ByteBuffer buffer;
+                    if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
+                        buffer = lastAsync(node, context);
+                    } else {
+                        buffer = lastSync(node, context);
+                    }
+                    if (buffer == null) {
+                        continue;
+                    }
+
+                    List<TimeValuePair> timeValuePairs = new ArrayList<>();
+                    for (int i = 0; i < seriesPaths.size(); i++) {
+                        timeValuePairs.add(SerializeUtils.deserializeTVPair(buffer));
+                    }
+                    List<Pair<Boolean, TimeValuePair>> results = new ArrayList<>();
+                    for (int i = 0; i < seriesPaths.size(); i++) {
+                        TimeValuePair pair = timeValuePairs.get(i);
+                        results.add(new Pair<>(true, pair));
+                    }
+                    return results;
+                } catch (TException e) {
+                    logger.warn("Query last of {} from {} errored", group, seriesPaths, e);
+                    return Collections.emptyList();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    logger.warn("Query last of {} from {} interrupted", group, seriesPaths, e);
+                    return Collections.emptyList();
+                }
+            }
+            return Collections.emptyList();
+        }
+
+        private ByteBuffer lastAsync(Node node, QueryContext context)
+                throws TException, InterruptedException {
+            ByteBuffer buffer;
+            AsyncDataClient asyncDataClient;
+            try {
+                asyncDataClient =
+                        metaGroupMember
+                                .getClientProvider()
+                                .getAsyncDataClient(node, RaftServer.getReadOperationTimeoutMS());
+            } catch (IOException e) {
+                return null;
+            }
+            buffer =
+                    SyncClientAdaptor.last(
+                            asyncDataClient,
+                            seriesPaths,
+                            dataTypeOrdinals,
+                            context,
+                            queryPlan.getDeviceToMeasurements(),
+                            group.getHeader());
+            return buffer;
+        }
+
+        private ByteBuffer lastSync(Node node, QueryContext context) throws TException {
+            SyncDataClient syncDataClient =
+                    metaGroupMember
+                            .getClientProvider()
+                            .getSyncDataClient(node, RaftServer.getReadOperationTimeoutMS());
+            ByteBuffer result =
+                    syncDataClient.last(
+                            new LastQueryRequest(
+                                    PartialPath.toStringList(seriesPaths),
+                                    dataTypeOrdinals,
+                                    context.getQueryId(),
+                                    queryPlan.getDeviceToMeasurements(),
+                                    group.getHeader(),
+                                    syncDataClient.getNode()));
+            ClientUtils.putBackSyncClient(syncDataClient);
+            return result;
+        }
     }
-  }
 }

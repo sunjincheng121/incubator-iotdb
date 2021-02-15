@@ -29,17 +29,16 @@ import org.apache.iotdb.tsfile.write.schema.Schema;
 
 public class TsFileOutputFormat extends FileOutputFormat<NullWritable, TSRecord> {
 
-  private Schema schema;
+    private Schema schema;
 
-  public TsFileOutputFormat(Schema schema) {
-    this.schema = schema;
-  }
+    public TsFileOutputFormat(Schema schema) {
+        this.schema = schema;
+    }
 
-  @Override
-  public RecordWriter<NullWritable, TSRecord> getRecordWriter(TaskAttemptContext job)
-      throws IOException {
-    Path path = getDefaultWorkFile(job, "");
-    return new TsFileRecordWriter(job, path, schema);
-  }
-
+    @Override
+    public RecordWriter<NullWritable, TSRecord> getRecordWriter(TaskAttemptContext job)
+            throws IOException {
+        Path path = getDefaultWorkFile(job, "");
+        return new TsFileRecordWriter(job, path, schema);
+    }
 }

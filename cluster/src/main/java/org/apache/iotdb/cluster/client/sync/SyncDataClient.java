@@ -39,67 +39,70 @@ import org.apache.thrift.transport.TTransportException;
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class SyncDataClient extends Client {
 
-  Node node;
-  SyncClientPool pool;
+    Node node;
+    SyncClientPool pool;
 
-  public SyncDataClient(TProtocol prot) {
-    super(prot);
-  }
-
-  public SyncDataClient(TProtocolFactory protocolFactory, Node node, SyncClientPool pool)
-      throws TTransportException {
-    // the difference of the two clients lies in the port
-    super(protocolFactory.getProtocol(RpcTransportFactory.INSTANCE.getTransport(
-        new TSocket(node.getIp(), node.getDataPort(), RaftServer.getConnectionTimeoutInMS()))));
-    this.node = node;
-    this.pool = pool;
-    getInputProtocol().getTransport().open();
-  }
-
-  public void setTimeout(int timeout) {
-    // the same transport is used in both input and output
-    ((TimeoutChangeableTransport) (getInputProtocol().getTransport()))
-        .setTimeout(timeout);
-  }
-
-  @TestOnly
-  public int getTimeout() throws SocketException {
-    return ((TimeoutChangeableTransport) getInputProtocol().getTransport()).getTimeOut();
-  }
-
-  public void putBack() {
-    if (pool != null) {
-      pool.putClient(node, this);
-    } else {
-      TProtocol inputProtocol = getInputProtocol();
-      if (inputProtocol != null) {
-        inputProtocol.getTransport().close();
-      }
+    public SyncDataClient(TProtocol prot) {
+        super(prot);
     }
-  }
 
-  public static class FactorySync implements SyncClientFactory {
+    public SyncDataClient(TProtocolFactory protocolFactory, Node node, SyncClientPool pool)
+            throws TTransportException {
+        // the difference of the two clients lies in the port
+        super(
+                protocolFactory.getProtocol(
+                        RpcTransportFactory.INSTANCE.getTransport(
+                                new TSocket(
+                                        node.getIp(),
+                                        node.getDataPort(),
+                                        RaftServer.getConnectionTimeoutInMS()))));
+        this.node = node;
+        this.pool = pool;
+        getInputProtocol().getTransport().open();
+    }
 
-    private TProtocolFactory protocolFactory;
+    public void setTimeout(int timeout) {
+        // the same transport is used in both input and output
+        ((TimeoutChangeableTransport) (getInputProtocol().getTransport())).setTimeout(timeout);
+    }
 
-    public FactorySync(TProtocolFactory protocolFactory) {
-      this.protocolFactory = protocolFactory;
+    @TestOnly
+    public int getTimeout() throws SocketException {
+        return ((TimeoutChangeableTransport) getInputProtocol().getTransport()).getTimeOut();
+    }
+
+    public void putBack() {
+        if (pool != null) {
+            pool.putClient(node, this);
+        } else {
+            TProtocol inputProtocol = getInputProtocol();
+            if (inputProtocol != null) {
+                inputProtocol.getTransport().close();
+            }
+        }
+    }
+
+    public static class FactorySync implements SyncClientFactory {
+
+        private TProtocolFactory protocolFactory;
+
+        public FactorySync(TProtocolFactory protocolFactory) {
+            this.protocolFactory = protocolFactory;
+        }
+
+        @Override
+        public SyncDataClient getSyncClient(Node node, SyncClientPool pool)
+                throws TTransportException {
+            return new SyncDataClient(protocolFactory, node, pool);
+        }
     }
 
     @Override
-    public SyncDataClient getSyncClient(Node node, SyncClientPool pool) throws TTransportException {
-      return new SyncDataClient(protocolFactory, node, pool);
+    public String toString() {
+        return "DataClient{" + "node=" + node + '}';
     }
-  }
 
-  @Override
-  public String toString() {
-    return "DataClient{" +
-        "node=" + node +
-        '}';
-  }
-
-  public Node getNode() {
-    return node;
-  }
+    public Node getNode() {
+        return node;
+    }
 }

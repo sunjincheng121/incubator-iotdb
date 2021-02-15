@@ -28,28 +28,30 @@ import org.apache.iotdb.db.metrics.ui.MetricsPage;
 
 public class QueryServlet extends HttpServlet {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  private final MetricsPage page;
+    private final MetricsPage page;
 
-  public QueryServlet(MetricsPage page) {
-    this.page = page;
-  }
+    public QueryServlet(MetricsPage page) {
+        this.page = page;
+    }
 
-  @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    resp.setContentType("text/html;charset=utf-8");
-    req.setCharacterEncoding("utf-8");
-    resp.setStatus(HttpServletResponse.SC_OK);
-    resp.setIntHeader("refresh", 300);
-    PrintWriter out = resp.getWriter();
-    out.print(page.render());
-    out.flush();
-    out.close();
-  }
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        resp.setContentType("text/html;charset=utf-8");
+        req.setCharacterEncoding("utf-8");
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setIntHeader("refresh", 300);
+        PrintWriter out = resp.getWriter();
+        out.print(page.render());
+        out.flush();
+        out.close();
+    }
 
-  @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    doGet(req, resp);
-  }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        doGet(req, resp);
+    }
 }

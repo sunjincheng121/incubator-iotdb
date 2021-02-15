@@ -42,161 +42,169 @@ import org.slf4j.LoggerFactory;
 
 public class MetaAsyncService extends BaseAsyncService implements TSMetaService.AsyncIface {
 
-  private static final Logger logger = LoggerFactory.getLogger(MetaAsyncService.class);
+    private static final Logger logger = LoggerFactory.getLogger(MetaAsyncService.class);
 
-  private MetaGroupMember metaGroupMember;
+    private MetaGroupMember metaGroupMember;
 
-  public MetaAsyncService(MetaGroupMember metaGroupMember) {
-    super(metaGroupMember);
-    this.metaGroupMember = metaGroupMember;
-  }
-
-  @Override
-  public void appendEntry(AppendEntryRequest request, AsyncMethodCallback resultHandler) {
-    if (metaGroupMember.getPartitionTable() == null) {
-      // this node lacks information of the cluster and refuse to work
-      logger.debug("This node is blind to the cluster and cannot accept logs");
-      resultHandler.onComplete(Response.RESPONSE_PARTITION_TABLE_UNAVAILABLE);
-      return;
+    public MetaAsyncService(MetaGroupMember metaGroupMember) {
+        super(metaGroupMember);
+        this.metaGroupMember = metaGroupMember;
     }
 
-    super.appendEntry(request, resultHandler);
-  }
+    @Override
+    public void appendEntry(AppendEntryRequest request, AsyncMethodCallback resultHandler) {
+        if (metaGroupMember.getPartitionTable() == null) {
+            // this node lacks information of the cluster and refuse to work
+            logger.debug("This node is blind to the cluster and cannot accept logs");
+            resultHandler.onComplete(Response.RESPONSE_PARTITION_TABLE_UNAVAILABLE);
+            return;
+        }
 
-  @Override
-  public void addNode(Node node, StartUpStatus startUpStatus,
-      AsyncMethodCallback<AddNodeResponse> resultHandler) {
-    AddNodeResponse addNodeResponse = null;
-    try {
-      addNodeResponse = metaGroupMember.addNode(node, startUpStatus);
-    } catch (AddSelfException | LogExecutionException e) {
-      resultHandler.onError(e);
-    }
-    if (addNodeResponse != null) {
-      resultHandler.onComplete(addNodeResponse);
-      return;
+        super.appendEntry(request, resultHandler);
     }
 
-    if (member.getCharacter() == NodeCharacter.FOLLOWER && member.getLeader() != null) {
-      logger.info("Forward the join request of {} to leader {}", node, member.getLeader());
-      if (forwardAddNode(node, startUpStatus, resultHandler)) {
-        return;
-      }
-    }
-    resultHandler.onError(new LeaderUnknownException(member.getAllNodes()));
-  }
+    @Override
+    public void addNode(
+            Node node,
+            StartUpStatus startUpStatus,
+            AsyncMethodCallback<AddNodeResponse> resultHandler) {
+        AddNodeResponse addNodeResponse = null;
+        try {
+            addNodeResponse = metaGroupMember.addNode(node, startUpStatus);
+        } catch (AddSelfException | LogExecutionException e) {
+            resultHandler.onError(e);
+        }
+        if (addNodeResponse != null) {
+            resultHandler.onComplete(addNodeResponse);
+            return;
+        }
 
-  @Override
-  public void sendSnapshot(SendSnapshotRequest request, AsyncMethodCallback<Void> resultHandler) {
-    try {
-      metaGroupMember.receiveSnapshot(request);
-    } catch (Exception e) {
-      resultHandler.onError(e);
-      return;
-    }
-    resultHandler.onComplete(null);
-  }
-
-  @Override
-  public void checkStatus(StartUpStatus startUpStatus,
-      AsyncMethodCallback<CheckStatusResponse> resultHandler) {
-    CheckStatusResponse response = ClusterUtils
-        .checkStatus(startUpStatus, metaGroupMember.getNewStartUpStatus());
-    resultHandler.onComplete(response);
-  }
-
-  /**
-   * Forward the join cluster request to the leader.
-   *
-   * @return true if the forwarding succeeds, false otherwise.
-   */
-  private boolean forwardAddNode(Node node, StartUpStatus startUpStatus,
-      AsyncMethodCallback<AddNodeResponse> resultHandler) {
-    TSMetaService.AsyncClient client =
-        (TSMetaService.AsyncClient) metaGroupMember.getAsyncClient(metaGroupMember.getLeader());
-    if (client != null) {
-      try {
-        client.addNode(node, startUpStatus, resultHandler);
-        return true;
-      } catch (TException e) {
-        logger.warn("Cannot connect to node {}", node, e);
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Return the status of the node to the requester that will help the requester figure out the load
-   * of the this node and how well it may perform for a specific query.
-   *
-   * @param resultHandler
-   */
-  @Override
-  public void queryNodeStatus(AsyncMethodCallback<TNodeStatus> resultHandler) {
-    resultHandler.onComplete(new TNodeStatus());
-  }
-
-  @Override
-  public void checkAlive(AsyncMethodCallback<Node> resultHandler) {
-    resultHandler.onComplete(metaGroupMember.getThisNode());
-  }
-
-  @Override
-  public void removeNode(Node node, AsyncMethodCallback<Long> resultHandler) {
-    long result = Response.RESPONSE_NULL;
-    try {
-      result = metaGroupMember.removeNode(node);
-    } catch (PartitionTableUnavailableException | LogExecutionException e) {
-      resultHandler.onError(e);
+        if (member.getCharacter() == NodeCharacter.FOLLOWER && member.getLeader() != null) {
+            logger.info("Forward the join request of {} to leader {}", node, member.getLeader());
+            if (forwardAddNode(node, startUpStatus, resultHandler)) {
+                return;
+            }
+        }
+        resultHandler.onError(new LeaderUnknownException(member.getAllNodes()));
     }
 
-    if (result != Response.RESPONSE_NULL) {
-      resultHandler.onComplete(result);
-      return;
+    @Override
+    public void sendSnapshot(SendSnapshotRequest request, AsyncMethodCallback<Void> resultHandler) {
+        try {
+            metaGroupMember.receiveSnapshot(request);
+        } catch (Exception e) {
+            resultHandler.onError(e);
+            return;
+        }
+        resultHandler.onComplete(null);
     }
 
-    if (metaGroupMember.getCharacter() == NodeCharacter.FOLLOWER
-        && metaGroupMember.getLeader() != null) {
-      logger.info("Forward the node removal request of {} to leader {}", node,
-          metaGroupMember.getLeader());
-      if (forwardRemoveNode(node, resultHandler)) {
-        return;
-      }
+    @Override
+    public void checkStatus(
+            StartUpStatus startUpStatus, AsyncMethodCallback<CheckStatusResponse> resultHandler) {
+        CheckStatusResponse response =
+                ClusterUtils.checkStatus(startUpStatus, metaGroupMember.getNewStartUpStatus());
+        resultHandler.onComplete(response);
     }
-    resultHandler.onError(new LeaderUnknownException(metaGroupMember.getAllNodes()));
-  }
 
-  /**
-   * Forward a node removal request to the leader.
-   *
-   * @param node          the node to be removed
-   * @param resultHandler
-   * @return true if the request is successfully forwarded, false otherwise
-   */
-  private boolean forwardRemoveNode(Node node, AsyncMethodCallback<Long> resultHandler) {
-    TSMetaService.AsyncClient client =
-        (TSMetaService.AsyncClient) metaGroupMember.getAsyncClient(metaGroupMember.getLeader());
-    if (client != null) {
-      try {
-        client.removeNode(node, resultHandler);
-        return true;
-      } catch (TException e) {
-        logger.warn("Cannot connect to node {}", node, e);
-      }
+    /**
+     * Forward the join cluster request to the leader.
+     *
+     * @return true if the forwarding succeeds, false otherwise.
+     */
+    private boolean forwardAddNode(
+            Node node,
+            StartUpStatus startUpStatus,
+            AsyncMethodCallback<AddNodeResponse> resultHandler) {
+        TSMetaService.AsyncClient client =
+                (TSMetaService.AsyncClient)
+                        metaGroupMember.getAsyncClient(metaGroupMember.getLeader());
+        if (client != null) {
+            try {
+                client.addNode(node, startUpStatus, resultHandler);
+                return true;
+            } catch (TException e) {
+                logger.warn("Cannot connect to node {}", node, e);
+            }
+        }
+        return false;
     }
-    return false;
-  }
 
-  /**
-   * Process a request that the local node is removed from the cluster. As a node is removed from
-   * the cluster, it no longer receive heartbeats or logs and cannot know it has been removed, so we
-   * must tell it directly.
-   *
-   * @param resultHandler
-   */
-  @Override
-  public void exile(AsyncMethodCallback<Void> resultHandler) {
-    metaGroupMember.applyRemoveNode(metaGroupMember.getThisNode());
-    resultHandler.onComplete(null);
-  }
+    /**
+     * Return the status of the node to the requester that will help the requester figure out the
+     * load of the this node and how well it may perform for a specific query.
+     *
+     * @param resultHandler
+     */
+    @Override
+    public void queryNodeStatus(AsyncMethodCallback<TNodeStatus> resultHandler) {
+        resultHandler.onComplete(new TNodeStatus());
+    }
+
+    @Override
+    public void checkAlive(AsyncMethodCallback<Node> resultHandler) {
+        resultHandler.onComplete(metaGroupMember.getThisNode());
+    }
+
+    @Override
+    public void removeNode(Node node, AsyncMethodCallback<Long> resultHandler) {
+        long result = Response.RESPONSE_NULL;
+        try {
+            result = metaGroupMember.removeNode(node);
+        } catch (PartitionTableUnavailableException | LogExecutionException e) {
+            resultHandler.onError(e);
+        }
+
+        if (result != Response.RESPONSE_NULL) {
+            resultHandler.onComplete(result);
+            return;
+        }
+
+        if (metaGroupMember.getCharacter() == NodeCharacter.FOLLOWER
+                && metaGroupMember.getLeader() != null) {
+            logger.info(
+                    "Forward the node removal request of {} to leader {}",
+                    node,
+                    metaGroupMember.getLeader());
+            if (forwardRemoveNode(node, resultHandler)) {
+                return;
+            }
+        }
+        resultHandler.onError(new LeaderUnknownException(metaGroupMember.getAllNodes()));
+    }
+
+    /**
+     * Forward a node removal request to the leader.
+     *
+     * @param node the node to be removed
+     * @param resultHandler
+     * @return true if the request is successfully forwarded, false otherwise
+     */
+    private boolean forwardRemoveNode(Node node, AsyncMethodCallback<Long> resultHandler) {
+        TSMetaService.AsyncClient client =
+                (TSMetaService.AsyncClient)
+                        metaGroupMember.getAsyncClient(metaGroupMember.getLeader());
+        if (client != null) {
+            try {
+                client.removeNode(node, resultHandler);
+                return true;
+            } catch (TException e) {
+                logger.warn("Cannot connect to node {}", node, e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Process a request that the local node is removed from the cluster. As a node is removed from
+     * the cluster, it no longer receive heartbeats or logs and cannot know it has been removed, so
+     * we must tell it directly.
+     *
+     * @param resultHandler
+     */
+    @Override
+    public void exile(AsyncMethodCallback<Void> resultHandler) {
+        metaGroupMember.applyRemoveNode(metaGroupMember.getThisNode());
+        resultHandler.onComplete(null);
+    }
 }

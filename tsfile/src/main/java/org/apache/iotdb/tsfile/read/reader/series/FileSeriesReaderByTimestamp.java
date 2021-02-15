@@ -29,131 +29,125 @@ import org.apache.iotdb.tsfile.read.reader.chunk.ChunkReader;
 import org.apache.iotdb.tsfile.read.reader.chunk.ChunkReaderByTimestamp;
 
 /**
- * <p>
  * Series reader is used to query one series of one tsfile, using this reader to query the value of
  * a series with given timestamps.
- * </p>
  */
 public class FileSeriesReaderByTimestamp {
 
-  protected IChunkLoader chunkLoader;
-  protected List<ChunkMetadata> chunkMetadataList;
-  private int currentChunkIndex = 0;
+    protected IChunkLoader chunkLoader;
+    protected List<ChunkMetadata> chunkMetadataList;
+    private int currentChunkIndex = 0;
 
-  private ChunkReader chunkReader;
-  private long currentTimestamp;
-  private BatchData data = null; // current batch data
+    private ChunkReader chunkReader;
+    private long currentTimestamp;
+    private BatchData data = null; // current batch data
 
-  /**
-   * init with chunkLoader and chunkMetaDataList.
-   */
-  public FileSeriesReaderByTimestamp(IChunkLoader chunkLoader, List<ChunkMetadata> chunkMetadataList) {
-    this.chunkLoader = chunkLoader;
-    this.chunkMetadataList = chunkMetadataList;
-    currentTimestamp = Long.MIN_VALUE;
-  }
+    /** init with chunkLoader and chunkMetaDataList. */
+    public FileSeriesReaderByTimestamp(
+            IChunkLoader chunkLoader, List<ChunkMetadata> chunkMetadataList) {
+        this.chunkLoader = chunkLoader;
+        this.chunkMetadataList = chunkMetadataList;
+        currentTimestamp = Long.MIN_VALUE;
+    }
 
-  public TSDataType getDataType() {
-    return chunkMetadataList.get(0).getDataType();
-  }
+    public TSDataType getDataType() {
+        return chunkMetadataList.get(0).getDataType();
+    }
 
-  /**
-   * get value with time equals timestamp. If there is no such point, return null.
-   */
-  @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  public Object getValueInTimestamp(long timestamp) throws IOException {
-    this.currentTimestamp = timestamp;
+    /** get value with time equals timestamp. If there is no such point, return null. */
+    @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
+    public Object getValueInTimestamp(long timestamp) throws IOException {
+        this.currentTimestamp = timestamp;
 
-    // first initialization, only invoked in the first time
-    if (chunkReader == null) {
-      if (!constructNextSatisfiedChunkReader()) {
+        // first initialization, only invoked in the first time
+        if (chunkReader == null) {
+            if (!constructNextSatisfiedChunkReader()) {
+                return null;
+            }
+
+            if (chunkReader.hasNextSatisfiedPage()) {
+                data = chunkReader.nextPageData();
+            } else {
+                return null;
+            }
+        }
+
+        while (data != null) {
+            while (data.hasCurrent()) {
+                if (data.currentTime() < timestamp) {
+                    data.next();
+                } else {
+                    break;
+                }
+            }
+
+            if (data.hasCurrent()) {
+                if (data.currentTime() == timestamp) {
+                    Object value = data.currentValue();
+                    data.next();
+                    return value;
+                }
+                return null;
+            } else {
+                if (chunkReader.hasNextSatisfiedPage()) {
+                    data = chunkReader.nextPageData();
+                } else if (!constructNextSatisfiedChunkReader()) {
+                    return null;
+                }
+            }
+        }
+
         return null;
-      }
-
-      if (chunkReader.hasNextSatisfiedPage()) {
-        data = chunkReader.nextPageData();
-      } else {
-        return null;
-      }
     }
 
-    while (data != null) {
-      while (data.hasCurrent()) {
-        if (data.currentTime() < timestamp) {
-          data.next();
-        } else {
-          break;
-        }
-      }
+    /**
+     * Judge if the series reader has next time-value pair.
+     *
+     * @return true if has next, false if not.
+     */
+    @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
+    public boolean hasNext() throws IOException {
 
-      if (data.hasCurrent()) {
-        if (data.currentTime() == timestamp) {
-          Object value = data.currentValue();
-          data.next();
-          return value;
+        if (chunkReader != null) {
+            if (data != null && data.hasCurrent()) {
+                return true;
+            }
+            while (chunkReader.hasNextSatisfiedPage()) {
+                data = chunkReader.nextPageData();
+                if (data != null && data.hasCurrent()) {
+                    return true;
+                }
+            }
         }
-        return null;
-      } else {
-        if (chunkReader.hasNextSatisfiedPage()) {
-          data = chunkReader.nextPageData();
-        } else if (!constructNextSatisfiedChunkReader()) {
-          return null;
+        while (constructNextSatisfiedChunkReader()) {
+            while (chunkReader.hasNextSatisfiedPage()) {
+                data = chunkReader.nextPageData();
+                if (data != null && data.hasCurrent()) {
+                    return true;
+                }
+            }
         }
-      }
+        return false;
     }
 
-    return null;
-  }
-
-  /**
-   * Judge if the series reader has next time-value pair.
-   *
-   * @return true if has next, false if not.
-   */
-  @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  public boolean hasNext() throws IOException {
-
-    if (chunkReader != null) {
-      if (data != null && data.hasCurrent()) {
-        return true;
-      }
-      while (chunkReader.hasNextSatisfiedPage()) {
-        data = chunkReader.nextPageData();
-        if (data != null && data.hasCurrent()) {
-          return true;
+    private boolean constructNextSatisfiedChunkReader() throws IOException {
+        while (currentChunkIndex < chunkMetadataList.size()) {
+            ChunkMetadata chunkMetaData = chunkMetadataList.get(currentChunkIndex++);
+            if (chunkSatisfied(chunkMetaData)) {
+                initChunkReader(chunkMetaData);
+                ((ChunkReaderByTimestamp) chunkReader).setCurrentTimestamp(currentTimestamp);
+                return true;
+            }
         }
-      }
+        return false;
     }
-    while (constructNextSatisfiedChunkReader()) {
-      while (chunkReader.hasNextSatisfiedPage()) {
-        data = chunkReader.nextPageData();
-        if (data != null && data.hasCurrent()) {
-          return true;
-        }
-      }
+
+    private void initChunkReader(ChunkMetadata chunkMetaData) throws IOException {
+        Chunk chunk = chunkLoader.loadChunk(chunkMetaData);
+        this.chunkReader = new ChunkReaderByTimestamp(chunk);
     }
-    return false;
-  }
 
-  private boolean constructNextSatisfiedChunkReader() throws IOException {
-    while (currentChunkIndex < chunkMetadataList.size()) {
-      ChunkMetadata chunkMetaData = chunkMetadataList.get(currentChunkIndex++);
-      if (chunkSatisfied(chunkMetaData)) {
-        initChunkReader(chunkMetaData);
-        ((ChunkReaderByTimestamp) chunkReader).setCurrentTimestamp(currentTimestamp);
-        return true;
-      }
+    private boolean chunkSatisfied(ChunkMetadata chunkMetaData) {
+        return chunkMetaData.getEndTime() >= currentTimestamp;
     }
-    return false;
-  }
-
-  private void initChunkReader(ChunkMetadata chunkMetaData) throws IOException {
-    Chunk chunk = chunkLoader.loadChunk(chunkMetaData);
-    this.chunkReader = new ChunkReaderByTimestamp(chunk);
-  }
-
-  private boolean chunkSatisfied(ChunkMetadata chunkMetaData) {
-    return chunkMetaData.getEndTime() >= currentTimestamp;
-  }
-
 }

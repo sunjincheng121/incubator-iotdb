@@ -18,28 +18,28 @@
  */
 package org.apache.iotdb.db.auth;
 
-/**
- * The exception for authority model.
- */
+/** The exception for authority model. */
 public class AuthException extends Exception {
 
-  private static final long serialVersionUID = 5091102941209301301L;
+    private static final long serialVersionUID = 5091102941209301301L;
 
-  public AuthException(String message) {
-    super(message);
-  }
+    public AuthException(String message) {
+        super(message);
+    }
 
-  public AuthException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public AuthException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-  public AuthException(Throwable cause) {
-    super(cause);
-  }
+    public AuthException(Throwable cause) {
+        super(cause);
+    }
 
-  protected AuthException(String message, Throwable cause, boolean enableSuppression,
-      boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-  }
-
+    protected AuthException(
+            String message,
+            Throwable cause,
+            boolean enableSuppression,
+            boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

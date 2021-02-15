@@ -31,57 +31,57 @@ import org.slf4j.LoggerFactory;
 
 public class UpgradeLog {
 
-  private static final Logger logger = LoggerFactory.getLogger(UpgradeLog.class);
+    private static final Logger logger = LoggerFactory.getLogger(UpgradeLog.class);
 
-  private static final IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
-  private static final String UPGRADE_DIR = "upgrade";
-  private static final String UPGRADE_LOG_NAME = "upgrade.txt";
-  private static BufferedWriter upgradeLogWriter;
-  private static File upgradeLogPath = SystemFileFactory.INSTANCE
-      .getFile(SystemFileFactory.INSTANCE.getFile(config.getSystemDir(), UPGRADE_DIR),
-          UPGRADE_LOG_NAME);
+    private static final IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
+    private static final String UPGRADE_DIR = "upgrade";
+    private static final String UPGRADE_LOG_NAME = "upgrade.txt";
+    private static BufferedWriter upgradeLogWriter;
+    private static File upgradeLogPath =
+            SystemFileFactory.INSTANCE.getFile(
+                    SystemFileFactory.INSTANCE.getFile(config.getSystemDir(), UPGRADE_DIR),
+                    UPGRADE_LOG_NAME);
 
-  public static boolean createUpgradeLog() {
-    try {
-      if (!upgradeLogPath.getParentFile().exists()) {
-        upgradeLogPath.getParentFile().mkdirs();
-      }
-      upgradeLogPath.createNewFile();
-      upgradeLogWriter = new BufferedWriter(new FileWriter(getUpgradeLogPath(), true));
-      return true;
-    } catch (IOException e) {
-      logger.error("meet error when create upgrade log, file path:{}",
-          upgradeLogPath, e);
-      return false;
+    public static boolean createUpgradeLog() {
+        try {
+            if (!upgradeLogPath.getParentFile().exists()) {
+                upgradeLogPath.getParentFile().mkdirs();
+            }
+            upgradeLogPath.createNewFile();
+            upgradeLogWriter = new BufferedWriter(new FileWriter(getUpgradeLogPath(), true));
+            return true;
+        } catch (IOException e) {
+            logger.error("meet error when create upgrade log, file path:{}", upgradeLogPath, e);
+            return false;
+        }
     }
-  }
 
-  public static String getUpgradeLogPath() {
-    return upgradeLogPath.getAbsolutePath();
-  }
-
-  public static boolean writeUpgradeLogFile(String content) {
-    UpgradeUtils.getUpgradeLogLock().writeLock().lock();
-    try {
-      upgradeLogWriter.write(content);
-      upgradeLogWriter.newLine();
-      upgradeLogWriter.flush();
-      return true;
-    } catch (IOException e) {
-      logger.error("write upgrade log file failed, the log file:{}", getUpgradeLogPath(), e);
-      return false;
-    } finally {
-      UpgradeUtils.getUpgradeLogLock().writeLock().unlock();
+    public static String getUpgradeLogPath() {
+        return upgradeLogPath.getAbsolutePath();
     }
-  }
 
-  public static void closeLogWriter() {
-    try {
-      if (upgradeLogWriter != null) {
-        upgradeLogWriter.close();
-      }
-    } catch (IOException e) {
-      logger.error("close upgrade log file failed, the log file:{}", getUpgradeLogPath(), e);
+    public static boolean writeUpgradeLogFile(String content) {
+        UpgradeUtils.getUpgradeLogLock().writeLock().lock();
+        try {
+            upgradeLogWriter.write(content);
+            upgradeLogWriter.newLine();
+            upgradeLogWriter.flush();
+            return true;
+        } catch (IOException e) {
+            logger.error("write upgrade log file failed, the log file:{}", getUpgradeLogPath(), e);
+            return false;
+        } finally {
+            UpgradeUtils.getUpgradeLogLock().writeLock().unlock();
+        }
     }
-  }
+
+    public static void closeLogWriter() {
+        try {
+            if (upgradeLogWriter != null) {
+                upgradeLogWriter.close();
+            }
+        } catch (IOException e) {
+            logger.error("close upgrade log file failed, the log file:{}", getUpgradeLogPath(), e);
+        }
+    }
 }

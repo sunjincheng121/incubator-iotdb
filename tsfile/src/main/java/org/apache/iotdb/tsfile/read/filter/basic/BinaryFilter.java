@@ -25,69 +25,67 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
 
-/**
- * Definition for binary filter operations.
- */
+/** Definition for binary filter operations. */
 public abstract class BinaryFilter implements Filter, Serializable {
 
-  private static final long serialVersionUID = 1039585564327602465L;
+    private static final long serialVersionUID = 1039585564327602465L;
 
-  protected Filter left;
-  protected Filter right;
+    protected Filter left;
+    protected Filter right;
 
-  public BinaryFilter() {
-  }
+    public BinaryFilter() {}
 
-  protected BinaryFilter(Filter left, Filter right) {
-    this.left = left;
-    this.right = right;
-  }
-
-  public Filter getLeft() {
-    return left;
-  }
-
-  public Filter getRight() {
-    return right;
-  }
-
-  @Override
-  public String toString() {
-    return "( " + left + "," + right + " )";
-  }
-
-  @Override
-  public abstract Filter copy();
-
-  @Override
-  public void serialize(DataOutputStream outputStream) {
-    try {
-      outputStream.write(getSerializeId().ordinal());
-      left.serialize(outputStream);
-      right.serialize(outputStream);
-    } catch (IOException ignored) {
-      // ignore
+    protected BinaryFilter(Filter left, Filter right) {
+        this.left = left;
+        this.right = right;
     }
-  }
 
-  @Override
-  public void deserialize(ByteBuffer buffer) {
-    left = FilterFactory.deserialize(buffer);
-    right = FilterFactory.deserialize(buffer);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof BinaryFilter)) {
-      return false;
+    public Filter getLeft() {
+        return left;
     }
-    BinaryFilter other = ((BinaryFilter) obj);
-    return this.left.equals(other.left) && this.right.equals(other.right)
-        && this.getSerializeId().equals(other.getSerializeId());
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(left, right, getSerializeId());
-  }
+    public Filter getRight() {
+        return right;
+    }
+
+    @Override
+    public String toString() {
+        return "( " + left + "," + right + " )";
+    }
+
+    @Override
+    public abstract Filter copy();
+
+    @Override
+    public void serialize(DataOutputStream outputStream) {
+        try {
+            outputStream.write(getSerializeId().ordinal());
+            left.serialize(outputStream);
+            right.serialize(outputStream);
+        } catch (IOException ignored) {
+            // ignore
+        }
+    }
+
+    @Override
+    public void deserialize(ByteBuffer buffer) {
+        left = FilterFactory.deserialize(buffer);
+        right = FilterFactory.deserialize(buffer);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof BinaryFilter)) {
+            return false;
+        }
+        BinaryFilter other = ((BinaryFilter) obj);
+        return this.left.equals(other.left)
+                && this.right.equals(other.right)
+                && this.getSerializeId().equals(other.getSerializeId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(left, right, getSerializeId());
+    }
 }

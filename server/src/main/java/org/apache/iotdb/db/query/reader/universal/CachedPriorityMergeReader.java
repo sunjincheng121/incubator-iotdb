@@ -29,67 +29,67 @@ import org.apache.iotdb.tsfile.read.TimeValuePair;
  */
 public class CachedPriorityMergeReader extends PriorityMergeReader {
 
-  private static final int CACHE_SIZE = 100;
+    private static final int CACHE_SIZE = 100;
 
-  private TimeValuePair[] timeValuePairCache = new TimeValuePair[CACHE_SIZE];
-  private int cacheLimit = 0;
-  private int cacheIdx = 0;
+    private TimeValuePair[] timeValuePairCache = new TimeValuePair[CACHE_SIZE];
+    private int cacheLimit = 0;
+    private int cacheIdx = 0;
 
-  private Long lastTimestamp = null;
+    private Long lastTimestamp = null;
 
-  public CachedPriorityMergeReader(TSDataType dataType) {
-    for (int i = 0; i < CACHE_SIZE; i++) {
-      timeValuePairCache[i] = TimeValuePairUtils.getEmptyTimeValuePair(dataType);
-    }
-  }
-
-  @Override
-  public boolean hasNextTimeValuePair() {
-    return cacheIdx < cacheLimit || !heap.isEmpty();
-  }
-
-  private void fetch() throws IOException {
-    cacheLimit = 0;
-    cacheIdx = 0;
-    while (!heap.isEmpty() && cacheLimit < CACHE_SIZE) {
-      Element top = heap.peek();
-      if (lastTimestamp == null || top.currTime() != lastTimestamp) {
-        TimeValuePairUtils.setTimeValuePair(top.timeValuePair, timeValuePairCache[cacheLimit++]);
-        lastTimestamp = top.currTime();
-      }
-      // remove duplicates
-      while (heap.peek() != null && heap.peek().currTime() == lastTimestamp) {
-        top = heap.poll();
-        if (top.hasNext()) {
-          top.next();
-          heap.add(top);
-        } else {
-          top.close();
+    public CachedPriorityMergeReader(TSDataType dataType) {
+        for (int i = 0; i < CACHE_SIZE; i++) {
+            timeValuePairCache[i] = TimeValuePairUtils.getEmptyTimeValuePair(dataType);
         }
-      }
     }
-  }
 
-
-  @Override
-  public TimeValuePair nextTimeValuePair() throws IOException {
-    TimeValuePair ret;
-    if (cacheIdx < cacheLimit) {
-      ret = timeValuePairCache[cacheIdx++];
-    } else {
-      fetch();
-      ret = timeValuePairCache[cacheIdx++];
+    @Override
+    public boolean hasNextTimeValuePair() {
+        return cacheIdx < cacheLimit || !heap.isEmpty();
     }
-    return ret;
-  }
 
-  @Override
-  public TimeValuePair currentTimeValuePair() throws IOException {
-    if (0 <= cacheIdx && cacheIdx < cacheLimit) {
-      return timeValuePairCache[cacheIdx];
-    } else {
-      fetch();
-      return timeValuePairCache[cacheIdx];
+    private void fetch() throws IOException {
+        cacheLimit = 0;
+        cacheIdx = 0;
+        while (!heap.isEmpty() && cacheLimit < CACHE_SIZE) {
+            Element top = heap.peek();
+            if (lastTimestamp == null || top.currTime() != lastTimestamp) {
+                TimeValuePairUtils.setTimeValuePair(
+                        top.timeValuePair, timeValuePairCache[cacheLimit++]);
+                lastTimestamp = top.currTime();
+            }
+            // remove duplicates
+            while (heap.peek() != null && heap.peek().currTime() == lastTimestamp) {
+                top = heap.poll();
+                if (top.hasNext()) {
+                    top.next();
+                    heap.add(top);
+                } else {
+                    top.close();
+                }
+            }
+        }
     }
-  }
+
+    @Override
+    public TimeValuePair nextTimeValuePair() throws IOException {
+        TimeValuePair ret;
+        if (cacheIdx < cacheLimit) {
+            ret = timeValuePairCache[cacheIdx++];
+        } else {
+            fetch();
+            ret = timeValuePairCache[cacheIdx++];
+        }
+        return ret;
+    }
+
+    @Override
+    public TimeValuePair currentTimeValuePair() throws IOException {
+        if (0 <= cacheIdx && cacheIdx < cacheLimit) {
+            return timeValuePairCache[cacheIdx];
+        } else {
+            fetch();
+            return timeValuePairCache[cacheIdx];
+        }
+    }
 }

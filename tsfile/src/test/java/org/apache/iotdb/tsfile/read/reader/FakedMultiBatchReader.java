@@ -25,38 +25,36 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 
 public class FakedMultiBatchReader implements IBatchReader {
 
-  private long time = 0;
-  private int batchSize;
-  private int batches;
-  private int batchIndex = 0;
-  private Filter filter;
+    private long time = 0;
+    private int batchSize;
+    private int batches;
+    private int batchIndex = 0;
+    private Filter filter;
 
-  FakedMultiBatchReader(int batchSize, int batches, Filter filter) {
-    this.batchSize = batchSize;
-    this.batches = batches;
-    this.filter = filter;
-  }
-
-  @Override
-  public boolean hasNextBatch() {
-    return batchIndex < batches;
-  }
-
-  @Override
-  public BatchData nextBatch() {
-    batchIndex++;
-    BatchData batchData = new BatchData(TSDataType.INT64);
-    for (int i = 0; i < batchSize; i++) {
-      if (filter.satisfy(time, time)) {
-        batchData.putLong(time, time);
-      }
-      time++;
+    FakedMultiBatchReader(int batchSize, int batches, Filter filter) {
+        this.batchSize = batchSize;
+        this.batches = batches;
+        this.filter = filter;
     }
-    return batchData;
-  }
 
-  @Override
-  public void close() throws IOException {
+    @Override
+    public boolean hasNextBatch() {
+        return batchIndex < batches;
+    }
 
-  }
+    @Override
+    public BatchData nextBatch() {
+        batchIndex++;
+        BatchData batchData = new BatchData(TSDataType.INT64);
+        for (int i = 0; i < batchSize; i++) {
+            if (filter.satisfy(time, time)) {
+                batchData.putLong(time, time);
+            }
+            time++;
+        }
+        return batchData;
+    }
+
+    @Override
+    public void close() throws IOException {}
 }

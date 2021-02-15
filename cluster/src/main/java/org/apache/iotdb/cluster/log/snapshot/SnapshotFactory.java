@@ -22,7 +22,7 @@ package org.apache.iotdb.cluster.log.snapshot;
 import org.apache.iotdb.cluster.log.Snapshot;
 
 public interface SnapshotFactory<T extends Snapshot> {
-  T create();
+    T create();
 
-  T copy(T origin);
+    T copy(T origin);
 }

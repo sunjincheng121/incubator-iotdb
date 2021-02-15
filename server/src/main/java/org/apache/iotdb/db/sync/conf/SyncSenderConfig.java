@@ -24,107 +24,105 @@ import java.util.List;
 
 public class SyncSenderConfig {
 
-  private String serverIp = "127.0.0.1";
+    private String serverIp = "127.0.0.1";
 
-  private int serverPort = 5555;
+    private int serverPort = 5555;
 
-  private int syncPeriodInSecond = 600;
+    private int syncPeriodInSecond = 600;
 
-  private String senderFolderPath;
+    private String senderFolderPath;
 
-  private String lastFileInfoPath;
+    private String lastFileInfoPath;
 
-  private String snapshotPath;
+    private String snapshotPath;
 
-  /**
-   * The maximum number of retry when syncing a file to receiver fails.
-   */
-  private int maxNumOfSyncFileRetry = 5;
+    /** The maximum number of retry when syncing a file to receiver fails. */
+    private int maxNumOfSyncFileRetry = 5;
 
-  /**
-   * Storage groups which participate in sync process
-   */
-  private List<String> storageGroupList = new ArrayList<>();
+    /** Storage groups which participate in sync process */
+    private List<String> storageGroupList = new ArrayList<>();
 
-  /**
-   * Update paths based on data directory
-   */
-  public void update(String dataDirectory) {
-    senderFolderPath =
-        dataDirectory + File.separatorChar + SyncConstant.SYNC_SENDER + File.separatorChar +
-            getSyncReceiverName();
-    lastFileInfoPath = senderFolderPath + File.separatorChar + SyncConstant.LAST_LOCAL_FILE_NAME;
-    snapshotPath = senderFolderPath + File.separatorChar + SyncConstant.DATA_SNAPSHOT_NAME;
-    if (!new File(snapshotPath).exists()) {
-      new File(snapshotPath).mkdirs();
+    /** Update paths based on data directory */
+    public void update(String dataDirectory) {
+        senderFolderPath =
+                dataDirectory
+                        + File.separatorChar
+                        + SyncConstant.SYNC_SENDER
+                        + File.separatorChar
+                        + getSyncReceiverName();
+        lastFileInfoPath =
+                senderFolderPath + File.separatorChar + SyncConstant.LAST_LOCAL_FILE_NAME;
+        snapshotPath = senderFolderPath + File.separatorChar + SyncConstant.DATA_SNAPSHOT_NAME;
+        if (!new File(snapshotPath).exists()) {
+            new File(snapshotPath).mkdirs();
+        }
     }
-  }
 
-  public String getServerIp() {
-    return serverIp;
-  }
+    public String getServerIp() {
+        return serverIp;
+    }
 
-  public void setServerIp(String serverIp) {
-    this.serverIp = serverIp;
-  }
+    public void setServerIp(String serverIp) {
+        this.serverIp = serverIp;
+    }
 
-  public int getServerPort() {
-    return serverPort;
-  }
+    public int getServerPort() {
+        return serverPort;
+    }
 
-  public void setServerPort(int serverPort) {
-    this.serverPort = serverPort;
-  }
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
+    }
 
-  public int getSyncPeriodInSecond() {
-    return syncPeriodInSecond;
-  }
+    public int getSyncPeriodInSecond() {
+        return syncPeriodInSecond;
+    }
 
-  public void setSyncPeriodInSecond(int syncPeriodInSecond) {
-    this.syncPeriodInSecond = syncPeriodInSecond;
-  }
+    public void setSyncPeriodInSecond(int syncPeriodInSecond) {
+        this.syncPeriodInSecond = syncPeriodInSecond;
+    }
 
-  public String getSenderFolderPath() {
-    return senderFolderPath;
-  }
+    public String getSenderFolderPath() {
+        return senderFolderPath;
+    }
 
-  public void setSenderFolderPath(String senderFolderPath) {
-    this.senderFolderPath = senderFolderPath;
-  }
+    public void setSenderFolderPath(String senderFolderPath) {
+        this.senderFolderPath = senderFolderPath;
+    }
 
-  public String getLastFileInfoPath() {
-    return lastFileInfoPath;
-  }
+    public String getLastFileInfoPath() {
+        return lastFileInfoPath;
+    }
 
-  public void setLastFileInfoPath(String lastFileInfoPath) {
-    this.lastFileInfoPath = lastFileInfoPath;
-  }
+    public void setLastFileInfoPath(String lastFileInfoPath) {
+        this.lastFileInfoPath = lastFileInfoPath;
+    }
 
-  public String getSnapshotPath() {
-    return snapshotPath;
-  }
+    public String getSnapshotPath() {
+        return snapshotPath;
+    }
 
-  public void setSnapshotPath(String snapshotPath) {
-    this.snapshotPath = snapshotPath;
-  }
+    public void setSnapshotPath(String snapshotPath) {
+        this.snapshotPath = snapshotPath;
+    }
 
-  public String getSyncReceiverName() {
-    return serverIp + SyncConstant.SYNC_DIR_NAME_SEPARATOR + serverPort;
-  }
+    public String getSyncReceiverName() {
+        return serverIp + SyncConstant.SYNC_DIR_NAME_SEPARATOR + serverPort;
+    }
 
-  public List<String> getStorageGroupList() {
-    return new ArrayList<>(storageGroupList);
-  }
+    public List<String> getStorageGroupList() {
+        return new ArrayList<>(storageGroupList);
+    }
 
-  public void setStorageGroupList(List<String> storageGroupList) {
-    this.storageGroupList = storageGroupList;
-  }
+    public void setStorageGroupList(List<String> storageGroupList) {
+        this.storageGroupList = storageGroupList;
+    }
 
-  public int getMaxNumOfSyncFileRetry() {
-    return maxNumOfSyncFileRetry;
-  }
+    public int getMaxNumOfSyncFileRetry() {
+        return maxNumOfSyncFileRetry;
+    }
 
-  public void setMaxNumOfSyncFileRetry(int maxNumOfSyncFileRetry) {
-    this.maxNumOfSyncFileRetry = maxNumOfSyncFileRetry;
-  }
+    public void setMaxNumOfSyncFileRetry(int maxNumOfSyncFileRetry) {
+        this.maxNumOfSyncFileRetry = maxNumOfSyncFileRetry;
+    }
 }

@@ -18,16 +18,13 @@
 
 package org.apache.iotdb.flink;
 
+import java.io.Serializable;
+import java.util.List;
 import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 
-import java.io.Serializable;
-import java.util.List;
-
-/**
- * IoTDBOptions describes the configuration related information for IoTDB and timeseries.
- */
+/** IoTDBOptions describes the configuration related information for IoTDB and timeseries. */
 public class IoTDBOptions implements Serializable {
     private String host;
     private int port;
@@ -36,11 +33,15 @@ public class IoTDBOptions implements Serializable {
     private String storageGroup;
     private List<TimeseriesOption> timeseriesOptionList;
 
-    public IoTDBOptions() {
-    }
+    public IoTDBOptions() {}
 
-    public IoTDBOptions(String host, int port, String user, String password,
-                        String storageGroup, List<TimeseriesOption> timeseriesOptionList) {
+    public IoTDBOptions(
+            String host,
+            int port,
+            String user,
+            String password,
+            String storageGroup,
+            List<TimeseriesOption> timeseriesOptionList) {
         this.host = host;
         this.port = port;
         this.user = user;
@@ -103,14 +104,14 @@ public class IoTDBOptions implements Serializable {
         private TSEncoding encoding = TSEncoding.PLAIN;
         private CompressionType compressor = CompressionType.SNAPPY;
 
-        public TimeseriesOption() {
-        }
+        public TimeseriesOption() {}
 
         public TimeseriesOption(String path) {
             this.path = path;
         }
 
-        public TimeseriesOption(String path, TSDataType dataType, TSEncoding encoding, CompressionType compressor) {
+        public TimeseriesOption(
+                String path, TSDataType dataType, TSEncoding encoding, CompressionType compressor) {
             this.path = path;
             this.dataType = dataType;
             this.encoding = encoding;

@@ -23,73 +23,75 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-
 /**
  * The type of MetadataIndexNode
  *
- * INTERNAL_DEVICE: internal nodes of the index tree's device level
- * LEAF_DEVICE: leaf nodes of the index tree's device level, points to measurement level
- * INTERNAL_MEASUREMENT: internal nodes of the index tree's measurement level
- * LEAF_MEASUREMENT: leaf nodes of the index tree's device level, points to TimeseriesMetadata
+ * <p>INTERNAL_DEVICE: internal nodes of the index tree's device level LEAF_DEVICE: leaf nodes of
+ * the index tree's device level, points to measurement level INTERNAL_MEASUREMENT: internal nodes
+ * of the index tree's measurement level LEAF_MEASUREMENT: leaf nodes of the index tree's device
+ * level, points to TimeseriesMetadata
  */
 public enum MetadataIndexNodeType {
-  INTERNAL_DEVICE, LEAF_DEVICE, INTERNAL_MEASUREMENT, LEAF_MEASUREMENT;
+    INTERNAL_DEVICE,
+    LEAF_DEVICE,
+    INTERNAL_MEASUREMENT,
+    LEAF_MEASUREMENT;
 
-  /**
-   * deserialize byte number.
-   *
-   * @param i byte number
-   * @return MetadataIndexNodeType
-   */
-  public static MetadataIndexNodeType deserialize(byte i) {
-    if (i >= 4) {
-      throw new IllegalArgumentException("Invalid input: " + i);
+    /**
+     * deserialize byte number.
+     *
+     * @param i byte number
+     * @return MetadataIndexNodeType
+     */
+    public static MetadataIndexNodeType deserialize(byte i) {
+        if (i >= 4) {
+            throw new IllegalArgumentException("Invalid input: " + i);
+        }
+        switch (i) {
+            case 0:
+                return INTERNAL_DEVICE;
+            case 1:
+                return LEAF_DEVICE;
+            case 2:
+                return INTERNAL_MEASUREMENT;
+            default:
+                return LEAF_MEASUREMENT;
+        }
     }
-    switch (i) {
-      case 0:
-        return INTERNAL_DEVICE;
-      case 1:
-        return LEAF_DEVICE;
-      case 2:
-        return INTERNAL_MEASUREMENT;
-      default:
-        return LEAF_MEASUREMENT;
+
+    public static MetadataIndexNodeType deserializeFrom(ByteBuffer buffer) {
+        return deserialize(buffer.get());
     }
-  }
 
-  public static MetadataIndexNodeType deserializeFrom(ByteBuffer buffer) {
-    return deserialize(buffer.get());
-  }
-
-  public static int getSerializedSize() {
-    return Byte.BYTES;
-  }
-
-  public void serializeTo(ByteBuffer byteBuffer) {
-    byteBuffer.put(serialize());
-  }
-
-  public void serializeTo(DataOutputStream outputStream) throws IOException {
-    outputStream.write(serialize());
-  }
-
-  /**
-   * return a serialize child metadata index type.
-   *
-   * @return -enum type
-   */
-  public byte serialize() {
-    switch (this) {
-      case INTERNAL_DEVICE:
-        return 0;
-      case LEAF_DEVICE:
-        return 1;
-      case INTERNAL_MEASUREMENT:
-        return 2;
-      case LEAF_MEASUREMENT:
-        return 3;
-      default:
-        return -1;
+    public static int getSerializedSize() {
+        return Byte.BYTES;
     }
-  }
+
+    public void serializeTo(ByteBuffer byteBuffer) {
+        byteBuffer.put(serialize());
+    }
+
+    public void serializeTo(DataOutputStream outputStream) throws IOException {
+        outputStream.write(serialize());
+    }
+
+    /**
+     * return a serialize child metadata index type.
+     *
+     * @return -enum type
+     */
+    public byte serialize() {
+        switch (this) {
+            case INTERNAL_DEVICE:
+                return 0;
+            case LEAF_DEVICE:
+                return 1;
+            case INTERNAL_MEASUREMENT:
+                return 2;
+            case LEAF_MEASUREMENT:
+                return 3;
+            default:
+                return -1;
+        }
+    }
 }

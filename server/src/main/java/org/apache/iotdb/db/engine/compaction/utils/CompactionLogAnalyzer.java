@@ -37,87 +37,87 @@ import java.util.Set;
 
 public class CompactionLogAnalyzer {
 
-  public static final String STR_DEVICE_OFFSET_SEPERATOR = " ";
+    public static final String STR_DEVICE_OFFSET_SEPERATOR = " ";
 
-  private File logFile;
-  private boolean isMergeFinished = false;
-  private Set<String> deviceSet = new HashSet<>();
-  private long offset = 0;
-  private List<String> sourceFiles = new ArrayList<>();
-  private String targetFile = null;
-  private boolean isSeq = false;
-  private boolean fullMerge = false;
+    private File logFile;
+    private boolean isMergeFinished = false;
+    private Set<String> deviceSet = new HashSet<>();
+    private long offset = 0;
+    private List<String> sourceFiles = new ArrayList<>();
+    private String targetFile = null;
+    private boolean isSeq = false;
+    private boolean fullMerge = false;
 
-  public CompactionLogAnalyzer(File logFile) {
-    this.logFile = logFile;
-  }
-
-  /**
-   * @return analyze (written device set, last offset, source file list, target file , is contains
-   * merge finished)
-   */
-  public void analyze() throws IOException {
-    String currLine;
-    try (BufferedReader bufferedReader = new BufferedReader(new FileReader(logFile))) {
-      while ((currLine = bufferedReader.readLine()) != null) {
-        switch (currLine) {
-          case SOURCE_NAME:
-            currLine = bufferedReader.readLine();
-            sourceFiles.add(currLine);
-            break;
-          case TARGET_NAME:
-            currLine = bufferedReader.readLine();
-            targetFile = currLine;
-            break;
-          case MERGE_FINISHED:
-            isMergeFinished = true;
-            break;
-          case FULL_MERGE:
-            fullMerge = true;
-            break;
-          case SEQUENCE_NAME:
-            isSeq = true;
-            break;
-          case UNSEQUENCE_NAME:
-            isSeq = false;
-            break;
-          default:
-            if (currLine.contains(STR_DEVICE_OFFSET_SEPERATOR)) {
-              String[] resultList = currLine.split(STR_DEVICE_OFFSET_SEPERATOR);
-              deviceSet.add(resultList[0]);
-              offset = Long.parseLong(resultList[1]);
-            }
-            break;
-        }
-      }
+    public CompactionLogAnalyzer(File logFile) {
+        this.logFile = logFile;
     }
-  }
 
-  public boolean isMergeFinished() {
-    return isMergeFinished;
-  }
+    /**
+     * @return analyze (written device set, last offset, source file list, target file , is contains
+     *     merge finished)
+     */
+    public void analyze() throws IOException {
+        String currLine;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(logFile))) {
+            while ((currLine = bufferedReader.readLine()) != null) {
+                switch (currLine) {
+                    case SOURCE_NAME:
+                        currLine = bufferedReader.readLine();
+                        sourceFiles.add(currLine);
+                        break;
+                    case TARGET_NAME:
+                        currLine = bufferedReader.readLine();
+                        targetFile = currLine;
+                        break;
+                    case MERGE_FINISHED:
+                        isMergeFinished = true;
+                        break;
+                    case FULL_MERGE:
+                        fullMerge = true;
+                        break;
+                    case SEQUENCE_NAME:
+                        isSeq = true;
+                        break;
+                    case UNSEQUENCE_NAME:
+                        isSeq = false;
+                        break;
+                    default:
+                        if (currLine.contains(STR_DEVICE_OFFSET_SEPERATOR)) {
+                            String[] resultList = currLine.split(STR_DEVICE_OFFSET_SEPERATOR);
+                            deviceSet.add(resultList[0]);
+                            offset = Long.parseLong(resultList[1]);
+                        }
+                        break;
+                }
+            }
+        }
+    }
 
-  public Set<String> getDeviceSet() {
-    return deviceSet;
-  }
+    public boolean isMergeFinished() {
+        return isMergeFinished;
+    }
 
-  public long getOffset() {
-    return offset;
-  }
+    public Set<String> getDeviceSet() {
+        return deviceSet;
+    }
 
-  public List<String> getSourceFiles() {
-    return sourceFiles;
-  }
+    public long getOffset() {
+        return offset;
+    }
 
-  public String getTargetFile() {
-    return targetFile;
-  }
+    public List<String> getSourceFiles() {
+        return sourceFiles;
+    }
 
-  public boolean isSeq() {
-    return isSeq;
-  }
+    public String getTargetFile() {
+        return targetFile;
+    }
 
-  public boolean isFullMerge() {
-    return fullMerge;
-  }
+    public boolean isSeq() {
+        return isSeq;
+    }
+
+    public boolean isFullMerge() {
+        return fullMerge;
+    }
 }

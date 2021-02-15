@@ -30,49 +30,50 @@ import org.slf4j.LoggerFactory;
 
 public class PreviousFillHandler implements AsyncMethodCallback<ByteBuffer> {
 
-  private static final Logger logger = LoggerFactory.getLogger(PreviousFillHandler.class);
-  private static final long MAX_WAIT_MIN = 3;
-  private CountDownLatch latch;
-  private TimeValuePair result = new TimeValuePair(Long.MIN_VALUE, null);
+    private static final Logger logger = LoggerFactory.getLogger(PreviousFillHandler.class);
+    private static final long MAX_WAIT_MIN = 3;
+    private CountDownLatch latch;
+    private TimeValuePair result = new TimeValuePair(Long.MIN_VALUE, null);
 
-  public PreviousFillHandler(CountDownLatch latch) {
-    this.latch = latch;
-  }
-
-  @Override
-  public synchronized void onComplete(ByteBuffer response) {
-    if (response != null && (response.limit() - response.position()) != 0) {
-      TimeValuePair timeValuePair = SerializeUtils.deserializeTVPair(response);
-      if (timeValuePair != null && timeValuePair.getTimestamp() > result.getTimestamp()) {
-        result = timeValuePair;
-      }
+    public PreviousFillHandler(CountDownLatch latch) {
+        this.latch = latch;
     }
-    latch.countDown();
-  }
 
-  public synchronized void onComplete(TimeValuePair timeValuePair) {
-    if (timeValuePair.getTimestamp() > result.getTimestamp()) {
-      result = timeValuePair;
+    @Override
+    public synchronized void onComplete(ByteBuffer response) {
+        if (response != null && (response.limit() - response.position()) != 0) {
+            TimeValuePair timeValuePair = SerializeUtils.deserializeTVPair(response);
+            if (timeValuePair != null && timeValuePair.getTimestamp() > result.getTimestamp()) {
+                result = timeValuePair;
+            }
+        }
+        latch.countDown();
     }
-    latch.countDown();
-  }
 
-  @Override
-  public synchronized void onError(Exception exception) {
-    logger.error("Cannot get previous fill result", exception);
-    latch.countDown();
-  }
-
-  public TimeValuePair getResult() {
-    try {
-      if (!latch.await(MAX_WAIT_MIN, TimeUnit.MINUTES)) {
-        logger.warn("Not all nodes returned previous fill result when timed out, remaining {}",
-            latch.getCount());
-      }
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      logger.error("Unexpected interruption when waiting for the result of previous fill");
+    public synchronized void onComplete(TimeValuePair timeValuePair) {
+        if (timeValuePair.getTimestamp() > result.getTimestamp()) {
+            result = timeValuePair;
+        }
+        latch.countDown();
     }
-    return result;
-  }
+
+    @Override
+    public synchronized void onError(Exception exception) {
+        logger.error("Cannot get previous fill result", exception);
+        latch.countDown();
+    }
+
+    public TimeValuePair getResult() {
+        try {
+            if (!latch.await(MAX_WAIT_MIN, TimeUnit.MINUTES)) {
+                logger.warn(
+                        "Not all nodes returned previous fill result when timed out, remaining {}",
+                        latch.getCount());
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Unexpected interruption when waiting for the result of previous fill");
+        }
+        return result;
+    }
 }

@@ -20,20 +20,19 @@ package org.apache.iotdb.rocketmq;
 
 public class Utils {
 
-  private Utils() {
-    throw new IllegalStateException("Utility class");
-  }
-
-  public static int ConvertStringToInteger(String device) {
-    int sum = 0;
-    for (char c : device.toCharArray()) {
-      sum += c;
+    private Utils() {
+        throw new IllegalStateException("Utility class");
     }
-    return sum;
-  }
 
-  public static String getTimeSeries(String sql){
-    return sql.substring(0, sql.indexOf(',')).trim();
-  }
+    public static int ConvertStringToInteger(String device) {
+        int sum = 0;
+        for (char c : device.toCharArray()) {
+            sum += c;
+        }
+        return sum;
+    }
 
+    public static String getTimeSeries(String sql) {
+        return sql.substring(0, sql.indexOf(',')).trim();
+    }
 }

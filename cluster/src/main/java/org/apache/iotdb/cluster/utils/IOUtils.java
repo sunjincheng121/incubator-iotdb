@@ -32,56 +32,56 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("java:S1135")
 public class IOUtils {
 
-  private static final Logger logger = LoggerFactory.getLogger(IOUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(IOUtils.class);
 
-  private IOUtils() {
-    // util class
-  }
-
-  /**
-   * An interface that is used for a node to pull chunks of files like TsFiles. The file should be a
-   * temporary hard link, and once the file is totally read, it will be removed.
-   */
-  public static ByteBuffer readFile(String filePath, long offset, int length) throws IOException {
-    // TODO-Cluster: hold if the file is an unclosed TsFile
-    File file = new File(filePath);
-    if (!file.exists()) {
-      return ByteBuffer.allocate(0);
+    private IOUtils() {
+        // util class
     }
 
-    ByteBuffer result;
-    boolean fileExhausted;
-    try (BufferedInputStream bufferedInputStream =
-        new BufferedInputStream(new FileInputStream(file))) {
-      skipExactly(bufferedInputStream, offset);
-      byte[] bytes = new byte[length];
-      result = ByteBuffer.wrap(bytes);
-      int len = bufferedInputStream.read(bytes);
-      result.limit(Math.max(len, 0));
-      fileExhausted = bufferedInputStream.available() <= 0;
+    /**
+     * An interface that is used for a node to pull chunks of files like TsFiles. The file should be
+     * a temporary hard link, and once the file is totally read, it will be removed.
+     */
+    public static ByteBuffer readFile(String filePath, long offset, int length) throws IOException {
+        // TODO-Cluster: hold if the file is an unclosed TsFile
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return ByteBuffer.allocate(0);
+        }
+
+        ByteBuffer result;
+        boolean fileExhausted;
+        try (BufferedInputStream bufferedInputStream =
+                new BufferedInputStream(new FileInputStream(file))) {
+            skipExactly(bufferedInputStream, offset);
+            byte[] bytes = new byte[length];
+            result = ByteBuffer.wrap(bytes);
+            int len = bufferedInputStream.read(bytes);
+            result.limit(Math.max(len, 0));
+            fileExhausted = bufferedInputStream.available() <= 0;
+        }
+
+        if (fileExhausted) {
+            try {
+                Files.delete(file.toPath());
+            } catch (IOException e) {
+                logger.warn("Cannot delete an exhausted file {}", filePath, e);
+            }
+        }
+        return result;
     }
 
-    if (fileExhausted) {
-      try {
-        Files.delete(file.toPath());
-      } catch (IOException e) {
-        logger.warn("Cannot delete an exhausted file {}", filePath, e);
-      }
+    private static void skipExactly(InputStream stream, long byteToSkip) throws IOException {
+        while (byteToSkip > 0) {
+            byteToSkip -= stream.skip(byteToSkip);
+        }
     }
-    return result;
-  }
 
-  private static void skipExactly(InputStream stream, long byteToSkip) throws IOException {
-    while (byteToSkip > 0) {
-      byteToSkip -= stream.skip(byteToSkip);
+    public static Throwable getRootCause(Throwable e) {
+        Throwable curr = e;
+        while (curr.getCause() != null) {
+            curr = curr.getCause();
+        }
+        return curr;
     }
-  }
-
-  public static Throwable getRootCause(Throwable e) {
-    Throwable curr = e;
-    while (curr.getCause() != null) {
-      curr = curr.getCause();
-    }
-    return curr;
-  }
 }

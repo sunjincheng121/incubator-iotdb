@@ -44,114 +44,121 @@ import org.junit.Test;
 
 public class TsFileSequenceReaderTest {
 
-  private static final String FILE_PATH = FileGenerator.outputDataFile;
-  private ReadOnlyTsFile tsFile;
+    private static final String FILE_PATH = FileGenerator.outputDataFile;
+    private ReadOnlyTsFile tsFile;
 
-  @Before
-  public void before() throws IOException {
-    int rowCount = 100;
-    FileGenerator.generateFile(rowCount, 10000);
-    TsFileSequenceReader fileReader = new TsFileSequenceReader(FILE_PATH);
-    tsFile = new ReadOnlyTsFile(fileReader);
-  }
-
-  @After
-  public void after() throws IOException {
-    tsFile.close();
-    FileGenerator.after();
-  }
-
-  @Test
-  public void testReadTsFileSequently() throws IOException {
-    TsFileSequenceReader reader = new TsFileSequenceReader(FILE_PATH);
-    reader.position(TSFileConfig.MAGIC_STRING.getBytes().length + TSFileConfig.VERSION_NUMBER
-        .getBytes().length);
-    Map<String, List<Pair<Long, Long>>> deviceChunkGroupMetadataOffsets = new HashMap<>();
-
-    long startOffset = reader.position();
-    byte marker;
-    while ((marker = reader.readMarker()) != MetaMarker.SEPARATOR) {
-      switch (marker) {
-        case MetaMarker.CHUNK_HEADER:
-          ChunkHeader header = reader.readChunkHeader();
-          for (int j = 0; j < header.getNumOfPages(); j++) {
-            PageHeader pageHeader = reader.readPageHeader(header.getDataType());
-            reader.readPage(pageHeader, header.getCompressionType());
-          }
-          break;
-        case MetaMarker.CHUNK_GROUP_FOOTER:
-          ChunkGroupFooter footer = reader.readChunkGroupFooter();
-          long endOffset = reader.position();
-          Pair<Long, Long> pair = new Pair<>(startOffset, endOffset);
-          deviceChunkGroupMetadataOffsets.putIfAbsent(footer.getDeviceID(), new ArrayList<>());
-          List<Pair<Long, Long>> metadatas = deviceChunkGroupMetadataOffsets
-              .get(footer.getDeviceID());
-          metadatas.add(pair);
-          startOffset = endOffset;
-          break;
-        case MetaMarker.VERSION:
-          reader.readVersion();
-          break;
-        default:
-          MetaMarker.handleUnexpectedMarker(marker);
-      }
+    @Before
+    public void before() throws IOException {
+        int rowCount = 100;
+        FileGenerator.generateFile(rowCount, 10000);
+        TsFileSequenceReader fileReader = new TsFileSequenceReader(FILE_PATH);
+        tsFile = new ReadOnlyTsFile(fileReader);
     }
-    reader.close();
-  }
 
-  @Test
-  public void readChunksInDevice() throws IOException {
-    TsFileSequenceReader reader = new TsFileSequenceReader(FILE_PATH);
+    @After
+    public void after() throws IOException {
+        tsFile.close();
+        FileGenerator.after();
+    }
 
-    for (String device : reader.getAllDevices()) {
-      Map<String, Set<Chunk>> expectedChunksInDevice = new HashMap<>();
-      for (Entry<String, List<ChunkMetadata>> entry : reader.readChunkMetadataInDevice(device)
-          .entrySet()) {
-        expectedChunksInDevice.putIfAbsent(entry.getKey(), new HashSet<>());
-        for (ChunkMetadata chunkMetadata : entry.getValue()) {
-          expectedChunksInDevice.get(entry.getKey()).add(reader.readMemChunk(chunkMetadata));
+    @Test
+    public void testReadTsFileSequently() throws IOException {
+        TsFileSequenceReader reader = new TsFileSequenceReader(FILE_PATH);
+        reader.position(
+                TSFileConfig.MAGIC_STRING.getBytes().length
+                        + TSFileConfig.VERSION_NUMBER.getBytes().length);
+        Map<String, List<Pair<Long, Long>>> deviceChunkGroupMetadataOffsets = new HashMap<>();
+
+        long startOffset = reader.position();
+        byte marker;
+        while ((marker = reader.readMarker()) != MetaMarker.SEPARATOR) {
+            switch (marker) {
+                case MetaMarker.CHUNK_HEADER:
+                    ChunkHeader header = reader.readChunkHeader();
+                    for (int j = 0; j < header.getNumOfPages(); j++) {
+                        PageHeader pageHeader = reader.readPageHeader(header.getDataType());
+                        reader.readPage(pageHeader, header.getCompressionType());
+                    }
+                    break;
+                case MetaMarker.CHUNK_GROUP_FOOTER:
+                    ChunkGroupFooter footer = reader.readChunkGroupFooter();
+                    long endOffset = reader.position();
+                    Pair<Long, Long> pair = new Pair<>(startOffset, endOffset);
+                    deviceChunkGroupMetadataOffsets.putIfAbsent(
+                            footer.getDeviceID(), new ArrayList<>());
+                    List<Pair<Long, Long>> metadatas =
+                            deviceChunkGroupMetadataOffsets.get(footer.getDeviceID());
+                    metadatas.add(pair);
+                    startOffset = endOffset;
+                    break;
+                case MetaMarker.VERSION:
+                    reader.readVersion();
+                    break;
+                default:
+                    MetaMarker.handleUnexpectedMarker(marker);
+            }
         }
-      }
-
-      Map<String, List<Chunk>> actualChunksInDevice = reader.readChunksInDevice(device);
-
-      for (Entry<String, Set<Chunk>> entry : expectedChunksInDevice.entrySet()) {
-        Set<String> expectedChunkStrings = entry.getValue().stream()
-            .map(chunk -> chunk.getHeader().toString()).collect(Collectors.toSet());
-
-        Assert.assertTrue(actualChunksInDevice.containsKey(entry.getKey()));
-        Set<String> actualChunkStrings = actualChunksInDevice.get(entry.getKey()).stream()
-            .map(chunk -> chunk.getHeader().toString()).collect(Collectors.toSet());
-
-        Assert.assertEquals(expectedChunkStrings, actualChunkStrings);
-      }
+        reader.close();
     }
 
-    reader.close();
-  }
+    @Test
+    public void readChunksInDevice() throws IOException {
+        TsFileSequenceReader reader = new TsFileSequenceReader(FILE_PATH);
 
-  @Test
-  public void testReadChunkMetadataInDevice() throws IOException {
-    TsFileSequenceReader reader = new TsFileSequenceReader(FILE_PATH);
+        for (String device : reader.getAllDevices()) {
+            Map<String, Set<Chunk>> expectedChunksInDevice = new HashMap<>();
+            for (Entry<String, List<ChunkMetadata>> entry :
+                    reader.readChunkMetadataInDevice(device).entrySet()) {
+                expectedChunksInDevice.putIfAbsent(entry.getKey(), new HashSet<>());
+                for (ChunkMetadata chunkMetadata : entry.getValue()) {
+                    expectedChunksInDevice
+                            .get(entry.getKey())
+                            .add(reader.readMemChunk(chunkMetadata));
+                }
+            }
 
-    // test for exist device "d2"
-    Map<String, List<ChunkMetadata>> chunkMetadataMap = reader
-        .readChunkMetadataInDevice("d2");
-    int[] res = new int[]{20, 75, 100, 13};
+            Map<String, List<Chunk>> actualChunksInDevice = reader.readChunksInDevice(device);
 
-    Assert.assertEquals(4, chunkMetadataMap.size());
-    for (int i = 0; i < chunkMetadataMap.size(); i++) {
-      int id = i + 1;
-      List<ChunkMetadata> metadataList = chunkMetadataMap.get("s" + id);
-      int numOfPoints = 0;
-      for (ChunkMetadata metadata : metadataList) {
-        numOfPoints += metadata.getNumOfPoints();
-      }
-      Assert.assertEquals(res[i], numOfPoints);
+            for (Entry<String, Set<Chunk>> entry : expectedChunksInDevice.entrySet()) {
+                Set<String> expectedChunkStrings =
+                        entry.getValue().stream()
+                                .map(chunk -> chunk.getHeader().toString())
+                                .collect(Collectors.toSet());
+
+                Assert.assertTrue(actualChunksInDevice.containsKey(entry.getKey()));
+                Set<String> actualChunkStrings =
+                        actualChunksInDevice.get(entry.getKey()).stream()
+                                .map(chunk -> chunk.getHeader().toString())
+                                .collect(Collectors.toSet());
+
+                Assert.assertEquals(expectedChunkStrings, actualChunkStrings);
+            }
+        }
+
+        reader.close();
     }
 
-    // test for non-exist device "d3"
-    Assert.assertTrue(reader.readChunkMetadataInDevice("d3").isEmpty());
-    reader.close();
-  }
+    @Test
+    public void testReadChunkMetadataInDevice() throws IOException {
+        TsFileSequenceReader reader = new TsFileSequenceReader(FILE_PATH);
+
+        // test for exist device "d2"
+        Map<String, List<ChunkMetadata>> chunkMetadataMap = reader.readChunkMetadataInDevice("d2");
+        int[] res = new int[] {20, 75, 100, 13};
+
+        Assert.assertEquals(4, chunkMetadataMap.size());
+        for (int i = 0; i < chunkMetadataMap.size(); i++) {
+            int id = i + 1;
+            List<ChunkMetadata> metadataList = chunkMetadataMap.get("s" + id);
+            int numOfPoints = 0;
+            for (ChunkMetadata metadata : metadataList) {
+                numOfPoints += metadata.getNumOfPoints();
+            }
+            Assert.assertEquals(res[i], numOfPoints);
+        }
+
+        // test for non-exist device "d3"
+        Assert.assertTrue(reader.readChunkMetadataInDevice("d3").isEmpty());
+        reader.close();
+    }
 }

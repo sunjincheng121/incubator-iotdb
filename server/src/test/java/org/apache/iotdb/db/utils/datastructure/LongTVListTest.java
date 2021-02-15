@@ -21,7 +21,6 @@ package org.apache.iotdb.db.utils.datastructure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.utils.TsPrimitiveType.TsLong;
 import org.junit.Assert;
@@ -29,49 +28,48 @@ import org.junit.Test;
 
 public class LongTVListTest {
 
+    @Test
+    public void testLongTVList1() {
+        LongTVList tvList = new LongTVList();
+        for (long i = 0; i < 1000; i++) {
+            tvList.putLong(i, i);
+        }
+        tvList.sort();
+        for (long i = 0; i < tvList.size; i++) {
+            Assert.assertEquals(i, tvList.getLong((int) i));
+            Assert.assertEquals(i, tvList.getTime((int) i));
+        }
+    }
 
-  @Test
-  public void testLongTVList1() {
-    LongTVList tvList = new LongTVList();
-    for (long i = 0; i < 1000; i++) {
-      tvList.putLong(i, i);
+    @Test
+    public void testLongTVList2() {
+        LongTVList tvList = new LongTVList();
+        for (long i = 1000; i >= 0; i--) {
+            tvList.putLong(i, i);
+        }
+        tvList.sort();
+        for (long i = 0; i < tvList.size; i++) {
+            Assert.assertEquals(i, tvList.getLong((int) i));
+            Assert.assertEquals(i, tvList.getTime((int) i));
+        }
     }
-    tvList.sort();
-    for (long i = 0; i < tvList.size; i++) {
-      Assert.assertEquals(i, tvList.getLong((int)i));
-      Assert.assertEquals(i, tvList.getTime((int)i));
-    }
-  }
 
-  @Test
-  public void testLongTVList2() {
-    LongTVList tvList = new LongTVList();
-    for (long i = 1000; i >= 0; i--) {
-      tvList.putLong(i, i);
+    @Test
+    public void testLongTVList3() {
+        Random random = new Random();
+        LongTVList tvList = new LongTVList();
+        List<TimeValuePair> inputs = new ArrayList<>();
+        for (long i = 0; i < 10000; i++) {
+            long time = random.nextInt(10000);
+            long value = random.nextInt(10000);
+            tvList.putLong(time, value);
+            inputs.add(new TimeValuePair(time, new TsLong(value)));
+        }
+        tvList.sort();
+        inputs.sort(TimeValuePair::compareTo);
+        for (long i = 0; i < tvList.size; i++) {
+            Assert.assertEquals(inputs.get((int) i).getTimestamp(), tvList.getTime((int) i));
+            Assert.assertEquals(inputs.get((int) i).getValue().getLong(), tvList.getLong((int) i));
+        }
     }
-    tvList.sort();
-    for (long i = 0; i < tvList.size; i++) {
-      Assert.assertEquals(i, tvList.getLong((int)i));
-      Assert.assertEquals(i, tvList.getTime((int)i));
-    }
-  }
-
-  @Test
-  public void testLongTVList3() {
-    Random random = new Random();
-    LongTVList tvList = new LongTVList();
-    List<TimeValuePair> inputs = new ArrayList<>();
-    for (long i = 0; i < 10000; i++) {
-      long time = random.nextInt(10000);
-      long value = random.nextInt(10000);
-      tvList.putLong(time, value);
-      inputs.add(new TimeValuePair(time, new TsLong(value)));
-    }
-    tvList.sort();
-    inputs.sort(TimeValuePair::compareTo);
-    for (long i = 0; i < tvList.size; i++) {
-      Assert.assertEquals(inputs.get((int)i).getTimestamp(), tvList.getTime((int)i));
-      Assert.assertEquals(inputs.get((int)i).getValue().getLong(), tvList.getLong((int)i));
-    }
-  }
 }

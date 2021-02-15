@@ -25,43 +25,39 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.junit.Test;
-
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
 import org.apache.iotdb.tsfile.fileSystem.fsFactory.FSFactory;
-import org.apache.iotdb.tsfile.read.TsFileRestorableReader;
-import org.apache.iotdb.tsfile.read.TsFileSequenceReader;
 import org.apache.iotdb.tsfile.utils.TsFileGeneratorForTest;
+import org.junit.Test;
 
 public class TsFileRestorableReaderTest {
 
-  private static final String FILE_PATH = TsFileGeneratorForTest.outputDataFile;
-  private FSFactory fsFactory = FSFactoryProducer.getFSFactory();
+    private static final String FILE_PATH = TsFileGeneratorForTest.outputDataFile;
+    private FSFactory fsFactory = FSFactoryProducer.getFSFactory();
 
-  @Test
-  public void testToReadDamagedFileAndRepair() throws IOException {
-    File file = fsFactory.getFile(FILE_PATH);
+    @Test
+    public void testToReadDamagedFileAndRepair() throws IOException {
+        File file = fsFactory.getFile(FILE_PATH);
 
-    TsFileGeneratorForTest.writeFileWithOneIncompleteChunkHeader(file);
+        TsFileGeneratorForTest.writeFileWithOneIncompleteChunkHeader(file);
 
-    TsFileSequenceReader reader = new TsFileRestorableReader(FILE_PATH, true);
-    String tailMagic = reader.readTailMagic();
-    reader.close();
+        TsFileSequenceReader reader = new TsFileRestorableReader(FILE_PATH, true);
+        String tailMagic = reader.readTailMagic();
+        reader.close();
 
-    // Check if the file was repaired
-    assertEquals(TSFileConfig.MAGIC_STRING, tailMagic);
-    assertTrue(file.delete());
-  }
+        // Check if the file was repaired
+        assertEquals(TSFileConfig.MAGIC_STRING, tailMagic);
+        assertTrue(file.delete());
+    }
 
-  @Test
-  public void testToReadDamagedFileNoRepair() throws IOException {
-    File file = fsFactory.getFile(FILE_PATH);
+    @Test
+    public void testToReadDamagedFileNoRepair() throws IOException {
+        File file = fsFactory.getFile(FILE_PATH);
 
-    TsFileGeneratorForTest.writeFileWithOneIncompleteChunkHeader(file);
-    // This should throw an Illegal Argument Exception
-    TsFileSequenceReader reader = new TsFileRestorableReader(FILE_PATH, false);
-    assertFalse(reader.isComplete());
-  }
+        TsFileGeneratorForTest.writeFileWithOneIncompleteChunkHeader(file);
+        // This should throw an Illegal Argument Exception
+        TsFileSequenceReader reader = new TsFileRestorableReader(FILE_PATH, false);
+        assertFalse(reader.isComplete());
+    }
 }

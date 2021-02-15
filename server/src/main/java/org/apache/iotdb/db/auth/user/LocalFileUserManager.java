@@ -22,7 +22,7 @@ import org.apache.iotdb.db.auth.AuthException;
 
 public class LocalFileUserManager extends BasicUserManager {
 
-  public LocalFileUserManager(String userDirPath) throws AuthException {
-    super(new LocalFileUserAccessor(userDirPath));
-  }
+    public LocalFileUserManager(String userDirPath) throws AuthException {
+        super(new LocalFileUserAccessor(userDirPath));
+    }
 }

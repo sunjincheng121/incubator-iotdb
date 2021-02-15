@@ -29,21 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The JSON payload formatter.
- * two json format supported:
- * {
- *     "device":"root.sg.d1",
- *     "timestamp":1586076045524,
- *     "measurements":["s1","s2"],
- *     "values":[0.530635,0.530635]
- * }
+ * The JSON payload formatter. two json format supported: { "device":"root.sg.d1",
+ * "timestamp":1586076045524, "measurements":["s1","s2"], "values":[0.530635,0.530635] }
  *
- * {
- *     "device":"root.sg.d1",
- *     "timestamps":[1586076045524,1586076065526],
- *     "measurements":["s1","s2"],
- *     "values":[[0.530635,0.530635], [0.530655,0.530695]]
- * }
+ * <p>{ "device":"root.sg.d1", "timestamps":[1586076045524,1586076065526],
+ * "measurements":["s1","s2"], "values":[[0.530635,0.530635], [0.530655,0.530695]] }
  */
 public class JSONPayloadFormatter implements PayloadFormatter {
     private static final String JSON_KEY_DEVICE = "device";
@@ -78,8 +68,10 @@ public class JSONPayloadFormatter implements PayloadFormatter {
             Message message = new Message();
             message.setDevice(device);
             message.setTimestamp(ts);
-            message.setMeasurements(GSON.fromJson(measurements, new TypeToken<List<String>>() {}.getType()));
-            message.setValues(GSON.fromJson(values.get(i), new TypeToken<List<String>>() {}.getType()));
+            message.setMeasurements(
+                    GSON.fromJson(measurements, new TypeToken<List<String>>() {}.getType()));
+            message.setValues(
+                    GSON.fromJson(values.get(i), new TypeToken<List<String>>() {}.getType()));
             ret.add(message);
         }
         return ret;

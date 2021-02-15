@@ -23,14 +23,14 @@ import org.apache.iotdb.db.metadata.PartialPath;
 
 public class ShowDevicesOperator extends ShowOperator {
 
-  private PartialPath path;
+    private PartialPath path;
 
-  public ShowDevicesOperator(int tokenIntType, PartialPath path) {
-    super(tokenIntType);
-    this.path = path;
-  }
+    public ShowDevicesOperator(int tokenIntType, PartialPath path) {
+        super(tokenIntType);
+        this.path = path;
+    }
 
-  public PartialPath getPath() {
-    return path;
-  }
+    public PartialPath getPath() {
+        return path;
+    }
 }

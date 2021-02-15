@@ -37,66 +37,71 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 public class JettyUtil {
 
-  public static ServletContextHandler createMetricsServletHandler(ObjectMapper mapper,MetricRegistry metricRegistry) {
-    HttpServlet httpServlet = new HttpServlet() {
-      private static final long serialVersionUID = 1L;
+    public static ServletContextHandler createMetricsServletHandler(
+            ObjectMapper mapper, MetricRegistry metricRegistry) {
+        HttpServlet httpServlet =
+                new HttpServlet() {
+                    private static final long serialVersionUID = 1L;
 
-      private final ObjectMapper om = mapper;
-      private final MetricRegistry mr = metricRegistry;
+                    private final ObjectMapper om = mapper;
+                    private final MetricRegistry mr = metricRegistry;
 
-      @Override
-      protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("text/html;charset=utf-8");
-        resp.setStatus(HttpServletResponse.SC_OK);
-        PrintWriter out = resp.getWriter();
-        out.write(om.writeValueAsString(mr));
-        out.flush();
-        out.close();
-      }
+                    @Override
+                    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+                            throws ServletException, IOException {
+                        resp.setContentType("text/html;charset=utf-8");
+                        resp.setStatus(HttpServletResponse.SC_OK);
+                        PrintWriter out = resp.getWriter();
+                        out.write(om.writeValueAsString(mr));
+                        out.flush();
+                        out.close();
+                    }
 
-      @Override
-      public void doPost(HttpServletRequest req, HttpServletResponse resp)
-          throws ServletException, IOException {
-        doGet(req, resp);
-      }
-    };
-    
-    return createServletHandler("/json", httpServlet);
-  }
+                    @Override
+                    public void doPost(HttpServletRequest req, HttpServletResponse resp)
+                            throws ServletException, IOException {
+                        doGet(req, resp);
+                    }
+                };
 
-  public static ServletContextHandler createServletHandler(String path, HttpServlet servlet) {
-    ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-    ServletHolder holder = new ServletHolder(servlet);
-    contextHandler.setContextPath(path);
-    contextHandler.addServlet(holder, "/");
-    return contextHandler;
-  }
-
-  public static ServletContextHandler createStaticHandler() {
-    ServletContextHandler contextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
-    URL res = JettyUtil.class.getClassLoader().getResource("iotdb/ui/static");
-    HttpServlet servlet = new DefaultServlet();
-    ServletHolder holder = new ServletHolder(servlet);
-    holder.setInitParameter("resourceBase", res.toString());
-    contextHandler.setContextPath("/static");
-    contextHandler.addServlet(holder, "/");
-    return contextHandler;
-  }
-
-  public static Server getJettyServer(List<ServletContextHandler> handlers, int port) {
-    Server server = new Server(port);
-    ErrorHandler errorHandler = new ErrorHandler();
-    errorHandler.setShowStacks(true);
-    errorHandler.setServer(server);
-    server.addBean(errorHandler);
-
-    ContextHandlerCollection collection = new ContextHandlerCollection();
-    ServletContextHandler[] sch = new ServletContextHandler[handlers.size()];
-    for (int i = 0; i < handlers.size(); i++) {
-      sch[i] = handlers.get(i);
+        return createServletHandler("/json", httpServlet);
     }
-    collection.setHandlers(sch);
-    server.setHandler(collection);
-    return server;
-  }
+
+    public static ServletContextHandler createServletHandler(String path, HttpServlet servlet) {
+        ServletContextHandler contextHandler =
+                new ServletContextHandler(ServletContextHandler.SESSIONS);
+        ServletHolder holder = new ServletHolder(servlet);
+        contextHandler.setContextPath(path);
+        contextHandler.addServlet(holder, "/");
+        return contextHandler;
+    }
+
+    public static ServletContextHandler createStaticHandler() {
+        ServletContextHandler contextHandler =
+                new ServletContextHandler(ServletContextHandler.SESSIONS);
+        URL res = JettyUtil.class.getClassLoader().getResource("iotdb/ui/static");
+        HttpServlet servlet = new DefaultServlet();
+        ServletHolder holder = new ServletHolder(servlet);
+        holder.setInitParameter("resourceBase", res.toString());
+        contextHandler.setContextPath("/static");
+        contextHandler.addServlet(holder, "/");
+        return contextHandler;
+    }
+
+    public static Server getJettyServer(List<ServletContextHandler> handlers, int port) {
+        Server server = new Server(port);
+        ErrorHandler errorHandler = new ErrorHandler();
+        errorHandler.setShowStacks(true);
+        errorHandler.setServer(server);
+        server.addBean(errorHandler);
+
+        ContextHandlerCollection collection = new ContextHandlerCollection();
+        ServletContextHandler[] sch = new ServletContextHandler[handlers.size()];
+        for (int i = 0; i < handlers.size(); i++) {
+            sch[i] = handlers.get(i);
+        }
+        collection.setHandlers(sch);
+        server.setHandler(collection);
+        return server;
+    }
 }

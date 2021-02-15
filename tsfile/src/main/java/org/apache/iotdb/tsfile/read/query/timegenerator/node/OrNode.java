@@ -22,97 +22,97 @@ import java.io.IOException;
 
 public class OrNode implements Node {
 
-  private Node leftChild;
-  private Node rightChild;
+    private Node leftChild;
+    private Node rightChild;
 
-  private boolean hasCachedLeftValue;
-  private long cachedLeftValue;
-  private boolean hasCachedRightValue;
-  private long cachedRightValue;
-  private boolean ascending = true;
+    private boolean hasCachedLeftValue;
+    private long cachedLeftValue;
+    private boolean hasCachedRightValue;
+    private long cachedRightValue;
+    private boolean ascending = true;
 
-  public OrNode(Node leftChild, Node rightChild) {
-    this.leftChild = leftChild;
-    this.rightChild = rightChild;
-    this.hasCachedLeftValue = false;
-    this.hasCachedRightValue = false;
-  }
-
-  public OrNode(Node leftChild, Node rightChild, boolean ascending) {
-    this.leftChild = leftChild;
-    this.rightChild = rightChild;
-    this.hasCachedLeftValue = false;
-    this.hasCachedRightValue = false;
-    this.ascending = ascending;
-  }
-
-  @Override
-  public boolean hasNext() throws IOException {
-    if (hasCachedLeftValue || hasCachedRightValue) {
-      return true;
+    public OrNode(Node leftChild, Node rightChild) {
+        this.leftChild = leftChild;
+        this.rightChild = rightChild;
+        this.hasCachedLeftValue = false;
+        this.hasCachedRightValue = false;
     }
-    return leftChild.hasNext() || rightChild.hasNext();
-  }
 
-  private boolean hasLeftValue() throws IOException {
-    return hasCachedLeftValue || leftChild.hasNext();
-  }
-
-  private long getLeftValue() throws IOException {
-    if (hasCachedLeftValue) {
-      hasCachedLeftValue = false;
-      return cachedLeftValue;
+    public OrNode(Node leftChild, Node rightChild, boolean ascending) {
+        this.leftChild = leftChild;
+        this.rightChild = rightChild;
+        this.hasCachedLeftValue = false;
+        this.hasCachedRightValue = false;
+        this.ascending = ascending;
     }
-    return leftChild.next();
-  }
 
-  private boolean hasRightValue() throws IOException {
-    return hasCachedRightValue || rightChild.hasNext();
-  }
-
-  private long getRightValue() throws IOException {
-    if (hasCachedRightValue) {
-      hasCachedRightValue = false;
-      return cachedRightValue;
+    @Override
+    public boolean hasNext() throws IOException {
+        if (hasCachedLeftValue || hasCachedRightValue) {
+            return true;
+        }
+        return leftChild.hasNext() || rightChild.hasNext();
     }
-    return rightChild.next();
-  }
 
-  @Override
-  public long next() throws IOException {
-    if (hasLeftValue() && !hasRightValue()) {
-      return getLeftValue();
-    } else if (!hasLeftValue() && hasRightValue()) {
-      return getRightValue();
-    } else if (hasLeftValue() && hasRightValue()) {
-      long leftValue = getLeftValue();
-      long rightValue = getRightValue();
-      if (ascending) {
-        return popAndFillNextCache(leftValue < rightValue, leftValue > rightValue, leftValue,
-            rightValue);
-      }
-      return popAndFillNextCache(leftValue > rightValue, leftValue < rightValue, leftValue,
-          rightValue);
+    private boolean hasLeftValue() throws IOException {
+        return hasCachedLeftValue || leftChild.hasNext();
     }
-    throw new IOException("no more data");
-  }
 
-  private long popAndFillNextCache(boolean popLeft, boolean popRight, long left, long right) {
-    if (popLeft) {
-      hasCachedRightValue = true;
-      cachedRightValue = right;
-      return left;
-    } else if (popRight) {
-      hasCachedLeftValue = true;
-      cachedLeftValue = left;
-      return right;
-    } else {
-      return left;
+    private long getLeftValue() throws IOException {
+        if (hasCachedLeftValue) {
+            hasCachedLeftValue = false;
+            return cachedLeftValue;
+        }
+        return leftChild.next();
     }
-  }
 
-  @Override
-  public NodeType getType() {
-    return NodeType.OR;
-  }
+    private boolean hasRightValue() throws IOException {
+        return hasCachedRightValue || rightChild.hasNext();
+    }
+
+    private long getRightValue() throws IOException {
+        if (hasCachedRightValue) {
+            hasCachedRightValue = false;
+            return cachedRightValue;
+        }
+        return rightChild.next();
+    }
+
+    @Override
+    public long next() throws IOException {
+        if (hasLeftValue() && !hasRightValue()) {
+            return getLeftValue();
+        } else if (!hasLeftValue() && hasRightValue()) {
+            return getRightValue();
+        } else if (hasLeftValue() && hasRightValue()) {
+            long leftValue = getLeftValue();
+            long rightValue = getRightValue();
+            if (ascending) {
+                return popAndFillNextCache(
+                        leftValue < rightValue, leftValue > rightValue, leftValue, rightValue);
+            }
+            return popAndFillNextCache(
+                    leftValue > rightValue, leftValue < rightValue, leftValue, rightValue);
+        }
+        throw new IOException("no more data");
+    }
+
+    private long popAndFillNextCache(boolean popLeft, boolean popRight, long left, long right) {
+        if (popLeft) {
+            hasCachedRightValue = true;
+            cachedRightValue = right;
+            return left;
+        } else if (popRight) {
+            hasCachedLeftValue = true;
+            cachedLeftValue = left;
+            return right;
+        } else {
+            return left;
+        }
+    }
+
+    @Override
+    public NodeType getType() {
+        return NodeType.OR;
+    }
 }

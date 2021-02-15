@@ -31,108 +31,111 @@ import org.junit.Test;
 
 public class ReadWriteIOUtilsTest {
 
-  protected static final int DEFAULT_BUFFER_SIZE = 4096;
+    protected static final int DEFAULT_BUFFER_SIZE = 4096;
 
-  @Test
-  public void readStringBufferTest() {
-    // 1. not null value
-    String str = "string";
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
-    DataOutputStream stream = new DataOutputStream(byteArrayOutputStream);
-    try {
-      ReadWriteIOUtils.write(str, stream);
-    } catch (IOException e) {
-      fail(e.toString());
+    @Test
+    public void readStringBufferTest() {
+        // 1. not null value
+        String str = "string";
+        ByteArrayOutputStream byteArrayOutputStream =
+                new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+        DataOutputStream stream = new DataOutputStream(byteArrayOutputStream);
+        try {
+            ReadWriteIOUtils.write(str, stream);
+        } catch (IOException e) {
+            fail(e.toString());
+        }
+
+        String result =
+                ReadWriteIOUtils.readString(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(str, result);
+
+        // 2. null value
+        str = null;
+        byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+        stream = new DataOutputStream(byteArrayOutputStream);
+        try {
+            ReadWriteIOUtils.write(str, stream);
+        } catch (IOException e) {
+            fail(e.toString());
+        }
+
+        result = ReadWriteIOUtils.readString(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
+        Assert.assertNull(result);
+        Assert.assertEquals(str, result);
     }
 
-    String result = ReadWriteIOUtils.readString(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
-    Assert.assertNotNull(result);
-    Assert.assertEquals(str, result);
+    @Test
+    public void readMapTest() {
+        // 1. key: not null; value: not null
+        String key = "string";
+        String value = "string";
+        Map<String, String> map = new HashMap<>();
+        map.put(key, value);
+        ByteArrayOutputStream byteArrayOutputStream =
+                new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+        DataOutputStream stream = new DataOutputStream(byteArrayOutputStream);
+        try {
+            ReadWriteIOUtils.write(map, stream);
+        } catch (IOException e) {
+            fail(e.toString());
+        }
 
-    //2. null value
-    str = null;
-    byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
-    stream = new DataOutputStream(byteArrayOutputStream);
-    try {
-      ReadWriteIOUtils.write(str, stream);
-    } catch (IOException e) {
-      fail(e.toString());
+        Map<String, String> result =
+                ReadWriteIOUtils.readMap(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(map, result);
+
+        // 2. key: not null; value: null
+        key = "string";
+        value = null;
+        map.clear();
+        map.put(key, value);
+        byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+        stream = new DataOutputStream(byteArrayOutputStream);
+        try {
+            ReadWriteIOUtils.write(map, stream);
+        } catch (IOException e) {
+            fail(e.toString());
+        }
+
+        result = ReadWriteIOUtils.readMap(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(map, result);
+
+        // 3. key: null; value: not null
+        key = null;
+        value = "string";
+        map.clear();
+        map.put(key, value);
+        byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+        stream = new DataOutputStream(byteArrayOutputStream);
+        try {
+            ReadWriteIOUtils.write(map, stream);
+        } catch (IOException e) {
+            fail(e.toString());
+        }
+
+        result = ReadWriteIOUtils.readMap(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(map, result);
+
+        // 4. key: null; value: null
+        key = null;
+        value = null;
+        map.clear();
+        map.put(key, value);
+        byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+        stream = new DataOutputStream(byteArrayOutputStream);
+        try {
+            ReadWriteIOUtils.write(map, stream);
+        } catch (IOException e) {
+            fail(e.toString());
+        }
+
+        result = ReadWriteIOUtils.readMap(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
+        Assert.assertNotNull(result);
+        Assert.assertEquals(map, result);
     }
-
-    result = ReadWriteIOUtils.readString(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
-    Assert.assertNull(result);
-    Assert.assertEquals(str, result);
-  }
-
-  @Test
-  public void readMapTest() {
-    // 1. key: not null; value: not null
-    String key = "string";
-    String value = "string";
-    Map<String, String> map = new HashMap<>();
-    map.put(key, value);
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
-    DataOutputStream stream = new DataOutputStream(byteArrayOutputStream);
-    try {
-      ReadWriteIOUtils.write(map, stream);
-    } catch (IOException e) {
-      fail(e.toString());
-    }
-
-    Map<String, String> result = ReadWriteIOUtils.readMap(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
-    Assert.assertNotNull(result);
-    Assert.assertEquals(map, result);
-
-    // 2. key: not null; value: null
-    key = "string";
-    value = null;
-    map.clear();
-    map.put(key, value);
-    byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
-    stream = new DataOutputStream(byteArrayOutputStream);
-    try {
-      ReadWriteIOUtils.write(map, stream);
-    } catch (IOException e) {
-      fail(e.toString());
-    }
-
-    result = ReadWriteIOUtils.readMap(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
-    Assert.assertNotNull(result);
-    Assert.assertEquals(map, result);
-
-    // 3. key: null; value: not null
-    key = null;
-    value = "string";
-    map.clear();
-    map.put(key, value);
-    byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
-    stream = new DataOutputStream(byteArrayOutputStream);
-    try {
-      ReadWriteIOUtils.write(map, stream);
-    } catch (IOException e) {
-      fail(e.toString());
-    }
-
-    result = ReadWriteIOUtils.readMap(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
-    Assert.assertNotNull(result);
-    Assert.assertEquals(map, result);
-
-    // 4. key: null; value: null
-    key = null;
-    value = null;
-    map.clear();
-    map.put(key, value);
-    byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
-    stream = new DataOutputStream(byteArrayOutputStream);
-    try {
-      ReadWriteIOUtils.write(map, stream);
-    } catch (IOException e) {
-      fail(e.toString());
-    }
-
-    result = ReadWriteIOUtils.readMap(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
-    Assert.assertNotNull(result);
-    Assert.assertEquals(map, result);
-
-  }
 }

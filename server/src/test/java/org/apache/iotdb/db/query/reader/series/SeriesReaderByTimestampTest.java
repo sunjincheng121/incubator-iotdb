@@ -19,6 +19,11 @@
 
 package org.apache.iotdb.db.query.reader.series;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.iotdb.db.engine.querycontext.QueryDataSource;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.exception.StorageEngineException;
@@ -35,53 +40,56 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 public class SeriesReaderByTimestampTest {
 
-  private static final String SERIES_READER_TEST_SG = "root.seriesReaderTest";
-  private List<String> deviceIds = new ArrayList<>();
-  private List<MeasurementSchema> measurementSchemas = new ArrayList<>();
+    private static final String SERIES_READER_TEST_SG = "root.seriesReaderTest";
+    private List<String> deviceIds = new ArrayList<>();
+    private List<MeasurementSchema> measurementSchemas = new ArrayList<>();
 
-  private List<TsFileResource> seqResources = new ArrayList<>();
-  private List<TsFileResource> unseqResources = new ArrayList<>();
+    private List<TsFileResource> seqResources = new ArrayList<>();
+    private List<TsFileResource> unseqResources = new ArrayList<>();
 
-  @Before
-  public void setUp() throws MetadataException, PathException, IOException, WriteProcessException {
-    SeriesReaderTestUtil.setUp(measurementSchemas, deviceIds, seqResources, unseqResources);
-  }
-
-  @After
-  public void tearDown() throws IOException, StorageEngineException {
-    SeriesReaderTestUtil.tearDown(seqResources, unseqResources);
-  }
-
-  @Test
-  public void test() throws IOException, IllegalPathException {
-    QueryDataSource dataSource = new QueryDataSource(
-        new PartialPath(SERIES_READER_TEST_SG + ".device0.sensor0"),
-        seqResources, unseqResources);
-
-    Set<String> allSensors = new HashSet<>();
-    allSensors.add("sensor0");
-
-    SeriesReaderByTimestamp seriesReader = new SeriesReaderByTimestamp(
-        new PartialPath(SERIES_READER_TEST_SG + ".device0.sensor0"), allSensors,
-        TSDataType.INT32, new QueryContext(), dataSource, null, true);
-
-    for (int time = 0; time < 500; time++) {
-      Integer value = (Integer) seriesReader.getValueInTimestamp(time);
-      if (time < 200) {
-        Assert.assertEquals(time + 20000, value.intValue());
-      } else if (time < 260 || (time >= 300 && time < 380) || (time >= 400)) {
-        Assert.assertEquals(time + 10000, value.intValue());
-      } else {
-        Assert.assertEquals(time, value.intValue());
-      }
+    @Before
+    public void setUp()
+            throws MetadataException, PathException, IOException, WriteProcessException {
+        SeriesReaderTestUtil.setUp(measurementSchemas, deviceIds, seqResources, unseqResources);
     }
-  }
+
+    @After
+    public void tearDown() throws IOException, StorageEngineException {
+        SeriesReaderTestUtil.tearDown(seqResources, unseqResources);
+    }
+
+    @Test
+    public void test() throws IOException, IllegalPathException {
+        QueryDataSource dataSource =
+                new QueryDataSource(
+                        new PartialPath(SERIES_READER_TEST_SG + ".device0.sensor0"),
+                        seqResources,
+                        unseqResources);
+
+        Set<String> allSensors = new HashSet<>();
+        allSensors.add("sensor0");
+
+        SeriesReaderByTimestamp seriesReader =
+                new SeriesReaderByTimestamp(
+                        new PartialPath(SERIES_READER_TEST_SG + ".device0.sensor0"),
+                        allSensors,
+                        TSDataType.INT32,
+                        new QueryContext(),
+                        dataSource,
+                        null,
+                        true);
+
+        for (int time = 0; time < 500; time++) {
+            Integer value = (Integer) seriesReader.getValueInTimestamp(time);
+            if (time < 200) {
+                Assert.assertEquals(time + 20000, value.intValue());
+            } else if (time < 260 || (time >= 300 && time < 380) || (time >= 400)) {
+                Assert.assertEquals(time + 10000, value.intValue());
+            } else {
+                Assert.assertEquals(time, value.intValue());
+            }
+        }
+    }
 }

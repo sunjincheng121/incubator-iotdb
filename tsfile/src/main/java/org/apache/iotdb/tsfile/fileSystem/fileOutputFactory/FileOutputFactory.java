@@ -23,6 +23,5 @@ import org.apache.iotdb.tsfile.write.writer.TsFileOutput;
 
 public interface FileOutputFactory {
 
-  TsFileOutput getTsFileOutput(String filePath, boolean append);
-
+    TsFileOutput getTsFileOutput(String filePath, boolean append);
 }

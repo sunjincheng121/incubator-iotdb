@@ -24,18 +24,17 @@ import org.apache.iotdb.service.rpc.thrift.TSStatus;
 
 public class IoTDBSQLException extends SQLException {
 
-  private static final long serialVersionUID = -3306001287342258977L;
+    private static final long serialVersionUID = -3306001287342258977L;
 
-  public IoTDBSQLException(String reason) {
-    super(reason);
-  }
+    public IoTDBSQLException(String reason) {
+        super(reason);
+    }
 
-  public IoTDBSQLException(String reason, TSStatus status) {
-    super(reason, status.message, status.code);
-  }
+    public IoTDBSQLException(String reason, TSStatus status) {
+        super(reason, status.message, status.code);
+    }
 
-  public IoTDBSQLException(Throwable cause) {
-    super(cause);
-  }
-
+    public IoTDBSQLException(Throwable cause) {
+        super(cause);
+    }
 }

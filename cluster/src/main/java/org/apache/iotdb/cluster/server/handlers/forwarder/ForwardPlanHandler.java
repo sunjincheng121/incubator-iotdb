@@ -31,36 +31,37 @@ import org.slf4j.LoggerFactory;
 
 public class ForwardPlanHandler implements AsyncMethodCallback<TSStatus> {
 
-  private static final Logger logger = LoggerFactory.getLogger(ForwardPlanHandler.class);
-  private PhysicalPlan plan;
-  private AtomicReference<TSStatus> result;
-  private Node node;
+    private static final Logger logger = LoggerFactory.getLogger(ForwardPlanHandler.class);
+    private PhysicalPlan plan;
+    private AtomicReference<TSStatus> result;
+    private Node node;
 
-  public ForwardPlanHandler(AtomicReference<TSStatus> result, PhysicalPlan plan, Node node) {
-    this.result = result;
-    this.plan = plan;
-    this.node = node;
-  }
+    public ForwardPlanHandler(AtomicReference<TSStatus> result, PhysicalPlan plan, Node node) {
+        this.result = result;
+        this.plan = plan;
+        this.node = node;
+    }
 
-  @Override
-  public void onComplete(TSStatus response) {
-    synchronized (result) {
-      result.set(response);
-      result.notifyAll();
+    @Override
+    public void onComplete(TSStatus response) {
+        synchronized (result) {
+            result.set(response);
+            result.notifyAll();
+        }
     }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    if (exception instanceof IOException) {
-      logger.warn("Cannot send plan {} to node {}: {}", plan, node, exception.getMessage());
-    } else {
-      logger.error("Cannot send plan {} to node {}", plan, node, exception);
+    @Override
+    public void onError(Exception exception) {
+        if (exception instanceof IOException) {
+            logger.warn("Cannot send plan {} to node {}: {}", plan, node, exception.getMessage());
+        } else {
+            logger.error("Cannot send plan {} to node {}", plan, node, exception);
+        }
+        synchronized (result) {
+            TSStatus status =
+                    StatusUtils.getStatus(StatusUtils.INTERNAL_ERROR, exception.getMessage());
+            result.set(status);
+            result.notifyAll();
+        }
     }
-    synchronized (result) {
-      TSStatus status = StatusUtils.getStatus(StatusUtils.INTERNAL_ERROR, exception.getMessage());
-      result.set(status);
-      result.notifyAll();
-    }
-  }
 }

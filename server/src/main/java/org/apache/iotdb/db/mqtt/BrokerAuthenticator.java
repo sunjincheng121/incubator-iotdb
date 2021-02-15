@@ -25,9 +25,7 @@ import org.apache.iotdb.db.auth.authorizer.IAuthorizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * The MQTT broker authenticator.
- */
+/** The MQTT broker authenticator. */
 public class BrokerAuthenticator implements IAuthenticator {
     private static final Logger LOG = LoggerFactory.getLogger(BrokerAuthenticator.class);
 

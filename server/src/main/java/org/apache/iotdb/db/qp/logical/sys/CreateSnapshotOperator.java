@@ -23,8 +23,8 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class CreateSnapshotOperator extends RootOperator {
 
-  public CreateSnapshotOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.CREATE_SCHEMA_SNAPSHOT;
-  }
+    public CreateSnapshotOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.CREATE_SCHEMA_SNAPSHOT;
+    }
 }

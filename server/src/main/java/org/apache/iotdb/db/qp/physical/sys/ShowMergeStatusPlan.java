@@ -21,7 +21,7 @@ package org.apache.iotdb.db.qp.physical.sys;
 
 public class ShowMergeStatusPlan extends ShowPlan {
 
-  public ShowMergeStatusPlan() {
-    super(ShowContentType.MERGE_STATUS);
-  }
+    public ShowMergeStatusPlan() {
+        super(ShowContentType.MERGE_STATUS);
+    }
 }

@@ -24,16 +24,16 @@ import org.apache.hadoop.mapred.FileSplit;
 
 /**
  * This is tsfile <code>InputSplit</code>.<br>
- * Each <code>InputSplit</code> will be processed by individual
- * <code>Mapper</code> task.
+ * Each <code>InputSplit</code> will be processed by individual <code>Mapper</code> task.
  */
-public class TSFInputSplit extends FileSplit implements Writable, org.apache.hadoop.mapred.InputSplit {
+public class TSFInputSplit extends FileSplit
+        implements Writable, org.apache.hadoop.mapred.InputSplit {
 
-  public TSFInputSplit() {
-    super();
-  }
+    public TSFInputSplit() {
+        super();
+    }
 
-  public TSFInputSplit(Path path, String[] hosts, long start, long length) {
-    super(path, start, length, hosts);
-  }
+    public TSFInputSplit(Path path, String[] hosts, long start, long length) {
+        super(path, start, length, hosts);
+    }
 }

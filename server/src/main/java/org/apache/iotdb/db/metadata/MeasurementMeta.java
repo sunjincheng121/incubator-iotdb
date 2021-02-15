@@ -22,62 +22,64 @@ import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
 
 public class MeasurementMeta {
-  private MeasurementSchema measurementSchema = null;
-  private String alias = null; // TODO get schema by alias
-  private TimeValuePair timeValuePair = null;
+    private MeasurementSchema measurementSchema = null;
+    private String alias = null; // TODO get schema by alias
+    private TimeValuePair timeValuePair = null;
 
-  public MeasurementMeta(MeasurementSchema measurementSchema, String alias, TimeValuePair timeValuePair) {
-    this.measurementSchema = measurementSchema;
-    this.alias = alias;
-    this.timeValuePair = timeValuePair;
-  }
-
-  public MeasurementMeta(MeasurementSchema measurementSchema, String alias) {
-    this.measurementSchema = measurementSchema;
-    this.alias = alias;
-  }
-
-  public MeasurementMeta(MeasurementSchema measurementSchema) {
-    this.measurementSchema = measurementSchema;
-  }
-
-  public MeasurementSchema getMeasurementSchema() {
-    return measurementSchema;
-  }
-
-  public void setMeasurementSchema(MeasurementSchema measurementSchema) {
-    this.measurementSchema = measurementSchema;
-  }
-
-  public String getAlias() {
-    return alias;
-  }
-
-  public void setAlias(String alias) {
-    this.alias = alias;
-  }
-
-  public TimeValuePair getTimeValuePair() {
-    return timeValuePair;
-  }
-
-  public synchronized void updateCachedLast(
-    TimeValuePair timeValuePair, boolean highPriorityUpdate, Long latestFlushedTime) {
-    if (timeValuePair == null || timeValuePair.getValue() == null) {
-      return;
+    public MeasurementMeta(
+            MeasurementSchema measurementSchema, String alias, TimeValuePair timeValuePair) {
+        this.measurementSchema = measurementSchema;
+        this.alias = alias;
+        this.timeValuePair = timeValuePair;
     }
 
-    if (this.timeValuePair == null) {
-      // If no cached last, (1) a last query (2) an unseq insertion or (3) a seq insertion will update cache.
-      if (!highPriorityUpdate || latestFlushedTime <= timeValuePair.getTimestamp()) {
-        this.timeValuePair =
-          new TimeValuePair(timeValuePair.getTimestamp(), timeValuePair.getValue());
-      }
-    } else if (timeValuePair.getTimestamp() > this.timeValuePair.getTimestamp()
-      || (timeValuePair.getTimestamp() == this.timeValuePair.getTimestamp()
-      && highPriorityUpdate)) {
-      this.timeValuePair.setTimestamp(timeValuePair.getTimestamp());
-      this.timeValuePair.setValue(timeValuePair.getValue());
+    public MeasurementMeta(MeasurementSchema measurementSchema, String alias) {
+        this.measurementSchema = measurementSchema;
+        this.alias = alias;
     }
-  }
+
+    public MeasurementMeta(MeasurementSchema measurementSchema) {
+        this.measurementSchema = measurementSchema;
+    }
+
+    public MeasurementSchema getMeasurementSchema() {
+        return measurementSchema;
+    }
+
+    public void setMeasurementSchema(MeasurementSchema measurementSchema) {
+        this.measurementSchema = measurementSchema;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public TimeValuePair getTimeValuePair() {
+        return timeValuePair;
+    }
+
+    public synchronized void updateCachedLast(
+            TimeValuePair timeValuePair, boolean highPriorityUpdate, Long latestFlushedTime) {
+        if (timeValuePair == null || timeValuePair.getValue() == null) {
+            return;
+        }
+
+        if (this.timeValuePair == null) {
+            // If no cached last, (1) a last query (2) an unseq insertion or (3) a seq insertion
+            // will update cache.
+            if (!highPriorityUpdate || latestFlushedTime <= timeValuePair.getTimestamp()) {
+                this.timeValuePair =
+                        new TimeValuePair(timeValuePair.getTimestamp(), timeValuePair.getValue());
+            }
+        } else if (timeValuePair.getTimestamp() > this.timeValuePair.getTimestamp()
+                || (timeValuePair.getTimestamp() == this.timeValuePair.getTimestamp()
+                        && highPriorityUpdate)) {
+            this.timeValuePair.setTimestamp(timeValuePair.getTimestamp());
+            this.timeValuePair.setValue(timeValuePair.getValue());
+        }
+    }
 }

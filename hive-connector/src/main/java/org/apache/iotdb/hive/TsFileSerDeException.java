@@ -22,19 +22,19 @@ import org.apache.hadoop.hive.serde2.SerDeException;
 
 public class TsFileSerDeException extends SerDeException {
 
-  public TsFileSerDeException() {
-    super();
-  }
+    public TsFileSerDeException() {
+        super();
+    }
 
-  public TsFileSerDeException(String message) {
-    super(message);
-  }
+    public TsFileSerDeException(String message) {
+        super(message);
+    }
 
-  public TsFileSerDeException(Throwable cause) {
-    super(cause);
-  }
+    public TsFileSerDeException(Throwable cause) {
+        super(cause);
+    }
 
-  public TsFileSerDeException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public TsFileSerDeException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

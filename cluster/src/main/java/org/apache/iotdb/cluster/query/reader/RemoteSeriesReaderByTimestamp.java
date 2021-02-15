@@ -34,72 +34,77 @@ import org.slf4j.LoggerFactory;
 
 public class RemoteSeriesReaderByTimestamp implements IReaderByTimestamp {
 
-  private static final Logger logger = LoggerFactory.getLogger(RemoteSeriesReaderByTimestamp.class);
-  private DataSourceInfo sourceInfo;
+    private static final Logger logger =
+            LoggerFactory.getLogger(RemoteSeriesReaderByTimestamp.class);
+    private DataSourceInfo sourceInfo;
 
-  private AtomicReference<ByteBuffer> fetchResult = new AtomicReference<>();
-  private GenericHandler<ByteBuffer> handler;
+    private AtomicReference<ByteBuffer> fetchResult = new AtomicReference<>();
+    private GenericHandler<ByteBuffer> handler;
 
-  public RemoteSeriesReaderByTimestamp(DataSourceInfo sourceInfo) {
-    this.sourceInfo = sourceInfo;
-    handler = new GenericHandler<>(sourceInfo.getCurrentNode(), fetchResult);
-  }
-
-  @Override
-  public Object getValueInTimestamp(long timestamp) throws IOException {
-    if (!sourceInfo.checkCurClient()) {
-      return null;
+    public RemoteSeriesReaderByTimestamp(DataSourceInfo sourceInfo) {
+        this.sourceInfo = sourceInfo;
+        handler = new GenericHandler<>(sourceInfo.getCurrentNode(), fetchResult);
     }
 
-    ByteBuffer result;
-    if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
-      result = fetchResultAsync(timestamp);
-    } else {
-      result = fetchResultSync(timestamp);
-    }
-
-    return SerializeUtils.deserializeObject(result);
-  }
-
-  @SuppressWarnings("java:S2274") // enable timeout
-  private ByteBuffer fetchResultAsync(long timestamp) throws IOException {
-    synchronized (fetchResult) {
-      fetchResult.set(null);
-      try {
-        sourceInfo.getCurAsyncClient(RaftServer.getReadOperationTimeoutMS())
-            .fetchSingleSeriesByTimestamp(sourceInfo.getHeader(),
-                sourceInfo.getReaderId(), timestamp, handler);
-        fetchResult.wait(RaftServer.getReadOperationTimeoutMS());
-      } catch (TException e) {
-        //try other node
-        if (!sourceInfo.switchNode(true, timestamp)) {
-          return null;
+    @Override
+    public Object getValueInTimestamp(long timestamp) throws IOException {
+        if (!sourceInfo.checkCurClient()) {
+            return null;
         }
-        return fetchResultAsync(timestamp);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        logger.warn("Query {} interrupted", sourceInfo);
-        return null;
-      }
-    }
-    return fetchResult.get();
-  }
 
-  private ByteBuffer fetchResultSync(long timestamp) throws IOException {
-    try {
-      SyncDataClient curSyncClient = sourceInfo
-          .getCurSyncClient(RaftServer.getReadOperationTimeoutMS());
-      ByteBuffer buffer = curSyncClient
-          .fetchSingleSeriesByTimestamp(sourceInfo.getHeader(),
-              sourceInfo.getReaderId(), timestamp);
-      curSyncClient.putBack();
-      return buffer;
-    } catch (TException e) {
-      //try other node
-      if (!sourceInfo.switchNode(true, timestamp)) {
-        return null;
-      }
-      return fetchResultSync(timestamp);
+        ByteBuffer result;
+        if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
+            result = fetchResultAsync(timestamp);
+        } else {
+            result = fetchResultSync(timestamp);
+        }
+
+        return SerializeUtils.deserializeObject(result);
     }
-  }
+
+    @SuppressWarnings("java:S2274") // enable timeout
+    private ByteBuffer fetchResultAsync(long timestamp) throws IOException {
+        synchronized (fetchResult) {
+            fetchResult.set(null);
+            try {
+                sourceInfo
+                        .getCurAsyncClient(RaftServer.getReadOperationTimeoutMS())
+                        .fetchSingleSeriesByTimestamp(
+                                sourceInfo.getHeader(),
+                                sourceInfo.getReaderId(),
+                                timestamp,
+                                handler);
+                fetchResult.wait(RaftServer.getReadOperationTimeoutMS());
+            } catch (TException e) {
+                // try other node
+                if (!sourceInfo.switchNode(true, timestamp)) {
+                    return null;
+                }
+                return fetchResultAsync(timestamp);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.warn("Query {} interrupted", sourceInfo);
+                return null;
+            }
+        }
+        return fetchResult.get();
+    }
+
+    private ByteBuffer fetchResultSync(long timestamp) throws IOException {
+        try {
+            SyncDataClient curSyncClient =
+                    sourceInfo.getCurSyncClient(RaftServer.getReadOperationTimeoutMS());
+            ByteBuffer buffer =
+                    curSyncClient.fetchSingleSeriesByTimestamp(
+                            sourceInfo.getHeader(), sourceInfo.getReaderId(), timestamp);
+            curSyncClient.putBack();
+            return buffer;
+        } catch (TException e) {
+            // try other node
+            if (!sourceInfo.switchNode(true, timestamp)) {
+                return null;
+            }
+            return fetchResultSync(timestamp);
+        }
+    }
 }

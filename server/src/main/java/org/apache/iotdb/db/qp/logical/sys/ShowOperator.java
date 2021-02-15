@@ -23,12 +23,12 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class ShowOperator extends RootOperator {
 
-  public ShowOperator(int tokenIntType) {
-    this(tokenIntType, OperatorType.SHOW);
-  }
+    public ShowOperator(int tokenIntType) {
+        this(tokenIntType, OperatorType.SHOW);
+    }
 
-  public ShowOperator(int tokenIntType, OperatorType operatorType) {
-    super(tokenIntType);
-    this.operatorType = operatorType;
-  }
+    public ShowOperator(int tokenIntType, OperatorType operatorType) {
+        super(tokenIntType);
+        this.operatorType = operatorType;
+    }
 }

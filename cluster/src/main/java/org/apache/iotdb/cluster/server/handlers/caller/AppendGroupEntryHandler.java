@@ -41,107 +41,117 @@ import org.slf4j.LoggerFactory;
  */
 public class AppendGroupEntryHandler implements AsyncMethodCallback<Long> {
 
-  private static final Logger logger = LoggerFactory.getLogger(AppendGroupEntryHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(AppendGroupEntryHandler.class);
 
-  private RaftMember member;
-  private Log log;
-  // the number of nodes that accept the log in each group
-  // to succeed, each number should reach zero
-  // for example: assuming there are 4 nodes and 3 replicas, then the initial array will be:
-  // [2, 2, 2, 2]. And if node0 accepted the log, as node0 is in group 2,3,0, the array will be
-  // [1, 2, 1, 1].
-  private int[] groupReceivedCounter;
-  // the index of the node which the request sends log to, if the node accepts the log, all
-  // groups' counters the node is in should decrease
-  private int receiverNodeIndex;
-  private Node receiverNode;
-  // store the flag of leadership lost and the new leader's term
-  private AtomicBoolean leaderShipStale;
-  private AtomicLong newLeaderTerm;
-  private int replicationNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
+    private RaftMember member;
+    private Log log;
+    // the number of nodes that accept the log in each group
+    // to succeed, each number should reach zero
+    // for example: assuming there are 4 nodes and 3 replicas, then the initial array will be:
+    // [2, 2, 2, 2]. And if node0 accepted the log, as node0 is in group 2,3,0, the array will be
+    // [1, 2, 1, 1].
+    private int[] groupReceivedCounter;
+    // the index of the node which the request sends log to, if the node accepts the log, all
+    // groups' counters the node is in should decrease
+    private int receiverNodeIndex;
+    private Node receiverNode;
+    // store the flag of leadership lost and the new leader's term
+    private AtomicBoolean leaderShipStale;
+    private AtomicLong newLeaderTerm;
+    private int replicationNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
 
-  private AtomicInteger erroredNodeNum = new AtomicInteger(0);
+    private AtomicInteger erroredNodeNum = new AtomicInteger(0);
 
-  public AppendGroupEntryHandler(int[] groupReceivedCounter, int receiverNodeIndex,
-      Node receiverNode, AtomicBoolean leaderShipStale, Log log, AtomicLong newLeaderTerm,
-      RaftMember member) {
-    this.groupReceivedCounter = groupReceivedCounter;
-    this.receiverNodeIndex = receiverNodeIndex;
-    this.receiverNode = receiverNode;
-    this.leaderShipStale = leaderShipStale;
-    this.log = log;
-    this.newLeaderTerm = newLeaderTerm;
-    this.member = member;
-  }
-
-  @Override
-  public void onComplete(Long response) {
-    if (leaderShipStale.get()) {
-      // someone has rejected this log because the leadership is stale
-      return;
+    public AppendGroupEntryHandler(
+            int[] groupReceivedCounter,
+            int receiverNodeIndex,
+            Node receiverNode,
+            AtomicBoolean leaderShipStale,
+            Log log,
+            AtomicLong newLeaderTerm,
+            RaftMember member) {
+        this.groupReceivedCounter = groupReceivedCounter;
+        this.receiverNodeIndex = receiverNodeIndex;
+        this.receiverNode = receiverNode;
+        this.leaderShipStale = leaderShipStale;
+        this.log = log;
+        this.newLeaderTerm = newLeaderTerm;
+        this.member = member;
     }
 
-    long resp = response;
-
-    if (resp == RESPONSE_AGREE) {
-      processAgreement();
-    } else if (resp > 0) {
-      // a response > 0 is the term fo the follower
-      synchronized (groupReceivedCounter) {
-        // the leader ship is stale, abort and wait for the new leader's heartbeat
-        long previousNewTerm = newLeaderTerm.get();
-        if (previousNewTerm < resp) {
-          newLeaderTerm.set(resp);
+    @Override
+    public void onComplete(Long response) {
+        if (leaderShipStale.get()) {
+            // someone has rejected this log because the leadership is stale
+            return;
         }
-        leaderShipStale.set(true);
-        groupReceivedCounter.notifyAll();
-      }
-    }
-    // rejected because the follower's logs are stale or the follower has no cluster info, just
-    // wait for the heartbeat to handle
-  }
 
-  /**
-   * Decrease all related counters of the receiver node. See the field "groupReceivedCounter" for an
-   * example. If all counters reach 0, wake the waiting thread to welcome the success.
-   */
-  private void processAgreement() {
-    synchronized (groupReceivedCounter) {
-      logger.debug("{}: Node {} has accepted log {}", member.getName(), receiverNode, log);
-      // this node is contained in REPLICATION_NUM groups, decrease the counters of these groups
-      for (int i = 0; i < replicationNum; i++) {
-        int nodeIndex = receiverNodeIndex - i;
-        if (nodeIndex < 0) {
-          nodeIndex += groupReceivedCounter.length;
+        long resp = response;
+
+        if (resp == RESPONSE_AGREE) {
+            processAgreement();
+        } else if (resp > 0) {
+            // a response > 0 is the term fo the follower
+            synchronized (groupReceivedCounter) {
+                // the leader ship is stale, abort and wait for the new leader's heartbeat
+                long previousNewTerm = newLeaderTerm.get();
+                if (previousNewTerm < resp) {
+                    newLeaderTerm.set(resp);
+                }
+                leaderShipStale.set(true);
+                groupReceivedCounter.notifyAll();
+            }
         }
-        groupReceivedCounter[nodeIndex]--;
-      }
+        // rejected because the follower's logs are stale or the follower has no cluster info, just
+        // wait for the heartbeat to handle
+    }
 
-      // examine if all groups has agreed
-      boolean allAgreed = true;
-      for (int remaining : groupReceivedCounter) {
-        if (remaining > 0) {
-          allAgreed = false;
-          break;
+    /**
+     * Decrease all related counters of the receiver node. See the field "groupReceivedCounter" for
+     * an example. If all counters reach 0, wake the waiting thread to welcome the success.
+     */
+    private void processAgreement() {
+        synchronized (groupReceivedCounter) {
+            logger.debug("{}: Node {} has accepted log {}", member.getName(), receiverNode, log);
+            // this node is contained in REPLICATION_NUM groups, decrease the counters of these
+            // groups
+            for (int i = 0; i < replicationNum; i++) {
+                int nodeIndex = receiverNodeIndex - i;
+                if (nodeIndex < 0) {
+                    nodeIndex += groupReceivedCounter.length;
+                }
+                groupReceivedCounter[nodeIndex]--;
+            }
+
+            // examine if all groups has agreed
+            boolean allAgreed = true;
+            for (int remaining : groupReceivedCounter) {
+                if (remaining > 0) {
+                    allAgreed = false;
+                    break;
+                }
+            }
+            if (allAgreed) {
+                // wake up the parent thread to welcome the new node
+                groupReceivedCounter.notifyAll();
+            }
         }
-      }
-      if (allAgreed) {
-        // wake up the parent thread to welcome the new node
-        groupReceivedCounter.notifyAll();
-      }
     }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    logger.error("{}: Cannot send the add node request to node {}", member.getName(), receiverNode,
-        exception);
-    if (erroredNodeNum.incrementAndGet() >= replicationNum / 2) {
-      synchronized (groupReceivedCounter) {
-        logger
-            .error("{}: Over half of the nodes failed, the request is rejected", member.getName());
-        groupReceivedCounter.notifyAll();
-      }
+    @Override
+    public void onError(Exception exception) {
+        logger.error(
+                "{}: Cannot send the add node request to node {}",
+                member.getName(),
+                receiverNode,
+                exception);
+        if (erroredNodeNum.incrementAndGet() >= replicationNum / 2) {
+            synchronized (groupReceivedCounter) {
+                logger.error(
+                        "{}: Over half of the nodes failed, the request is rejected",
+                        member.getName());
+                groupReceivedCounter.notifyAll();
+            }
+        }
     }
-  }
 }

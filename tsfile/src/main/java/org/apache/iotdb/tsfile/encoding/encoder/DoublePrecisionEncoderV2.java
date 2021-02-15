@@ -24,30 +24,32 @@ import static org.apache.iotdb.tsfile.common.conf.TSFileConfig.GORILLA_ENCODING_
 import java.io.ByteArrayOutputStream;
 
 /**
- * <p> This class includes code modified from Michael Burman's gorilla-tsc project.
+ * This class includes code modified from Michael Burman's gorilla-tsc project.
  *
- * <p> Copyright: 2016-2018 Michael Burman and/or other contributors
- * <p> Project page: https://github.com/burmanm/gorilla-tsc
- * <p> License: http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Copyright: 2016-2018 Michael Burman and/or other contributors
+ *
+ * <p>Project page: https://github.com/burmanm/gorilla-tsc
+ *
+ * <p>License: http://www.apache.org/licenses/LICENSE-2.0
  */
 public class DoublePrecisionEncoderV2 extends LongGorillaEncoder {
 
-  @Override
-  public final void encode(double value, ByteArrayOutputStream out) {
-    encode(Double.doubleToRawLongBits(value), out);
-  }
+    @Override
+    public final void encode(double value, ByteArrayOutputStream out) {
+        encode(Double.doubleToRawLongBits(value), out);
+    }
 
-  @Override
-  public void flush(ByteArrayOutputStream out) {
-    // ending stream
-    encode(GORILLA_ENCODING_ENDING_DOUBLE, out);
+    @Override
+    public void flush(ByteArrayOutputStream out) {
+        // ending stream
+        encode(GORILLA_ENCODING_ENDING_DOUBLE, out);
 
-    // flip the byte no matter it is empty or not
-    // the empty ending byte is necessary when decoding
-    bitsLeft = 0;
-    flipByte(out);
+        // flip the byte no matter it is empty or not
+        // the empty ending byte is necessary when decoding
+        bitsLeft = 0;
+        flipByte(out);
 
-    // the encoder may be reused, so let us reset it
-    reset();
-  }
+        // the encoder may be reused, so let us reset it
+        reset();
+    }
 }

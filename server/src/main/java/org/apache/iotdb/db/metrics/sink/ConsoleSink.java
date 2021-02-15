@@ -24,27 +24,30 @@ import java.util.concurrent.TimeUnit;
 
 public class ConsoleSink implements Sink {
 
-  public MetricRegistry registry;
-  public ConsoleReporter reporter;
+    public MetricRegistry registry;
+    public ConsoleReporter reporter;
 
-  public ConsoleSink(MetricRegistry registry) {
-    this.registry = registry;
-    this.reporter = ConsoleReporter.forRegistry(registry).convertDurationsTo(TimeUnit.MILLISECONDS)
-        .convertRatesTo(TimeUnit.SECONDS).build();
-  }
+    public ConsoleSink(MetricRegistry registry) {
+        this.registry = registry;
+        this.reporter =
+                ConsoleReporter.forRegistry(registry)
+                        .convertDurationsTo(TimeUnit.MILLISECONDS)
+                        .convertRatesTo(TimeUnit.SECONDS)
+                        .build();
+    }
 
-  @Override
-  public void start() {
-    reporter.start(10, TimeUnit.SECONDS);
-  }
+    @Override
+    public void start() {
+        reporter.start(10, TimeUnit.SECONDS);
+    }
 
-  @Override
-  public void stop() {
-    reporter.stop();
-  }
+    @Override
+    public void stop() {
+        reporter.stop();
+    }
 
-  @Override
-  public void report() {
-    reporter.report();
-  }
+    @Override
+    public void report() {
+        reporter.report();
+    }
 }

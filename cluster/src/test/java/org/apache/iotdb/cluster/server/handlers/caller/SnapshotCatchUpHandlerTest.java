@@ -26,32 +26,31 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.iotdb.cluster.common.TestException;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
-import org.apache.iotdb.cluster.server.handlers.caller.SnapshotCatchUpHandler;
 import org.junit.Test;
 
 public class SnapshotCatchUpHandlerTest {
 
-  @Test
-  public void testComplete() throws InterruptedException {
-    AtomicBoolean succeeded = new AtomicBoolean(false);
-    Node receiver = TestUtils.getNode(0);
-    SnapshotCatchUpHandler handler = new SnapshotCatchUpHandler(succeeded, receiver, null);
-    synchronized (succeeded) {
-      new Thread(() -> handler.onComplete(null)).start();
-      succeeded.wait();
+    @Test
+    public void testComplete() throws InterruptedException {
+        AtomicBoolean succeeded = new AtomicBoolean(false);
+        Node receiver = TestUtils.getNode(0);
+        SnapshotCatchUpHandler handler = new SnapshotCatchUpHandler(succeeded, receiver, null);
+        synchronized (succeeded) {
+            new Thread(() -> handler.onComplete(null)).start();
+            succeeded.wait();
+        }
+        assertTrue(succeeded.get());
     }
-    assertTrue(succeeded.get());
-  }
 
-  @Test
-  public void testError() throws InterruptedException {
-    AtomicBoolean succeeded = new AtomicBoolean(false);
-    Node receiver = TestUtils.getNode(0);
-    SnapshotCatchUpHandler handler = new SnapshotCatchUpHandler(succeeded, receiver, null);
-    synchronized (succeeded) {
-      new Thread(() -> handler.onError(new TestException())).start();
-      succeeded.wait();
+    @Test
+    public void testError() throws InterruptedException {
+        AtomicBoolean succeeded = new AtomicBoolean(false);
+        Node receiver = TestUtils.getNode(0);
+        SnapshotCatchUpHandler handler = new SnapshotCatchUpHandler(succeeded, receiver, null);
+        synchronized (succeeded) {
+            new Thread(() -> handler.onError(new TestException())).start();
+            succeeded.wait();
+        }
+        assertFalse(succeeded.get());
     }
-    assertFalse(succeeded.get());
-  }
 }

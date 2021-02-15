@@ -40,110 +40,116 @@ import org.junit.Test;
 @SuppressWarnings({"java:S2699", "java:S2925"})
 public class SlotManagerTest {
 
-  private SlotManager slotManager;
-  private boolean prevEnableLogPersistence;
-  private int prevReplicaNum;
+    private SlotManager slotManager;
+    private boolean prevEnableLogPersistence;
+    private int prevReplicaNum;
 
-  @Before
-  public void setUp() {
-    prevEnableLogPersistence =
-        ClusterDescriptor.getInstance().getConfig().isEnableRaftLogPersistence();
-    prevReplicaNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
-    ClusterDescriptor.getInstance().getConfig().setEnableRaftLogPersistence(true);
-    ClusterDescriptor.getInstance().getConfig().setReplicationNum(2);
-    int testSlotNum = 100;
-    slotManager = new SlotManager(testSlotNum, null);
-  }
-
-  @Test
-  public void waitSlot() {
-    slotManager.waitSlot(0);
-    slotManager.setToPulling(0, null);
-    new Thread(() -> {
-      try {
-        Thread.sleep(200);
-        slotManager.setToNull(0);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }).start();
-    slotManager.waitSlot(0);
-    ClusterDescriptor.getInstance().getConfig()
-        .setEnableRaftLogPersistence(prevEnableLogPersistence);
-    ClusterDescriptor.getInstance().getConfig().setReplicationNum(prevReplicaNum);
-  }
-
-  @Test
-  public void waitSlotForWrite() throws StorageEngineException {
-    slotManager.waitSlot(0);
-    slotManager.setToPullingWritable(0);
-    slotManager.waitSlotForWrite(0);
-    slotManager.setToPulling(0, null);
-    new Thread(() -> {
-      try {
-        Thread.sleep(200);
-        slotManager.setToNull(0);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }).start();
-    slotManager.waitSlotForWrite(0);
-  }
-
-  @Test
-  public void getStatus() {
-    assertEquals(NULL, slotManager.getStatus(0));
-    slotManager.setToPullingWritable(0);
-    assertEquals(PULLING_WRITABLE, slotManager.getStatus(0));
-    slotManager.setToPulling(0, null);
-    assertEquals(PULLING, slotManager.getStatus(0));
-    slotManager.setToNull(0);
-    assertEquals(NULL, slotManager.getStatus(0));
-  }
-
-  @Test
-  public void getSource() {
-    assertNull(slotManager.getSource(0));
-    Node source = new Node();
-    slotManager.setToPulling(0, source);
-    assertEquals(source, slotManager.getSource(0));
-    slotManager.setToPullingWritable(0);
-    assertEquals(source, slotManager.getSource(0));
-    slotManager.setToNull(0);
-    assertNull(slotManager.getSource(0));
-  }
-
-  @Test
-  public void testSerialize() throws IOException {
-    File dummyMemberDir = new File("test");
-    dummyMemberDir.mkdirs();
-    try {
-      slotManager = new SlotManager(5, dummyMemberDir.getPath());
-      slotManager.setToNull(0);
-      slotManager.setToPulling(1, TestUtils.getNode(1));
-      slotManager.setToPulling(2, TestUtils.getNode(2));
-      slotManager.setToPullingWritable(2);
-      slotManager.setToSending(3);
-      slotManager.sentOneReplication(3);
-      slotManager.setToSending(4);
-      for (int i = 0; i < ClusterDescriptor.getInstance().getConfig().getReplicationNum(); i++) {
-        slotManager.sentOneReplication(4);
-      }
-
-      SlotManager recovered = new SlotManager(5, dummyMemberDir.getPath());
-      assertEquals(NULL, recovered.getStatus(0));
-      assertEquals(PULLING, recovered.getStatus(1));
-      assertEquals(PULLING_WRITABLE, recovered.getStatus(2));
-      assertEquals(SENDING, recovered.getStatus(3));
-      assertEquals(SENT, recovered.getStatus(4));
-    } finally {
-      EnvironmentUtils.cleanDir(dummyMemberDir.getPath());
+    @Before
+    public void setUp() {
+        prevEnableLogPersistence =
+                ClusterDescriptor.getInstance().getConfig().isEnableRaftLogPersistence();
+        prevReplicaNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
+        ClusterDescriptor.getInstance().getConfig().setEnableRaftLogPersistence(true);
+        ClusterDescriptor.getInstance().getConfig().setReplicationNum(2);
+        int testSlotNum = 100;
+        slotManager = new SlotManager(testSlotNum, null);
     }
 
-  }
-//
-//  @After
-//  public void tearDown() throws Exception {
-//    EnvironmentUtils.cleanAllDir();
-//  }
+    @Test
+    public void waitSlot() {
+        slotManager.waitSlot(0);
+        slotManager.setToPulling(0, null);
+        new Thread(
+                        () -> {
+                            try {
+                                Thread.sleep(200);
+                                slotManager.setToNull(0);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        })
+                .start();
+        slotManager.waitSlot(0);
+        ClusterDescriptor.getInstance()
+                .getConfig()
+                .setEnableRaftLogPersistence(prevEnableLogPersistence);
+        ClusterDescriptor.getInstance().getConfig().setReplicationNum(prevReplicaNum);
+    }
+
+    @Test
+    public void waitSlotForWrite() throws StorageEngineException {
+        slotManager.waitSlot(0);
+        slotManager.setToPullingWritable(0);
+        slotManager.waitSlotForWrite(0);
+        slotManager.setToPulling(0, null);
+        new Thread(
+                        () -> {
+                            try {
+                                Thread.sleep(200);
+                                slotManager.setToNull(0);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        })
+                .start();
+        slotManager.waitSlotForWrite(0);
+    }
+
+    @Test
+    public void getStatus() {
+        assertEquals(NULL, slotManager.getStatus(0));
+        slotManager.setToPullingWritable(0);
+        assertEquals(PULLING_WRITABLE, slotManager.getStatus(0));
+        slotManager.setToPulling(0, null);
+        assertEquals(PULLING, slotManager.getStatus(0));
+        slotManager.setToNull(0);
+        assertEquals(NULL, slotManager.getStatus(0));
+    }
+
+    @Test
+    public void getSource() {
+        assertNull(slotManager.getSource(0));
+        Node source = new Node();
+        slotManager.setToPulling(0, source);
+        assertEquals(source, slotManager.getSource(0));
+        slotManager.setToPullingWritable(0);
+        assertEquals(source, slotManager.getSource(0));
+        slotManager.setToNull(0);
+        assertNull(slotManager.getSource(0));
+    }
+
+    @Test
+    public void testSerialize() throws IOException {
+        File dummyMemberDir = new File("test");
+        dummyMemberDir.mkdirs();
+        try {
+            slotManager = new SlotManager(5, dummyMemberDir.getPath());
+            slotManager.setToNull(0);
+            slotManager.setToPulling(1, TestUtils.getNode(1));
+            slotManager.setToPulling(2, TestUtils.getNode(2));
+            slotManager.setToPullingWritable(2);
+            slotManager.setToSending(3);
+            slotManager.sentOneReplication(3);
+            slotManager.setToSending(4);
+            for (int i = 0;
+                    i < ClusterDescriptor.getInstance().getConfig().getReplicationNum();
+                    i++) {
+                slotManager.sentOneReplication(4);
+            }
+
+            SlotManager recovered = new SlotManager(5, dummyMemberDir.getPath());
+            assertEquals(NULL, recovered.getStatus(0));
+            assertEquals(PULLING, recovered.getStatus(1));
+            assertEquals(PULLING_WRITABLE, recovered.getStatus(2));
+            assertEquals(SENDING, recovered.getStatus(3));
+            assertEquals(SENT, recovered.getStatus(4));
+        } finally {
+            EnvironmentUtils.cleanDir(dummyMemberDir.getPath());
+        }
+    }
+    //
+    //  @After
+    //  public void tearDown() throws Exception {
+    //    EnvironmentUtils.cleanAllDir();
+    //  }
 }

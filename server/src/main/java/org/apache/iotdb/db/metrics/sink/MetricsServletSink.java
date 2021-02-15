@@ -27,24 +27,26 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class MetricsServletSink implements Sink {
 
-  public MetricRegistry registry;
+    public MetricRegistry registry;
 
-  public MetricsServletSink(MetricRegistry registry) {
-    this.registry = registry;
-  }
+    public MetricsServletSink(MetricRegistry registry) {
+        this.registry = registry;
+    }
 
-  public ServletContextHandler getHandler() {
-    ObjectMapper mapper = new ObjectMapper()
-        .registerModule(new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
-    return JettyUtil.createMetricsServletHandler(mapper, registry);
-  }
+    public ServletContextHandler getHandler() {
+        ObjectMapper mapper =
+                new ObjectMapper()
+                        .registerModule(
+                                new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, false));
+        return JettyUtil.createMetricsServletHandler(mapper, registry);
+    }
 
-  @Override
-  public void start() {}
+    @Override
+    public void start() {}
 
-  @Override
-  public void stop() {}
+    @Override
+    public void stop() {}
 
-  @Override
-  public void report() {}
+    @Override
+    public void report() {}
 }

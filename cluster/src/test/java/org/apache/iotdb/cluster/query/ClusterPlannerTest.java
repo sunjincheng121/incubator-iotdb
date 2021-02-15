@@ -31,24 +31,24 @@ import org.junit.Test;
 
 public class ClusterPlannerTest extends BaseQueryTest {
 
-  private ClusterPlanner parser;
+    private ClusterPlanner parser;
 
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    parser = new ClusterPlanner();
-  }
-
-  @Test
-  public void test() throws QueryProcessException {
-    List<String> sgs = new ArrayList<>();
-    for (int i = 0; i < 10; i++) {
-      sgs.add(TestUtils.getTestSg(i));
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        parser = new ClusterPlanner();
     }
-    String sql = String.format("SELECT s0 FROM %s", String.join(",", sgs));
-    RawDataQueryPlan plan = (RawDataQueryPlan) parser.parseSQLToPhysicalPlan(sql);
-    assertEquals(pathList, plan.getDeduplicatedPaths());
-    assertEquals(dataTypes, plan.getDeduplicatedDataTypes());
-  }
+
+    @Test
+    public void test() throws QueryProcessException {
+        List<String> sgs = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            sgs.add(TestUtils.getTestSg(i));
+        }
+        String sql = String.format("SELECT s0 FROM %s", String.join(",", sgs));
+        RawDataQueryPlan plan = (RawDataQueryPlan) parser.parseSQLToPhysicalPlan(sql);
+        assertEquals(pathList, plan.getDeduplicatedPaths());
+        assertEquals(dataTypes, plan.getDeduplicatedDataTypes());
+    }
 }

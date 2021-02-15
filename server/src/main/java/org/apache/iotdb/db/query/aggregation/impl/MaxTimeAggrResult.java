@@ -31,79 +31,75 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public class MaxTimeAggrResult extends AggregateResult {
 
-  public MaxTimeAggrResult() {
-    super(TSDataType.INT64, AggregationType.MAX_TIME);
-    reset();
-  }
-
-  @Override
-  public Long getResult() {
-    return hasCandidateResult() ? getLongValue() : null;
-  }
-
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    long maxTimestamp = statistics.getEndTime();
-    updateMaxTimeResult(maxTimestamp);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage) {
-    updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
-    while (dataInThisPage.hasCurrent()
-        && dataInThisPage.currentTime() < maxBound
-        && dataInThisPage.currentTime() >= minBound) {
-      updateMaxTimeResult(dataInThisPage.currentTime());
-      dataInThisPage.next();
-    }
-  }
-
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    long time = -1;
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value != null) {
-        time = timestamps[i];
-      }
+    public MaxTimeAggrResult() {
+        super(TSDataType.INT64, AggregationType.MAX_TIME);
+        reset();
     }
 
-    if (time != -1) {
-      updateMaxTimeResult(time);
+    @Override
+    public Long getResult() {
+        return hasCandidateResult() ? getLongValue() : null;
     }
-  }
 
-  @Override
-  public boolean hasFinalResult() {
-    return false;
-  }
-
-  @Override
-  public void merge(AggregateResult another) {
-    MaxTimeAggrResult anotherMaxTime = (MaxTimeAggrResult) another;
-    if (anotherMaxTime.getResult() != null) {
-      this.updateMaxTimeResult(anotherMaxTime.getResult());
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        long maxTimestamp = statistics.getEndTime();
+        updateMaxTimeResult(maxTimestamp);
     }
-  }
 
-  @Override
-  protected void deserializeSpecificFields(ByteBuffer buffer) {
-
-  }
-
-  @Override
-  protected void serializeSpecificFields(OutputStream outputStream) {
-
-  }
-
-  protected void updateMaxTimeResult(long value) {
-    if (!hasCandidateResult() || value >= getLongValue()) {
-      setLongValue(value);
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage) {
+        updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
     }
-  }
+
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
+        while (dataInThisPage.hasCurrent()
+                && dataInThisPage.currentTime() < maxBound
+                && dataInThisPage.currentTime() >= minBound) {
+            updateMaxTimeResult(dataInThisPage.currentTime());
+            dataInThisPage.next();
+        }
+    }
+
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        long time = -1;
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value != null) {
+                time = timestamps[i];
+            }
+        }
+
+        if (time != -1) {
+            updateMaxTimeResult(time);
+        }
+    }
+
+    @Override
+    public boolean hasFinalResult() {
+        return false;
+    }
+
+    @Override
+    public void merge(AggregateResult another) {
+        MaxTimeAggrResult anotherMaxTime = (MaxTimeAggrResult) another;
+        if (anotherMaxTime.getResult() != null) {
+            this.updateMaxTimeResult(anotherMaxTime.getResult());
+        }
+    }
+
+    @Override
+    protected void deserializeSpecificFields(ByteBuffer buffer) {}
+
+    @Override
+    protected void serializeSpecificFields(OutputStream outputStream) {}
+
+    protected void updateMaxTimeResult(long value) {
+        if (!hasCandidateResult() || value >= getLongValue()) {
+            setLongValue(value);
+        }
+    }
 }

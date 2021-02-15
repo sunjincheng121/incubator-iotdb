@@ -23,60 +23,62 @@ import org.apache.iotdb.service.rpc.thrift.TSExecuteStatementResp;
 
 public class SqlArgument {
 
-  private TSExecuteStatementResp TSExecuteStatementResp;
-  private PhysicalPlan plan;
-  private String statement;
-  private long startTime;
-  private long endTime;
+    private TSExecuteStatementResp TSExecuteStatementResp;
+    private PhysicalPlan plan;
+    private String statement;
+    private long startTime;
+    private long endTime;
 
-  public SqlArgument(
-      org.apache.iotdb.service.rpc.thrift.TSExecuteStatementResp tSExecuteStatementResp,
-      PhysicalPlan plan, String statement, long startTime, long endTime) {
-    this.TSExecuteStatementResp = tSExecuteStatementResp;
-    this.statement = statement;
-    this.startTime = startTime;
-    this.endTime = endTime;
-    this.plan = plan;
-  }
+    public SqlArgument(
+            org.apache.iotdb.service.rpc.thrift.TSExecuteStatementResp tSExecuteStatementResp,
+            PhysicalPlan plan,
+            String statement,
+            long startTime,
+            long endTime) {
+        this.TSExecuteStatementResp = tSExecuteStatementResp;
+        this.statement = statement;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.plan = plan;
+    }
 
-  public TSExecuteStatementResp getTSExecuteStatementResp() {
-    return TSExecuteStatementResp;
-  }
+    public TSExecuteStatementResp getTSExecuteStatementResp() {
+        return TSExecuteStatementResp;
+    }
 
-  public void setTSExecuteStatementResp(TSExecuteStatementResp tSExecuteStatementResp) {
-    TSExecuteStatementResp = tSExecuteStatementResp;
-  }
+    public void setTSExecuteStatementResp(TSExecuteStatementResp tSExecuteStatementResp) {
+        TSExecuteStatementResp = tSExecuteStatementResp;
+    }
 
-  public long getStartTime() {
-    return startTime;
-  }
+    public long getStartTime() {
+        return startTime;
+    }
 
-  public void setStartTime(long startTime) {
-    this.startTime = startTime;
-  }
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
 
-  public long getEndTime() {
-    return endTime;
-  }
+    public long getEndTime() {
+        return endTime;
+    }
 
-  public void setEndTime(long endTime) {
-    this.endTime = endTime;
-  }
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
 
-  public PhysicalPlan getPlan() {
-    return plan;
-  }
+    public PhysicalPlan getPlan() {
+        return plan;
+    }
 
-  public void setPlan(PhysicalPlan plan) {
-    this.plan = plan;
-  }
+    public void setPlan(PhysicalPlan plan) {
+        this.plan = plan;
+    }
 
-  public String getStatement() {
-    return statement;
-  }
+    public String getStatement() {
+        return statement;
+    }
 
-  public void setStatement(String statement) {
-    this.statement = statement;
-  }
-
+    public void setStatement(String statement) {
+        this.statement = statement;
+    }
 }

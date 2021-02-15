@@ -20,13 +20,13 @@ package org.apache.iotdb.db.exception.index;
 
 public class IndexRuntimeException extends RuntimeException {
 
-  private static final long serialVersionUID = 5946611722012179976L;
+    private static final long serialVersionUID = 5946611722012179976L;
 
-  public IndexRuntimeException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public IndexRuntimeException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-  public IndexRuntimeException(String message) {
-    super(message);
-  }
+    public IndexRuntimeException(String message) {
+        super(message);
+    }
 }

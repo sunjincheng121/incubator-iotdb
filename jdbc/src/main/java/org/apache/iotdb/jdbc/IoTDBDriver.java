@@ -30,70 +30,68 @@ import java.util.regex.Pattern;
 import org.apache.thrift.transport.TTransportException;
 import org.osgi.service.component.annotations.Component;
 
-@Component(service = java.sql.Driver.class, immediate = true)public class IoTDBDriver implements Driver {
-  private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory
-      .getLogger(IoTDBDriver.class);
-  /**
-   * Is this driver JDBC compliant.
-   */
-  private static final boolean TSFILE_JDBC_COMPLIANT = false;
+@Component(service = java.sql.Driver.class, immediate = true)
+public class IoTDBDriver implements Driver {
+    private static final org.slf4j.Logger logger =
+            org.slf4j.LoggerFactory.getLogger(IoTDBDriver.class);
+    /** Is this driver JDBC compliant. */
+    private static final boolean TSFILE_JDBC_COMPLIANT = false;
 
-  static {
-    try {
-      DriverManager.registerDriver(new IoTDBDriver());
-    } catch (SQLException e) {
-      logger.error("Error occurs when registering TsFile driver", e);
+    static {
+        try {
+            DriverManager.registerDriver(new IoTDBDriver());
+        } catch (SQLException e) {
+            logger.error("Error occurs when registering TsFile driver", e);
+        }
     }
-  }
 
-  private final String TSFILE_URL_PREFIX = Config.IOTDB_URL_PREFIX + ".*";
+    private final String TSFILE_URL_PREFIX = Config.IOTDB_URL_PREFIX + ".*";
 
-  public IoTDBDriver() {
-    // This is a constructor.
-  }
-
-  @Override
-  public boolean acceptsURL(String url) throws SQLException {
-    return Pattern.matches(TSFILE_URL_PREFIX, url);
-  }
-
-  @Override
-  public Connection connect(String url, Properties info) throws SQLException {
-    try {
-      return acceptsURL(url) ? new IoTDBConnection(url, info) : null;
-    } catch (TTransportException e) {
-      throw new SQLException(
-          "Connection Error, please check whether the network is available or the server"
-              + " has started.");
+    public IoTDBDriver() {
+        // This is a constructor.
     }
-  }
 
-  @Override
-  public int getMajorVersion() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
+    @Override
+    public boolean acceptsURL(String url) throws SQLException {
+        return Pattern.matches(TSFILE_URL_PREFIX, url);
+    }
 
-  @Override
-  public int getMinorVersion() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
+    @Override
+    public Connection connect(String url, Properties info) throws SQLException {
+        try {
+            return acceptsURL(url) ? new IoTDBConnection(url, info) : null;
+        } catch (TTransportException e) {
+            throw new SQLException(
+                    "Connection Error, please check whether the network is available or the server"
+                            + " has started.");
+        }
+    }
 
-  @Override
-  public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-    throw new SQLFeatureNotSupportedException("Method not supported");
-  }
+    @Override
+    public int getMajorVersion() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-  @Override
-  public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
-    // TODO Auto-generated method stub
-    return new DriverPropertyInfo[0];
-  }
+    @Override
+    public int getMinorVersion() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-  @Override
-  public boolean jdbcCompliant() {
-    return TSFILE_JDBC_COMPLIANT;
-  }
+    @Override
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException("Method not supported");
+    }
 
+    @Override
+    public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
+        // TODO Auto-generated method stub
+        return new DriverPropertyInfo[0];
+    }
+
+    @Override
+    public boolean jdbcCompliant() {
+        return TSFILE_JDBC_COMPLIANT;
+    }
 }

@@ -28,157 +28,156 @@ import org.apache.iotdb.tsfile.exception.compress.CompressionTypeNotSupportedExc
 import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
 import org.xerial.snappy.Snappy;
 
-/**
- * compress data according to type in schema.
- */
+/** compress data according to type in schema. */
 public interface ICompressor extends Serializable {
 
-  static ICompressor getCompressor(String name) {
-    return getCompressor(CompressionType.valueOf(name));
-  }
-
-  /**
-   * get Compressor according to CompressionType.
-   *
-   * @param name CompressionType
-   * @return the Compressor of specified CompressionType
-   */
-  static ICompressor getCompressor(CompressionType name) {
-    if (name == null) {
-      throw new CompressionTypeNotSupportedException("NULL");
-    }
-    switch (name) {
-      case UNCOMPRESSED:
-        return new NoCompressor();
-      case SNAPPY:
-        return new SnappyCompressor();
-      case LZ4:
-        return new IOTDBLZ4Compressor();
-      default:
-        throw new CompressionTypeNotSupportedException(name.toString());
-    }
-  }
-
-  byte[] compress(byte[] data) throws IOException;
-
-  /**
-   * abstract method of compress.
-   *
-   * @return byte length of compressed data.
-   */
-  int compress(byte[] data, int offset, int length, byte[] compressed) throws IOException;
-
-  /**
-   * If the data is large, this function is better than byte[].
-   *
-   * @param data       MUST be DirectByteBuffer for Snappy.
-   * @param compressed MUST be DirectByteBuffer for Snappy.
-   * @return byte length of compressed data.
-   */
-  int compress(ByteBuffer data, ByteBuffer compressed) throws IOException;
-
-  int getMaxBytesForCompression(int uncompressedDataSize);
-
-  CompressionType getType();
-
-  /**
-   * NoCompressor will do nothing for data and return the input data directly.
-   */
-  class NoCompressor implements ICompressor {
-
-    @Override
-    public byte[] compress(byte[] data) {
-      return data;
+    static ICompressor getCompressor(String name) {
+        return getCompressor(CompressionType.valueOf(name));
     }
 
-    @Override
-    public int compress(byte[] data, int offset, int length, byte[] compressed) throws IOException {
-      throw new IOException("No Compressor does not support compression function");
+    /**
+     * get Compressor according to CompressionType.
+     *
+     * @param name CompressionType
+     * @return the Compressor of specified CompressionType
+     */
+    static ICompressor getCompressor(CompressionType name) {
+        if (name == null) {
+            throw new CompressionTypeNotSupportedException("NULL");
+        }
+        switch (name) {
+            case UNCOMPRESSED:
+                return new NoCompressor();
+            case SNAPPY:
+                return new SnappyCompressor();
+            case LZ4:
+                return new IOTDBLZ4Compressor();
+            default:
+                throw new CompressionTypeNotSupportedException(name.toString());
+        }
     }
 
-    @Override
-    public int compress(ByteBuffer data, ByteBuffer compressed) throws IOException {
-      throw new IOException("No Compressor does not support compression function");
+    byte[] compress(byte[] data) throws IOException;
+
+    /**
+     * abstract method of compress.
+     *
+     * @return byte length of compressed data.
+     */
+    int compress(byte[] data, int offset, int length, byte[] compressed) throws IOException;
+
+    /**
+     * If the data is large, this function is better than byte[].
+     *
+     * @param data MUST be DirectByteBuffer for Snappy.
+     * @param compressed MUST be DirectByteBuffer for Snappy.
+     * @return byte length of compressed data.
+     */
+    int compress(ByteBuffer data, ByteBuffer compressed) throws IOException;
+
+    int getMaxBytesForCompression(int uncompressedDataSize);
+
+    CompressionType getType();
+
+    /** NoCompressor will do nothing for data and return the input data directly. */
+    class NoCompressor implements ICompressor {
+
+        @Override
+        public byte[] compress(byte[] data) {
+            return data;
+        }
+
+        @Override
+        public int compress(byte[] data, int offset, int length, byte[] compressed)
+                throws IOException {
+            throw new IOException("No Compressor does not support compression function");
+        }
+
+        @Override
+        public int compress(ByteBuffer data, ByteBuffer compressed) throws IOException {
+            throw new IOException("No Compressor does not support compression function");
+        }
+
+        @Override
+        public int getMaxBytesForCompression(int uncompressedDataSize) {
+            return uncompressedDataSize;
+        }
+
+        @Override
+        public CompressionType getType() {
+            return CompressionType.UNCOMPRESSED;
+        }
     }
 
-    @Override
-    public int getMaxBytesForCompression(int uncompressedDataSize) {
-      return uncompressedDataSize;
+    class SnappyCompressor implements ICompressor {
+
+        @Override
+        public byte[] compress(byte[] data) throws IOException {
+            if (data == null) {
+                return new byte[0];
+            }
+            return Snappy.compress(data);
+        }
+
+        @Override
+        public int compress(byte[] data, int offset, int length, byte[] compressed)
+                throws IOException {
+            return Snappy.compress(data, offset, length, compressed, 0);
+        }
+
+        @Override
+        public int compress(ByteBuffer data, ByteBuffer compressed) throws IOException {
+            return Snappy.compress(data, compressed);
+        }
+
+        @Override
+        public int getMaxBytesForCompression(int uncompressedDataSize) {
+            return Snappy.maxCompressedLength(uncompressedDataSize);
+        }
+
+        @Override
+        public CompressionType getType() {
+            return CompressionType.SNAPPY;
+        }
     }
 
-    @Override
-    public CompressionType getType() {
-      return CompressionType.UNCOMPRESSED;
+    class IOTDBLZ4Compressor implements ICompressor {
+        private LZ4Compressor compressor;
+
+        public IOTDBLZ4Compressor() {
+            super();
+            LZ4Factory factory = LZ4Factory.fastestInstance();
+            compressor = factory.fastCompressor();
+        }
+
+        @Override
+        public byte[] compress(byte[] data) throws IOException {
+            if (data == null) {
+                return new byte[0];
+            }
+            return compressor.compress(data);
+        }
+
+        @Override
+        public int compress(byte[] data, int offset, int length, byte[] compressed)
+                throws IOException {
+            return compressor.compress(data, offset, length, compressed, 0);
+        }
+
+        @Override
+        public int compress(ByteBuffer data, ByteBuffer compressed) throws IOException {
+            compressor.compress(data, compressed);
+            return data.limit();
+        }
+
+        @Override
+        public int getMaxBytesForCompression(int uncompressedDataSize) {
+            return compressor.maxCompressedLength(uncompressedDataSize);
+        }
+
+        @Override
+        public CompressionType getType() {
+            return CompressionType.LZ4;
+        }
     }
-  }
-
-  class SnappyCompressor implements ICompressor {
-
-    @Override
-    public byte[] compress(byte[] data) throws IOException {
-      if (data == null) {
-        return new byte[0];
-      }
-      return Snappy.compress(data);
-    }
-
-    @Override
-    public int compress(byte[] data, int offset, int length, byte[] compressed) throws IOException {
-      return Snappy.compress(data, offset, length, compressed, 0);
-    }
-
-    @Override
-    public int compress(ByteBuffer data, ByteBuffer compressed) throws IOException {
-      return Snappy.compress(data, compressed);
-    }
-
-    @Override
-    public int getMaxBytesForCompression(int uncompressedDataSize) {
-      return Snappy.maxCompressedLength(uncompressedDataSize);
-    }
-
-    @Override
-    public CompressionType getType() {
-      return CompressionType.SNAPPY;
-    }
-  }
-
-  class IOTDBLZ4Compressor implements ICompressor {
-    private LZ4Compressor compressor;
-
-    public IOTDBLZ4Compressor(){
-      super();
-      LZ4Factory factory = LZ4Factory.fastestInstance();
-      compressor = factory.fastCompressor();
-    }
-
-    @Override
-    public byte[] compress(byte[] data) throws IOException {
-      if (data == null) {
-        return new byte[0];
-      }
-      return compressor.compress(data);
-    }
-
-    @Override
-    public int compress(byte[] data, int offset, int length, byte[] compressed) throws IOException {
-      return compressor.compress(data, offset, length, compressed, 0);
-    }
-
-    @Override
-    public int compress(ByteBuffer data, ByteBuffer compressed) throws IOException {
-      compressor.compress(data, compressed);
-      return data.limit();
-    }
-
-    @Override
-    public int getMaxBytesForCompression(int uncompressedDataSize) {
-      return compressor.maxCompressedLength(uncompressedDataSize);
-    }
-
-    @Override
-    public CompressionType getType() {
-      return CompressionType.LZ4;
-    }
-  }
 }

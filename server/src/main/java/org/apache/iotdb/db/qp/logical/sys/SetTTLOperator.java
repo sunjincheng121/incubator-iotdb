@@ -25,27 +25,27 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class SetTTLOperator extends RootOperator {
 
-  private PartialPath storageGroup;
-  private long dataTTL;
+    private PartialPath storageGroup;
+    private long dataTTL;
 
-  public SetTTLOperator(int tokenIntType) {
-    super(tokenIntType);
-    this.operatorType = OperatorType.TTL;
-  }
+    public SetTTLOperator(int tokenIntType) {
+        super(tokenIntType);
+        this.operatorType = OperatorType.TTL;
+    }
 
-  public PartialPath getStorageGroup() {
-    return storageGroup;
-  }
+    public PartialPath getStorageGroup() {
+        return storageGroup;
+    }
 
-  public void setStorageGroup(PartialPath storageGroup) {
-    this.storageGroup = storageGroup;
-  }
+    public void setStorageGroup(PartialPath storageGroup) {
+        this.storageGroup = storageGroup;
+    }
 
-  public long getDataTTL() {
-    return dataTTL;
-  }
+    public long getDataTTL() {
+        return dataTTL;
+    }
 
-  public void setDataTTL(long dataTTL) {
-    this.dataTTL = dataTTL;
-  }
+    public void setDataTTL(long dataTTL) {
+        this.dataTTL = dataTTL;
+    }
 }

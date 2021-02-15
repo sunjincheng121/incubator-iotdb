@@ -20,157 +20,158 @@
 package org.apache.iotdb.tsfile.encoding;
 
 import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import org.apache.iotdb.tsfile.encoding.encoder.SDTEncoder;
 import org.junit.Test;
 
 public class SDTEncoderTest {
 
-  @Test
-  public void testIntSingleValue() throws IOException {
-    SDTEncoder encoder = new SDTEncoder();
-    encoder.setCompDeviation(0.01);
+    @Test
+    public void testIntSingleValue() throws IOException {
+        SDTEncoder encoder = new SDTEncoder();
+        encoder.setCompDeviation(0.01);
 
-    int degree = 0;
-    int count = 0;
-    for (long time = 0; time < 100; time++) {
-      //generate data in sine wave pattern
-      int value = (int) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
-      if (encoder.encodeInt(time, value)) {
-        count++;
-      }
+        int degree = 0;
+        int count = 0;
+        for (long time = 0; time < 100; time++) {
+            // generate data in sine wave pattern
+            int value = (int) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
+            if (encoder.encodeInt(time, value)) {
+                count++;
+            }
+        }
+        assertEquals(22, count);
     }
-    assertEquals(22, count);
-  }
 
-  @Test
-  public void testDoubleSingleValue() throws IOException {
-    SDTEncoder encoder = new SDTEncoder();
-    encoder.setCompDeviation(0.01);
+    @Test
+    public void testDoubleSingleValue() throws IOException {
+        SDTEncoder encoder = new SDTEncoder();
+        encoder.setCompDeviation(0.01);
 
-    int degree = 0;
-    int count = 0;
-    for (long time = 0; time < 100; time++) {
-      //generate data in sine wave pattern
-      double value = 10 * Math.sin(degree++ * 3.141592653589793D / 180.0D);
-      if (encoder.encodeDouble(time, value)) {
-        count++;
-      }
+        int degree = 0;
+        int count = 0;
+        for (long time = 0; time < 100; time++) {
+            // generate data in sine wave pattern
+            double value = 10 * Math.sin(degree++ * 3.141592653589793D / 180.0D);
+            if (encoder.encodeDouble(time, value)) {
+                count++;
+            }
+        }
+        assertEquals(14, count);
     }
-    assertEquals(14, count);
-  }
 
-  @Test
-  public void testLongSingleValue() throws IOException {
-    SDTEncoder encoder = new SDTEncoder();
-    encoder.setCompDeviation(0.01);
+    @Test
+    public void testLongSingleValue() throws IOException {
+        SDTEncoder encoder = new SDTEncoder();
+        encoder.setCompDeviation(0.01);
 
-    int degree = 0;
-    int count = 0;
-    for (long time = 0; time < 100; time++) {
-      //generate data in sine wave pattern
-      long value = (long) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
-      if (encoder.encodeLong(time, value)) {
-        count++;
-      }
+        int degree = 0;
+        int count = 0;
+        for (long time = 0; time < 100; time++) {
+            // generate data in sine wave pattern
+            long value = (long) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
+            if (encoder.encodeLong(time, value)) {
+                count++;
+            }
+        }
+        assertEquals(22, count);
     }
-    assertEquals(22, count);
-  }
 
-  @Test
-  public void testFloatSingleValue() throws IOException {
-    SDTEncoder encoder = new SDTEncoder();
-    encoder.setCompDeviation(0.01);
+    @Test
+    public void testFloatSingleValue() throws IOException {
+        SDTEncoder encoder = new SDTEncoder();
+        encoder.setCompDeviation(0.01);
 
-    int degree = 0;
-    int count = 0;
-    for (long time = 0; time < 100; time++) {
-      //generate data in sine wave pattern
-      float value = (float) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
-      if (encoder.encodeFloat(time, value)) {
-        count++;
-      }
+        int degree = 0;
+        int count = 0;
+        for (long time = 0; time < 100; time++) {
+            // generate data in sine wave pattern
+            float value = (float) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
+            if (encoder.encodeFloat(time, value)) {
+                count++;
+            }
+        }
+        assertEquals(14, count);
     }
-    assertEquals(14, count);
-  }
 
-  @Test
-  public void testIntValueArray() {
-    SDTEncoder encoder = new SDTEncoder();
-    encoder.setCompDeviation(0.01);
+    @Test
+    public void testIntValueArray() {
+        SDTEncoder encoder = new SDTEncoder();
+        encoder.setCompDeviation(0.01);
 
-    int degree = 0;
-    long[] timestamps = new long[100];
-    int[] values = new int[100];
+        int degree = 0;
+        long[] timestamps = new long[100];
+        int[] values = new int[100];
 
-    for (int time = 0; time < 100; time++) {
-      //generate data in sine wave pattern
-      int value = (int) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
-      timestamps[time] = time;
-      values[time] = value;
+        for (int time = 0; time < 100; time++) {
+            // generate data in sine wave pattern
+            int value = (int) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
+            timestamps[time] = time;
+            values[time] = value;
+        }
+        int size = encoder.encode(timestamps, values, timestamps.length);
+
+        assertEquals(22, size);
     }
-    int size = encoder.encode(timestamps, values, timestamps.length);
 
-    assertEquals(22, size);
-  }
+    @Test
+    public void testDoubleValueArray() throws IOException {
+        SDTEncoder encoder = new SDTEncoder();
+        encoder.setCompDeviation(0.01);
 
-  @Test
-  public void testDoubleValueArray() throws IOException {
-    SDTEncoder encoder = new SDTEncoder();
-    encoder.setCompDeviation(0.01);
+        int degree = 0;
+        long[] timestamps = new long[100];
+        double[] values = new double[100];
 
-    int degree = 0;
-    long[] timestamps = new long[100];
-    double[] values = new double[100];
+        for (int time = 0; time < 100; time++) {
+            // generate data in sine wave pattern
+            double value = (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
+            timestamps[time] = time;
+            values[time] = value;
+        }
+        int size = encoder.encode(timestamps, values, timestamps.length);
 
-    for (int time = 0; time < 100; time++) {
-      //generate data in sine wave pattern
-      double value = (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
-      timestamps[time] = time;
-      values[time] = value;
+        assertEquals(14, size);
     }
-    int size = encoder.encode(timestamps, values, timestamps.length);
 
-    assertEquals(14, size);
-  }
+    @Test
+    public void testLongValueArray() {
+        SDTEncoder encoder = new SDTEncoder();
+        encoder.setCompDeviation(0.01);
 
-  @Test
-  public void testLongValueArray() {
-    SDTEncoder encoder = new SDTEncoder();
-    encoder.setCompDeviation(0.01);
+        int degree = 0;
+        long[] timestamps = new long[100];
+        long[] values = new long[100];
 
-    int degree = 0;
-    long[] timestamps = new long[100];
-    long[] values = new long[100];
+        for (int time = 0; time < 100; time++) {
+            // generate data in sine wave pattern
+            long value = (long) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
+            timestamps[time] = time;
+            values[time] = value;
+        }
+        int size = encoder.encode(timestamps, values, timestamps.length);
 
-    for (int time = 0; time < 100; time++) {
-      //generate data in sine wave pattern
-      long value = (long) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
-      timestamps[time] = time;
-      values[time] = value;
+        assertEquals(22, size);
     }
-    int size = encoder.encode(timestamps, values, timestamps.length);
 
-    assertEquals(22, size);
-  }
+    @Test
+    public void testFloatValueArray() {
+        SDTEncoder encoder = new SDTEncoder();
+        encoder.setCompDeviation(0.01);
 
-  @Test
-  public void testFloatValueArray() {
-    SDTEncoder encoder = new SDTEncoder();
-    encoder.setCompDeviation(0.01);
+        int degree = 0;
+        long[] timestamps = new long[100];
+        float[] values = new float[100];
 
-    int degree = 0;
-    long[] timestamps = new long[100];
-    float[] values = new float[100];
+        for (int time = 0; time < 100; time++) {
+            // generate data in sine wave pattern
+            float value = (float) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
+            timestamps[time] = time;
+            values[time] = value;
+        }
+        int size = encoder.encode(timestamps, values, timestamps.length);
 
-    for (int time = 0; time < 100; time++) {
-      //generate data in sine wave pattern
-      float value = (float) (10 * Math.sin(degree++ * 3.141592653589793D / 180.0D));
-      timestamps[time] = time;
-      values[time] = value;
+        assertEquals(14, size);
     }
-    int size = encoder.encode(timestamps, values, timestamps.length);
-
-    assertEquals(14, size);
-  }
 }

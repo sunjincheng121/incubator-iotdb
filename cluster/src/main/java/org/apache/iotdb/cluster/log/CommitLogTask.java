@@ -26,43 +26,39 @@ import org.slf4j.LoggerFactory;
 
 public class CommitLogTask implements Runnable {
 
-  private static final Logger logger = LoggerFactory.getLogger(CommitLogTask.class);
-  private RaftLogManager logManager;
-  private long leaderCommit;
-  private long term;
+    private static final Logger logger = LoggerFactory.getLogger(CommitLogTask.class);
+    private RaftLogManager logManager;
+    private long leaderCommit;
+    private long term;
 
-  public CommitLogTask(RaftLogManager logManager, long leaderCommit, long term) {
-    this.logManager = logManager;
-    this.leaderCommit = leaderCommit;
-    this.term = term;
-  }
-
-  /**
-   * listener field
-   */
-  private AsyncMethodCallback<Void> callback;
-
-  /**
-   * @param callback the event listener
-   */
-  public void registerCallback(AsyncMethodCallback<Void> callback) {
-    this.callback = callback;
-  }
-
-  private void doCommitLog() {
-    if (callback == null) {
-      logger.error("callback is not registered");
-      return;
+    public CommitLogTask(RaftLogManager logManager, long leaderCommit, long term) {
+        this.logManager = logManager;
+        this.leaderCommit = leaderCommit;
+        this.term = term;
     }
 
-    boolean success = logManager.maybeCommit(leaderCommit, term);
-    if (success) {
-      callback.onComplete(null);
-    }
-  }
+    /** listener field */
+    private AsyncMethodCallback<Void> callback;
 
-  @Override
-  public void run() {
-    doCommitLog();
-  }
+    /** @param callback the event listener */
+    public void registerCallback(AsyncMethodCallback<Void> callback) {
+        this.callback = callback;
+    }
+
+    private void doCommitLog() {
+        if (callback == null) {
+            logger.error("callback is not registered");
+            return;
+        }
+
+        boolean success = logManager.maybeCommit(leaderCommit, term);
+        if (success) {
+            callback.onComplete(null);
+        }
+    }
+
+    @Override
+    public void run() {
+        doCommitLog();
+    }
 }

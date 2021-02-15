@@ -32,72 +32,64 @@ import org.apache.iotdb.tsfile.read.reader.chunk.ChunkReaderByTimestamp;
 
 public class ChunkReaderWrap {
 
-  private ChunkReaderType type;
-  private Filter filter;
+    private ChunkReaderType type;
+    private Filter filter;
 
-  // attributes for disk chunk
-  private ChunkMetadata chunkMetaData;
-  private IChunkLoader chunkLoader;
+    // attributes for disk chunk
+    private ChunkMetadata chunkMetaData;
+    private IChunkLoader chunkLoader;
 
-  // attributes for mem chunk
-  private ReadOnlyMemChunk readOnlyMemChunk;
+    // attributes for mem chunk
+    private ReadOnlyMemChunk readOnlyMemChunk;
 
-  /**
-   * This is used in test.
-   */
-  protected ChunkReaderWrap() {
+    /** This is used in test. */
+    protected ChunkReaderWrap() {}
 
-  }
-
-  /**
-   * constructor of diskChunkReader
-   */
-  public ChunkReaderWrap(ChunkMetadata metaData, IChunkLoader chunkLoader, Filter filter) {
-    this.type = ChunkReaderType.DISK_CHUNK;
-    this.chunkMetaData = metaData;
-    this.chunkLoader = chunkLoader;
-    this.filter = filter;
-  }
-
-  /**
-   * constructor of MemChunkReader
-   */
-  public ChunkReaderWrap(ReadOnlyMemChunk readOnlyMemChunk, Filter filter) {
-    type = ChunkReaderType.MEM_CHUNK;
-    this.readOnlyMemChunk = readOnlyMemChunk;
-    this.filter = filter;
-  }
-
-  public IPointReader getIPointReader() throws IOException {
-    if (type.equals(ChunkReaderType.DISK_CHUNK)) {
-      Chunk chunk = chunkLoader.loadChunk(chunkMetaData);
-      ChunkReader chunkReader = new ChunkReader(chunk, filter);
-      return new ChunkDataIterator(chunkReader);
-    } else {
-      return new MemChunkReader(readOnlyMemChunk, filter);
+    /** constructor of diskChunkReader */
+    public ChunkReaderWrap(ChunkMetadata metaData, IChunkLoader chunkLoader, Filter filter) {
+        this.type = ChunkReaderType.DISK_CHUNK;
+        this.chunkMetaData = metaData;
+        this.chunkLoader = chunkLoader;
+        this.filter = filter;
     }
-  }
 
-  public IReaderByTimestamp getIReaderByTimestamp() throws IOException {
-    if (type.equals(ChunkReaderType.DISK_CHUNK)) {
-      Chunk chunk = chunkLoader.loadChunk(chunkMetaData);
-      ChunkReaderByTimestamp chunkReader = new ChunkReaderByTimestamp(chunk);
-      return new DiskChunkReaderByTimestamp(chunkReader);
-    } else {
-      return new ByTimestampReaderAdapter(readOnlyMemChunk.getPointReader());
+    /** constructor of MemChunkReader */
+    public ChunkReaderWrap(ReadOnlyMemChunk readOnlyMemChunk, Filter filter) {
+        type = ChunkReaderType.MEM_CHUNK;
+        this.readOnlyMemChunk = readOnlyMemChunk;
+        this.filter = filter;
     }
-  }
 
-  public String getMeasurementUid() {
-    if (chunkMetaData != null) {
-      return chunkMetaData.getMeasurementUid();
-    } else {
-      return null;
+    public IPointReader getIPointReader() throws IOException {
+        if (type.equals(ChunkReaderType.DISK_CHUNK)) {
+            Chunk chunk = chunkLoader.loadChunk(chunkMetaData);
+            ChunkReader chunkReader = new ChunkReader(chunk, filter);
+            return new ChunkDataIterator(chunkReader);
+        } else {
+            return new MemChunkReader(readOnlyMemChunk, filter);
+        }
     }
-  }
 
-  enum ChunkReaderType {
-    DISK_CHUNK, MEM_CHUNK
-  }
+    public IReaderByTimestamp getIReaderByTimestamp() throws IOException {
+        if (type.equals(ChunkReaderType.DISK_CHUNK)) {
+            Chunk chunk = chunkLoader.loadChunk(chunkMetaData);
+            ChunkReaderByTimestamp chunkReader = new ChunkReaderByTimestamp(chunk);
+            return new DiskChunkReaderByTimestamp(chunkReader);
+        } else {
+            return new ByTimestampReaderAdapter(readOnlyMemChunk.getPointReader());
+        }
+    }
 
+    public String getMeasurementUid() {
+        if (chunkMetaData != null) {
+            return chunkMetaData.getMeasurementUid();
+        } else {
+            return null;
+        }
+    }
+
+    enum ChunkReaderType {
+        DISK_CHUNK,
+        MEM_CHUNK
+    }
 }

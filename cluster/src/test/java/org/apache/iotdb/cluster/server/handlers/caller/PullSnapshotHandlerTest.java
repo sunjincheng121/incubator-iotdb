@@ -33,49 +33,50 @@ import org.apache.iotdb.cluster.common.TestSnapshot;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.cluster.rpc.thrift.PullSnapshotResp;
-import org.apache.iotdb.cluster.server.handlers.caller.PullSnapshotHandler;
 import org.junit.Test;
 
 public class PullSnapshotHandlerTest {
 
-  @Test
-  public void testSnapshot() throws InterruptedException {
-    AtomicReference<Map<Integer, TestSnapshot>> result = new AtomicReference<>();
-    Node owner = TestUtils.getNode(1);
-    List<Integer> slots = new ArrayList<>();
-    Map<Integer, TestSnapshot> snapshotMap = new HashMap<>();
-    Map<Integer, ByteBuffer> snapshotBufferMap = new HashMap<>();
-    for (int i = 0; i < 10; i++) {
-      slots.add(i);
-      TestSnapshot snapshot = new TestSnapshot(i);
-      snapshotMap.put(i, snapshot);
-      snapshotBufferMap.put(i, snapshot.serialize());
+    @Test
+    public void testSnapshot() throws InterruptedException {
+        AtomicReference<Map<Integer, TestSnapshot>> result = new AtomicReference<>();
+        Node owner = TestUtils.getNode(1);
+        List<Integer> slots = new ArrayList<>();
+        Map<Integer, TestSnapshot> snapshotMap = new HashMap<>();
+        Map<Integer, ByteBuffer> snapshotBufferMap = new HashMap<>();
+        for (int i = 0; i < 10; i++) {
+            slots.add(i);
+            TestSnapshot snapshot = new TestSnapshot(i);
+            snapshotMap.put(i, snapshot);
+            snapshotBufferMap.put(i, snapshot.serialize());
+        }
+
+        PullSnapshotHandler<TestSnapshot> handler =
+                new PullSnapshotHandler<>(result, owner, slots, TestSnapshot.Factory.INSTANCE);
+        synchronized (result) {
+            new Thread(
+                            () -> {
+                                PullSnapshotResp resp = new PullSnapshotResp();
+                                resp.setSnapshotBytes(snapshotBufferMap);
+                                handler.onComplete(resp);
+                            })
+                    .start();
+            result.wait();
+        }
+        assertEquals(snapshotMap, result.get());
     }
 
-    PullSnapshotHandler<TestSnapshot> handler = new PullSnapshotHandler<>(result, owner, slots,
-        TestSnapshot.Factory.INSTANCE);
-    synchronized (result) {
-      new Thread(() -> {
-        PullSnapshotResp resp = new PullSnapshotResp();
-        resp.setSnapshotBytes(snapshotBufferMap);
-        handler.onComplete(resp);
-      }).start();
-      result.wait();
+    @Test
+    public void testError() throws InterruptedException {
+        AtomicReference<Map<Integer, TestSnapshot>> result = new AtomicReference<>();
+        Node owner = TestUtils.getNode(1);
+        List<Integer> slots = new ArrayList<>();
+        PullSnapshotHandler<TestSnapshot> handler =
+                new PullSnapshotHandler<>(result, owner, slots, TestSnapshot.Factory.INSTANCE);
+        synchronized (result) {
+            new Thread(() -> handler.onError(new TestException())).start();
+            result.wait();
+        }
+        assertNull(result.get());
     }
-    assertEquals(snapshotMap, result.get());
-  }
-
-  @Test
-  public void testError() throws InterruptedException {
-    AtomicReference<Map<Integer, TestSnapshot>> result = new AtomicReference<>();
-    Node owner = TestUtils.getNode(1);
-    List<Integer> slots = new ArrayList<>();
-    PullSnapshotHandler<TestSnapshot> handler = new PullSnapshotHandler<>(result, owner, slots,
-        TestSnapshot.Factory.INSTANCE);
-    synchronized (result) {
-      new Thread(() -> handler.onError(new TestException())).start();
-      result.wait();
-    }
-    assertNull(result.get());
-  }
 }

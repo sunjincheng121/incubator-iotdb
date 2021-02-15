@@ -31,60 +31,59 @@ import org.junit.Test;
 
 public class GetAllDevicesTest {
 
-  private final TSFileConfig conf = TSFileDescriptor.getInstance().getConfig();
-  private int maxDegreeOfIndexNode;
-  private static final String FILE_PATH = FileGenerator.outputDataFile;
+    private final TSFileConfig conf = TSFileDescriptor.getInstance().getConfig();
+    private int maxDegreeOfIndexNode;
+    private static final String FILE_PATH = FileGenerator.outputDataFile;
 
-  @Before
-  public void before() {
-    maxDegreeOfIndexNode = conf.getMaxDegreeOfIndexNode();
-    conf.setMaxDegreeOfIndexNode(3);
-  }
-
-  @After
-  public void after() throws IOException {
-    FileGenerator.after();
-    conf.setMaxDegreeOfIndexNode(maxDegreeOfIndexNode);
-  }
-
-  @Test
-  public void testGetAllDevices1() throws IOException {
-    testGetAllDevices(2, 2);
-  }
-
-  @Test
-  public void testGetAllDevices2() throws IOException {
-    testGetAllDevices(2, 50);
-  }
-
-  @Test
-  public void testGetAllDevices3() throws IOException {
-    testGetAllDevices(50, 2);
-  }
-
-  @Test
-  public void testGetAllDevices4() throws IOException {
-    testGetAllDevices(50, 50);
-  }
-
-  public void testGetAllDevices(int deviceNum, int measurementNum) throws IOException {
-    FileGenerator.generateFile(10000, deviceNum, measurementNum);
-    try (TsFileSequenceReader fileReader = new TsFileSequenceReader(FILE_PATH)) {
-      ReadOnlyTsFile tsFile = new ReadOnlyTsFile(fileReader);
-  
-      // test
-      try (TsFileSequenceReader reader = new TsFileSequenceReader(FILE_PATH)) {
-        List<String> devices = reader.getAllDevices();
-        Assert.assertEquals(deviceNum, devices.size());
-        for (int i = 0; i < deviceNum; i++) {
-          Assert.assertTrue(devices.contains("d" + i));
-        }
-      }
-  
-      // after
-      tsFile.close();
-      FileGenerator.after();
+    @Before
+    public void before() {
+        maxDegreeOfIndexNode = conf.getMaxDegreeOfIndexNode();
+        conf.setMaxDegreeOfIndexNode(3);
     }
-  }
 
+    @After
+    public void after() throws IOException {
+        FileGenerator.after();
+        conf.setMaxDegreeOfIndexNode(maxDegreeOfIndexNode);
+    }
+
+    @Test
+    public void testGetAllDevices1() throws IOException {
+        testGetAllDevices(2, 2);
+    }
+
+    @Test
+    public void testGetAllDevices2() throws IOException {
+        testGetAllDevices(2, 50);
+    }
+
+    @Test
+    public void testGetAllDevices3() throws IOException {
+        testGetAllDevices(50, 2);
+    }
+
+    @Test
+    public void testGetAllDevices4() throws IOException {
+        testGetAllDevices(50, 50);
+    }
+
+    public void testGetAllDevices(int deviceNum, int measurementNum) throws IOException {
+        FileGenerator.generateFile(10000, deviceNum, measurementNum);
+        try (TsFileSequenceReader fileReader = new TsFileSequenceReader(FILE_PATH)) {
+            ReadOnlyTsFile tsFile = new ReadOnlyTsFile(fileReader);
+
+            // test
+            try (TsFileSequenceReader reader = new TsFileSequenceReader(FILE_PATH)) {
+                List<String> devices = reader.getAllDevices();
+                Assert.assertEquals(deviceNum, devices.size());
+                for (int i = 0; i < deviceNum; i++) {
+                    Assert.assertTrue(devices.contains("d" + i));
+                }
+            }
+
+            // after
+            tsFile.close();
+            FileGenerator.after();
+        }
+    }
 }

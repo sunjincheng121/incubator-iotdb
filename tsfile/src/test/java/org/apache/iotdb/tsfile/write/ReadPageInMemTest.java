@@ -22,161 +22,174 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
+import org.apache.iotdb.tsfile.constant.TestConstant;
 import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.iotdb.tsfile.read.common.Path;
-import org.apache.iotdb.tsfile.write.TsFileWriter;
-import org.apache.iotdb.tsfile.write.record.TSRecord;
-import org.apache.iotdb.tsfile.write.schema.Schema;
-import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
-import org.apache.iotdb.tsfile.constant.TestConstant;
 import org.apache.iotdb.tsfile.utils.RecordUtils;
+import org.apache.iotdb.tsfile.write.record.TSRecord;
+import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
+import org.apache.iotdb.tsfile.write.schema.Schema;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ReadPageInMemTest {
 
-  private String filePath = TestConstant.BASE_OUTPUT_PATH.concat("TsFileReadPageInMem");
-  private File file = new File(filePath);
-  private TSFileConfig conf = TSFileDescriptor.getInstance().getConfig();
-  private TsFileWriter innerWriter;
-  private Schema schema = null;
+    private String filePath = TestConstant.BASE_OUTPUT_PATH.concat("TsFileReadPageInMem");
+    private File file = new File(filePath);
+    private TSFileConfig conf = TSFileDescriptor.getInstance().getConfig();
+    private TsFileWriter innerWriter;
+    private Schema schema = null;
 
-  private int pageSize;
-  private int ChunkGroupSize;
-  private int pageCheckSizeThreshold;
-  private int defaultMaxStringLength;
+    private int pageSize;
+    private int ChunkGroupSize;
+    private int pageCheckSizeThreshold;
+    private int defaultMaxStringLength;
 
-  private static Schema getSchema() {
-    Schema schema = new Schema();
-    TSFileConfig conf = TSFileDescriptor.getInstance().getConfig();
-    schema.registerTimeseries(new Path("root.car.d1", "s1"),
-        new MeasurementSchema("s1", TSDataType.INT32, TSEncoding.valueOf(conf.getValueEncoder())));
-    schema.registerTimeseries(new Path("root.car.d1", "s2"),
-        new MeasurementSchema("s2", TSDataType.INT64, TSEncoding.valueOf(conf.getValueEncoder())));
-    schema.registerTimeseries(new Path("root.car.d1", "s3"),
-        new MeasurementSchema("s3", TSDataType.FLOAT, TSEncoding.valueOf(conf.getValueEncoder())));
-    schema.registerTimeseries(new Path("root.car.d1", "s4"),
-        new MeasurementSchema("s4", TSDataType.DOUBLE, TSEncoding.valueOf(conf.getValueEncoder())));
-    schema.registerTimeseries(new Path("root.car.d2", "s1"),
-        new MeasurementSchema("s1", TSDataType.INT32, TSEncoding.valueOf(conf.getValueEncoder())));
-    schema.registerTimeseries(new Path("root.car.d2", "s2"),
-        new MeasurementSchema("s2", TSDataType.INT64, TSEncoding.valueOf(conf.getValueEncoder())));
-    schema.registerTimeseries(new Path("root.car.d2", "s3"),
-        new MeasurementSchema("s3", TSDataType.FLOAT, TSEncoding.valueOf(conf.getValueEncoder())));
-    schema.registerTimeseries(new Path("root.car.d2", "s4"),
-        new MeasurementSchema("s4", TSDataType.DOUBLE, TSEncoding.valueOf(conf.getValueEncoder())));
-    return schema;
-  }
-
-  @Before
-  public void setUp() throws Exception {
-    file.delete();
-    pageSize = conf.getPageSizeInByte();
-    conf.setPageSizeInByte(200);
-    ChunkGroupSize = conf.getGroupSizeInByte();
-    conf.setGroupSizeInByte(100000);
-    pageCheckSizeThreshold = conf.getPageCheckSizeThreshold();
-    conf.setPageCheckSizeThreshold(1);
-    defaultMaxStringLength = conf.getMaxStringLength();
-    conf.setMaxStringLength(2);
-    schema = getSchema();
-    innerWriter = new TsFileWriter(new File(filePath), schema, conf);
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    file.delete();
-    conf.setPageSizeInByte(pageSize);
-    conf.setGroupSizeInByte(ChunkGroupSize);
-    conf.setPageCheckSizeThreshold(pageCheckSizeThreshold);
-    conf.setMaxStringLength(defaultMaxStringLength);
-  }
-
-  @Test
-  public void OneDeviceTest() {
-    String line = "";
-    for (int i = 1; i <= 3; i++) {
-      line = "root.car.d1," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
-      TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
-      try {
-        innerWriter.write(record);
-      } catch (IOException | WriteProcessException e) {
-        e.printStackTrace();
-        fail(e.getMessage());
-      }
-    }
-    for (int i = 4; i < 100; i++) {
-      line = "root.car.d1," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
-      TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
-      try {
-        innerWriter.write(record);
-      } catch (IOException | WriteProcessException e) {
-        e.printStackTrace();
-        fail(e.getMessage());
-      }
-    }
-    try {
-      innerWriter.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-      fail(e.getMessage());
-    }
-  }
-
-  @Test
-  public void MultiDeviceTest() throws IOException {
-
-    String line = "";
-    for (int i = 1; i <= 3; i++) {
-      line = "root.car.d1," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
-      TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
-      try {
-        innerWriter.write(record);
-      } catch (IOException | WriteProcessException e) {
-        e.printStackTrace();
-        fail(e.getMessage());
-      }
-    }
-    for (int i = 1; i <= 3; i++) {
-      line = "root.car.d2," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
-      TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
-      try {
-        innerWriter.write(record);
-      } catch (IOException | WriteProcessException e) {
-        e.printStackTrace();
-        fail(e.getMessage());
-      }
+    private static Schema getSchema() {
+        Schema schema = new Schema();
+        TSFileConfig conf = TSFileDescriptor.getInstance().getConfig();
+        schema.registerTimeseries(
+                new Path("root.car.d1", "s1"),
+                new MeasurementSchema(
+                        "s1", TSDataType.INT32, TSEncoding.valueOf(conf.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("root.car.d1", "s2"),
+                new MeasurementSchema(
+                        "s2", TSDataType.INT64, TSEncoding.valueOf(conf.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("root.car.d1", "s3"),
+                new MeasurementSchema(
+                        "s3", TSDataType.FLOAT, TSEncoding.valueOf(conf.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("root.car.d1", "s4"),
+                new MeasurementSchema(
+                        "s4", TSDataType.DOUBLE, TSEncoding.valueOf(conf.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("root.car.d2", "s1"),
+                new MeasurementSchema(
+                        "s1", TSDataType.INT32, TSEncoding.valueOf(conf.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("root.car.d2", "s2"),
+                new MeasurementSchema(
+                        "s2", TSDataType.INT64, TSEncoding.valueOf(conf.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("root.car.d2", "s3"),
+                new MeasurementSchema(
+                        "s3", TSDataType.FLOAT, TSEncoding.valueOf(conf.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("root.car.d2", "s4"),
+                new MeasurementSchema(
+                        "s4", TSDataType.DOUBLE, TSEncoding.valueOf(conf.getValueEncoder())));
+        return schema;
     }
 
-    for (int i = 4; i < 100; i++) {
-      line = "root.car.d1," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
-      TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
-      try {
-        innerWriter.write(record);
-      } catch (IOException | WriteProcessException e) {
-        e.printStackTrace();
-        fail(e.getMessage());
-      }
+    @Before
+    public void setUp() throws Exception {
+        file.delete();
+        pageSize = conf.getPageSizeInByte();
+        conf.setPageSizeInByte(200);
+        ChunkGroupSize = conf.getGroupSizeInByte();
+        conf.setGroupSizeInByte(100000);
+        pageCheckSizeThreshold = conf.getPageCheckSizeThreshold();
+        conf.setPageCheckSizeThreshold(1);
+        defaultMaxStringLength = conf.getMaxStringLength();
+        conf.setMaxStringLength(2);
+        schema = getSchema();
+        innerWriter = new TsFileWriter(new File(filePath), schema, conf);
     }
 
-    for (int i = 4; i < 100; i++) {
-      line = "root.car.d2," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
-      TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
-      try {
-        innerWriter.write(record);
-      } catch (IOException | WriteProcessException e) {
-        e.printStackTrace();
-        fail(e.getMessage());
-      }
+    @After
+    public void tearDown() throws Exception {
+        file.delete();
+        conf.setPageSizeInByte(pageSize);
+        conf.setGroupSizeInByte(ChunkGroupSize);
+        conf.setPageCheckSizeThreshold(pageCheckSizeThreshold);
+        conf.setMaxStringLength(defaultMaxStringLength);
     }
 
-    innerWriter.close();
-  }
+    @Test
+    public void OneDeviceTest() {
+        String line = "";
+        for (int i = 1; i <= 3; i++) {
+            line = "root.car.d1," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
+            TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
+            try {
+                innerWriter.write(record);
+            } catch (IOException | WriteProcessException e) {
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        }
+        for (int i = 4; i < 100; i++) {
+            line = "root.car.d1," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
+            TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
+            try {
+                innerWriter.write(record);
+            } catch (IOException | WriteProcessException e) {
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        }
+        try {
+            innerWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void MultiDeviceTest() throws IOException {
+
+        String line = "";
+        for (int i = 1; i <= 3; i++) {
+            line = "root.car.d1," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
+            TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
+            try {
+                innerWriter.write(record);
+            } catch (IOException | WriteProcessException e) {
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        }
+        for (int i = 1; i <= 3; i++) {
+            line = "root.car.d2," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
+            TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
+            try {
+                innerWriter.write(record);
+            } catch (IOException | WriteProcessException e) {
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        }
+
+        for (int i = 4; i < 100; i++) {
+            line = "root.car.d1," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
+            TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
+            try {
+                innerWriter.write(record);
+            } catch (IOException | WriteProcessException e) {
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        }
+
+        for (int i = 4; i < 100; i++) {
+            line = "root.car.d2," + i + ",s1,1,s2,1,s3,0.1,s4,0.1";
+            TSRecord record = RecordUtils.parseSimpleTupleRecord(line, schema);
+            try {
+                innerWriter.write(record);
+            } catch (IOException | WriteProcessException e) {
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        }
+
+        innerWriter.close();
+    }
 }

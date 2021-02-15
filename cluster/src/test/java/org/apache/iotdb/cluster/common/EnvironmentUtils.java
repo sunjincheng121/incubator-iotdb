@@ -24,8 +24,6 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import org.apache.iotdb.db.auth.AuthException;
 import org.apache.iotdb.db.auth.authorizer.IAuthorizer;
 import org.apache.iotdb.db.auth.authorizer.LocalFileAuthorizer;
@@ -49,170 +47,163 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * <p>
- * This class is used for cleaning test environment in unit test and integration test
- * </p>
- */
+/** This class is used for cleaning test environment in unit test and integration test */
 public class EnvironmentUtils {
 
-  private static final String OUTPUT_DATA_DIR = "target/";
+    private static final String OUTPUT_DATA_DIR = "target/";
 
-  private EnvironmentUtils() {
-    // util class
-  }
-
-  private static final Logger logger = LoggerFactory.getLogger(EnvironmentUtils.class);
-
-  private static IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
-  private static DirectoryManager directoryManager = DirectoryManager.getInstance();
-
-  private static long testQueryId = 1;
-
-  private static long oldTsFileThreshold = config.getTsFileSizeThreshold();
-
-  private static long oldGroupSizeInByte = config.getMemtableSizeThreshold();
-
-  public static void cleanEnv() throws IOException, StorageEngineException {
-    System.out.println("Cleaning environment...");
-    QueryResourceManager.getInstance().endQuery(testQueryId);
-
-    // clear opened file streams
-    FileReaderManager.getInstance().closeAndRemoveAllOpenedReaders();
-
-    // clean storage group manager
-    if (!StorageEngine.getInstance().deleteAll()) {
-      logger.error("Can't close the storage group manager in EnvironmentUtils");
-      Assert.fail();
+    private EnvironmentUtils() {
+        // util class
     }
-    StorageEngine.getInstance().reset();
-    IoTDBDescriptor.getInstance().getConfig().setReadOnly(false);
 
-    StatMonitor.getInstance().close();
-    // clean wal
-    MultiFileLogNodeManager.getInstance().stop();
-    // clean cache
-    if (config.isMetaDataCacheEnable()) {
-      ChunkMetadataCache.getInstance().clear();
-      TimeSeriesMetadataCache.getInstance().clear();
-    }
-    // close metadata
-    IoTDB.metaManager.clear();
+    private static final Logger logger = LoggerFactory.getLogger(EnvironmentUtils.class);
 
-    MergeManager.getINSTANCE().stop();
-    MetricsService.getInstance().stop();
-    // delete all directory
-    cleanAllDir();
+    private static IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
+    private static DirectoryManager directoryManager = DirectoryManager.getInstance();
 
-    config.setTsFileSizeThreshold(oldTsFileThreshold);
-    config.setMemtableSizeThreshold(oldGroupSizeInByte);
-  }
+    private static long testQueryId = 1;
 
-  public static void cleanAllDir() throws IOException {
-    // delete sequential files
-    for (String path : directoryManager.getAllSequenceFileFolders()) {
-      cleanDir(path);
-    }
-    // delete unsequence files
-    for (String path : directoryManager.getAllUnSequenceFileFolders()) {
-      cleanDir(path);
-    }
-    // delete system info
-    cleanDir(config.getSystemDir());
-    // delete wal
-    cleanDir(config.getWalDir());
-    // delete query
-    cleanDir(config.getQueryDir());
-    cleanDir("remote");
-    // delete data files
-    for (String dataDir : config.getDataDirs()) {
-      cleanDir(dataDir);
-    }
-  }
+    private static long oldTsFileThreshold = config.getTsFileSizeThreshold();
 
-  public static void cleanDir(String dir) throws IOException {
-    deleteRecursively(new File(dir));
-  }
+    private static long oldGroupSizeInByte = config.getMemtableSizeThreshold();
 
-  public static void deleteRecursively(File file) throws IOException {
-    if (file.exists()) {
-      if (file.isDirectory()) {
-        File[] files = file.listFiles();
-        if (files != null) {
-          for (File child : files) {
-            deleteRecursively(child);
-          }
+    public static void cleanEnv() throws IOException, StorageEngineException {
+        System.out.println("Cleaning environment...");
+        QueryResourceManager.getInstance().endQuery(testQueryId);
+
+        // clear opened file streams
+        FileReaderManager.getInstance().closeAndRemoveAllOpenedReaders();
+
+        // clean storage group manager
+        if (!StorageEngine.getInstance().deleteAll()) {
+            logger.error("Can't close the storage group manager in EnvironmentUtils");
+            Assert.fail();
         }
-      }
-      try {
-        Files.delete(Paths.get(file.getAbsolutePath()));
-      } catch (DirectoryNotEmptyException e) {
-        deleteRecursively(file);
-      } catch (NoSuchFileException e) {
-        // ignore;
-      }
-    }
-  }
+        StorageEngine.getInstance().reset();
+        IoTDBDescriptor.getInstance().getConfig().setReadOnly(false);
 
+        StatMonitor.getInstance().close();
+        // clean wal
+        MultiFileLogNodeManager.getInstance().stop();
+        // clean cache
+        if (config.isMetaDataCacheEnable()) {
+            ChunkMetadataCache.getInstance().clear();
+            TimeSeriesMetadataCache.getInstance().clear();
+        }
+        // close metadata
+        IoTDB.metaManager.clear();
 
-  /**
-   * disable the system monitor</br> this function should be called before all code in the setup
-   */
-  public static void closeStatMonitor() {
-    config.setEnableStatMonitor(false);
-  }
+        MergeManager.getINSTANCE().stop();
+        MetricsService.getInstance().stop();
+        // delete all directory
+        cleanAllDir();
 
-  /**
-   * disable memory control</br> this function should be called before all code in the setup
-   */
-  public static void envSetUp() throws StartupException {
-    IoTDB.metaManager.init();
+        config.setTsFileSizeThreshold(oldTsFileThreshold);
+        config.setMemtableSizeThreshold(oldGroupSizeInByte);
+    }
 
-    createAllDir();
-    // disable the system monitor
-    config.setEnableStatMonitor(false);
-    IAuthorizer authorizer;
-    try {
-      authorizer = LocalFileAuthorizer.getInstance();
-    } catch (AuthException e) {
-      throw new StartupException(e);
+    public static void cleanAllDir() throws IOException {
+        // delete sequential files
+        for (String path : directoryManager.getAllSequenceFileFolders()) {
+            cleanDir(path);
+        }
+        // delete unsequence files
+        for (String path : directoryManager.getAllUnSequenceFileFolders()) {
+            cleanDir(path);
+        }
+        // delete system info
+        cleanDir(config.getSystemDir());
+        // delete wal
+        cleanDir(config.getWalDir());
+        // delete query
+        cleanDir(config.getQueryDir());
+        cleanDir("remote");
+        // delete data files
+        for (String dataDir : config.getDataDirs()) {
+            cleanDir(dataDir);
+        }
     }
-    try {
-      authorizer.reset();
-    } catch (AuthException e) {
-      throw new StartupException(e);
-    }
-    StorageEngine.getInstance().reset();
-    MultiFileLogNodeManager.getInstance().start();
-    FlushManager.getInstance().start();
-    MergeManager.getINSTANCE().start();
-    testQueryId = QueryResourceManager.getInstance().assignQueryId(true, 1024, -1);
-  }
 
-  private static void createAllDir() {
-    // create sequential files
-    for (String path : directoryManager.getAllSequenceFileFolders()) {
-      createDir(path);
+    public static void cleanDir(String dir) throws IOException {
+        deleteRecursively(new File(dir));
     }
-    // create unsequential files
-    for (String path : directoryManager.getAllUnSequenceFileFolders()) {
-      createDir(path);
-    }
-    // create storage group
-    createDir(config.getSystemDir());
-    // create wal
-    createDir(config.getWalDir());
-    // create query
-    createDir(config.getQueryDir());
-    createDir(OUTPUT_DATA_DIR);
-    // create data
-    for (String dataDir : config.getDataDirs()) {
-      createDir(dataDir);
-    }
-  }
 
-  private static void createDir(String dir) {
-    File file = new File(dir);
-    file.mkdirs();
-  }
+    public static void deleteRecursively(File file) throws IOException {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                File[] files = file.listFiles();
+                if (files != null) {
+                    for (File child : files) {
+                        deleteRecursively(child);
+                    }
+                }
+            }
+            try {
+                Files.delete(Paths.get(file.getAbsolutePath()));
+            } catch (DirectoryNotEmptyException e) {
+                deleteRecursively(file);
+            } catch (NoSuchFileException e) {
+                // ignore;
+            }
+        }
+    }
+
+    /**
+     * disable the system monitor</br> this function should be called before all code in the setup
+     */
+    public static void closeStatMonitor() {
+        config.setEnableStatMonitor(false);
+    }
+
+    /** disable memory control</br> this function should be called before all code in the setup */
+    public static void envSetUp() throws StartupException {
+        IoTDB.metaManager.init();
+
+        createAllDir();
+        // disable the system monitor
+        config.setEnableStatMonitor(false);
+        IAuthorizer authorizer;
+        try {
+            authorizer = LocalFileAuthorizer.getInstance();
+        } catch (AuthException e) {
+            throw new StartupException(e);
+        }
+        try {
+            authorizer.reset();
+        } catch (AuthException e) {
+            throw new StartupException(e);
+        }
+        StorageEngine.getInstance().reset();
+        MultiFileLogNodeManager.getInstance().start();
+        FlushManager.getInstance().start();
+        MergeManager.getINSTANCE().start();
+        testQueryId = QueryResourceManager.getInstance().assignQueryId(true, 1024, -1);
+    }
+
+    private static void createAllDir() {
+        // create sequential files
+        for (String path : directoryManager.getAllSequenceFileFolders()) {
+            createDir(path);
+        }
+        // create unsequential files
+        for (String path : directoryManager.getAllUnSequenceFileFolders()) {
+            createDir(path);
+        }
+        // create storage group
+        createDir(config.getSystemDir());
+        // create wal
+        createDir(config.getWalDir());
+        // create query
+        createDir(config.getQueryDir());
+        createDir(OUTPUT_DATA_DIR);
+        // create data
+        for (String dataDir : config.getDataDirs()) {
+            createDir(dataDir);
+        }
+    }
+
+    private static void createDir(String dir) {
+        File file = new File(dir);
+        file.mkdirs();
+    }
 }

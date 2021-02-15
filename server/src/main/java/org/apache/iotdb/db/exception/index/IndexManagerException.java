@@ -17,19 +17,18 @@
  */
 package org.apache.iotdb.db.exception.index;
 
-
 import org.apache.iotdb.db.exception.IoTDBException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 
 public class IndexManagerException extends QueryProcessException {
 
-  private static final long serialVersionUID = 1233035822169501915L;
+    private static final long serialVersionUID = 1233035822169501915L;
 
-  public IndexManagerException(String message) {
-    super(message);
-  }
+    public IndexManagerException(String message) {
+        super(message);
+    }
 
-  public IndexManagerException(IoTDBException e) {
-    super(e);
-  }
+    public IndexManagerException(IoTDBException e) {
+        super(e);
+    }
 }

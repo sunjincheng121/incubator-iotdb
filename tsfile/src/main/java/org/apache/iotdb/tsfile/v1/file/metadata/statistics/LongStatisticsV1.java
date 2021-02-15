@@ -23,58 +23,55 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Statistics for long type.
- */
+/** Statistics for long type. */
 public class LongStatisticsV1 extends StatisticsV1<Long> {
 
-  private long min;
-  private long max;
-  private long first;
-  private long last;
-  private double sum;
+    private long min;
+    private long max;
+    private long first;
+    private long last;
+    private double sum;
 
-  @Override
-  public Long getMin() {
-    return min;
-  }
+    @Override
+    public Long getMin() {
+        return min;
+    }
 
-  @Override
-  public Long getMax() {
-    return max;
-  }
+    @Override
+    public Long getMax() {
+        return max;
+    }
 
-  @Override
-  public Long getFirst() {
-    return first;
-  }
+    @Override
+    public Long getFirst() {
+        return first;
+    }
 
-  @Override
-  public Long getLast() {
-    return last;
-  }
+    @Override
+    public Long getLast() {
+        return last;
+    }
 
-  @Override
-  public double getSum() {
-    return sum;
-  }
+    @Override
+    public double getSum() {
+        return sum;
+    }
 
-  @Override
-  void deserialize(ByteBuffer byteBuffer) throws IOException {
-    this.min = ReadWriteIOUtils.readLong(byteBuffer);
-    this.max = ReadWriteIOUtils.readLong(byteBuffer);
-    this.first = ReadWriteIOUtils.readLong(byteBuffer);
-    this.last = ReadWriteIOUtils.readLong(byteBuffer);
-    this.sum = ReadWriteIOUtils.readDouble(byteBuffer);
-  }
+    @Override
+    void deserialize(ByteBuffer byteBuffer) throws IOException {
+        this.min = ReadWriteIOUtils.readLong(byteBuffer);
+        this.max = ReadWriteIOUtils.readLong(byteBuffer);
+        this.first = ReadWriteIOUtils.readLong(byteBuffer);
+        this.last = ReadWriteIOUtils.readLong(byteBuffer);
+        this.sum = ReadWriteIOUtils.readDouble(byteBuffer);
+    }
 
-  @Override
-  void deserialize(InputStream inputStream) throws IOException {
-    this.min = ReadWriteIOUtils.readLong(inputStream);
-    this.max = ReadWriteIOUtils.readLong(inputStream);
-    this.first = ReadWriteIOUtils.readLong(inputStream);
-    this.last = ReadWriteIOUtils.readLong(inputStream);
-    this.sum = ReadWriteIOUtils.readDouble(inputStream);
-  }
-
+    @Override
+    void deserialize(InputStream inputStream) throws IOException {
+        this.min = ReadWriteIOUtils.readLong(inputStream);
+        this.max = ReadWriteIOUtils.readLong(inputStream);
+        this.first = ReadWriteIOUtils.readLong(inputStream);
+        this.last = ReadWriteIOUtils.readLong(inputStream);
+        this.sum = ReadWriteIOUtils.readDouble(inputStream);
+    }
 }

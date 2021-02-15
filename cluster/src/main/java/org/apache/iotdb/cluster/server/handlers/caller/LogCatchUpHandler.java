@@ -36,69 +36,70 @@ import org.slf4j.LoggerFactory;
  */
 public class LogCatchUpHandler implements AsyncMethodCallback<Long> {
 
-  private static final Logger logger = LoggerFactory.getLogger(LogCatchUpHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogCatchUpHandler.class);
 
-  private Node follower;
-  private Log log;
-  private AtomicBoolean appendSucceed;
-  private String memberName;
-  private RaftMember raftMember;
+    private Node follower;
+    private Log log;
+    private AtomicBoolean appendSucceed;
+    private String memberName;
+    private RaftMember raftMember;
 
-  @Override
-  public void onComplete(Long response) {
-    logger.debug("{}: Received a catch-up result of {} from {}", memberName, log, follower);
-    long resp = response;
-    if (resp == RESPONSE_AGREE) {
-      synchronized (appendSucceed) {
-        appendSucceed.set(true);
-        appendSucceed.notifyAll();
-      }
-      logger.debug("{}: Succeeded to send log {}", memberName, log);
-    } else if (resp == RESPONSE_LOG_MISMATCH) {
-      // this may occur when the follower suddenly received a lot of logs, committed them and
-      // discarded the old ones, so we consider in this case the appending succeeded
-      logger.debug("{}: Log mismatch occurred when sending log {}", memberName, log);
-      synchronized (appendSucceed) {
-        appendSucceed.set(true);
-        appendSucceed.notifyAll();
-      }
-    } else {
-      // the follower's term has updated, which means a new leader is elected
-      logger.debug("{}: Received a rejection because term is updated to: {}", memberName, resp);
-      raftMember.stepDown(resp, false);
-      synchronized (appendSucceed) {
-        appendSucceed.notifyAll();
-      }
-      logger.warn("{}: Catch-up aborted because leadership is lost", memberName);
+    @Override
+    public void onComplete(Long response) {
+        logger.debug("{}: Received a catch-up result of {} from {}", memberName, log, follower);
+        long resp = response;
+        if (resp == RESPONSE_AGREE) {
+            synchronized (appendSucceed) {
+                appendSucceed.set(true);
+                appendSucceed.notifyAll();
+            }
+            logger.debug("{}: Succeeded to send log {}", memberName, log);
+        } else if (resp == RESPONSE_LOG_MISMATCH) {
+            // this may occur when the follower suddenly received a lot of logs, committed them and
+            // discarded the old ones, so we consider in this case the appending succeeded
+            logger.debug("{}: Log mismatch occurred when sending log {}", memberName, log);
+            synchronized (appendSucceed) {
+                appendSucceed.set(true);
+                appendSucceed.notifyAll();
+            }
+        } else {
+            // the follower's term has updated, which means a new leader is elected
+            logger.debug(
+                    "{}: Received a rejection because term is updated to: {}", memberName, resp);
+            raftMember.stepDown(resp, false);
+            synchronized (appendSucceed) {
+                appendSucceed.notifyAll();
+            }
+            logger.warn("{}: Catch-up aborted because leadership is lost", memberName);
+        }
     }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    synchronized (appendSucceed) {
-      appendSucceed.notifyAll();
+    @Override
+    public void onError(Exception exception) {
+        synchronized (appendSucceed) {
+            appendSucceed.notifyAll();
+        }
+        logger.warn("{}: Catch-up fails when sending log {}", memberName, log, exception);
     }
-    logger.warn("{}: Catch-up fails when sending log {}", memberName, log, exception);
-  }
 
-  public void setLog(Log log) {
-    this.log = log;
-  }
+    public void setLog(Log log) {
+        this.log = log;
+    }
 
-  public void setAppendSucceed(AtomicBoolean appendSucceed) {
-    this.appendSucceed = appendSucceed;
-  }
+    public void setAppendSucceed(AtomicBoolean appendSucceed) {
+        this.appendSucceed = appendSucceed;
+    }
 
-  public void setRaftMember(RaftMember raftMember) {
-    this.raftMember = raftMember;
-    this.memberName = raftMember.getName();
-  }
+    public void setRaftMember(RaftMember raftMember) {
+        this.raftMember = raftMember;
+        this.memberName = raftMember.getName();
+    }
 
-  public void setFollower(Node follower) {
-    this.follower = follower;
-  }
+    public void setFollower(Node follower) {
+        this.follower = follower;
+    }
 
-  public AtomicBoolean getAppendSucceed() {
-    return appendSucceed;
-  }
+    public AtomicBoolean getAppendSucceed() {
+        return appendSucceed;
+    }
 }

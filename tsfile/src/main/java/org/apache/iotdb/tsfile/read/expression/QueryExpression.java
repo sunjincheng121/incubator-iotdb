@@ -26,73 +26,76 @@ import org.apache.iotdb.tsfile.read.common.Path;
 
 public class QueryExpression implements Serializable {
 
-  private List<Path> selectedSeries;
-  private List<TSDataType> dataTypes;
-  private IExpression expression;
-  private boolean hasQueryFilter;
+    private List<Path> selectedSeries;
+    private List<TSDataType> dataTypes;
+    private IExpression expression;
+    private boolean hasQueryFilter;
 
-  private QueryExpression() {
-    selectedSeries = new ArrayList<>();
-    hasQueryFilter = false;
-  }
-
-  public static QueryExpression create() {
-    return new QueryExpression();
-  }
-
-  public static QueryExpression create(List<Path> selectedSeries,
-      IExpression expression) {
-    QueryExpression ret = new QueryExpression();
-    ret.selectedSeries = selectedSeries;
-    ret.expression = expression;
-    ret.hasQueryFilter = expression != null;
-    return ret;
-  }
-
-  public QueryExpression addSelectedPath(Path path) {
-    this.selectedSeries.add(path);
-    return this;
-  }
-
-  public QueryExpression setSelectSeries(List<Path> selectedSeries) {
-    this.selectedSeries = selectedSeries;
-    return this;
-  }
-
-  public IExpression getExpression() {
-    return expression;
-  }
-
-  public QueryExpression setExpression(IExpression expression) {
-    if (expression != null) {
-      this.expression = expression;
-      hasQueryFilter = true;
+    private QueryExpression() {
+        selectedSeries = new ArrayList<>();
+        hasQueryFilter = false;
     }
-    return this;
-  }
 
-  public List<Path> getSelectedSeries() {
-    return selectedSeries;
-  }
+    public static QueryExpression create() {
+        return new QueryExpression();
+    }
 
-  @Override
-  public String toString() {
-    StringBuilder stringBuilder = new StringBuilder("\n\t[Selected Series]:").append(selectedSeries)
-        .append("\n\t[TSDataType]:").append(dataTypes).append("\n\t[expression]:")
-        .append(expression);
-    return stringBuilder.toString();
-  }
+    public static QueryExpression create(List<Path> selectedSeries, IExpression expression) {
+        QueryExpression ret = new QueryExpression();
+        ret.selectedSeries = selectedSeries;
+        ret.expression = expression;
+        ret.hasQueryFilter = expression != null;
+        return ret;
+    }
 
-  public boolean hasQueryFilter() {
-    return hasQueryFilter;
-  }
+    public QueryExpression addSelectedPath(Path path) {
+        this.selectedSeries.add(path);
+        return this;
+    }
 
-  public List<TSDataType> getDataTypes() {
-    return dataTypes;
-  }
+    public QueryExpression setSelectSeries(List<Path> selectedSeries) {
+        this.selectedSeries = selectedSeries;
+        return this;
+    }
 
-  public QueryExpression setDataTypes(List<TSDataType> dataTypes) {
-    this.dataTypes = dataTypes;
-    return this;
-  }
+    public IExpression getExpression() {
+        return expression;
+    }
+
+    public QueryExpression setExpression(IExpression expression) {
+        if (expression != null) {
+            this.expression = expression;
+            hasQueryFilter = true;
+        }
+        return this;
+    }
+
+    public List<Path> getSelectedSeries() {
+        return selectedSeries;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder =
+                new StringBuilder("\n\t[Selected Series]:")
+                        .append(selectedSeries)
+                        .append("\n\t[TSDataType]:")
+                        .append(dataTypes)
+                        .append("\n\t[expression]:")
+                        .append(expression);
+        return stringBuilder.toString();
+    }
+
+    public boolean hasQueryFilter() {
+        return hasQueryFilter;
+    }
+
+    public List<TSDataType> getDataTypes() {
+        return dataTypes;
+    }
+
+    public QueryExpression setDataTypes(List<TSDataType> dataTypes) {
+        this.dataTypes = dataTypes;
+        return this;
+    }
 }

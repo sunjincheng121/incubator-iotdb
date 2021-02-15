@@ -23,12 +23,9 @@ import org.apache.iotdb.spark.tsfile.qp.exception.DNFOptimizeException;
 import org.apache.iotdb.spark.tsfile.qp.exception.MergeFilterException;
 import org.apache.iotdb.spark.tsfile.qp.exception.RemoveNotException;
 
-/**
- * provide a filter operator, optimize it.
- *
- */
+/** provide a filter operator, optimize it. */
 public interface IFilterOptimizer {
 
-  FilterOperator optimize(FilterOperator filter)
-      throws RemoveNotException, DNFOptimizeException, MergeFilterException;
+    FilterOperator optimize(FilterOperator filter)
+            throws RemoveNotException, DNFOptimizeException, MergeFilterException;
 }

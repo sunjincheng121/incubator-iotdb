@@ -28,68 +28,66 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
  */
 public abstract class SFWOperator extends RootOperator {
 
-  private SelectOperator selectOperator;
-  private FromOperator fromOperator;
-  private FilterOperator filterOperator;
-  private boolean hasAggregation = false;
-  private boolean lastQuery = false;
+    private SelectOperator selectOperator;
+    private FromOperator fromOperator;
+    private FilterOperator filterOperator;
+    private boolean hasAggregation = false;
+    private boolean lastQuery = false;
 
-  public SFWOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.SFW;
-  }
-
-  public FromOperator getFromOperator() {
-    return fromOperator;
-  }
-
-  public void setFromOperator(FromOperator from) {
-    this.fromOperator = from;
-  }
-
-  public SelectOperator getSelectOperator() {
-    return selectOperator;
-  }
-
-  /**
-   * set selectOperator, then init hasAggregation according to selectOperator.
-   */
-  public void setSelectOperator(SelectOperator sel) {
-    this.selectOperator = sel;
-    if (!sel.getAggregations().isEmpty()) {
-      hasAggregation = true;
+    public SFWOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.SFW;
     }
-    if (sel.isLastQuery()) {
-      lastQuery = true;
+
+    public FromOperator getFromOperator() {
+        return fromOperator;
     }
-  }
 
-  public FilterOperator getFilterOperator() {
-    return filterOperator;
-  }
-
-  public void setFilterOperator(FilterOperator filter) {
-    this.filterOperator = filter;
-  }
-
-  /**
-   * get information from SelectOperator and FromOperator and generate all table paths.
-   *
-   * @return - a list of seriesPath
-   */
-  public List<PartialPath> getSelectedPaths() {
-    List<PartialPath> suffixPaths = null;
-    if (selectOperator != null) {
-      suffixPaths = selectOperator.getSuffixPaths();
+    public void setFromOperator(FromOperator from) {
+        this.fromOperator = from;
     }
-    return suffixPaths;
-  }
 
-  public boolean hasAggregation() {
-    return hasAggregation;
-  }
+    public SelectOperator getSelectOperator() {
+        return selectOperator;
+    }
 
-  public boolean isLastQuery() {
-    return lastQuery;
-  }
+    /** set selectOperator, then init hasAggregation according to selectOperator. */
+    public void setSelectOperator(SelectOperator sel) {
+        this.selectOperator = sel;
+        if (!sel.getAggregations().isEmpty()) {
+            hasAggregation = true;
+        }
+        if (sel.isLastQuery()) {
+            lastQuery = true;
+        }
+    }
+
+    public FilterOperator getFilterOperator() {
+        return filterOperator;
+    }
+
+    public void setFilterOperator(FilterOperator filter) {
+        this.filterOperator = filter;
+    }
+
+    /**
+     * get information from SelectOperator and FromOperator and generate all table paths.
+     *
+     * @return - a list of seriesPath
+     */
+    public List<PartialPath> getSelectedPaths() {
+        List<PartialPath> suffixPaths = null;
+        if (selectOperator != null) {
+            suffixPaths = selectOperator.getSuffixPaths();
+        }
+        return suffixPaths;
+    }
+
+    public boolean hasAggregation() {
+        return hasAggregation;
+    }
+
+    public boolean isLastQuery() {
+        return lastQuery;
+    }
 }

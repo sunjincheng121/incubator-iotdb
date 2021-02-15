@@ -31,69 +31,69 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class SetStorageGroupPlan extends PhysicalPlan {
 
-  private PartialPath path;
+    private PartialPath path;
 
-  public SetStorageGroupPlan() {
-    super(false, Operator.OperatorType.SET_STORAGE_GROUP);
-  }
-
-  public SetStorageGroupPlan(PartialPath path) {
-    super(false, Operator.OperatorType.SET_STORAGE_GROUP);
-    this.path = path;
-  }
-  
-  public PartialPath getPath() {
-    return path;
-  }
-
-  public void setPath(PartialPath path) {
-    this.path = path;
-  }
-
-  @Override
-  public List<PartialPath> getPaths() {
-    return path != null ? Collections.singletonList(path) : Collections.emptyList();
-  }
-
-  @Override
-  public void serialize(DataOutputStream stream) throws IOException {
-    stream.write((byte) PhysicalPlanType.SET_STORAGE_GROUP.ordinal());
-    byte[] fullPathBytes = path.getFullPath().getBytes();
-    stream.writeInt(fullPathBytes.length);
-    stream.write(fullPathBytes);
-
-    stream.writeLong(index);
-  }
-
-  @Override
-  public void deserialize(ByteBuffer buffer) throws IllegalPathException {
-    int length = buffer.getInt();
-    byte[] fullPathBytes = new byte[length];
-    buffer.get(fullPathBytes);
-    path = new PartialPath(new String(fullPathBytes));
-
-    this.index = buffer.getLong();
-  }
-
-  @Override
-  public String toString() {
-    return "SetStorageGroup{" + path + '}';
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public SetStorageGroupPlan() {
+        super(false, Operator.OperatorType.SET_STORAGE_GROUP);
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    SetStorageGroupPlan that = (SetStorageGroupPlan) o;
-    return Objects.equals(path, that.path);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(path);
-  }
+    public SetStorageGroupPlan(PartialPath path) {
+        super(false, Operator.OperatorType.SET_STORAGE_GROUP);
+        this.path = path;
+    }
+
+    public PartialPath getPath() {
+        return path;
+    }
+
+    public void setPath(PartialPath path) {
+        this.path = path;
+    }
+
+    @Override
+    public List<PartialPath> getPaths() {
+        return path != null ? Collections.singletonList(path) : Collections.emptyList();
+    }
+
+    @Override
+    public void serialize(DataOutputStream stream) throws IOException {
+        stream.write((byte) PhysicalPlanType.SET_STORAGE_GROUP.ordinal());
+        byte[] fullPathBytes = path.getFullPath().getBytes();
+        stream.writeInt(fullPathBytes.length);
+        stream.write(fullPathBytes);
+
+        stream.writeLong(index);
+    }
+
+    @Override
+    public void deserialize(ByteBuffer buffer) throws IllegalPathException {
+        int length = buffer.getInt();
+        byte[] fullPathBytes = new byte[length];
+        buffer.get(fullPathBytes);
+        path = new PartialPath(new String(fullPathBytes));
+
+        this.index = buffer.getLong();
+    }
+
+    @Override
+    public String toString() {
+        return "SetStorageGroup{" + path + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SetStorageGroupPlan that = (SetStorageGroupPlan) o;
+        return Objects.equals(path, that.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path);
+    }
 }

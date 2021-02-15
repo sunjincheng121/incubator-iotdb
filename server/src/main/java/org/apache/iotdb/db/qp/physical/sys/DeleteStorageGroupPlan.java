@@ -29,56 +29,55 @@ import org.apache.iotdb.db.qp.logical.Operator;
 import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class DeleteStorageGroupPlan extends PhysicalPlan {
-  
-  private List<PartialPath> deletePathList;
-  
-  public DeleteStorageGroupPlan (List<PartialPath> deletePathList) {
-	  super(false, Operator.OperatorType.DELETE_STORAGE_GROUP);
-	  this.deletePathList = deletePathList;
-  }
 
-  public DeleteStorageGroupPlan() {
-    super(false, Operator.OperatorType.DELETE_STORAGE_GROUP);
-  }
-  
-  @Override
-  public List<PartialPath> getPaths() {
-    return deletePathList;
-  }
+    private List<PartialPath> deletePathList;
 
-  @Override
-  public void serialize(DataOutputStream stream) throws IOException {
-    int type = PhysicalPlan.PhysicalPlanType.DELETE_STORAGE_GROUP.ordinal();
-    stream.writeByte((byte) type);
-    stream.writeInt(this.getPaths().size());
-    for (PartialPath path : this.getPaths()) {
-      putString(stream, path.getFullPath());
+    public DeleteStorageGroupPlan(List<PartialPath> deletePathList) {
+        super(false, Operator.OperatorType.DELETE_STORAGE_GROUP);
+        this.deletePathList = deletePathList;
     }
 
-    stream.writeLong(index);
-  }
-
-  @Override
-  public void serialize(ByteBuffer buffer) {
-    int type = PhysicalPlanType.DELETE_STORAGE_GROUP.ordinal();
-    buffer.put((byte) type);
-    buffer.putInt(this.getPaths().size());
-    for (PartialPath path : this.getPaths()) {
-      putString(buffer, path.getFullPath());
+    public DeleteStorageGroupPlan() {
+        super(false, Operator.OperatorType.DELETE_STORAGE_GROUP);
     }
 
-    buffer.putLong(index);
-  }
-
-  @Override
-  public void deserialize(ByteBuffer buffer) throws IllegalPathException {
-    int pathNum = buffer.getInt();
-    this.deletePathList = new ArrayList<>();
-    for (int i = 0; i < pathNum; i++) {
-      deletePathList.add(new PartialPath(readString(buffer)));
+    @Override
+    public List<PartialPath> getPaths() {
+        return deletePathList;
     }
 
-    this.index = buffer.getLong();
-  }
+    @Override
+    public void serialize(DataOutputStream stream) throws IOException {
+        int type = PhysicalPlan.PhysicalPlanType.DELETE_STORAGE_GROUP.ordinal();
+        stream.writeByte((byte) type);
+        stream.writeInt(this.getPaths().size());
+        for (PartialPath path : this.getPaths()) {
+            putString(stream, path.getFullPath());
+        }
 
+        stream.writeLong(index);
+    }
+
+    @Override
+    public void serialize(ByteBuffer buffer) {
+        int type = PhysicalPlanType.DELETE_STORAGE_GROUP.ordinal();
+        buffer.put((byte) type);
+        buffer.putInt(this.getPaths().size());
+        for (PartialPath path : this.getPaths()) {
+            putString(buffer, path.getFullPath());
+        }
+
+        buffer.putLong(index);
+    }
+
+    @Override
+    public void deserialize(ByteBuffer buffer) throws IllegalPathException {
+        int pathNum = buffer.getInt();
+        this.deletePathList = new ArrayList<>();
+        for (int i = 0; i < pathNum; i++) {
+            deletePathList.add(new PartialPath(readString(buffer)));
+        }
+
+        this.index = buffer.getLong();
+    }
 }

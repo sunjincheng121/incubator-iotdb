@@ -23,92 +23,97 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class PageHeader {
 
-  private int uncompressedSize;
-  private int compressedSize;
-  private Statistics statistics;
-  private boolean modified;
+    private int uncompressedSize;
+    private int compressedSize;
+    private Statistics statistics;
+    private boolean modified;
 
-  public PageHeader(int uncompressedSize, int compressedSize, Statistics statistics) {
-    this.uncompressedSize = uncompressedSize;
-    this.compressedSize = compressedSize;
-    this.statistics = statistics;
-  }
+    public PageHeader(int uncompressedSize, int compressedSize, Statistics statistics) {
+        this.uncompressedSize = uncompressedSize;
+        this.compressedSize = compressedSize;
+        this.statistics = statistics;
+    }
 
-  public static int calculatePageHeaderSizeWithoutStatistics() {
-    return 2 * Integer.BYTES; // uncompressedSize, compressedSize
-  }
+    public static int calculatePageHeaderSizeWithoutStatistics() {
+        return 2 * Integer.BYTES; // uncompressedSize, compressedSize
+    }
 
-  public static PageHeader deserializeFrom(InputStream inputStream, TSDataType dataType)
-      throws IOException {
-    int uncompressedSize = ReadWriteIOUtils.readInt(inputStream);
-    int compressedSize = ReadWriteIOUtils.readInt(inputStream);
-    Statistics statistics = Statistics.deserialize(inputStream, dataType);
-    return new PageHeader(uncompressedSize, compressedSize, statistics);
-  }
+    public static PageHeader deserializeFrom(InputStream inputStream, TSDataType dataType)
+            throws IOException {
+        int uncompressedSize = ReadWriteIOUtils.readInt(inputStream);
+        int compressedSize = ReadWriteIOUtils.readInt(inputStream);
+        Statistics statistics = Statistics.deserialize(inputStream, dataType);
+        return new PageHeader(uncompressedSize, compressedSize, statistics);
+    }
 
-  public static PageHeader deserializeFrom(ByteBuffer buffer, TSDataType dataType) {
-    int uncompressedSize = ReadWriteIOUtils.readInt(buffer);
-    int compressedSize = ReadWriteIOUtils.readInt(buffer);
-    Statistics statistics = Statistics.deserialize(buffer, dataType);
-    return new PageHeader(uncompressedSize, compressedSize, statistics);
-  }
+    public static PageHeader deserializeFrom(ByteBuffer buffer, TSDataType dataType) {
+        int uncompressedSize = ReadWriteIOUtils.readInt(buffer);
+        int compressedSize = ReadWriteIOUtils.readInt(buffer);
+        Statistics statistics = Statistics.deserialize(buffer, dataType);
+        return new PageHeader(uncompressedSize, compressedSize, statistics);
+    }
 
-  public int getUncompressedSize() {
-    return uncompressedSize;
-  }
+    public int getUncompressedSize() {
+        return uncompressedSize;
+    }
 
-  public void setUncompressedSize(int uncompressedSize) {
-    this.uncompressedSize = uncompressedSize;
-  }
+    public void setUncompressedSize(int uncompressedSize) {
+        this.uncompressedSize = uncompressedSize;
+    }
 
-  public int getCompressedSize() {
-    return compressedSize;
-  }
+    public int getCompressedSize() {
+        return compressedSize;
+    }
 
-  public void setCompressedSize(int compressedSize) {
-    this.compressedSize = compressedSize;
-  }
+    public void setCompressedSize(int compressedSize) {
+        this.compressedSize = compressedSize;
+    }
 
-  public long getNumOfValues() {
-    return statistics.getCount();
-  }
+    public long getNumOfValues() {
+        return statistics.getCount();
+    }
 
-  public Statistics getStatistics() {
-    return statistics;
-  }
+    public Statistics getStatistics() {
+        return statistics;
+    }
 
-  public long getEndTime() {
-    return statistics.getEndTime();
-  }
+    public long getEndTime() {
+        return statistics.getEndTime();
+    }
 
-  public long getStartTime() {
-    return statistics.getStartTime();
-  }
+    public long getStartTime() {
+        return statistics.getStartTime();
+    }
 
-  public void serializeTo(OutputStream outputStream) throws IOException {
-    ReadWriteIOUtils.write(uncompressedSize, outputStream);
-    ReadWriteIOUtils.write(compressedSize, outputStream);
-    statistics.serialize(outputStream);
-  }
+    public void serializeTo(OutputStream outputStream) throws IOException {
+        ReadWriteIOUtils.write(uncompressedSize, outputStream);
+        ReadWriteIOUtils.write(compressedSize, outputStream);
+        statistics.serialize(outputStream);
+    }
 
-  @Override
-  public String toString() {
-    return "PageHeader{" + "uncompressedSize=" + uncompressedSize + ", compressedSize="
-        + compressedSize + ", statistics=" + statistics + "}";
-  }
+    @Override
+    public String toString() {
+        return "PageHeader{"
+                + "uncompressedSize="
+                + uncompressedSize
+                + ", compressedSize="
+                + compressedSize
+                + ", statistics="
+                + statistics
+                + "}";
+    }
 
-  public boolean isModified() {
-    return modified;
-  }
+    public boolean isModified() {
+        return modified;
+    }
 
-  public void setModified(boolean modified) {
-    this.modified = modified;
-  }
+    public void setModified(boolean modified) {
+        this.modified = modified;
+    }
 }

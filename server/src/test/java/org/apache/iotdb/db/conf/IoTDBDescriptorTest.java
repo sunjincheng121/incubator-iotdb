@@ -18,59 +18,57 @@
  */
 package org.apache.iotdb.db.conf;
 
+import java.net.URL;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.URL;
-
 public class IoTDBDescriptorTest {
-  private final String confPath = System.getProperty(IoTDBConstant.IOTDB_CONF, null);
+    private final String confPath = System.getProperty(IoTDBConstant.IOTDB_CONF, null);
 
-  @Before
-  public void init() {
-    org.apache.catalina.webresources.TomcatURLStreamHandlerFactory.getInstance();
-  }
-
-  @After
-  public void clear() {
-    if (confPath != null) {
-      System.setProperty(IoTDBConstant.IOTDB_CONF, confPath);
-    } else {
-      System.clearProperty(IoTDBConstant.IOTDB_CONF);
+    @Before
+    public void init() {
+        org.apache.catalina.webresources.TomcatURLStreamHandlerFactory.getInstance();
     }
-  }
 
-  @Test
-  public void testConfigURLWithFileProtocol() {
-    IoTDBDescriptor desc = IoTDBDescriptor.getInstance();
-    String pathString = "file:/usr/local/bin";
+    @After
+    public void clear() {
+        if (confPath != null) {
+            System.setProperty(IoTDBConstant.IOTDB_CONF, confPath);
+        } else {
+            System.clearProperty(IoTDBConstant.IOTDB_CONF);
+        }
+    }
 
-    System.setProperty(IoTDBConstant.IOTDB_CONF, pathString);
-    URL confURL = desc.getPropsUrl();
-    Assert.assertTrue(confURL.toString().startsWith(pathString));
-  }
+    @Test
+    public void testConfigURLWithFileProtocol() {
+        IoTDBDescriptor desc = IoTDBDescriptor.getInstance();
+        String pathString = "file:/usr/local/bin";
 
-  @Test
-  public void testConfigURLWithClasspathProtocol() {
-    IoTDBDescriptor desc = IoTDBDescriptor.getInstance();
+        System.setProperty(IoTDBConstant.IOTDB_CONF, pathString);
+        URL confURL = desc.getPropsUrl();
+        Assert.assertTrue(confURL.toString().startsWith(pathString));
+    }
 
-    String pathString = "classpath:/root/path";
-    System.setProperty(IoTDBConstant.IOTDB_CONF, pathString);
-    URL confURL = desc.getPropsUrl();
-    Assert.assertTrue(confURL.toString().startsWith(pathString));
-  }
+    @Test
+    public void testConfigURLWithClasspathProtocol() {
+        IoTDBDescriptor desc = IoTDBDescriptor.getInstance();
 
-  @Test
-  public void testConfigURLWithPlainFilePath() {
-    IoTDBDescriptor desc = IoTDBDescriptor.getInstance();
-    URL path = IoTDBConfig.class.getResource("/" + IoTDBConfig.CONFIG_NAME);
-    // filePath is a plain path string
-    String filePath = path.getFile();
-    System.setProperty(IoTDBConstant.IOTDB_CONF, filePath);
-    URL confURL = desc.getPropsUrl();
-    Assert.assertEquals(confURL.toString(), path.toString());
-  }
+        String pathString = "classpath:/root/path";
+        System.setProperty(IoTDBConstant.IOTDB_CONF, pathString);
+        URL confURL = desc.getPropsUrl();
+        Assert.assertTrue(confURL.toString().startsWith(pathString));
+    }
 
+    @Test
+    public void testConfigURLWithPlainFilePath() {
+        IoTDBDescriptor desc = IoTDBDescriptor.getInstance();
+        URL path = IoTDBConfig.class.getResource("/" + IoTDBConfig.CONFIG_NAME);
+        // filePath is a plain path string
+        String filePath = path.getFile();
+        System.setProperty(IoTDBConstant.IOTDB_CONF, filePath);
+        URL confURL = desc.getPropsUrl();
+        Assert.assertEquals(confURL.toString(), path.toString());
+    }
 }

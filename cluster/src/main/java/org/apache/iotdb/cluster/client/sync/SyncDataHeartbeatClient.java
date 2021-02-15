@@ -33,39 +33,46 @@ import org.apache.thrift.transport.TTransportException;
  */
 public class SyncDataHeartbeatClient extends SyncDataClient {
 
-  private SyncDataHeartbeatClient(TProtocolFactory protocolFactory, Node node, SyncClientPool pool)
-      throws TTransportException {
-    // the difference of the two clients lies in the port
-    super(protocolFactory.getProtocol(RpcTransportFactory.INSTANCE.getTransport(
-        new TSocket(node.getIp(), node.getDataPort() + ClusterUtils.DATA_HEARTBEAT_PORT_OFFSET,
-            RaftServer.getConnectionTimeoutInMS()))));
-    this.node = node;
-    this.pool = pool;
-    getInputProtocol().getTransport().open();
-  }
+    private SyncDataHeartbeatClient(
+            TProtocolFactory protocolFactory, Node node, SyncClientPool pool)
+            throws TTransportException {
+        // the difference of the two clients lies in the port
+        super(
+                protocolFactory.getProtocol(
+                        RpcTransportFactory.INSTANCE.getTransport(
+                                new TSocket(
+                                        node.getIp(),
+                                        node.getDataPort()
+                                                + ClusterUtils.DATA_HEARTBEAT_PORT_OFFSET,
+                                        RaftServer.getConnectionTimeoutInMS()))));
+        this.node = node;
+        this.pool = pool;
+        getInputProtocol().getTransport().open();
+    }
 
+    public static class FactorySync implements SyncClientFactory {
 
-  public static class FactorySync implements SyncClientFactory {
+        private TProtocolFactory protocolFactory;
 
-    private TProtocolFactory protocolFactory;
+        public FactorySync(TProtocolFactory protocolFactory) {
+            this.protocolFactory = protocolFactory;
+        }
 
-    public FactorySync(TProtocolFactory protocolFactory) {
-      this.protocolFactory = protocolFactory;
+        @Override
+        public SyncDataHeartbeatClient getSyncClient(Node node, SyncClientPool pool)
+                throws TTransportException {
+            return new SyncDataHeartbeatClient(protocolFactory, node, pool);
+        }
     }
 
     @Override
-    public SyncDataHeartbeatClient getSyncClient(Node node, SyncClientPool pool)
-        throws TTransportException {
-      return new SyncDataHeartbeatClient(protocolFactory, node, pool);
+    public String toString() {
+        return "SyncHeartbeatDataClient{"
+                + "node="
+                + super.getNode()
+                + ","
+                + "dataHeartbeatPort="
+                + (super.getNode().getDataPort() + ClusterUtils.DATA_HEARTBEAT_PORT_OFFSET)
+                + '}';
     }
-  }
-
-  @Override
-  public String toString() {
-    return "SyncHeartbeatDataClient{" +
-        "node=" + super.getNode() + "," +
-        "dataHeartbeatPort=" + (super.getNode().getDataPort()
-        + ClusterUtils.DATA_HEARTBEAT_PORT_OFFSET) +
-        '}';
-  }
 }

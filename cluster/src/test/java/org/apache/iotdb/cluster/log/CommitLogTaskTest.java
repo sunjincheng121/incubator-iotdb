@@ -32,41 +32,42 @@ import org.junit.Test;
 
 public class CommitLogTaskTest {
 
-  @After
-  public void tearDown() throws Exception {
-    EnvironmentUtils.cleanAllDir();
-  }
-
-  @Test
-  public void test() {
-    RaftLogManager manager = new TestLogManager(0);
-    try {
-      manager.append(TestUtils.prepareTestLogs(10));
-
-      AtomicBoolean complete = new AtomicBoolean(false);
-      CommitLogTask task = new CommitLogTask(manager, 9, 9);
-      AsyncMethodCallback<Void> callback = new AsyncMethodCallback<Void>() {
-        @Override
-        public void onComplete(Void unused) {
-          complete.set(true);
-        }
-
-        @Override
-        public void onError(Exception e) {
-          fail(e.getMessage());
-        }
-      };
-      task.registerCallback(callback);
-
-      task.run();
-      assertEquals(9, manager.getCommitLogIndex());
-      assertTrue(complete.get());
-
-      complete.set(false);
-      task.run();
-      assertFalse(complete.get());
-    } finally {
-      manager.close();
+    @After
+    public void tearDown() throws Exception {
+        EnvironmentUtils.cleanAllDir();
     }
-  }
+
+    @Test
+    public void test() {
+        RaftLogManager manager = new TestLogManager(0);
+        try {
+            manager.append(TestUtils.prepareTestLogs(10));
+
+            AtomicBoolean complete = new AtomicBoolean(false);
+            CommitLogTask task = new CommitLogTask(manager, 9, 9);
+            AsyncMethodCallback<Void> callback =
+                    new AsyncMethodCallback<Void>() {
+                        @Override
+                        public void onComplete(Void unused) {
+                            complete.set(true);
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            fail(e.getMessage());
+                        }
+                    };
+            task.registerCallback(callback);
+
+            task.run();
+            assertEquals(9, manager.getCommitLogIndex());
+            assertTrue(complete.get());
+
+            complete.set(false);
+            task.run();
+            assertFalse(complete.get());
+        } finally {
+            manager.close();
+        }
+    }
 }

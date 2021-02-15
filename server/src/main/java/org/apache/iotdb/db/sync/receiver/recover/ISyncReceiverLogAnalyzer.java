@@ -24,10 +24,9 @@ import org.apache.iotdb.db.sync.receiver.load.IFileLoader;
 
 public interface ISyncReceiverLogAnalyzer {
 
-  void recoverAll() throws IOException;
+    void recoverAll() throws IOException;
 
-  boolean recover(String senderName) throws IOException;
+    boolean recover(String senderName) throws IOException;
 
-  void scanLogger(IFileLoader loader, File syncLog, File loadLog);
-
+    void scanLogger(IFileLoader loader, File syncLog, File loadLog);
 }

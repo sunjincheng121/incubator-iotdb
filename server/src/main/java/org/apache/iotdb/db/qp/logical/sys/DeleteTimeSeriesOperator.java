@@ -22,24 +22,21 @@ import java.util.List;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.qp.logical.RootOperator;
 
-/**
- * this class deletes whole data and metadata of the timeseries.
- */
+/** this class deletes whole data and metadata of the timeseries. */
 public class DeleteTimeSeriesOperator extends RootOperator {
 
-  private List<PartialPath> deletePathList;
-  
-  public DeleteTimeSeriesOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.DELETE_TIMESERIES;
-  }
-  
-  public List<PartialPath> getDeletePathList() {
-    return deletePathList;
-  }
+    private List<PartialPath> deletePathList;
 
-  public void setDeletePathList(List<PartialPath> deletePathList) {
-    this.deletePathList = deletePathList;
-  }
+    public DeleteTimeSeriesOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.DELETE_TIMESERIES;
+    }
 
+    public List<PartialPath> getDeletePathList() {
+        return deletePathList;
+    }
+
+    public void setDeletePathList(List<PartialPath> deletePathList) {
+        this.deletePathList = deletePathList;
+    }
 }

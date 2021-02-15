@@ -24,54 +24,51 @@ import org.apache.iotdb.tsfile.read.filter.basic.BinaryFilter;
 import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.filter.factory.FilterSerializeId;
 
-/**
- * Either of the left and right operators of AndExpression must satisfy the condition.
- */
+/** Either of the left and right operators of AndExpression must satisfy the condition. */
 public class OrFilter extends BinaryFilter implements Serializable {
 
-  private static final long serialVersionUID = -968055896528472694L;
+    private static final long serialVersionUID = -968055896528472694L;
 
-  public OrFilter() {
-  }
+    public OrFilter() {}
 
-  public OrFilter(Filter left, Filter right) {
-    super(left, right);
-  }
+    public OrFilter(Filter left, Filter right) {
+        super(left, right);
+    }
 
-  @Override
-  public String toString() {
-    return "(" + left + " || " + right + ")";
-  }
+    @Override
+    public String toString() {
+        return "(" + left + " || " + right + ")";
+    }
 
-  @Override
-  public Filter copy() {
-    return new OrFilter(left.copy(), right.copy());
-  }
+    @Override
+    public Filter copy() {
+        return new OrFilter(left.copy(), right.copy());
+    }
 
-  @Override
-  public boolean satisfy(Statistics statistics) {
-    return left.satisfy(statistics) || right.satisfy(statistics);
-  }
+    @Override
+    public boolean satisfy(Statistics statistics) {
+        return left.satisfy(statistics) || right.satisfy(statistics);
+    }
 
-  @Override
-  public boolean satisfy(long time, Object value) {
-    return left.satisfy(time, value) || right.satisfy(time, value);
-  }
+    @Override
+    public boolean satisfy(long time, Object value) {
+        return left.satisfy(time, value) || right.satisfy(time, value);
+    }
 
-  @Override
-  public boolean satisfyStartEndTime(long startTime, long endTime) {
-    return left.satisfyStartEndTime(startTime, endTime) || right
-        .satisfyStartEndTime(startTime, endTime);
-  }
+    @Override
+    public boolean satisfyStartEndTime(long startTime, long endTime) {
+        return left.satisfyStartEndTime(startTime, endTime)
+                || right.satisfyStartEndTime(startTime, endTime);
+    }
 
-  @Override
-  public boolean containStartEndTime(long startTime, long endTime) {
-    return left.containStartEndTime(startTime, endTime) || right
-        .containStartEndTime(startTime, endTime);
-  }
+    @Override
+    public boolean containStartEndTime(long startTime, long endTime) {
+        return left.containStartEndTime(startTime, endTime)
+                || right.containStartEndTime(startTime, endTime);
+    }
 
-  @Override
-  public FilterSerializeId getSerializeId() {
-    return FilterSerializeId.OR;
-  }
+    @Override
+    public FilterSerializeId getSerializeId() {
+        return FilterSerializeId.OR;
+    }
 }

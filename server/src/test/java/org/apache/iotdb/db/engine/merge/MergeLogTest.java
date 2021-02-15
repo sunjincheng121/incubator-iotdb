@@ -33,8 +33,8 @@ import org.apache.iotdb.db.constant.TestConstant;
 import org.apache.iotdb.db.engine.merge.manage.MergeResource;
 import org.apache.iotdb.db.engine.merge.task.MergeTask;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
-import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.exception.StorageEngineException;
+import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
 import org.junit.After;
 import org.junit.Before;
@@ -42,42 +42,49 @@ import org.junit.Test;
 
 public class MergeLogTest extends MergeTest {
 
-  File tempSGDir;
+    File tempSGDir;
 
-  @Before
-  public void setUp() throws IOException, WriteProcessException, MetadataException {
-    super.setUp();
-    tempSGDir = new File(TestConstant.BASE_OUTPUT_PATH.concat("tempSG"));
-    tempSGDir.mkdirs();
-  }
-
-  @After
-  public void tearDown() throws IOException, StorageEngineException {
-    super.tearDown();
-    FileUtils.deleteDirectory(tempSGDir);
-  }
-
-  @Test
-  public void testMergeLog() throws Exception {
-    IoTDBDescriptor.getInstance().getConfig().setMergeChunkPointNumberThreshold(Integer.MAX_VALUE);
-    MergeTask mergeTask =
-        new MergeTask(new MergeResource(seqResources.subList(0, 1), unseqResources.subList(0, 1)),
-            tempSGDir.getPath(), this::testCallBack, "test", false, 1, MERGE_TEST_SG);
-    mergeTask.call();
-  }
-
-  private void testCallBack(List<TsFileResource> seqFiles, List<TsFileResource> unseqFiles,
-      File mergeLog) {
-    int lineCnt = 0;
-    try (BufferedReader bufferedReader = new BufferedReader(new FileReader(mergeLog))) {
-      while (bufferedReader.readLine() != null) {
-        lineCnt ++;
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-      fail(e.getMessage());
+    @Before
+    public void setUp() throws IOException, WriteProcessException, MetadataException {
+        super.setUp();
+        tempSGDir = new File(TestConstant.BASE_OUTPUT_PATH.concat("tempSG"));
+        tempSGDir.mkdirs();
     }
-    assertEquals(309, lineCnt);
-  }
 
+    @After
+    public void tearDown() throws IOException, StorageEngineException {
+        super.tearDown();
+        FileUtils.deleteDirectory(tempSGDir);
+    }
+
+    @Test
+    public void testMergeLog() throws Exception {
+        IoTDBDescriptor.getInstance()
+                .getConfig()
+                .setMergeChunkPointNumberThreshold(Integer.MAX_VALUE);
+        MergeTask mergeTask =
+                new MergeTask(
+                        new MergeResource(seqResources.subList(0, 1), unseqResources.subList(0, 1)),
+                        tempSGDir.getPath(),
+                        this::testCallBack,
+                        "test",
+                        false,
+                        1,
+                        MERGE_TEST_SG);
+        mergeTask.call();
+    }
+
+    private void testCallBack(
+            List<TsFileResource> seqFiles, List<TsFileResource> unseqFiles, File mergeLog) {
+        int lineCnt = 0;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(mergeLog))) {
+            while (bufferedReader.readLine() != null) {
+                lineCnt++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+        assertEquals(309, lineCnt);
+    }
 }

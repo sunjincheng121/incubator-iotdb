@@ -47,203 +47,220 @@ import org.slf4j.LoggerFactory;
  */
 public class DataSourceInfo {
 
-  private static final Logger logger = LoggerFactory.getLogger(DataSourceInfo.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataSourceInfo.class);
 
-  private long readerId;
-  private Node curSource;
-  private PartitionGroup partitionGroup;
-  private TSDataType dataType;
-  private SingleSeriesQueryRequest request;
-  private RemoteQueryContext context;
-  private MetaGroupMember metaGroupMember;
-  private List<Node> nodes;
-  private int curPos;
-  private boolean isNoData = false;
-  private boolean isNoClient = false;
+    private long readerId;
+    private Node curSource;
+    private PartitionGroup partitionGroup;
+    private TSDataType dataType;
+    private SingleSeriesQueryRequest request;
+    private RemoteQueryContext context;
+    private MetaGroupMember metaGroupMember;
+    private List<Node> nodes;
+    private int curPos;
+    private boolean isNoData = false;
+    private boolean isNoClient = false;
 
-  public DataSourceInfo(PartitionGroup group, TSDataType dataType,
-      SingleSeriesQueryRequest request, RemoteQueryContext context,
-      MetaGroupMember metaGroupMember, List<Node> nodes) {
-    this.readerId = -1;
-    this.partitionGroup = group;
-    this.dataType = dataType;
-    this.request = request;
-    this.context = context;
-    this.metaGroupMember = metaGroupMember;
-    this.nodes = nodes;
-    // set to the last node so after nextDataClient() is called it will scan from the first node
-    this.curPos = nodes.size() - 1;
-    this.curSource = nodes.get(curPos);
-  }
-
-  public boolean hasNextDataClient(boolean byTimestamp, long timestamp) {
-    if (this.nodes.isEmpty()) {
-      this.isNoData = false;
-      return false;
+    public DataSourceInfo(
+            PartitionGroup group,
+            TSDataType dataType,
+            SingleSeriesQueryRequest request,
+            RemoteQueryContext context,
+            MetaGroupMember metaGroupMember,
+            List<Node> nodes) {
+        this.readerId = -1;
+        this.partitionGroup = group;
+        this.dataType = dataType;
+        this.request = request;
+        this.context = context;
+        this.metaGroupMember = metaGroupMember;
+        this.nodes = nodes;
+        // set to the last node so after nextDataClient() is called it will scan from the first node
+        this.curPos = nodes.size() - 1;
+        this.curSource = nodes.get(curPos);
     }
 
-    int nextNodePos = (this.curPos + 1) % this.nodes.size();
-    while (true) {
-      Node node = nodes.get(nextNodePos);
-      logger.debug("querying {} from {} of {}", request.path, node, partitionGroup.getHeader());
-      try {
-        Long newReaderId = getReaderId(node, byTimestamp, timestamp);
-        if (newReaderId != null) {
-          logger.debug("get a readerId {} for {} from {}", newReaderId, request.path, node);
-          if (newReaderId != -1) {
-            // register the node so the remote resources can be released
-            context.registerRemoteNode(node, partitionGroup.getHeader());
-            this.readerId = newReaderId;
-            this.curSource = node;
-            this.curPos = nextNodePos;
-            return true;
-          } else {
-            // the id being -1 means there is no satisfying data on the remote node, create an
-            // empty reader to reduce further communication
-            this.isNoClient = true;
-            this.isNoData = true;
+    public boolean hasNextDataClient(boolean byTimestamp, long timestamp) {
+        if (this.nodes.isEmpty()) {
+            this.isNoData = false;
             return false;
-          }
         }
-      } catch (TException | IOException e) {
-        logger.error("Cannot query {} from {}", this.request.path, node, e);
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        logger.error("Cannot query {} from {}", this.request.path, node, e);
-      }
-      nextNodePos = (nextNodePos + 1) % this.nodes.size();
-      if (nextNodePos == this.curPos) {
-        // has iterate over all nodes
-        isNoClient = true;
-        break;
-      }
-    }
-    // all nodes are failed
-    this.isNoData = false;
-    return false;
-  }
 
-  private Long getReaderId(Node node, boolean byTimestamp, long timestamp)
-      throws TException, InterruptedException, IOException {
-    if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
-      return applyForReaderIdAsync(node, byTimestamp, timestamp);
+        int nextNodePos = (this.curPos + 1) % this.nodes.size();
+        while (true) {
+            Node node = nodes.get(nextNodePos);
+            logger.debug(
+                    "querying {} from {} of {}", request.path, node, partitionGroup.getHeader());
+            try {
+                Long newReaderId = getReaderId(node, byTimestamp, timestamp);
+                if (newReaderId != null) {
+                    logger.debug(
+                            "get a readerId {} for {} from {}", newReaderId, request.path, node);
+                    if (newReaderId != -1) {
+                        // register the node so the remote resources can be released
+                        context.registerRemoteNode(node, partitionGroup.getHeader());
+                        this.readerId = newReaderId;
+                        this.curSource = node;
+                        this.curPos = nextNodePos;
+                        return true;
+                    } else {
+                        // the id being -1 means there is no satisfying data on the remote node,
+                        // create an
+                        // empty reader to reduce further communication
+                        this.isNoClient = true;
+                        this.isNoData = true;
+                        return false;
+                    }
+                }
+            } catch (TException | IOException e) {
+                logger.error("Cannot query {} from {}", this.request.path, node, e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.error("Cannot query {} from {}", this.request.path, node, e);
+            }
+            nextNodePos = (nextNodePos + 1) % this.nodes.size();
+            if (nextNodePos == this.curPos) {
+                // has iterate over all nodes
+                isNoClient = true;
+                break;
+            }
+        }
+        // all nodes are failed
+        this.isNoData = false;
+        return false;
     }
-    return applyForReaderIdSync(node, byTimestamp, timestamp);
-  }
 
-  private Long applyForReaderIdAsync(Node node, boolean byTimestamp, long timestamp)
-      throws TException, InterruptedException, IOException {
-    AsyncDataClient client = this.metaGroupMember
-        .getClientProvider().getAsyncDataClient(node, RaftServer.getReadOperationTimeoutMS());
-    Long newReaderId;
-    if (byTimestamp) {
-      newReaderId = SyncClientAdaptor.querySingleSeriesByTimestamp(client, request);
-    } else {
-      newReaderId = SyncClientAdaptor.querySingleSeries(client, request, timestamp);
+    private Long getReaderId(Node node, boolean byTimestamp, long timestamp)
+            throws TException, InterruptedException, IOException {
+        if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
+            return applyForReaderIdAsync(node, byTimestamp, timestamp);
+        }
+        return applyForReaderIdSync(node, byTimestamp, timestamp);
     }
-    return newReaderId;
-  }
 
-  private Long applyForReaderIdSync(Node node, boolean byTimestamp, long timestamp)
-      throws TException {
-    SyncDataClient client = this.metaGroupMember
-        .getClientProvider().getSyncDataClient(node, RaftServer.getReadOperationTimeoutMS());
-    Long newReaderId;
-    try {
-      if (byTimestamp) {
-        newReaderId = client.querySingleSeriesByTimestamp(request);
-      } else {
-        Filter newFilter;
-        // add timestamp to as a timeFilter to skip the data which has been read
-        if (request.isSetTimeFilterBytes()) {
-          Filter timeFilter = FilterFactory.deserialize(request.timeFilterBytes);
-          newFilter = new AndFilter(timeFilter, TimeFilter.gt(timestamp));
+    private Long applyForReaderIdAsync(Node node, boolean byTimestamp, long timestamp)
+            throws TException, InterruptedException, IOException {
+        AsyncDataClient client =
+                this.metaGroupMember
+                        .getClientProvider()
+                        .getAsyncDataClient(node, RaftServer.getReadOperationTimeoutMS());
+        Long newReaderId;
+        if (byTimestamp) {
+            newReaderId = SyncClientAdaptor.querySingleSeriesByTimestamp(client, request);
         } else {
-          newFilter = TimeFilter.gt(timestamp);
+            newReaderId = SyncClientAdaptor.querySingleSeries(client, request, timestamp);
         }
-        request.setTimeFilterBytes(SerializeUtils.serializeFilter(newFilter));
-        newReaderId = client.querySingleSeries(request);
-      }
-      return newReaderId;
-    } finally {
-      client.putBack();
-    }
-  }
-
-  public long getReaderId() {
-    return this.readerId;
-  }
-
-  public TSDataType getDataType() {
-    return this.dataType;
-  }
-
-  public Node getHeader() {
-    return partitionGroup.getHeader();
-  }
-
-  Node getCurrentNode() {
-    return this.curSource;
-  }
-
-  AsyncDataClient getCurAsyncClient(int timeout) throws IOException {
-    return isNoClient ? null
-        : metaGroupMember.getClientProvider().getAsyncDataClient(this.curSource, timeout);
-  }
-
-  SyncDataClient getCurSyncClient(int timeout) {
-    return isNoClient ? null :
-        metaGroupMember.getClientProvider().getSyncDataClient(this.curSource, timeout);
-  }
-
-  public boolean isNoData() {
-    return this.isNoData;
-  }
-
-  private boolean isNoClient() {
-    return this.isNoClient;
-  }
-
-  @Override
-  public String toString() {
-    return "DataSourceInfo{" +
-        "readerId=" + readerId +
-        ", curSource=" + curSource +
-        ", partitionGroup=" + partitionGroup +
-        ", request=" + request +
-        '}';
-  }
-
-  /**
-   * Check if there is still any available client and there is still any left data.
-   *
-   * @return true if there is an available client and data to read, false all data has been read.
-   * @throws IOException if all clients are unavailable.
-   */
-  boolean checkCurClient() throws IOException {
-    if (isNoClient()) {
-      if (!isNoData()) {
-        throw new IOException("no available client.");
-      } else {
-        // no data
-        return false;
-      }
+        return newReaderId;
     }
 
-    return true;
-  }
-
-  boolean switchNode(boolean byTimestamp, long timeOffset) throws IOException {
-    boolean hasClient = hasNextDataClient(byTimestamp, timeOffset);
-    logger.info("Client failed, changed to {}", curSource);
-    if (!hasClient) {
-      if (!isNoData()) {
-        throw new IOException("no available client.");
-      } else {
-        // no data
-        return false;
-      }
+    private Long applyForReaderIdSync(Node node, boolean byTimestamp, long timestamp)
+            throws TException {
+        SyncDataClient client =
+                this.metaGroupMember
+                        .getClientProvider()
+                        .getSyncDataClient(node, RaftServer.getReadOperationTimeoutMS());
+        Long newReaderId;
+        try {
+            if (byTimestamp) {
+                newReaderId = client.querySingleSeriesByTimestamp(request);
+            } else {
+                Filter newFilter;
+                // add timestamp to as a timeFilter to skip the data which has been read
+                if (request.isSetTimeFilterBytes()) {
+                    Filter timeFilter = FilterFactory.deserialize(request.timeFilterBytes);
+                    newFilter = new AndFilter(timeFilter, TimeFilter.gt(timestamp));
+                } else {
+                    newFilter = TimeFilter.gt(timestamp);
+                }
+                request.setTimeFilterBytes(SerializeUtils.serializeFilter(newFilter));
+                newReaderId = client.querySingleSeries(request);
+            }
+            return newReaderId;
+        } finally {
+            client.putBack();
+        }
     }
-    return true;
-  }
+
+    public long getReaderId() {
+        return this.readerId;
+    }
+
+    public TSDataType getDataType() {
+        return this.dataType;
+    }
+
+    public Node getHeader() {
+        return partitionGroup.getHeader();
+    }
+
+    Node getCurrentNode() {
+        return this.curSource;
+    }
+
+    AsyncDataClient getCurAsyncClient(int timeout) throws IOException {
+        return isNoClient
+                ? null
+                : metaGroupMember.getClientProvider().getAsyncDataClient(this.curSource, timeout);
+    }
+
+    SyncDataClient getCurSyncClient(int timeout) {
+        return isNoClient
+                ? null
+                : metaGroupMember.getClientProvider().getSyncDataClient(this.curSource, timeout);
+    }
+
+    public boolean isNoData() {
+        return this.isNoData;
+    }
+
+    private boolean isNoClient() {
+        return this.isNoClient;
+    }
+
+    @Override
+    public String toString() {
+        return "DataSourceInfo{"
+                + "readerId="
+                + readerId
+                + ", curSource="
+                + curSource
+                + ", partitionGroup="
+                + partitionGroup
+                + ", request="
+                + request
+                + '}';
+    }
+
+    /**
+     * Check if there is still any available client and there is still any left data.
+     *
+     * @return true if there is an available client and data to read, false all data has been read.
+     * @throws IOException if all clients are unavailable.
+     */
+    boolean checkCurClient() throws IOException {
+        if (isNoClient()) {
+            if (!isNoData()) {
+                throw new IOException("no available client.");
+            } else {
+                // no data
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    boolean switchNode(boolean byTimestamp, long timeOffset) throws IOException {
+        boolean hasClient = hasNextDataClient(byTimestamp, timeOffset);
+        logger.info("Client failed, changed to {}", curSource);
+        if (!hasClient) {
+            if (!isNoData()) {
+                throw new IOException("no available client.");
+            } else {
+                // no data
+                return false;
+            }
+        }
+        return true;
+    }
 }

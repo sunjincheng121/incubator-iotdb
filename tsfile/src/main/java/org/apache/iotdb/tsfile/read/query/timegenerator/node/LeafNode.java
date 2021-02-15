@@ -24,71 +24,68 @@ import org.apache.iotdb.tsfile.read.reader.IBatchReader;
 
 public class LeafNode implements Node {
 
-  private IBatchReader reader;
+    private IBatchReader reader;
 
-  private BatchData cacheData;
-  private boolean hasCached;
+    private BatchData cacheData;
+    private boolean hasCached;
 
-  private long cachedTime;
-  private Object cachedValue;
+    private long cachedTime;
+    private Object cachedValue;
 
-  public LeafNode(IBatchReader reader) {
-    this.reader = reader;
-  }
-
-  @Override
-  public boolean hasNext() throws IOException {
-    if (hasCached) {
-      return true;
+    public LeafNode(IBatchReader reader) {
+        this.reader = reader;
     }
-    if (cacheData != null && cacheData.hasCurrent()) {
-      cachedTime = cacheData.currentTime();
-      cachedValue = cacheData.currentValue();
-      hasCached = true;
-      return true;
+
+    @Override
+    public boolean hasNext() throws IOException {
+        if (hasCached) {
+            return true;
+        }
+        if (cacheData != null && cacheData.hasCurrent()) {
+            cachedTime = cacheData.currentTime();
+            cachedValue = cacheData.currentValue();
+            hasCached = true;
+            return true;
+        }
+        if (reader.hasNextBatch()) {
+            cacheData = reader.nextBatch();
+            if (cacheData.hasCurrent()) {
+                cachedTime = cacheData.currentTime();
+                cachedValue = cacheData.currentValue();
+                hasCached = true;
+                return true;
+            }
+        }
+        return false;
     }
-    if (reader.hasNextBatch()) {
-      cacheData = reader.nextBatch();
-      if (cacheData.hasCurrent()) {
-        cachedTime = cacheData.currentTime();
-        cachedValue = cacheData.currentValue();
-        hasCached = true;
-        return true;
-      }
+
+    @Override
+    public long next() throws IOException {
+        if ((hasCached || hasNext())) {
+            hasCached = false;
+            cacheData.next();
+            return cachedTime;
+        }
+        throw new IOException("no more data");
     }
-    return false;
-  }
 
-  @Override
-  public long next() throws IOException {
-    if ((hasCached || hasNext())) {
-      hasCached = false;
-      cacheData.next();
-      return cachedTime;
+    /**
+     * Check whether the current time equals the given time.
+     *
+     * @param time the given time
+     * @return True if the current time equals the given time. False if not.
+     */
+    public boolean currentTimeIs(long time) {
+        return cachedTime == time;
     }
-    throw new IOException("no more data");
-  }
 
-  /**
-   * Check whether the current time equals the given time.
-   *
-   * @param time the given time
-   * @return True if the current time equals the given time. False if not.
-   */
-  public boolean currentTimeIs(long time) {
-    return cachedTime == time;
-  }
+    /** Function for getting the value at the given time. */
+    public Object currentValue() {
+        return cachedValue;
+    }
 
-  /**
-   * Function for getting the value at the given time.
-   */
-  public Object currentValue() {
-    return cachedValue;
-  }
-
-  @Override
-  public NodeType getType() {
-    return NodeType.LEAF;
-  }
-
+    @Override
+    public NodeType getType() {
+        return NodeType.LEAF;
+    }
 }

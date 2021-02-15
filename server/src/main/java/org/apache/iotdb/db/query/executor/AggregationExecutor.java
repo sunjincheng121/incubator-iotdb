@@ -62,375 +62,439 @@ import org.apache.iotdb.tsfile.read.query.timegenerator.TimeGenerator;
 @SuppressWarnings("java:S1135") // ignore todos
 public class AggregationExecutor {
 
-  private List<PartialPath> selectedSeries;
-  protected List<TSDataType> dataTypes;
-  protected List<String> aggregations;
-  protected IExpression expression;
-  protected boolean ascending;
+    private List<PartialPath> selectedSeries;
+    protected List<TSDataType> dataTypes;
+    protected List<String> aggregations;
+    protected IExpression expression;
+    protected boolean ascending;
 
-  /**
-   * aggregation batch calculation size.
-   **/
-  private int aggregateFetchSize;
+    /** aggregation batch calculation size. */
+    private int aggregateFetchSize;
 
-  protected AggregationExecutor(AggregationPlan aggregationPlan) {
-    this.selectedSeries = aggregationPlan.getDeduplicatedPaths();
-    this.dataTypes = aggregationPlan.getDeduplicatedDataTypes();
-    this.aggregations = aggregationPlan.getDeduplicatedAggregations();
-    this.expression = aggregationPlan.getExpression();
-    this.aggregateFetchSize = IoTDBDescriptor.getInstance().getConfig().getBatchSize();
-    this.ascending = aggregationPlan.isAscending();
-  }
-
-  /**
-   * execute aggregate function with only time filter or no filter.
-   *
-   * @param context query context
-   */
-  public QueryDataSet executeWithoutValueFilter(QueryContext context,
-      AggregationPlan aggregationPlan)
-      throws StorageEngineException, IOException, QueryProcessException {
-
-    Filter timeFilter = null;
-    if (expression != null) {
-      timeFilter = ((GlobalTimeExpression) expression).getFilter();
+    protected AggregationExecutor(AggregationPlan aggregationPlan) {
+        this.selectedSeries = aggregationPlan.getDeduplicatedPaths();
+        this.dataTypes = aggregationPlan.getDeduplicatedDataTypes();
+        this.aggregations = aggregationPlan.getDeduplicatedAggregations();
+        this.expression = aggregationPlan.getExpression();
+        this.aggregateFetchSize = IoTDBDescriptor.getInstance().getConfig().getBatchSize();
+        this.ascending = aggregationPlan.isAscending();
     }
 
-    // TODO use multi-thread
-    Map<PartialPath, List<Integer>> pathToAggrIndexesMap = groupAggregationsBySeries(
-        selectedSeries);
-    AggregateResult[] aggregateResultList = new AggregateResult[selectedSeries.size()];
-    // TODO-Cluster: group the paths by storage group to reduce communications
-    List<StorageGroupProcessor> list = StorageEngine.getInstance()
-        .mergeLock(new ArrayList<>(pathToAggrIndexesMap.keySet()));
-    try {
-      for (Map.Entry<PartialPath, List<Integer>> entry : pathToAggrIndexesMap.entrySet()) {
-        aggregateOneSeries(entry, aggregateResultList,
-            aggregationPlan.getAllMeasurementsInDevice(entry.getKey().getDevice()), timeFilter,
-            context);
-      }
-    } finally {
-      StorageEngine.getInstance().mergeUnLock(list);
-    }
+    /**
+     * execute aggregate function with only time filter or no filter.
+     *
+     * @param context query context
+     */
+    public QueryDataSet executeWithoutValueFilter(
+            QueryContext context, AggregationPlan aggregationPlan)
+            throws StorageEngineException, IOException, QueryProcessException {
 
-    return constructDataSet(Arrays.asList(aggregateResultList), aggregationPlan);
-  }
-
-  /**
-   * get aggregation result for one series
-   *
-   * @param pathToAggrIndexes entry of path to aggregation indexes map
-   * @param timeFilter        time filter
-   * @param context           query context
-   */
-  protected void aggregateOneSeries(
-      Map.Entry<PartialPath, List<Integer>> pathToAggrIndexes,
-      AggregateResult[] aggregateResultList, Set<String> measurements,
-      Filter timeFilter, QueryContext context)
-      throws IOException, QueryProcessException, StorageEngineException {
-    List<AggregateResult> ascAggregateResultList = new ArrayList<>();
-    List<AggregateResult> descAggregateResultList = new ArrayList<>();
-    boolean[] isAsc = new boolean[aggregateResultList.length];
-
-    PartialPath seriesPath = pathToAggrIndexes.getKey();
-    TSDataType tsDataType = dataTypes.get(pathToAggrIndexes.getValue().get(0));
-
-    for (int i : pathToAggrIndexes.getValue()) {
-      // construct AggregateResult
-      AggregateResult aggregateResult = AggregateResultFactory
-          .getAggrResultByName(aggregations.get(i), tsDataType);
-      if (aggregateResult.isAscending()) {
-        ascAggregateResultList.add(aggregateResult);
-        isAsc[i] = true;
-      } else {
-        descAggregateResultList.add(aggregateResult);
-      }
-    }
-    aggregateOneSeries(seriesPath, measurements, context, timeFilter, tsDataType,
-        ascAggregateResultList, descAggregateResultList, null);
-
-    int ascIndex = 0;
-    int descIndex = 0;
-    for (int i : pathToAggrIndexes.getValue()) {
-      aggregateResultList[i] = isAsc[i] ? ascAggregateResultList.get(ascIndex++)
-          : descAggregateResultList.get(descIndex++);
-    }
-  }
-
-  @SuppressWarnings("squid:S107")
-  public static void aggregateOneSeries(PartialPath seriesPath, Set<String> measurements,
-      QueryContext context, Filter timeFilter,
-      TSDataType tsDataType, List<AggregateResult> ascAggregateResultList,
-      List<AggregateResult> descAggregateResultList, TsFileFilter fileFilter)
-      throws StorageEngineException, IOException, QueryProcessException {
-
-    // construct series reader without value filter
-    QueryDataSource queryDataSource = QueryResourceManager.getInstance()
-        .getQueryDataSource(seriesPath, context, timeFilter);
-    if (fileFilter != null) {
-      QueryUtils.filterQueryDataSource(queryDataSource, fileFilter);
-    }
-    // update filter by TTL
-    timeFilter = queryDataSource.updateFilterUsingTTL(timeFilter);
-
-    if (ascAggregateResultList != null && !ascAggregateResultList.isEmpty()) {
-      IAggregateReader seriesReader = new SeriesAggregateReader(seriesPath, measurements,
-          tsDataType, context, queryDataSource, timeFilter, null, null, true);
-      aggregateFromReader(seriesReader, ascAggregateResultList);
-    }
-    if (descAggregateResultList != null && !descAggregateResultList.isEmpty()) {
-      IAggregateReader seriesReader = new SeriesAggregateReader(seriesPath, measurements,
-          tsDataType, context, queryDataSource, timeFilter, null, null, false);
-      aggregateFromReader(seriesReader, descAggregateResultList);
-    }
-  }
-
-  @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  private static void aggregateFromReader(IAggregateReader seriesReader,
-      List<AggregateResult> aggregateResultList) throws QueryProcessException, IOException {
-    int remainingToCalculate = aggregateResultList.size();
-    boolean[] isCalculatedArray = new boolean[aggregateResultList.size()];
-
-    while (seriesReader.hasNextFile()) {
-      // cal by file statistics
-      if (seriesReader.canUseCurrentFileStatistics()) {
-        Statistics fileStatistics = seriesReader.currentFileStatistics();
-        remainingToCalculate = aggregateStatistics(aggregateResultList, isCalculatedArray,
-            remainingToCalculate, fileStatistics);
-        if (remainingToCalculate == 0) {
-          return;
-        }
-        seriesReader.skipCurrentFile();
-        continue;
-      }
-
-      while (seriesReader.hasNextChunk()) {
-        // cal by chunk statistics
-        if (seriesReader.canUseCurrentChunkStatistics()) {
-          Statistics chunkStatistics = seriesReader.currentChunkStatistics();
-          remainingToCalculate = aggregateStatistics(aggregateResultList, isCalculatedArray,
-              remainingToCalculate, chunkStatistics);
-          if (remainingToCalculate == 0) {
-            return;
-          }
-          seriesReader.skipCurrentChunk();
-          continue;
+        Filter timeFilter = null;
+        if (expression != null) {
+            timeFilter = ((GlobalTimeExpression) expression).getFilter();
         }
 
-        remainingToCalculate = aggregatePages(seriesReader, aggregateResultList,
-            isCalculatedArray, remainingToCalculate);
-        if (remainingToCalculate == 0) {
-          return;
-        }
-      }
-    }
-
-  }
-
-  /**
-   * Aggregate each result in the list with the statistics
-   */
-  private static int aggregateStatistics(List<AggregateResult> aggregateResultList,
-      boolean[] isCalculatedArray, int remainingToCalculate, Statistics statistics)
-      throws QueryProcessException {
-    int newRemainingToCalculate = remainingToCalculate;
-    for (int i = 0; i < aggregateResultList.size(); i++) {
-      if (!isCalculatedArray[i]) {
-        AggregateResult aggregateResult = aggregateResultList.get(i);
-        aggregateResult.updateResultFromStatistics(statistics);
-        if (aggregateResult.hasFinalResult()) {
-          isCalculatedArray[i] = true;
-          newRemainingToCalculate--;
-          if (newRemainingToCalculate == 0) {
-            return newRemainingToCalculate;
-          }
-        }
-      }
-    }
-    return newRemainingToCalculate;
-  }
-
-  @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  private static int aggregatePages(IAggregateReader seriesReader,
-      List<AggregateResult> aggregateResultList, boolean[] isCalculatedArray,
-      int remainingToCalculate)
-      throws IOException, QueryProcessException {
-    while (seriesReader.hasNextPage()) {
-      //cal by page statistics
-      if (seriesReader.canUseCurrentPageStatistics()) {
-        Statistics pageStatistic = seriesReader.currentPageStatistics();
-        remainingToCalculate = aggregateStatistics(aggregateResultList, isCalculatedArray,
-            remainingToCalculate, pageStatistic);
-        if (remainingToCalculate == 0) {
-          return 0;
-        }
-        seriesReader.skipCurrentPage();
-        continue;
-      }
-      BatchData nextOverlappedPageData = seriesReader.nextPage();
-      for (int i = 0; i < aggregateResultList.size(); i++) {
-        if (!isCalculatedArray[i]) {
-          AggregateResult aggregateResult = aggregateResultList.get(i);
-          aggregateResult.updateResultFromPageData(nextOverlappedPageData);
-          nextOverlappedPageData.resetBatchData();
-          if (aggregateResult.hasFinalResult()) {
-            isCalculatedArray[i] = true;
-            remainingToCalculate--;
-            if (remainingToCalculate == 0) {
-              return 0;
+        // TODO use multi-thread
+        Map<PartialPath, List<Integer>> pathToAggrIndexesMap =
+                groupAggregationsBySeries(selectedSeries);
+        AggregateResult[] aggregateResultList = new AggregateResult[selectedSeries.size()];
+        // TODO-Cluster: group the paths by storage group to reduce communications
+        List<StorageGroupProcessor> list =
+                StorageEngine.getInstance()
+                        .mergeLock(new ArrayList<>(pathToAggrIndexesMap.keySet()));
+        try {
+            for (Map.Entry<PartialPath, List<Integer>> entry : pathToAggrIndexesMap.entrySet()) {
+                aggregateOneSeries(
+                        entry,
+                        aggregateResultList,
+                        aggregationPlan.getAllMeasurementsInDevice(entry.getKey().getDevice()),
+                        timeFilter,
+                        context);
             }
-          }
+        } finally {
+            StorageEngine.getInstance().mergeUnLock(list);
         }
-      }
-    }
-    return remainingToCalculate;
-  }
 
-  /**
-   * execute aggregate function with value filter.
-   *
-   * @param context query context.
-   */
-  public QueryDataSet executeWithValueFilter(QueryContext context, RawDataQueryPlan queryPlan)
-      throws StorageEngineException, IOException, QueryProcessException {
-    int index = 0;
-    for (; index < aggregations.size(); index++) {
-      String aggregationFunc = aggregations.get(index);
-      if (!aggregationFunc.equals(IoTDBConstant.MAX_TIME) && !aggregationFunc
-          .equals(IoTDBConstant.LAST_VALUE)) {
-        break;
-      }
-    }
-    if (index >= aggregations.size()) {
-      queryPlan.setAscending(false);
-      this.ascending = false;
-    }
-    TimeGenerator timestampGenerator = getTimeGenerator(context, queryPlan);
-    List<IReaderByTimestamp> readersOfSelectedSeries = new ArrayList<>();
-    List<StorageGroupProcessor> list = StorageEngine.getInstance().mergeLock(selectedSeries);
-    try {
-      for (int i = 0; i < selectedSeries.size(); i++) {
-        PartialPath path = selectedSeries.get(i);
-        IReaderByTimestamp seriesReaderByTimestamp = getReaderByTime(path, queryPlan,
-            dataTypes.get(i), context);
-        readersOfSelectedSeries.add(seriesReaderByTimestamp);
-      }
-    } finally {
-      StorageEngine.getInstance().mergeUnLock(list);
+        return constructDataSet(Arrays.asList(aggregateResultList), aggregationPlan);
     }
 
-    List<AggregateResult> aggregateResults = new ArrayList<>();
-    for (int i = 0; i < selectedSeries.size(); i++) {
-      TSDataType type = dataTypes.get(i);
-      AggregateResult result = AggregateResultFactory
-          .getAggrResultByName(aggregations.get(i), type, ascending);
-      aggregateResults.add(result);
-    }
-    aggregateWithValueFilter(aggregateResults, timestampGenerator, readersOfSelectedSeries);
-    return constructDataSet(aggregateResults, queryPlan);
-  }
+    /**
+     * get aggregation result for one series
+     *
+     * @param pathToAggrIndexes entry of path to aggregation indexes map
+     * @param timeFilter time filter
+     * @param context query context
+     */
+    protected void aggregateOneSeries(
+            Map.Entry<PartialPath, List<Integer>> pathToAggrIndexes,
+            AggregateResult[] aggregateResultList,
+            Set<String> measurements,
+            Filter timeFilter,
+            QueryContext context)
+            throws IOException, QueryProcessException, StorageEngineException {
+        List<AggregateResult> ascAggregateResultList = new ArrayList<>();
+        List<AggregateResult> descAggregateResultList = new ArrayList<>();
+        boolean[] isAsc = new boolean[aggregateResultList.length];
 
-  protected TimeGenerator getTimeGenerator(QueryContext context, RawDataQueryPlan queryPlan)
-      throws StorageEngineException {
-    return new ServerTimeGenerator(expression, context, queryPlan);
-  }
+        PartialPath seriesPath = pathToAggrIndexes.getKey();
+        TSDataType tsDataType = dataTypes.get(pathToAggrIndexes.getValue().get(0));
 
-  protected IReaderByTimestamp getReaderByTime(PartialPath path, RawDataQueryPlan queryPlan,
-      TSDataType dataType,
-      QueryContext context) throws StorageEngineException, QueryProcessException {
-    return new SeriesReaderByTimestamp(path,
-        queryPlan.getAllMeasurementsInDevice(path.getDevice()), dataType, context,
-        QueryResourceManager.getInstance().getQueryDataSource(path, context, null), null,
-        ascending);
-  }
-
-  /**
-   * calculate aggregation result with value filter.
-   */
-  private void aggregateWithValueFilter(List<AggregateResult> aggregateResults,
-      TimeGenerator timestampGenerator, List<IReaderByTimestamp> readersOfSelectedSeries)
-      throws IOException {
-
-    while (timestampGenerator.hasNext()) {
-
-      // generate timestamps for aggregate
-      long[] timeArray = new long[aggregateFetchSize];
-      int timeArrayLength = 0;
-      for (int cnt = 0; cnt < aggregateFetchSize; cnt++) {
-        if (!timestampGenerator.hasNext()) {
-          break;
+        for (int i : pathToAggrIndexes.getValue()) {
+            // construct AggregateResult
+            AggregateResult aggregateResult =
+                    AggregateResultFactory.getAggrResultByName(aggregations.get(i), tsDataType);
+            if (aggregateResult.isAscending()) {
+                ascAggregateResultList.add(aggregateResult);
+                isAsc[i] = true;
+            } else {
+                descAggregateResultList.add(aggregateResult);
+            }
         }
-        timeArray[timeArrayLength++] = timestampGenerator.next();
-      }
+        aggregateOneSeries(
+                seriesPath,
+                measurements,
+                context,
+                timeFilter,
+                tsDataType,
+                ascAggregateResultList,
+                descAggregateResultList,
+                null);
 
-      // cal part of aggregate result
-      for (int i = 0; i < readersOfSelectedSeries.size(); i++) {
-        aggregateResults.get(i).updateResultUsingTimestamps(timeArray, timeArrayLength,
-            readersOfSelectedSeries.get(i));
-      }
-    }
-  }
-
-  /**
-   * using aggregate result data list construct QueryDataSet.
-   *
-   * @param aggregateResultList aggregate result list
-   */
-  private QueryDataSet constructDataSet(List<AggregateResult> aggregateResultList,
-      RawDataQueryPlan plan)
-      throws QueryProcessException {
-    RowRecord record = new RowRecord(0);
-    for (AggregateResult resultData : aggregateResultList) {
-      TSDataType dataType = resultData.getResultDataType();
-      record.addField(resultData.getResult(), dataType);
+        int ascIndex = 0;
+        int descIndex = 0;
+        for (int i : pathToAggrIndexes.getValue()) {
+            aggregateResultList[i] =
+                    isAsc[i]
+                            ? ascAggregateResultList.get(ascIndex++)
+                            : descAggregateResultList.get(descIndex++);
+        }
     }
 
-    SingleDataSet dataSet;
-    if (((AggregationPlan) plan).getLevel() >= 0) {
-      Map<Integer, String> pathIndex = new HashMap<>();
-      Map<String, AggregateResult> finalPaths = FilePathUtils.getPathByLevel(
-              (AggregationPlan) plan, pathIndex);
+    @SuppressWarnings("squid:S107")
+    public static void aggregateOneSeries(
+            PartialPath seriesPath,
+            Set<String> measurements,
+            QueryContext context,
+            Filter timeFilter,
+            TSDataType tsDataType,
+            List<AggregateResult> ascAggregateResultList,
+            List<AggregateResult> descAggregateResultList,
+            TsFileFilter fileFilter)
+            throws StorageEngineException, IOException, QueryProcessException {
 
-      List<AggregateResult> mergedAggResults = FilePathUtils.mergeRecordByPath(
-              aggregateResultList, finalPaths, pathIndex);
+        // construct series reader without value filter
+        QueryDataSource queryDataSource =
+                QueryResourceManager.getInstance()
+                        .getQueryDataSource(seriesPath, context, timeFilter);
+        if (fileFilter != null) {
+            QueryUtils.filterQueryDataSource(queryDataSource, fileFilter);
+        }
+        // update filter by TTL
+        timeFilter = queryDataSource.updateFilterUsingTTL(timeFilter);
 
-      List<PartialPath> paths = new ArrayList<>();
-      List<TSDataType> dataTypes = new ArrayList<>();
-      for (int i = 0; i < mergedAggResults.size(); i++) {
-        dataTypes.add(mergedAggResults.get(i).getResultDataType());
-      }
-      RowRecord curRecord = new RowRecord(0);
-      for (AggregateResult resultData : mergedAggResults) {
-        TSDataType dataType = resultData.getResultDataType();
-        curRecord.addField(resultData.getResult(), dataType);
-      }
-
-      dataSet = new SingleDataSet(paths, dataTypes);
-      dataSet.setRecord(curRecord);
-    } else {
-      dataSet = new SingleDataSet(selectedSeries, dataTypes);
-      dataSet.setRecord(record);
+        if (ascAggregateResultList != null && !ascAggregateResultList.isEmpty()) {
+            IAggregateReader seriesReader =
+                    new SeriesAggregateReader(
+                            seriesPath,
+                            measurements,
+                            tsDataType,
+                            context,
+                            queryDataSource,
+                            timeFilter,
+                            null,
+                            null,
+                            true);
+            aggregateFromReader(seriesReader, ascAggregateResultList);
+        }
+        if (descAggregateResultList != null && !descAggregateResultList.isEmpty()) {
+            IAggregateReader seriesReader =
+                    new SeriesAggregateReader(
+                            seriesPath,
+                            measurements,
+                            tsDataType,
+                            context,
+                            queryDataSource,
+                            timeFilter,
+                            null,
+                            null,
+                            false);
+            aggregateFromReader(seriesReader, descAggregateResultList);
+        }
     }
 
-    return dataSet;
-  }
+    @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
+    private static void aggregateFromReader(
+            IAggregateReader seriesReader, List<AggregateResult> aggregateResultList)
+            throws QueryProcessException, IOException {
+        int remainingToCalculate = aggregateResultList.size();
+        boolean[] isCalculatedArray = new boolean[aggregateResultList.size()];
 
-  /**
-   * Merge same series and convert to series map. For example: Given: paths: s1, s2, s3, s1 and
-   * aggregations: count, sum, count, sum. Then: pathToAggrIndexesMap: s1 -> 0, 3; s2 -> 1; s3 -> 2
-   *
-   * @param selectedSeries selected series
-   * @return path to aggregation indexes map
-   */
-  private Map<PartialPath, List<Integer>> groupAggregationsBySeries(
-      List<PartialPath> selectedSeries) {
-    Map<PartialPath, List<Integer>> pathToAggrIndexesMap = new HashMap<>();
-    for (int i = 0; i < selectedSeries.size(); i++) {
-      PartialPath series = selectedSeries.get(i);
-      List<Integer> indexList = pathToAggrIndexesMap
-          .computeIfAbsent(series, key -> new ArrayList<>());
-      indexList.add(i);
+        while (seriesReader.hasNextFile()) {
+            // cal by file statistics
+            if (seriesReader.canUseCurrentFileStatistics()) {
+                Statistics fileStatistics = seriesReader.currentFileStatistics();
+                remainingToCalculate =
+                        aggregateStatistics(
+                                aggregateResultList,
+                                isCalculatedArray,
+                                remainingToCalculate,
+                                fileStatistics);
+                if (remainingToCalculate == 0) {
+                    return;
+                }
+                seriesReader.skipCurrentFile();
+                continue;
+            }
+
+            while (seriesReader.hasNextChunk()) {
+                // cal by chunk statistics
+                if (seriesReader.canUseCurrentChunkStatistics()) {
+                    Statistics chunkStatistics = seriesReader.currentChunkStatistics();
+                    remainingToCalculate =
+                            aggregateStatistics(
+                                    aggregateResultList,
+                                    isCalculatedArray,
+                                    remainingToCalculate,
+                                    chunkStatistics);
+                    if (remainingToCalculate == 0) {
+                        return;
+                    }
+                    seriesReader.skipCurrentChunk();
+                    continue;
+                }
+
+                remainingToCalculate =
+                        aggregatePages(
+                                seriesReader,
+                                aggregateResultList,
+                                isCalculatedArray,
+                                remainingToCalculate);
+                if (remainingToCalculate == 0) {
+                    return;
+                }
+            }
+        }
     }
-    return pathToAggrIndexesMap;
-  }
+
+    /** Aggregate each result in the list with the statistics */
+    private static int aggregateStatistics(
+            List<AggregateResult> aggregateResultList,
+            boolean[] isCalculatedArray,
+            int remainingToCalculate,
+            Statistics statistics)
+            throws QueryProcessException {
+        int newRemainingToCalculate = remainingToCalculate;
+        for (int i = 0; i < aggregateResultList.size(); i++) {
+            if (!isCalculatedArray[i]) {
+                AggregateResult aggregateResult = aggregateResultList.get(i);
+                aggregateResult.updateResultFromStatistics(statistics);
+                if (aggregateResult.hasFinalResult()) {
+                    isCalculatedArray[i] = true;
+                    newRemainingToCalculate--;
+                    if (newRemainingToCalculate == 0) {
+                        return newRemainingToCalculate;
+                    }
+                }
+            }
+        }
+        return newRemainingToCalculate;
+    }
+
+    @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
+    private static int aggregatePages(
+            IAggregateReader seriesReader,
+            List<AggregateResult> aggregateResultList,
+            boolean[] isCalculatedArray,
+            int remainingToCalculate)
+            throws IOException, QueryProcessException {
+        while (seriesReader.hasNextPage()) {
+            // cal by page statistics
+            if (seriesReader.canUseCurrentPageStatistics()) {
+                Statistics pageStatistic = seriesReader.currentPageStatistics();
+                remainingToCalculate =
+                        aggregateStatistics(
+                                aggregateResultList,
+                                isCalculatedArray,
+                                remainingToCalculate,
+                                pageStatistic);
+                if (remainingToCalculate == 0) {
+                    return 0;
+                }
+                seriesReader.skipCurrentPage();
+                continue;
+            }
+            BatchData nextOverlappedPageData = seriesReader.nextPage();
+            for (int i = 0; i < aggregateResultList.size(); i++) {
+                if (!isCalculatedArray[i]) {
+                    AggregateResult aggregateResult = aggregateResultList.get(i);
+                    aggregateResult.updateResultFromPageData(nextOverlappedPageData);
+                    nextOverlappedPageData.resetBatchData();
+                    if (aggregateResult.hasFinalResult()) {
+                        isCalculatedArray[i] = true;
+                        remainingToCalculate--;
+                        if (remainingToCalculate == 0) {
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+        return remainingToCalculate;
+    }
+
+    /**
+     * execute aggregate function with value filter.
+     *
+     * @param context query context.
+     */
+    public QueryDataSet executeWithValueFilter(QueryContext context, RawDataQueryPlan queryPlan)
+            throws StorageEngineException, IOException, QueryProcessException {
+        int index = 0;
+        for (; index < aggregations.size(); index++) {
+            String aggregationFunc = aggregations.get(index);
+            if (!aggregationFunc.equals(IoTDBConstant.MAX_TIME)
+                    && !aggregationFunc.equals(IoTDBConstant.LAST_VALUE)) {
+                break;
+            }
+        }
+        if (index >= aggregations.size()) {
+            queryPlan.setAscending(false);
+            this.ascending = false;
+        }
+        TimeGenerator timestampGenerator = getTimeGenerator(context, queryPlan);
+        List<IReaderByTimestamp> readersOfSelectedSeries = new ArrayList<>();
+        List<StorageGroupProcessor> list = StorageEngine.getInstance().mergeLock(selectedSeries);
+        try {
+            for (int i = 0; i < selectedSeries.size(); i++) {
+                PartialPath path = selectedSeries.get(i);
+                IReaderByTimestamp seriesReaderByTimestamp =
+                        getReaderByTime(path, queryPlan, dataTypes.get(i), context);
+                readersOfSelectedSeries.add(seriesReaderByTimestamp);
+            }
+        } finally {
+            StorageEngine.getInstance().mergeUnLock(list);
+        }
+
+        List<AggregateResult> aggregateResults = new ArrayList<>();
+        for (int i = 0; i < selectedSeries.size(); i++) {
+            TSDataType type = dataTypes.get(i);
+            AggregateResult result =
+                    AggregateResultFactory.getAggrResultByName(
+                            aggregations.get(i), type, ascending);
+            aggregateResults.add(result);
+        }
+        aggregateWithValueFilter(aggregateResults, timestampGenerator, readersOfSelectedSeries);
+        return constructDataSet(aggregateResults, queryPlan);
+    }
+
+    protected TimeGenerator getTimeGenerator(QueryContext context, RawDataQueryPlan queryPlan)
+            throws StorageEngineException {
+        return new ServerTimeGenerator(expression, context, queryPlan);
+    }
+
+    protected IReaderByTimestamp getReaderByTime(
+            PartialPath path, RawDataQueryPlan queryPlan, TSDataType dataType, QueryContext context)
+            throws StorageEngineException, QueryProcessException {
+        return new SeriesReaderByTimestamp(
+                path,
+                queryPlan.getAllMeasurementsInDevice(path.getDevice()),
+                dataType,
+                context,
+                QueryResourceManager.getInstance().getQueryDataSource(path, context, null),
+                null,
+                ascending);
+    }
+
+    /** calculate aggregation result with value filter. */
+    private void aggregateWithValueFilter(
+            List<AggregateResult> aggregateResults,
+            TimeGenerator timestampGenerator,
+            List<IReaderByTimestamp> readersOfSelectedSeries)
+            throws IOException {
+
+        while (timestampGenerator.hasNext()) {
+
+            // generate timestamps for aggregate
+            long[] timeArray = new long[aggregateFetchSize];
+            int timeArrayLength = 0;
+            for (int cnt = 0; cnt < aggregateFetchSize; cnt++) {
+                if (!timestampGenerator.hasNext()) {
+                    break;
+                }
+                timeArray[timeArrayLength++] = timestampGenerator.next();
+            }
+
+            // cal part of aggregate result
+            for (int i = 0; i < readersOfSelectedSeries.size(); i++) {
+                aggregateResults
+                        .get(i)
+                        .updateResultUsingTimestamps(
+                                timeArray, timeArrayLength, readersOfSelectedSeries.get(i));
+            }
+        }
+    }
+
+    /**
+     * using aggregate result data list construct QueryDataSet.
+     *
+     * @param aggregateResultList aggregate result list
+     */
+    private QueryDataSet constructDataSet(
+            List<AggregateResult> aggregateResultList, RawDataQueryPlan plan)
+            throws QueryProcessException {
+        RowRecord record = new RowRecord(0);
+        for (AggregateResult resultData : aggregateResultList) {
+            TSDataType dataType = resultData.getResultDataType();
+            record.addField(resultData.getResult(), dataType);
+        }
+
+        SingleDataSet dataSet;
+        if (((AggregationPlan) plan).getLevel() >= 0) {
+            Map<Integer, String> pathIndex = new HashMap<>();
+            Map<String, AggregateResult> finalPaths =
+                    FilePathUtils.getPathByLevel((AggregationPlan) plan, pathIndex);
+
+            List<AggregateResult> mergedAggResults =
+                    FilePathUtils.mergeRecordByPath(aggregateResultList, finalPaths, pathIndex);
+
+            List<PartialPath> paths = new ArrayList<>();
+            List<TSDataType> dataTypes = new ArrayList<>();
+            for (int i = 0; i < mergedAggResults.size(); i++) {
+                dataTypes.add(mergedAggResults.get(i).getResultDataType());
+            }
+            RowRecord curRecord = new RowRecord(0);
+            for (AggregateResult resultData : mergedAggResults) {
+                TSDataType dataType = resultData.getResultDataType();
+                curRecord.addField(resultData.getResult(), dataType);
+            }
+
+            dataSet = new SingleDataSet(paths, dataTypes);
+            dataSet.setRecord(curRecord);
+        } else {
+            dataSet = new SingleDataSet(selectedSeries, dataTypes);
+            dataSet.setRecord(record);
+        }
+
+        return dataSet;
+    }
+
+    /**
+     * Merge same series and convert to series map. For example: Given: paths: s1, s2, s3, s1 and
+     * aggregations: count, sum, count, sum. Then: pathToAggrIndexesMap: s1 -> 0, 3; s2 -> 1; s3 ->
+     * 2
+     *
+     * @param selectedSeries selected series
+     * @return path to aggregation indexes map
+     */
+    private Map<PartialPath, List<Integer>> groupAggregationsBySeries(
+            List<PartialPath> selectedSeries) {
+        Map<PartialPath, List<Integer>> pathToAggrIndexesMap = new HashMap<>();
+        for (int i = 0; i < selectedSeries.size(); i++) {
+            PartialPath series = selectedSeries.get(i);
+            List<Integer> indexList =
+                    pathToAggrIndexesMap.computeIfAbsent(series, key -> new ArrayList<>());
+            indexList.add(i);
+        }
+        return pathToAggrIndexesMap;
+    }
 }

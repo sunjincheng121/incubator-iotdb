@@ -18,16 +18,15 @@
  */
 package org.apache.iotdb.db.exception.runtime;
 
-public class RPCServiceException extends RuntimeException{
+public class RPCServiceException extends RuntimeException {
 
-  private static final long serialVersionUID = 520836932066897810L;
+    private static final long serialVersionUID = 520836932066897810L;
 
-  public RPCServiceException(String message) {
-    super(message);
-  }
+    public RPCServiceException(String message) {
+        super(message);
+    }
 
-  public RPCServiceException(String message, Throwable e) {
-    super(message + e.getMessage());
-  }
-
+    public RPCServiceException(String message, Throwable e) {
+        super(message + e.getMessage());
+    }
 }

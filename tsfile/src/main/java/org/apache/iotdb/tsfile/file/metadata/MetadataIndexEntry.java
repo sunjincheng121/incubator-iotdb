@@ -26,44 +26,44 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class MetadataIndexEntry {
 
-  private String name;
-  private long offset;
+    private String name;
+    private long offset;
 
-  public MetadataIndexEntry(String name, long offset) {
-    this.name = name;
-    this.offset = offset;
-  }
+    public MetadataIndexEntry(String name, long offset) {
+        this.name = name;
+        this.offset = offset;
+    }
 
-  public String getName() {
-    return name;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public long getOffset() {
-    return offset;
-  }
+    public long getOffset() {
+        return offset;
+    }
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-  public void setOffset(long offset) {
-    this.offset = offset;
-  }
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
 
-  public String toString() {
-    return "<" + name + "," + offset + ">";
-  }
+    public String toString() {
+        return "<" + name + "," + offset + ">";
+    }
 
-  public int serializeTo(OutputStream outputStream) throws IOException {
-    int byteLen = 0;
-    byteLen += ReadWriteIOUtils.write(name, outputStream);
-    byteLen += ReadWriteIOUtils.write(offset, outputStream);
-    return byteLen;
-  }
+    public int serializeTo(OutputStream outputStream) throws IOException {
+        int byteLen = 0;
+        byteLen += ReadWriteIOUtils.write(name, outputStream);
+        byteLen += ReadWriteIOUtils.write(offset, outputStream);
+        return byteLen;
+    }
 
-  public static MetadataIndexEntry deserializeFrom(ByteBuffer buffer) {
-    String name = ReadWriteIOUtils.readString(buffer);
-    long offset = ReadWriteIOUtils.readLong(buffer);
-    return new MetadataIndexEntry(name, offset);
-  }
+    public static MetadataIndexEntry deserializeFrom(ByteBuffer buffer) {
+        String name = ReadWriteIOUtils.readString(buffer);
+        long offset = ReadWriteIOUtils.readLong(buffer);
+        return new MetadataIndexEntry(name, offset);
+    }
 }

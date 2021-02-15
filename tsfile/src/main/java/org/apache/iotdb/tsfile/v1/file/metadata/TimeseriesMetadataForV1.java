@@ -21,22 +21,20 @@ package org.apache.iotdb.tsfile.v1.file.metadata;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
 import org.apache.iotdb.tsfile.file.metadata.TimeseriesMetadata;
 
 public class TimeseriesMetadataForV1 extends TimeseriesMetadata {
-  
-  private List<ChunkMetadata> chunkMetadataList;
 
-  public void setChunkMetadataList(List<ChunkMetadata> chunkMetadataList) {
-    this.chunkMetadataList = chunkMetadataList;
-  }
+    private List<ChunkMetadata> chunkMetadataList;
 
-  @Override
-  public List<ChunkMetadata> loadChunkMetadataList() throws IOException {
-    chunkMetadataLoader.setDiskChunkLoader(chunkMetadataList);
-    return chunkMetadataList;
-  }
+    public void setChunkMetadataList(List<ChunkMetadata> chunkMetadataList) {
+        this.chunkMetadataList = chunkMetadataList;
+    }
 
+    @Override
+    public List<ChunkMetadata> loadChunkMetadataList() throws IOException {
+        chunkMetadataLoader.setDiskChunkLoader(chunkMetadataList);
+        return chunkMetadataList;
+    }
 }

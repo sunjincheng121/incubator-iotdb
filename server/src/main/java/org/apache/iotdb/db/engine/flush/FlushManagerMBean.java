@@ -21,11 +21,11 @@ package org.apache.iotdb.db.engine.flush;
 
 public interface FlushManagerMBean {
 
-  int getNumberOfWorkingTasks();
+    int getNumberOfWorkingTasks();
 
-  int getNumberOfPendingTasks();
+    int getNumberOfPendingTasks();
 
-  int getNumberOfWorkingSubTasks();
+    int getNumberOfWorkingSubTasks();
 
-  int getNumberOfPendingSubTasks();
+    int getNumberOfPendingSubTasks();
 }

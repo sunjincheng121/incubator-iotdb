@@ -32,81 +32,83 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * PhysicalPlanLog contains a non-partitioned physical plan like set storage group.
- */
+/** PhysicalPlanLog contains a non-partitioned physical plan like set storage group. */
 public class PhysicalPlanLog extends Log {
 
-  private static final Logger logger = LoggerFactory.getLogger(PhysicalPlanLog.class);
-  private PhysicalPlan plan;
+    private static final Logger logger = LoggerFactory.getLogger(PhysicalPlanLog.class);
+    private PhysicalPlan plan;
 
-  public PhysicalPlanLog() {
-  }
+    public PhysicalPlanLog() {}
 
-  public PhysicalPlanLog(PhysicalPlan plan) {
-    this.plan = plan;
-  }
-
-  @Override
-  public ByteBuffer serialize() {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
-    try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
-      dataOutputStream.writeByte((byte) PHYSICAL_PLAN.ordinal());
-
-      dataOutputStream.writeLong(getCurrLogIndex());
-      dataOutputStream.writeLong(getCurrLogTerm());
-
-      plan.serialize(dataOutputStream);
-    } catch (IOException e) {
-      // unreachable
+    public PhysicalPlanLog(PhysicalPlan plan) {
+        this.plan = plan;
     }
 
-    return ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-  }
+    @Override
+    public ByteBuffer serialize() {
+        ByteArrayOutputStream byteArrayOutputStream =
+                new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
+        try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
+            dataOutputStream.writeByte((byte) PHYSICAL_PLAN.ordinal());
 
-  @Override
-  public void deserialize(ByteBuffer buffer) {
-    setCurrLogIndex(buffer.getLong());
-    setCurrLogTerm(buffer.getLong());
+            dataOutputStream.writeLong(getCurrLogIndex());
+            dataOutputStream.writeLong(getCurrLogTerm());
 
-    try {
-      plan = PhysicalPlan.Factory.create(buffer);
-    } catch (IOException | IllegalPathException e) {
-      logger.error("Cannot parse a physical {}:{} plan {}", getCurrLogIndex(), getCurrLogTerm(),
-          buffer.array().length, e);
+            plan.serialize(dataOutputStream);
+        } catch (IOException e) {
+            // unreachable
+        }
+
+        return ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
     }
-  }
 
-  public PhysicalPlan getPlan() {
-    return plan;
-  }
+    @Override
+    public void deserialize(ByteBuffer buffer) {
+        setCurrLogIndex(buffer.getLong());
+        setCurrLogTerm(buffer.getLong());
 
-  public void setPlan(PhysicalPlan plan) {
-    this.plan = plan;
-  }
-
-  @Override
-  public String toString() {
-    return plan.toString() + ",term:" + getCurrLogTerm() + ",index:" + getCurrLogIndex();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+        try {
+            plan = PhysicalPlan.Factory.create(buffer);
+        } catch (IOException | IllegalPathException e) {
+            logger.error(
+                    "Cannot parse a physical {}:{} plan {}",
+                    getCurrLogIndex(),
+                    getCurrLogTerm(),
+                    buffer.array().length,
+                    e);
+        }
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    if (!super.equals(o)) {
-      return false;
-    }
-    PhysicalPlanLog that = (PhysicalPlanLog) o;
-    return Objects.equals(plan, that.plan);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(super.hashCode(), plan);
-  }
+    public PhysicalPlan getPlan() {
+        return plan;
+    }
+
+    public void setPlan(PhysicalPlan plan) {
+        this.plan = plan;
+    }
+
+    @Override
+    public String toString() {
+        return plan.toString() + ",term:" + getCurrLogTerm() + ",index:" + getCurrLogIndex();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        PhysicalPlanLog that = (PhysicalPlanLog) o;
+        return Objects.equals(plan, that.plan);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), plan);
+    }
 }

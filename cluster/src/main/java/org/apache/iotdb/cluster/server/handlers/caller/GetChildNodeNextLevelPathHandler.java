@@ -28,30 +28,31 @@ import org.slf4j.LoggerFactory;
 
 public class GetChildNodeNextLevelPathHandler implements AsyncMethodCallback<Set<String>> {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetChildNodeNextLevelPathHandler.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(GetChildNodeNextLevelPathHandler.class);
 
-  private Node contact;
-  private AtomicReference<Set<String>> result;
+    private Node contact;
+    private AtomicReference<Set<String>> result;
 
-  @Override
-  public void onComplete(Set<String> resp) {
-    logger.info("Received child node next level path from {}", contact);
-    synchronized (result) {
-      result.set(resp);
-      result.notifyAll();
+    @Override
+    public void onComplete(Set<String> resp) {
+        logger.info("Received child node next level path from {}", contact);
+        synchronized (result) {
+            result.set(resp);
+            result.notifyAll();
+        }
     }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    logger.warn("Cannot get child node next level path from {}, because", contact, exception);
-  }
+    @Override
+    public void onError(Exception exception) {
+        logger.warn("Cannot get child node next level path from {}, because", contact, exception);
+    }
 
-  public void setResponse(AtomicReference<Set<String>> response) {
-    this.result = response;
-  }
+    public void setResponse(AtomicReference<Set<String>> response) {
+        this.result = response;
+    }
 
-  public void setContact(Node contact) {
-    this.contact = contact;
-  }
+    public void setContact(Node contact) {
+        this.contact = contact;
+    }
 }

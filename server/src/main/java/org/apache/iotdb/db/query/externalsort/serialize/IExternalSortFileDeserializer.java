@@ -24,8 +24,8 @@ import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
 public interface IExternalSortFileDeserializer extends IPointReader {
 
-  @Override
-  default TimeValuePair currentTimeValuePair() throws IOException {
-    throw new IOException("IExternalSortFileDeserializer doesn't implement current() method.");
-  }
+    @Override
+    default TimeValuePair currentTimeValuePair() throws IOException {
+        throw new IOException("IExternalSortFileDeserializer doesn't implement current() method.");
+    }
 }

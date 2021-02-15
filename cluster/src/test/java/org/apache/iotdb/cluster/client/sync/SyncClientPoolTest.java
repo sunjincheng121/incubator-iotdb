@@ -24,130 +24,136 @@ import org.mockito.Mock;
 
 public class SyncClientPoolTest {
 
-  @Mock
-  private SyncClientFactory testSyncClientFactory;
+    @Mock private SyncClientFactory testSyncClientFactory;
 
-  @Test
-  public void testTestClient() {
-    testSyncClientFactory = new TestSyncClientFactory();
-    getClient();
-    putClient();
-  }
-
-  private void getClient() {
-    SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
-    for (int i = 0; i < 10; i++) {
-      Client client = syncClientPool.getClient(TestUtils.getNode(i));
-      if (client instanceof TestSyncClient) {
-        TestSyncClient testSyncClient = (TestSyncClient) client;
-        assertEquals(i, testSyncClient.getSerialNum());
-      }
-    }
-  }
-
-  private void putClient() {
-    SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
-    List<Client> testClients = new ArrayList<>();
-    for (int i = 0; i < 10; i++) {
-      Client client = syncClientPool.getClient(TestUtils.getNode(i));
-      testClients.add(client);
-    }
-    for (int i = 0; i < 10; i++) {
-      syncClientPool.putClient(TestUtils.getNode(i), testClients.get(i));
+    @Test
+    public void testTestClient() {
+        testSyncClientFactory = new TestSyncClientFactory();
+        getClient();
+        putClient();
     }
 
-    for (int i = 0; i < 10; i++) {
-      Client poolClient = syncClientPool.getClient(TestUtils.getNode(i));
-      assertEquals(testClients.get(i), poolClient);
-    }
-  }
-
-  @Test
-  public void testPutBadClient() {
-    testSyncClientFactory = new TestSyncClientFactory();
-    SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
-    Client client = syncClientPool.getClient(TestUtils.getNode(0));
-    client.getInputProtocol().getTransport().close();
-    syncClientPool.putClient(TestUtils.getNode(0), client);
-    Client newClient = syncClientPool.getClient(TestUtils.getNode(0));
-    assertNotEquals(client, newClient);
-  }
-
-  @Test
-  public void testMaxClient() {
-    int maxClientNum = ClusterDescriptor.getInstance().getConfig().getMaxClientPerNodePerMember();
-    ClusterDescriptor.getInstance().getConfig().setMaxClientPerNodePerMember(5);
-    testSyncClientFactory = new TestSyncClientFactory();
-    SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
-
-    for (int i = 0; i < 5; i++) {
-      syncClientPool.getClient(TestUtils.getNode(0));
-    }
-    AtomicReference<Client> reference = new AtomicReference<>();
-    Thread t = new Thread(() -> reference.set(syncClientPool.getClient(TestUtils.getNode(0))));
-    t.start();
-    t.interrupt();
-    assertNull(reference.get());
-    ClusterDescriptor.getInstance().getConfig().setMaxClientPerNodePerMember(maxClientNum);
-  }
-
-  @Test
-  public void testWaitClient() {
-    int maxClientPerNodePerMember = ClusterDescriptor.getInstance().getConfig()
-        .getMaxClientPerNodePerMember();
-    try {
-      ClusterDescriptor.getInstance().getConfig().setMaxClientPerNodePerMember(10);
-      testSyncClientFactory = new TestSyncClientFactory();
-      SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
-
-      Node node = TestUtils.getNode(0);
-      List<Client> clients = new ArrayList<>();
-      for (int i = 0; i < 10; i++) {
-        clients.add(syncClientPool.getClient(node));
-      }
-
-      AtomicBoolean waitStart = new AtomicBoolean(false);
-      new Thread(() -> {
-        while (!waitStart.get()) {
-         // wait until we start to for wait for a client
+    private void getClient() {
+        SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
+        for (int i = 0; i < 10; i++) {
+            Client client = syncClientPool.getClient(TestUtils.getNode(i));
+            if (client instanceof TestSyncClient) {
+                TestSyncClient testSyncClient = (TestSyncClient) client;
+                assertEquals(i, testSyncClient.getSerialNum());
+            }
         }
-        synchronized (syncClientPool) {
-          for (Client client : clients) {
-            syncClientPool.putClient(node, client);
-          }
+    }
+
+    private void putClient() {
+        SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
+        List<Client> testClients = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Client client = syncClientPool.getClient(TestUtils.getNode(i));
+            testClients.add(client);
         }
-      }).start();
+        for (int i = 0; i < 10; i++) {
+            syncClientPool.putClient(TestUtils.getNode(i), testClients.get(i));
+        }
 
-      Client client;
-      synchronized (syncClientPool) {
-        waitStart.set(true);
-        // getClient() will wait on syncClientPool, so the thread above can return clients
-        client = syncClientPool.getClient(node);
-      }
-      assertNotNull(client);
-    } finally {
-      ClusterDescriptor.getInstance().getConfig().setMaxClientPerNodePerMember(maxClientPerNodePerMember);
+        for (int i = 0; i < 10; i++) {
+            Client poolClient = syncClientPool.getClient(TestUtils.getNode(i));
+            assertEquals(testClients.get(i), poolClient);
+        }
     }
-  }
 
-  @Test
-  public void testWaitClientTimeOut() {
-    int maxClientPerNodePerMember = ClusterDescriptor.getInstance().getConfig()
-        .getMaxClientPerNodePerMember();
-    try {
-      ClusterDescriptor.getInstance().getConfig().setMaxClientPerNodePerMember(1);
-      testSyncClientFactory = new TestSyncClientFactory();
-      SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
-
-      Node node = TestUtils.getNode(0);
-      List<Client> clients = new ArrayList<>();
-      for (int i = 0; i < 2; i++) {
-        clients.add(syncClientPool.getClient(node));
-      }
-
-      assertNotEquals(clients.get(0), clients.get(1));
-    } finally {
-      ClusterDescriptor.getInstance().getConfig().setMaxClientPerNodePerMember(maxClientPerNodePerMember);
+    @Test
+    public void testPutBadClient() {
+        testSyncClientFactory = new TestSyncClientFactory();
+        SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
+        Client client = syncClientPool.getClient(TestUtils.getNode(0));
+        client.getInputProtocol().getTransport().close();
+        syncClientPool.putClient(TestUtils.getNode(0), client);
+        Client newClient = syncClientPool.getClient(TestUtils.getNode(0));
+        assertNotEquals(client, newClient);
     }
-  }
+
+    @Test
+    public void testMaxClient() {
+        int maxClientNum =
+                ClusterDescriptor.getInstance().getConfig().getMaxClientPerNodePerMember();
+        ClusterDescriptor.getInstance().getConfig().setMaxClientPerNodePerMember(5);
+        testSyncClientFactory = new TestSyncClientFactory();
+        SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
+
+        for (int i = 0; i < 5; i++) {
+            syncClientPool.getClient(TestUtils.getNode(0));
+        }
+        AtomicReference<Client> reference = new AtomicReference<>();
+        Thread t = new Thread(() -> reference.set(syncClientPool.getClient(TestUtils.getNode(0))));
+        t.start();
+        t.interrupt();
+        assertNull(reference.get());
+        ClusterDescriptor.getInstance().getConfig().setMaxClientPerNodePerMember(maxClientNum);
+    }
+
+    @Test
+    public void testWaitClient() {
+        int maxClientPerNodePerMember =
+                ClusterDescriptor.getInstance().getConfig().getMaxClientPerNodePerMember();
+        try {
+            ClusterDescriptor.getInstance().getConfig().setMaxClientPerNodePerMember(10);
+            testSyncClientFactory = new TestSyncClientFactory();
+            SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
+
+            Node node = TestUtils.getNode(0);
+            List<Client> clients = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                clients.add(syncClientPool.getClient(node));
+            }
+
+            AtomicBoolean waitStart = new AtomicBoolean(false);
+            new Thread(
+                            () -> {
+                                while (!waitStart.get()) {
+                                    // wait until we start to for wait for a client
+                                }
+                                synchronized (syncClientPool) {
+                                    for (Client client : clients) {
+                                        syncClientPool.putClient(node, client);
+                                    }
+                                }
+                            })
+                    .start();
+
+            Client client;
+            synchronized (syncClientPool) {
+                waitStart.set(true);
+                // getClient() will wait on syncClientPool, so the thread above can return clients
+                client = syncClientPool.getClient(node);
+            }
+            assertNotNull(client);
+        } finally {
+            ClusterDescriptor.getInstance()
+                    .getConfig()
+                    .setMaxClientPerNodePerMember(maxClientPerNodePerMember);
+        }
+    }
+
+    @Test
+    public void testWaitClientTimeOut() {
+        int maxClientPerNodePerMember =
+                ClusterDescriptor.getInstance().getConfig().getMaxClientPerNodePerMember();
+        try {
+            ClusterDescriptor.getInstance().getConfig().setMaxClientPerNodePerMember(1);
+            testSyncClientFactory = new TestSyncClientFactory();
+            SyncClientPool syncClientPool = new SyncClientPool(testSyncClientFactory);
+
+            Node node = TestUtils.getNode(0);
+            List<Client> clients = new ArrayList<>();
+            for (int i = 0; i < 2; i++) {
+                clients.add(syncClientPool.getClient(node));
+            }
+
+            assertNotEquals(clients.get(0), clients.get(1));
+        } finally {
+            ClusterDescriptor.getInstance()
+                    .getConfig()
+                    .setMaxClientPerNodePerMember(maxClientPerNodePerMember);
+        }
+    }
 }

@@ -22,7 +22,7 @@ import java.io.Serializable;
 
 public interface IExpression extends Serializable {
 
-  ExpressionType getType();
+    ExpressionType getType();
 
-  IExpression clone();
+    IExpression clone();
 }

@@ -46,59 +46,59 @@ import org.slf4j.LoggerFactory;
 
 public class ClusterPhysicalGenerator extends PhysicalGenerator {
 
-  private static final Logger logger = LoggerFactory.getLogger(ClusterPhysicalGenerator.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClusterPhysicalGenerator.class);
 
-  private CMManager getCMManager() {
-    return ((CMManager) IoTDB.metaManager);
-  }
-
-  @Override
-  protected Pair<List<TSDataType>, List<TSDataType>> getSeriesTypes(List<PartialPath> paths,
-      String aggregation) throws MetadataException {
-    return getCMManager().getSeriesTypesByPaths(paths, aggregation);
-  }
-
-  @Override
-  protected List<TSDataType> getSeriesTypes(List<PartialPath> paths) throws MetadataException {
-    return getCMManager().getSeriesTypesByPaths(paths, null).left;
-  }
-
-  @Override
-  protected List<PartialPath> getMatchedTimeseries(PartialPath path) throws MetadataException {
-    return ((CMManager) IoTDB.metaManager).getMatchedPaths(path);
-  }
-
-  @Override
-  protected Set<PartialPath> getMatchedDevices(PartialPath path) throws MetadataException {
-    return ((CMManager) IoTDB.metaManager).getMatchedDevices(path);
-  }
-
-
-  @Override
-  protected PhysicalPlan generateLoadConfigurationPlan(LoadConfigurationOperatorType type)
-      throws QueryProcessException {
-    if (type == LoadConfigurationOperatorType.GLOBAL) {
-      Properties[] properties = new Properties[2];
-      properties[0] = new Properties();
-      URL iotdbEnginePropertiesUrl = IoTDBDescriptor.getInstance().getPropsUrl();
-      try (InputStream inputStream = new FileInputStream(new File(iotdbEnginePropertiesUrl.toString()))) {
-        properties[0].load(inputStream);
-      } catch (IOException e) {
-        logger.warn("Fail to find config file {}", iotdbEnginePropertiesUrl, e);
-        throw new QueryProcessException("Fail to find iotdb-engine config file.");
-      }
-      String clusterPropertiesUrl = ClusterDescriptor.getInstance().getPropsUrl();
-      properties[1] = new Properties();
-      try (InputStream inputStream = new FileInputStream(new File(clusterPropertiesUrl))) {
-        properties[1].load(inputStream);
-      } catch (IOException e) {
-        logger.warn("Fail to find config file {}", clusterPropertiesUrl, e);
-        throw new QueryProcessException("Fail to find cluster config file.");
-      }
-
-      return new LoadConfigurationPlan(LoadConfigurationPlanType.GLOBAL, properties);
-    } else {
-      return new LoadConfigurationPlan(LoadConfigurationPlanType.LOCAL);
+    private CMManager getCMManager() {
+        return ((CMManager) IoTDB.metaManager);
     }
-  }
+
+    @Override
+    protected Pair<List<TSDataType>, List<TSDataType>> getSeriesTypes(
+            List<PartialPath> paths, String aggregation) throws MetadataException {
+        return getCMManager().getSeriesTypesByPaths(paths, aggregation);
+    }
+
+    @Override
+    protected List<TSDataType> getSeriesTypes(List<PartialPath> paths) throws MetadataException {
+        return getCMManager().getSeriesTypesByPaths(paths, null).left;
+    }
+
+    @Override
+    protected List<PartialPath> getMatchedTimeseries(PartialPath path) throws MetadataException {
+        return ((CMManager) IoTDB.metaManager).getMatchedPaths(path);
+    }
+
+    @Override
+    protected Set<PartialPath> getMatchedDevices(PartialPath path) throws MetadataException {
+        return ((CMManager) IoTDB.metaManager).getMatchedDevices(path);
+    }
+
+    @Override
+    protected PhysicalPlan generateLoadConfigurationPlan(LoadConfigurationOperatorType type)
+            throws QueryProcessException {
+        if (type == LoadConfigurationOperatorType.GLOBAL) {
+            Properties[] properties = new Properties[2];
+            properties[0] = new Properties();
+            URL iotdbEnginePropertiesUrl = IoTDBDescriptor.getInstance().getPropsUrl();
+            try (InputStream inputStream =
+                    new FileInputStream(new File(iotdbEnginePropertiesUrl.toString()))) {
+                properties[0].load(inputStream);
+            } catch (IOException e) {
+                logger.warn("Fail to find config file {}", iotdbEnginePropertiesUrl, e);
+                throw new QueryProcessException("Fail to find iotdb-engine config file.");
+            }
+            String clusterPropertiesUrl = ClusterDescriptor.getInstance().getPropsUrl();
+            properties[1] = new Properties();
+            try (InputStream inputStream = new FileInputStream(new File(clusterPropertiesUrl))) {
+                properties[1].load(inputStream);
+            } catch (IOException e) {
+                logger.warn("Fail to find config file {}", clusterPropertiesUrl, e);
+                throw new QueryProcessException("Fail to find cluster config file.");
+            }
+
+            return new LoadConfigurationPlan(LoadConfigurationPlanType.GLOBAL, properties);
+        } else {
+            return new LoadConfigurationPlan(LoadConfigurationPlanType.LOCAL);
+        }
+    }
 }

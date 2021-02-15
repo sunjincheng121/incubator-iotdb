@@ -32,95 +32,93 @@ import org.apache.iotdb.tsfile.read.filter.operator.NotFilter;
 
 public class TimeFilter {
 
-  private TimeFilter() {
-  }
+    private TimeFilter() {}
 
-  public static TimeEq eq(long value) {
-    return new TimeEq(value);
-  }
-
-  public static TimeGt gt(long value) {
-    return new TimeGt(value);
-  }
-
-  public static TimeGtEq gtEq(long value) {
-    return new TimeGtEq(value);
-  }
-
-  public static TimeLt lt(long value) {
-    return new TimeLt(value);
-  }
-
-  public static TimeLtEq ltEq(long value) {
-    return new TimeLtEq(value);
-  }
-
-  public static TimeNotFilter not(Filter filter) {
-    return new TimeNotFilter(filter);
-  }
-
-  public static TimeNotEq notEq(long value) {
-    return new TimeNotEq(value);
-  }
-
-  public static TimeIn in(Set<Long> values, boolean not) {
-    return new TimeIn(values, not);
-  }
-
-  public static class TimeIn extends In {
-
-    private TimeIn(Set<Long> values, boolean not) {
-      super(values, FilterType.TIME_FILTER,not);
+    public static TimeEq eq(long value) {
+        return new TimeEq(value);
     }
-  }
 
-  public static class TimeEq extends Eq {
-
-    private TimeEq(long value) {
-      super(value, FilterType.TIME_FILTER);
+    public static TimeGt gt(long value) {
+        return new TimeGt(value);
     }
-  }
 
-  public static class TimeNotEq extends NotEq {
-
-    private TimeNotEq(long value) {
-      super(value, FilterType.TIME_FILTER);
+    public static TimeGtEq gtEq(long value) {
+        return new TimeGtEq(value);
     }
-  }
 
-  public static class TimeGt extends Gt {
-
-    private TimeGt(long value) {
-      super(value, FilterType.TIME_FILTER);
+    public static TimeLt lt(long value) {
+        return new TimeLt(value);
     }
-  }
 
-  public static class TimeGtEq extends GtEq {
-
-    private TimeGtEq(long value) {
-      super(value, FilterType.TIME_FILTER);
+    public static TimeLtEq ltEq(long value) {
+        return new TimeLtEq(value);
     }
-  }
 
-  public static class TimeLt extends Lt {
-
-    private TimeLt(long value) {
-      super(value, FilterType.TIME_FILTER);
+    public static TimeNotFilter not(Filter filter) {
+        return new TimeNotFilter(filter);
     }
-  }
 
-  public static class TimeLtEq extends LtEq {
-
-    private TimeLtEq(long value) {
-      super(value, FilterType.TIME_FILTER);
+    public static TimeNotEq notEq(long value) {
+        return new TimeNotEq(value);
     }
-  }
 
-  public static class TimeNotFilter extends NotFilter {
-
-    private TimeNotFilter(Filter filter) {
-      super(filter);
+    public static TimeIn in(Set<Long> values, boolean not) {
+        return new TimeIn(values, not);
     }
-  }
 
+    public static class TimeIn extends In {
+
+        private TimeIn(Set<Long> values, boolean not) {
+            super(values, FilterType.TIME_FILTER, not);
+        }
+    }
+
+    public static class TimeEq extends Eq {
+
+        private TimeEq(long value) {
+            super(value, FilterType.TIME_FILTER);
+        }
+    }
+
+    public static class TimeNotEq extends NotEq {
+
+        private TimeNotEq(long value) {
+            super(value, FilterType.TIME_FILTER);
+        }
+    }
+
+    public static class TimeGt extends Gt {
+
+        private TimeGt(long value) {
+            super(value, FilterType.TIME_FILTER);
+        }
+    }
+
+    public static class TimeGtEq extends GtEq {
+
+        private TimeGtEq(long value) {
+            super(value, FilterType.TIME_FILTER);
+        }
+    }
+
+    public static class TimeLt extends Lt {
+
+        private TimeLt(long value) {
+            super(value, FilterType.TIME_FILTER);
+        }
+    }
+
+    public static class TimeLtEq extends LtEq {
+
+        private TimeLtEq(long value) {
+            super(value, FilterType.TIME_FILTER);
+        }
+    }
+
+    public static class TimeNotFilter extends NotFilter {
+
+        private TimeNotFilter(Filter filter) {
+            super(filter);
+        }
+    }
 }

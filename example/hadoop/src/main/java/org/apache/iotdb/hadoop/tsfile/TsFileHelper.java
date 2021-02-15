@@ -36,105 +36,111 @@ import org.slf4j.LoggerFactory;
 
 public class TsFileHelper {
 
-  private static final Logger logger = LoggerFactory.getLogger(TsFileHelper.class);
+    private static final Logger logger = LoggerFactory.getLogger(TsFileHelper.class);
 
-  public static boolean deleteTsFile(String filePath) {
-    File file = new File(filePath);
-    return file.delete();
-  }
+    public static boolean deleteTsFile(String filePath) {
+        File file = new File(filePath);
+        return file.delete();
+    }
 
-  public static void writeTsFile(String filePath) {
+    public static void writeTsFile(String filePath) {
 
-    try {
-      File file = new File(filePath);
+        try {
+            File file = new File(filePath);
 
-      if (file.exists()) {
-        file.delete();
-      }
+            if (file.exists()) {
+                file.delete();
+            }
 
-      Schema schema = new Schema();
+            Schema schema = new Schema();
 
-      List<MeasurementSchema> schemaList = new ArrayList<>();
+            List<MeasurementSchema> schemaList = new ArrayList<>();
 
-      // the number of rows to include in the tablet
-      int rowNum = 1000000;
-      // the number of values to include in the tablet
-      int sensorNum = 10;
+            // the number of rows to include in the tablet
+            int rowNum = 1000000;
+            // the number of values to include in the tablet
+            int sensorNum = 10;
 
-      // add measurements into file schema (all with INT64 data type)
-      for (int i = 0; i < 2; i++) {
-        MeasurementSchema measurementSchema = new MeasurementSchema(
-            Constant.SENSOR_PREFIX + (i + 1), TSDataType.INT64,
-            TSEncoding.TS_2DIFF);
-        schema.registerTimeseries(new Path(Constant.DEVICE_1, Constant.SENSOR_PREFIX + (i + 1)),
-            measurementSchema);
-        schemaList.add(measurementSchema);
-      }
+            // add measurements into file schema (all with INT64 data type)
+            for (int i = 0; i < 2; i++) {
+                MeasurementSchema measurementSchema =
+                        new MeasurementSchema(
+                                Constant.SENSOR_PREFIX + (i + 1),
+                                TSDataType.INT64,
+                                TSEncoding.TS_2DIFF);
+                schema.registerTimeseries(
+                        new Path(Constant.DEVICE_1, Constant.SENSOR_PREFIX + (i + 1)),
+                        measurementSchema);
+                schemaList.add(measurementSchema);
+            }
 
-      for (int i = 2; i < sensorNum; i++) {
-        MeasurementSchema measurementSchema = new MeasurementSchema(
-            Constant.SENSOR_PREFIX + (i + 1), TSDataType.DOUBLE,
-            TSEncoding.TS_2DIFF);
-        schema.registerTimeseries(new Path(Constant.DEVICE_1, Constant.SENSOR_PREFIX + (i + 1)),
-            measurementSchema);
-        schemaList.add(measurementSchema);
-      }
+            for (int i = 2; i < sensorNum; i++) {
+                MeasurementSchema measurementSchema =
+                        new MeasurementSchema(
+                                Constant.SENSOR_PREFIX + (i + 1),
+                                TSDataType.DOUBLE,
+                                TSEncoding.TS_2DIFF);
+                schema.registerTimeseries(
+                        new Path(Constant.DEVICE_1, Constant.SENSOR_PREFIX + (i + 1)),
+                        measurementSchema);
+                schemaList.add(measurementSchema);
+            }
 
-      // add measurements into TSFileWriter
-      TsFileWriter tsFileWriter = new TsFileWriter(file, schema);
+            // add measurements into TSFileWriter
+            TsFileWriter tsFileWriter = new TsFileWriter(file, schema);
 
-      // construct the tablet
-      Tablet tablet = new Tablet(Constant.DEVICE_1, schemaList);
+            // construct the tablet
+            Tablet tablet = new Tablet(Constant.DEVICE_1, schemaList);
 
-      long[] timestamps = tablet.timestamps;
-      Object[] values = tablet.values;
+            long[] timestamps = tablet.timestamps;
+            Object[] values = tablet.values;
 
-      long timestamp = 1;
-      long value = 1000000L;
-      double doubleValue = 1.1;
+            long timestamp = 1;
+            long value = 1000000L;
+            double doubleValue = 1.1;
 
-      try {
-        for (int r = 0; r < rowNum; r++, value++, doubleValue = doubleValue + 0.1) {
-          int row = tablet.rowSize++;
-          timestamps[row] = timestamp++;
-          for (int i = 0; i < 2; i++) {
-            long[] sensor = (long[]) values[i];
-            sensor[row] = value;
-          }
-          for (int i = 2; i < sensorNum; i++) {
-            double[] sensor = (double[]) values[i];
-            sensor[row] = doubleValue;
-          }
-          // write Tablet to TsFile
-          if (tablet.rowSize == tablet.getMaxRowNumber()) {
-            tsFileWriter.write(tablet);
-            tablet.reset();
-          }
+            try {
+                for (int r = 0; r < rowNum; r++, value++, doubleValue = doubleValue + 0.1) {
+                    int row = tablet.rowSize++;
+                    timestamps[row] = timestamp++;
+                    for (int i = 0; i < 2; i++) {
+                        long[] sensor = (long[]) values[i];
+                        sensor[row] = value;
+                    }
+                    for (int i = 2; i < sensorNum; i++) {
+                        double[] sensor = (double[]) values[i];
+                        sensor[row] = doubleValue;
+                    }
+                    // write Tablet to TsFile
+                    if (tablet.rowSize == tablet.getMaxRowNumber()) {
+                        tsFileWriter.write(tablet);
+                        tablet.reset();
+                    }
+                }
+                // write Tablet to TsFile
+                if (tablet.rowSize != 0) {
+                    tsFileWriter.write(tablet);
+                    tablet.reset();
+                }
+            } finally {
+                tsFileWriter.close();
+            }
+
+        } catch (Throwable e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
-        // write Tablet to TsFile
-        if (tablet.rowSize != 0) {
-          tsFileWriter.write(tablet);
-          tablet.reset();
+    }
+
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+        String filePath = "example_mr.tsfile";
+        File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
         }
-      } finally {
-        tsFileWriter.close();
-      }
-
-    } catch (Throwable e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
+        writeTsFile(filePath);
+        try (TsFileSequenceReader reader = new TsFileSequenceReader(filePath)) {
+            logger.info("Get file meta data: {}", reader.readFileMetadata());
+        }
     }
-  }
-
-  public static void main(String[] args) throws FileNotFoundException, IOException {
-    String filePath = "example_mr.tsfile";
-    File file = new File(filePath);
-    if (file.exists()) {
-      file.delete();
-    }
-    writeTsFile(filePath);
-    try (TsFileSequenceReader reader = new TsFileSequenceReader(filePath)) {
-      logger.info("Get file meta data: {}", reader.readFileMetadata());
-    }
-  }
 }

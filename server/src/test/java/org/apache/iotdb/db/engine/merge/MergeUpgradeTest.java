@@ -49,114 +49,144 @@ import org.junit.Test;
 
 public class MergeUpgradeTest {
 
-  private List<TsFileResource> seqResources = new ArrayList<>();
-  private List<TsFileResource> unseqResources = new ArrayList<>();
+    private List<TsFileResource> seqResources = new ArrayList<>();
+    private List<TsFileResource> unseqResources = new ArrayList<>();
 
-  private int seqFileNum = 2;
-  private TSEncoding encoding = TSEncoding.RLE;
-  private MeasurementSchema[] measurementSchemas;
-  private int timeseriesNum = 5;
-  private long ptNum = 10;
-  private boolean changeVersion = true;
-  private String deviceName = "root.MergeUpgrade.device0";
+    private int seqFileNum = 2;
+    private TSEncoding encoding = TSEncoding.RLE;
+    private MeasurementSchema[] measurementSchemas;
+    private int timeseriesNum = 5;
+    private long ptNum = 10;
+    private boolean changeVersion = true;
+    private String deviceName = "root.MergeUpgrade.device0";
 
-
-  @Before
-  public void setUp() throws IOException, WriteProcessException {
-    prepareSeries();
-    prepareFiles();
-  }
-
-  @After
-  public void tearDown() {
-    removeFiles();
-    seqResources.clear();
-    unseqResources.clear();
-  }
-
-  @Test
-  public void testMergeUpgradeSelect() throws MergeException {
-    MergeResource resource = new MergeResource(seqResources, unseqResources);
-    MaxFileMergeFileSelector mergeFileSelector = new MaxFileMergeFileSelector(resource,
-        Long.MAX_VALUE);
-    List[] result = mergeFileSelector.select();
-    assertEquals(0, result.length);
-  }
-
-  private void prepareFiles() throws IOException, WriteProcessException {
-    // prepare seqFiles
-    for (int i = 0; i < seqFileNum; i++) {
-      File seqfile = FSFactoryProducer.getFSFactory().getFile(TestConstant.BASE_OUTPUT_PATH.concat(
-              "seq" + IoTDBConstant.FILE_NAME_SEPARATOR + i + IoTDBConstant.FILE_NAME_SEPARATOR
-              + i + IoTDBConstant.FILE_NAME_SEPARATOR + 0
-              + ".tsfile"));
-      TsFileResource seqTsFileResource = new TsFileResource(seqfile);
-      seqResources.add(seqTsFileResource);
-      prepareOldFile(seqTsFileResource, i * ptNum, ptNum, 0);
+    @Before
+    public void setUp() throws IOException, WriteProcessException {
+        prepareSeries();
+        prepareFiles();
     }
-    // prepare unseqFile
-    File unseqfile = FSFactoryProducer.getFSFactory().getFile(TestConstant.BASE_OUTPUT_PATH.concat(
-            "unseq" + IoTDBConstant.FILE_NAME_SEPARATOR + 0 + IoTDBConstant.FILE_NAME_SEPARATOR
-            + 0 + IoTDBConstant.FILE_NAME_SEPARATOR + 0
-            + ".tsfile"));
-    TsFileResource unseqTsFileResource = new TsFileResource(unseqfile);
-    unseqResources.add(unseqTsFileResource);
-    prepareFile(unseqTsFileResource, 0, 2 * ptNum, 10);
-  }
 
-  private void prepareSeries() {
-    measurementSchemas = new MeasurementSchema[timeseriesNum];
-    for (int i = 0; i < timeseriesNum; i++) {
-      measurementSchemas[i] = new MeasurementSchema("sensor" + i, TSDataType.DOUBLE,
-          encoding, CompressionType.UNCOMPRESSED);
+    @After
+    public void tearDown() {
+        removeFiles();
+        seqResources.clear();
+        unseqResources.clear();
     }
-  }
 
-  private void prepareOldFile(TsFileResource tsFileResource, long timeOffset, long ptNum,
-      long valueOffset)
-      throws IOException, WriteProcessException {
-    TsFileWriter fileWriter = new TsFileWriter(tsFileResource.getTsFile());
-    prepareData(tsFileResource, fileWriter, timeOffset, ptNum, valueOffset);
-    fileWriter.close();
-    if (changeVersion) {
-      try (RandomAccessFile oldTsfile = new RandomAccessFile(tsFileResource.getTsFile(), "rw")) {
-        oldTsfile.seek(TSFileConfig.MAGIC_STRING.length());
-        oldTsfile.write(TSFileConfig.VERSION_NUMBER_V1.getBytes());
-      }
-      changeVersion = false;
+    @Test
+    public void testMergeUpgradeSelect() throws MergeException {
+        MergeResource resource = new MergeResource(seqResources, unseqResources);
+        MaxFileMergeFileSelector mergeFileSelector =
+                new MaxFileMergeFileSelector(resource, Long.MAX_VALUE);
+        List[] result = mergeFileSelector.select();
+        assertEquals(0, result.length);
     }
-  }
 
-  private void prepareFile(TsFileResource tsFileResource, long timeOffset, long ptNum,
-      long valueOffset) throws IOException, WriteProcessException {
-    TsFileWriter fileWriter = new TsFileWriter(tsFileResource.getTsFile());
-    prepareData(tsFileResource, fileWriter, timeOffset, ptNum, valueOffset);
-    fileWriter.close();
-  }
+    private void prepareFiles() throws IOException, WriteProcessException {
+        // prepare seqFiles
+        for (int i = 0; i < seqFileNum; i++) {
+            File seqfile =
+                    FSFactoryProducer.getFSFactory()
+                            .getFile(
+                                    TestConstant.BASE_OUTPUT_PATH.concat(
+                                            "seq"
+                                                    + IoTDBConstant.FILE_NAME_SEPARATOR
+                                                    + i
+                                                    + IoTDBConstant.FILE_NAME_SEPARATOR
+                                                    + i
+                                                    + IoTDBConstant.FILE_NAME_SEPARATOR
+                                                    + 0
+                                                    + ".tsfile"));
+            TsFileResource seqTsFileResource = new TsFileResource(seqfile);
+            seqResources.add(seqTsFileResource);
+            prepareOldFile(seqTsFileResource, i * ptNum, ptNum, 0);
+        }
+        // prepare unseqFile
+        File unseqfile =
+                FSFactoryProducer.getFSFactory()
+                        .getFile(
+                                TestConstant.BASE_OUTPUT_PATH.concat(
+                                        "unseq"
+                                                + IoTDBConstant.FILE_NAME_SEPARATOR
+                                                + 0
+                                                + IoTDBConstant.FILE_NAME_SEPARATOR
+                                                + 0
+                                                + IoTDBConstant.FILE_NAME_SEPARATOR
+                                                + 0
+                                                + ".tsfile"));
+        TsFileResource unseqTsFileResource = new TsFileResource(unseqfile);
+        unseqResources.add(unseqTsFileResource);
+        prepareFile(unseqTsFileResource, 0, 2 * ptNum, 10);
+    }
 
-  private void removeFiles() {
-    for (TsFileResource tsFileResource : seqResources) {
-      tsFileResource.remove();
+    private void prepareSeries() {
+        measurementSchemas = new MeasurementSchema[timeseriesNum];
+        for (int i = 0; i < timeseriesNum; i++) {
+            measurementSchemas[i] =
+                    new MeasurementSchema(
+                            "sensor" + i,
+                            TSDataType.DOUBLE,
+                            encoding,
+                            CompressionType.UNCOMPRESSED);
+        }
     }
-    for (TsFileResource tsFileResource : unseqResources) {
-      tsFileResource.remove();
-    }
-  }
 
-  private void prepareData(TsFileResource tsFileResource, TsFileWriter fileWriter, long timeOffset,
-      long ptNum, long valueOffset) throws WriteProcessException, IOException {
-    for (MeasurementSchema MeasurementSchema : measurementSchemas) {
-      fileWriter.registerTimeseries(new Path(deviceName, MeasurementSchema.getMeasurementId()), MeasurementSchema);
+    private void prepareOldFile(
+            TsFileResource tsFileResource, long timeOffset, long ptNum, long valueOffset)
+            throws IOException, WriteProcessException {
+        TsFileWriter fileWriter = new TsFileWriter(tsFileResource.getTsFile());
+        prepareData(tsFileResource, fileWriter, timeOffset, ptNum, valueOffset);
+        fileWriter.close();
+        if (changeVersion) {
+            try (RandomAccessFile oldTsfile =
+                    new RandomAccessFile(tsFileResource.getTsFile(), "rw")) {
+                oldTsfile.seek(TSFileConfig.MAGIC_STRING.length());
+                oldTsfile.write(TSFileConfig.VERSION_NUMBER_V1.getBytes());
+            }
+            changeVersion = false;
+        }
     }
-    for (long i = timeOffset; i < timeOffset + ptNum; i++) {
-      TSRecord record = new TSRecord(i, deviceName);
-      for (int k = 0; k < timeseriesNum; k++) {
-        record.addTuple(DataPoint.getDataPoint(measurementSchemas[k].getType(),
-            measurementSchemas[k].getMeasurementId(), String.valueOf(i + valueOffset)));
-      }
-      fileWriter.write(record);
-      tsFileResource.updateStartTime(deviceName, i);
-      tsFileResource.updateEndTime(deviceName, i);
+
+    private void prepareFile(
+            TsFileResource tsFileResource, long timeOffset, long ptNum, long valueOffset)
+            throws IOException, WriteProcessException {
+        TsFileWriter fileWriter = new TsFileWriter(tsFileResource.getTsFile());
+        prepareData(tsFileResource, fileWriter, timeOffset, ptNum, valueOffset);
+        fileWriter.close();
     }
-  }
+
+    private void removeFiles() {
+        for (TsFileResource tsFileResource : seqResources) {
+            tsFileResource.remove();
+        }
+        for (TsFileResource tsFileResource : unseqResources) {
+            tsFileResource.remove();
+        }
+    }
+
+    private void prepareData(
+            TsFileResource tsFileResource,
+            TsFileWriter fileWriter,
+            long timeOffset,
+            long ptNum,
+            long valueOffset)
+            throws WriteProcessException, IOException {
+        for (MeasurementSchema MeasurementSchema : measurementSchemas) {
+            fileWriter.registerTimeseries(
+                    new Path(deviceName, MeasurementSchema.getMeasurementId()), MeasurementSchema);
+        }
+        for (long i = timeOffset; i < timeOffset + ptNum; i++) {
+            TSRecord record = new TSRecord(i, deviceName);
+            for (int k = 0; k < timeseriesNum; k++) {
+                record.addTuple(
+                        DataPoint.getDataPoint(
+                                measurementSchemas[k].getType(),
+                                measurementSchemas[k].getMeasurementId(),
+                                String.valueOf(i + valueOffset)));
+            }
+            fileWriter.write(record);
+            tsFileResource.updateStartTime(deviceName, i);
+            tsFileResource.updateEndTime(deviceName, i);
+        }
+    }
 }

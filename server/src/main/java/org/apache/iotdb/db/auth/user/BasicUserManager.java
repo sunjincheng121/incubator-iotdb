@@ -39,295 +39,291 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class BasicUserManager implements IUserManager {
 
-  private static final Logger logger = LoggerFactory.getLogger(BasicUserManager.class);
-  private static final String NO_SUCH_USER_ERROR = "No such user %s";
+    private static final Logger logger = LoggerFactory.getLogger(BasicUserManager.class);
+    private static final String NO_SUCH_USER_ERROR = "No such user %s";
 
-  private Map<String, User> userMap;
-  private IUserAccessor accessor;
-  private HashLock lock;
+    private Map<String, User> userMap;
+    private IUserAccessor accessor;
+    private HashLock lock;
 
-  /**
-   * BasicUserManager Constructor.
-   *
-   * @param accessor user accessor
-   * @throws AuthException Authentication Exception
-   */
-  public BasicUserManager(IUserAccessor accessor) throws AuthException {
-    this.userMap = new HashMap<>();
-    this.accessor = accessor;
-    this.lock = new HashLock();
+    /**
+     * BasicUserManager Constructor.
+     *
+     * @param accessor user accessor
+     * @throws AuthException Authentication Exception
+     */
+    public BasicUserManager(IUserAccessor accessor) throws AuthException {
+        this.userMap = new HashMap<>();
+        this.accessor = accessor;
+        this.lock = new HashLock();
 
-    reset();
-  }
-
-  /**
-   * Try to load admin. If it doesn't exist, automatically create one.
-   */
-  private void initAdmin() throws AuthException {
-    User admin;
-    try {
-      admin = getUser(IoTDBConstant.ADMIN_NAME);
-    } catch (AuthException e) {
-      logger.warn("Cannot load admin, Creating a new one.", e);
-      admin = null;
+        reset();
     }
 
-    if (admin == null) {
-      createUser(IoTDBConstant.ADMIN_NAME, IoTDBConstant.ADMIN_PW);
-      setUserUseWaterMark(IoTDBConstant.ADMIN_NAME, false);
-    }
-    logger.info("Admin initialized");
-  }
-
-  @Override
-  public User getUser(String username) throws AuthException {
-    lock.readLock(username);
-    User user = userMap.get(username);
-    try {
-      if (user == null) {
-        user = accessor.loadUser(username);
-        if (user != null) {
-          userMap.put(username, user);
-        }
-      }
-    } catch (IOException e) {
-      throw new AuthException(e);
-    } finally {
-      lock.readUnlock(username);
-    }
-    if (user != null) {
-      user.setLastActiveTime(System.currentTimeMillis());
-    }
-    return user;
-  }
-
-  @Override
-  public boolean createUser(String username, String password) throws AuthException {
-    AuthUtils.validateUsername(username);
-    AuthUtils.validatePassword(password);
-
-    User user = getUser(username);
-    if (user != null) {
-      return false;
-    }
-    lock.writeLock(username);
-    try {
-      user = new User(username, AuthUtils.encryptPassword(password));
-      accessor.saveUser(user);
-      userMap.put(username, user);
-      return true;
-    } catch (IOException e) {
-      throw new AuthException(e);
-    } finally {
-      lock.writeUnlock(username);
-    }
-  }
-
-  @Override
-  public boolean deleteUser(String username) throws AuthException {
-    lock.writeLock(username);
-    try {
-      if (accessor.deleteUser(username)) {
-        userMap.remove(username);
-        return true;
-      } else {
-        return false;
-      }
-    } catch (IOException e) {
-      throw new AuthException(e);
-    } finally {
-      lock.writeUnlock(username);
-    }
-  }
-
-  @Override
-  public boolean grantPrivilegeToUser(String username, String path, int privilegeId)
-      throws AuthException {
-    AuthUtils.validatePrivilegeOnPath(path, privilegeId);
-    lock.writeLock(username);
-    try {
-      User user = getUser(username);
-      if (user == null) {
-        throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
-      }
-      if (user.hasPrivilege(path, privilegeId)) {
-        return false;
-      }
-      Set<Integer> privilegesCopy = new HashSet<>(user.getPrivileges(path));
-      user.addPrivilege(path, privilegeId);
-      try {
-        accessor.saveUser(user);
-      } catch (IOException e) {
-        user.setPrivileges(path, privilegesCopy);
-        throw new AuthException(e);
-      }
-      return true;
-    } finally {
-      lock.writeUnlock(username);
-    }
-  }
-
-  @Override
-  public boolean revokePrivilegeFromUser(String username, String path, int privilegeId)
-      throws AuthException {
-    AuthUtils.validatePrivilegeOnPath(path, privilegeId);
-    lock.writeLock(username);
-    try {
-      User user = getUser(username);
-      if (user == null) {
-        throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
-      }
-      if (!user.hasPrivilege(path, privilegeId)) {
-        return false;
-      }
-      user.removePrivilege(path, privilegeId);
-      try {
-        accessor.saveUser(user);
-      } catch (IOException e) {
-        user.addPrivilege(path, privilegeId);
-        throw new AuthException(e);
-      }
-      return true;
-    } finally {
-      lock.writeUnlock(username);
-    }
-  }
-
-  @Override
-  public boolean updateUserPassword(String username, String newPassword) throws AuthException {
-    try {
-      AuthUtils.validatePassword(newPassword);
-    } catch (AuthException e) {
-      logger.debug("An illegal password detected ", e);
-      return false;
-    }
-
-    lock.writeLock(username);
-    try {
-      User user = getUser(username);
-      if (user == null) {
-        throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
-      }
-      String oldPassword = user.getPassword();
-      user.setPassword(AuthUtils.encryptPassword(newPassword));
-      try {
-        accessor.saveUser(user);
-      } catch (IOException e) {
-        user.setPassword(oldPassword);
-        throw new AuthException(e);
-      }
-      return true;
-    } finally {
-      lock.writeUnlock(username);
-    }
-  }
-
-  @Override
-  public boolean grantRoleToUser(String roleName, String username) throws AuthException {
-    lock.writeLock(username);
-    try {
-      User user = getUser(username);
-      if (user == null) {
-        throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
-      }
-      if (user.hasRole(roleName)) {
-        return false;
-      }
-      user.getRoleList().add(roleName);
-      try {
-        accessor.saveUser(user);
-      } catch (IOException e) {
-        user.getRoleList().remove(roleName);
-        throw new AuthException(e);
-      }
-      return true;
-    } finally {
-      lock.writeUnlock(username);
-    }
-  }
-
-  @Override
-  public boolean revokeRoleFromUser(String roleName, String username) throws AuthException {
-    lock.writeLock(username);
-    try {
-      User user = getUser(username);
-      if (user == null) {
-        throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
-      }
-      if (!user.hasRole(roleName)) {
-        return false;
-      }
-      user.getRoleList().remove(roleName);
-      try {
-        accessor.saveUser(user);
-      } catch (IOException e) {
-        user.getRoleList().add(roleName);
-        throw new AuthException(e);
-      }
-      return true;
-    } finally {
-      lock.writeUnlock(username);
-    }
-  }
-
-  @Override
-  public void reset() throws AuthException {
-    accessor.reset();
-    userMap.clear();
-    initAdmin();
-  }
-
-  @Override
-  public List<String> listAllUsers() {
-    List<String> rtlist = accessor.listAllUsers();
-    rtlist.sort(null);
-    return rtlist;
-  }
-
-  @Override
-  public boolean isUserUseWaterMark(String username) throws AuthException {
-    User user = getUser(username);
-    if (user == null) {
-      throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
-    }
-    return user.isUseWaterMark();
-  }
-
-  @Override
-  public void setUserUseWaterMark(String username, boolean useWaterMark) throws AuthException {
-    User user = getUser(username);
-    if (user == null) {
-      throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
-    }
-    boolean oldFlag = user.isUseWaterMark();
-    if (oldFlag == useWaterMark) {
-      return;
-    }
-    user.setUseWaterMark(useWaterMark);
-    try {
-      accessor.saveUser(user);
-    } catch (IOException e) {
-      user.setUseWaterMark(oldFlag);
-      throw new AuthException(e);
-    }
-  }
-
-
-  @Override
-  public void replaceAllUsers(Map<String, User> users) throws AuthException {
-    synchronized (this) {
-      reset();
-      userMap = users;
-
-      for (Entry<String, User> entry : userMap.entrySet()) {
-        User user = entry.getValue();
+    /** Try to load admin. If it doesn't exist, automatically create one. */
+    private void initAdmin() throws AuthException {
+        User admin;
         try {
-          accessor.saveUser(user);
-        } catch (IOException e) {
-          throw new AuthException(e);
+            admin = getUser(IoTDBConstant.ADMIN_NAME);
+        } catch (AuthException e) {
+            logger.warn("Cannot load admin, Creating a new one.", e);
+            admin = null;
         }
-      }
-    }
-  }
 
+        if (admin == null) {
+            createUser(IoTDBConstant.ADMIN_NAME, IoTDBConstant.ADMIN_PW);
+            setUserUseWaterMark(IoTDBConstant.ADMIN_NAME, false);
+        }
+        logger.info("Admin initialized");
+    }
+
+    @Override
+    public User getUser(String username) throws AuthException {
+        lock.readLock(username);
+        User user = userMap.get(username);
+        try {
+            if (user == null) {
+                user = accessor.loadUser(username);
+                if (user != null) {
+                    userMap.put(username, user);
+                }
+            }
+        } catch (IOException e) {
+            throw new AuthException(e);
+        } finally {
+            lock.readUnlock(username);
+        }
+        if (user != null) {
+            user.setLastActiveTime(System.currentTimeMillis());
+        }
+        return user;
+    }
+
+    @Override
+    public boolean createUser(String username, String password) throws AuthException {
+        AuthUtils.validateUsername(username);
+        AuthUtils.validatePassword(password);
+
+        User user = getUser(username);
+        if (user != null) {
+            return false;
+        }
+        lock.writeLock(username);
+        try {
+            user = new User(username, AuthUtils.encryptPassword(password));
+            accessor.saveUser(user);
+            userMap.put(username, user);
+            return true;
+        } catch (IOException e) {
+            throw new AuthException(e);
+        } finally {
+            lock.writeUnlock(username);
+        }
+    }
+
+    @Override
+    public boolean deleteUser(String username) throws AuthException {
+        lock.writeLock(username);
+        try {
+            if (accessor.deleteUser(username)) {
+                userMap.remove(username);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (IOException e) {
+            throw new AuthException(e);
+        } finally {
+            lock.writeUnlock(username);
+        }
+    }
+
+    @Override
+    public boolean grantPrivilegeToUser(String username, String path, int privilegeId)
+            throws AuthException {
+        AuthUtils.validatePrivilegeOnPath(path, privilegeId);
+        lock.writeLock(username);
+        try {
+            User user = getUser(username);
+            if (user == null) {
+                throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
+            }
+            if (user.hasPrivilege(path, privilegeId)) {
+                return false;
+            }
+            Set<Integer> privilegesCopy = new HashSet<>(user.getPrivileges(path));
+            user.addPrivilege(path, privilegeId);
+            try {
+                accessor.saveUser(user);
+            } catch (IOException e) {
+                user.setPrivileges(path, privilegesCopy);
+                throw new AuthException(e);
+            }
+            return true;
+        } finally {
+            lock.writeUnlock(username);
+        }
+    }
+
+    @Override
+    public boolean revokePrivilegeFromUser(String username, String path, int privilegeId)
+            throws AuthException {
+        AuthUtils.validatePrivilegeOnPath(path, privilegeId);
+        lock.writeLock(username);
+        try {
+            User user = getUser(username);
+            if (user == null) {
+                throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
+            }
+            if (!user.hasPrivilege(path, privilegeId)) {
+                return false;
+            }
+            user.removePrivilege(path, privilegeId);
+            try {
+                accessor.saveUser(user);
+            } catch (IOException e) {
+                user.addPrivilege(path, privilegeId);
+                throw new AuthException(e);
+            }
+            return true;
+        } finally {
+            lock.writeUnlock(username);
+        }
+    }
+
+    @Override
+    public boolean updateUserPassword(String username, String newPassword) throws AuthException {
+        try {
+            AuthUtils.validatePassword(newPassword);
+        } catch (AuthException e) {
+            logger.debug("An illegal password detected ", e);
+            return false;
+        }
+
+        lock.writeLock(username);
+        try {
+            User user = getUser(username);
+            if (user == null) {
+                throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
+            }
+            String oldPassword = user.getPassword();
+            user.setPassword(AuthUtils.encryptPassword(newPassword));
+            try {
+                accessor.saveUser(user);
+            } catch (IOException e) {
+                user.setPassword(oldPassword);
+                throw new AuthException(e);
+            }
+            return true;
+        } finally {
+            lock.writeUnlock(username);
+        }
+    }
+
+    @Override
+    public boolean grantRoleToUser(String roleName, String username) throws AuthException {
+        lock.writeLock(username);
+        try {
+            User user = getUser(username);
+            if (user == null) {
+                throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
+            }
+            if (user.hasRole(roleName)) {
+                return false;
+            }
+            user.getRoleList().add(roleName);
+            try {
+                accessor.saveUser(user);
+            } catch (IOException e) {
+                user.getRoleList().remove(roleName);
+                throw new AuthException(e);
+            }
+            return true;
+        } finally {
+            lock.writeUnlock(username);
+        }
+    }
+
+    @Override
+    public boolean revokeRoleFromUser(String roleName, String username) throws AuthException {
+        lock.writeLock(username);
+        try {
+            User user = getUser(username);
+            if (user == null) {
+                throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
+            }
+            if (!user.hasRole(roleName)) {
+                return false;
+            }
+            user.getRoleList().remove(roleName);
+            try {
+                accessor.saveUser(user);
+            } catch (IOException e) {
+                user.getRoleList().add(roleName);
+                throw new AuthException(e);
+            }
+            return true;
+        } finally {
+            lock.writeUnlock(username);
+        }
+    }
+
+    @Override
+    public void reset() throws AuthException {
+        accessor.reset();
+        userMap.clear();
+        initAdmin();
+    }
+
+    @Override
+    public List<String> listAllUsers() {
+        List<String> rtlist = accessor.listAllUsers();
+        rtlist.sort(null);
+        return rtlist;
+    }
+
+    @Override
+    public boolean isUserUseWaterMark(String username) throws AuthException {
+        User user = getUser(username);
+        if (user == null) {
+            throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
+        }
+        return user.isUseWaterMark();
+    }
+
+    @Override
+    public void setUserUseWaterMark(String username, boolean useWaterMark) throws AuthException {
+        User user = getUser(username);
+        if (user == null) {
+            throw new AuthException(String.format(NO_SUCH_USER_ERROR, username));
+        }
+        boolean oldFlag = user.isUseWaterMark();
+        if (oldFlag == useWaterMark) {
+            return;
+        }
+        user.setUseWaterMark(useWaterMark);
+        try {
+            accessor.saveUser(user);
+        } catch (IOException e) {
+            user.setUseWaterMark(oldFlag);
+            throw new AuthException(e);
+        }
+    }
+
+    @Override
+    public void replaceAllUsers(Map<String, User> users) throws AuthException {
+        synchronized (this) {
+            reset();
+            userMap = users;
+
+            for (Entry<String, User> entry : userMap.entrySet()) {
+                User user = entry.getValue();
+                try {
+                    accessor.saveUser(user);
+                } catch (IOException e) {
+                    throw new AuthException(e);
+                }
+            }
+        }
+    }
 }

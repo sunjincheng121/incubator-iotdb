@@ -30,50 +30,51 @@ import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.thrift.protocol.TProtocolFactory;
 
 public class DataClientProvider {
-  /**
-   * dataClientPool provides reusable thrift clients to connect to the DataGroupMembers of other
-   * nodes
-   */
-  private AsyncClientPool dataAsyncClientPool;
-  private SyncClientPool dataSyncClientPool;
+    /**
+     * dataClientPool provides reusable thrift clients to connect to the DataGroupMembers of other
+     * nodes
+     */
+    private AsyncClientPool dataAsyncClientPool;
 
-  public DataClientProvider(TProtocolFactory factory) {
-    if (!ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
-      dataSyncClientPool = new SyncClientPool(new SyncDataClient.FactorySync(factory));
-    } else {
-      dataAsyncClientPool = new AsyncClientPool(new FactoryAsync(factory));
+    private SyncClientPool dataSyncClientPool;
+
+    public DataClientProvider(TProtocolFactory factory) {
+        if (!ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
+            dataSyncClientPool = new SyncClientPool(new SyncDataClient.FactorySync(factory));
+        } else {
+            dataAsyncClientPool = new AsyncClientPool(new FactoryAsync(factory));
+        }
     }
-  }
 
-  private AsyncClientPool getDataAsyncClientPool() {
-    return dataAsyncClientPool;
-  }
+    private AsyncClientPool getDataAsyncClientPool() {
+        return dataAsyncClientPool;
+    }
 
-  private SyncClientPool getDataSyncClientPool() {
-    return dataSyncClientPool;
-  }
+    private SyncClientPool getDataSyncClientPool() {
+        return dataSyncClientPool;
+    }
 
-  /**
-   * Get a thrift client that will connect to "node" using the data port.
-   *
-   * @param node the node to be connected
-   * @param timeout timeout threshold of connection
-   */
-  public AsyncDataClient getAsyncDataClient(Node node, int timeout) throws IOException {
-    AsyncDataClient client = (AsyncDataClient) getDataAsyncClientPool().getClient(node);
-    client.setTimeout(timeout);
-    return client;
-  }
+    /**
+     * Get a thrift client that will connect to "node" using the data port.
+     *
+     * @param node the node to be connected
+     * @param timeout timeout threshold of connection
+     */
+    public AsyncDataClient getAsyncDataClient(Node node, int timeout) throws IOException {
+        AsyncDataClient client = (AsyncDataClient) getDataAsyncClientPool().getClient(node);
+        client.setTimeout(timeout);
+        return client;
+    }
 
-  /**
-   * Get a thrift client that will connect to "node" using the data port.
-   *
-   * @param node the node to be connected
-   * @param timeout timeout threshold of connection
-   */
-  public SyncDataClient getSyncDataClient(Node node, int timeout) {
-    SyncDataClient client = (SyncDataClient) getDataSyncClientPool().getClient(node);
-    client.setTimeout(timeout);
-    return client;
-  }
+    /**
+     * Get a thrift client that will connect to "node" using the data port.
+     *
+     * @param node the node to be connected
+     * @param timeout timeout threshold of connection
+     */
+    public SyncDataClient getSyncDataClient(Node node, int timeout) {
+        SyncDataClient client = (SyncDataClient) getDataSyncClientPool().getClient(node);
+        client.setTimeout(timeout);
+        return client;
+    }
 }

@@ -31,70 +31,69 @@ import org.apache.iotdb.cluster.log.logtypes.RemoveNodeLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * LogParser transform a ByteBuffer into a Log.
- */
+/** LogParser transform a ByteBuffer into a Log. */
 public class LogParser {
 
-  private static final Logger logger = LoggerFactory.getLogger(LogParser.class);
-  private static final LogParser INSTANCE = new LogParser();
+    private static final Logger logger = LoggerFactory.getLogger(LogParser.class);
+    private static final LogParser INSTANCE = new LogParser();
 
-  private LogParser() {
-    // singleton class
-  }
+    private LogParser() {
+        // singleton class
+    }
 
-  public static LogParser getINSTANCE() {
-    return INSTANCE;
-  }
+    public static LogParser getINSTANCE() {
+        return INSTANCE;
+    }
 
-  public Log parse(ByteBuffer buffer) throws UnknownLogTypeException {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Received a log buffer, pos:{}, limit:{}", buffer.position(), buffer.limit());
+    public Log parse(ByteBuffer buffer) throws UnknownLogTypeException {
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Received a log buffer, pos:{}, limit:{}", buffer.position(), buffer.limit());
+        }
+        int typeInt = buffer.get();
+        Types type;
+        try {
+            type = Types.values()[typeInt];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new UnknownLogTypeException(typeInt);
+        }
+        logger.debug("The log type is {}", type);
+        Log log;
+        switch (type) {
+            case ADD_NODE:
+                AddNodeLog addNodeLog = new AddNodeLog();
+                addNodeLog.deserialize(buffer);
+                log = addNodeLog;
+                break;
+            case PHYSICAL_PLAN:
+                PhysicalPlanLog physicalPlanLog = new PhysicalPlanLog();
+                physicalPlanLog.deserialize(buffer);
+                log = physicalPlanLog;
+                break;
+            case CLOSE_FILE:
+                CloseFileLog closeFileLog = new CloseFileLog();
+                closeFileLog.deserialize(buffer);
+                log = closeFileLog;
+                break;
+            case REMOVE_NODE:
+                RemoveNodeLog removeNodeLog = new RemoveNodeLog();
+                removeNodeLog.deserialize(buffer);
+                log = removeNodeLog;
+                break;
+            case EMPTY_CONTENT:
+                EmptyContentLog emptyLog = new EmptyContentLog();
+                emptyLog.deserialize(buffer);
+                log = emptyLog;
+                break;
+            case TEST_LARGE_CONTENT:
+                LargeTestLog largeLog = new LargeTestLog();
+                largeLog.deserialize(buffer);
+                log = largeLog;
+                break;
+            default:
+                throw new IllegalArgumentException(type.toString());
+        }
+        logger.debug("Parsed a log {}", log);
+        return log;
     }
-    int typeInt = buffer.get();
-    Types type;
-    try {
-      type = Types.values()[typeInt];
-    } catch (ArrayIndexOutOfBoundsException e) {
-      throw new UnknownLogTypeException(typeInt);
-    }
-    logger.debug("The log type is {}", type);
-    Log log;
-    switch (type) {
-      case ADD_NODE:
-        AddNodeLog addNodeLog = new AddNodeLog();
-        addNodeLog.deserialize(buffer);
-        log = addNodeLog;
-        break;
-      case PHYSICAL_PLAN:
-        PhysicalPlanLog physicalPlanLog = new PhysicalPlanLog();
-        physicalPlanLog.deserialize(buffer);
-        log = physicalPlanLog;
-        break;
-      case CLOSE_FILE:
-        CloseFileLog closeFileLog = new CloseFileLog();
-        closeFileLog.deserialize(buffer);
-        log = closeFileLog;
-        break;
-      case REMOVE_NODE:
-        RemoveNodeLog removeNodeLog = new RemoveNodeLog();
-        removeNodeLog.deserialize(buffer);
-        log = removeNodeLog;
-        break;
-      case EMPTY_CONTENT:
-        EmptyContentLog emptyLog = new EmptyContentLog();
-        emptyLog.deserialize(buffer);
-        log = emptyLog;
-        break;
-      case TEST_LARGE_CONTENT:
-        LargeTestLog largeLog = new LargeTestLog();
-        largeLog.deserialize(buffer);
-        log = largeLog;
-        break;
-      default:
-        throw new IllegalArgumentException(type.toString());
-    }
-    logger.debug("Parsed a log {}", log);
-    return log;
-  }
 }

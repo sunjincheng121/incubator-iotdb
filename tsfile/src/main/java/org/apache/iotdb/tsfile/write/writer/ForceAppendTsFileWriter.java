@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.iotdb.tsfile.exception.write.TsFileNotCompleteException;
 import org.apache.iotdb.tsfile.file.metadata.ChunkGroupMetadata;
 import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
@@ -38,54 +37,56 @@ import org.slf4j.LoggerFactory;
  */
 public class ForceAppendTsFileWriter extends TsFileIOWriter {
 
-  private long truncatePosition;
-  private static Logger logger = LoggerFactory.getLogger(ForceAppendTsFileWriter.class);
+    private long truncatePosition;
+    private static Logger logger = LoggerFactory.getLogger(ForceAppendTsFileWriter.class);
 
-  public ForceAppendTsFileWriter(File file) throws IOException {
-    if (logger.isDebugEnabled()) {
-      logger.debug("{} writer is opened.", file.getName());
+    public ForceAppendTsFileWriter(File file) throws IOException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("{} writer is opened.", file.getName());
+        }
+        this.out = FSFactoryProducer.getFileOutputFactory().getTsFileOutput(file.getPath(), true);
+        this.file = file;
+
+        // file doesn't exist
+        if (file.length() == 0 || !file.exists()) {
+            throw new TsFileNotCompleteException(
+                    "File " + file.getPath() + " is not a complete TsFile");
+        }
+
+        try (TsFileSequenceReader reader = new TsFileSequenceReader(file.getAbsolutePath(), true)) {
+
+            // this tsfile is not complete
+            if (!reader.isComplete()) {
+                throw new TsFileNotCompleteException(
+                        "File " + file.getPath() + " is not a complete TsFile");
+            }
+            TsFileMetadata tsFileMetadata = reader.readFileMetadata();
+            // truncate metadata and marker
+            truncatePosition = tsFileMetadata.getMetaOffset();
+
+            canWrite = true;
+            versionInfo = tsFileMetadata.getVersionInfo();
+            totalChunkNum = tsFileMetadata.getTotalChunkNum();
+            invalidChunkNum = tsFileMetadata.getInvalidChunkNum();
+
+            List<String> devices = reader.getAllDevices();
+            for (String device : devices) {
+                List<ChunkMetadata> chunkMetadataList = new ArrayList<>();
+                reader.readChunkMetadataInDevice(device)
+                        .values()
+                        .forEach(chunkMetadataList::addAll);
+                ChunkGroupMetadata chunkGroupMetadata =
+                        new ChunkGroupMetadata(device, chunkMetadataList);
+                chunkGroupMetadataList.add(chunkGroupMetadata);
+            }
+        }
     }
-    this.out = FSFactoryProducer.getFileOutputFactory().getTsFileOutput(file.getPath(), true);
-    this.file = file;
 
-    // file doesn't exist
-    if (file.length() == 0 || !file.exists()) {
-      throw new TsFileNotCompleteException("File " + file.getPath() + " is not a complete TsFile");
+    public void doTruncate() throws IOException {
+        out.truncate(truncatePosition);
     }
 
-    try (TsFileSequenceReader reader = new TsFileSequenceReader(file.getAbsolutePath(), true)) {
-
-      // this tsfile is not complete
-      if (!reader.isComplete()) {
-        throw new TsFileNotCompleteException(
-            "File " + file.getPath() + " is not a complete TsFile");
-      }
-      TsFileMetadata tsFileMetadata = reader.readFileMetadata();
-      // truncate metadata and marker
-      truncatePosition = tsFileMetadata.getMetaOffset();
-
-      canWrite = true;
-      versionInfo = tsFileMetadata.getVersionInfo();
-      totalChunkNum = tsFileMetadata.getTotalChunkNum();
-      invalidChunkNum = tsFileMetadata.getInvalidChunkNum();
-      
-      List<String> devices = reader.getAllDevices();
-      for (String device : devices) {
-        List<ChunkMetadata> chunkMetadataList = new ArrayList<>();
-        reader.readChunkMetadataInDevice(device).values()
-            .forEach(chunkMetadataList::addAll);          
-        ChunkGroupMetadata chunkGroupMetadata = new ChunkGroupMetadata(device, chunkMetadataList);
-        chunkGroupMetadataList.add(chunkGroupMetadata);
-      }
+    public long getTruncatePosition() {
+        return truncatePosition;
     }
-  }
-
-  public void doTruncate() throws IOException {
-    out.truncate(truncatePosition);
-  }
-
-  public long getTruncatePosition() {
-    return truncatePosition;
-  }
-
 }

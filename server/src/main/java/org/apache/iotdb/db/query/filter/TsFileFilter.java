@@ -27,5 +27,5 @@ import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
  */
 @FunctionalInterface
 public interface TsFileFilter {
-  boolean fileNotSatisfy(TsFileResource resource);
+    boolean fileNotSatisfy(TsFileResource resource);
 }

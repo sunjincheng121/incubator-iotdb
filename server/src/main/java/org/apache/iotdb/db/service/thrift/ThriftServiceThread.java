@@ -41,126 +41,141 @@ import org.slf4j.LoggerFactory;
 
 public class ThriftServiceThread extends Thread {
 
-  private static final Logger logger = LoggerFactory.getLogger(ThriftServiceThread.class);
-  private TServerTransport serverTransport;
-  private TServer poolServer;
-  private CountDownLatch threadStopLatch;
+    private static final Logger logger = LoggerFactory.getLogger(ThriftServiceThread.class);
+    private TServerTransport serverTransport;
+    private TServer poolServer;
+    private CountDownLatch threadStopLatch;
 
-  private String serviceName;
+    private String serviceName;
 
-  private TProtocolFactory protocolFactory;
-  private TThreadPoolServer.Args poolArgs;
+    private TProtocolFactory protocolFactory;
+    private TThreadPoolServer.Args poolArgs;
 
-  @SuppressWarnings("squid:S107")
-  public ThriftServiceThread(TProcessor processor, String serviceName,
-      String threadsName,
-      String bindAddress, int port, int maxWorkerThreads, int timeoutMs,
-      TServerEventHandler serverEventHandler, boolean compress) {
-    if (compress) {
-      protocolFactory = new TCompactProtocol.Factory();
-    } else {
-      protocolFactory = new TBinaryProtocol.Factory();
-    }
-    this.serviceName = serviceName;
-
-    try {
-      serverTransport = openTransport(bindAddress, port);
-      poolArgs = new TThreadPoolServer.Args(serverTransport)
-          .maxWorkerThreads(maxWorkerThreads)
-          .minWorkerThreads(CommonUtils.getCpuCores())
-          .stopTimeoutVal(timeoutMs);
-      poolArgs.executorService = IoTDBThreadPoolFactory.createThriftRpcClientThreadPool(poolArgs,
-          threadsName);
-      poolArgs.processor(processor);
-      poolArgs.protocolFactory(protocolFactory);
-      poolArgs.transportFactory(RpcTransportFactory.INSTANCE);
-      poolServer = new TThreadPoolServer(poolArgs);
-      poolServer.setServerEventHandler(serverEventHandler);
-    } catch (TTransportException e) {
-      close();
-      if (threadStopLatch == null) {
-        logger.debug("Stop Count Down latch is null");
-      } else {
-        logger.debug("Stop Count Down latch is {}", threadStopLatch.getCount());
-      }
-      if (threadStopLatch != null && threadStopLatch.getCount() == 1) {
-        threadStopLatch.countDown();
-      }
-      logger.debug("{}: close TThreadPoolServer and TServerSocket for {}",
-          IoTDBConstant.GLOBAL_DB_NAME, serviceName);
-      throw new RPCServiceException(String.format("%s: failed to start %s, because ",
-          IoTDBConstant.GLOBAL_DB_NAME, serviceName), e);
-    }
-  }
-
-  @SuppressWarnings("java:S2259")
-  public TServerTransport openTransport(String bindAddress, int port) throws TTransportException {
-    int maxRetry = 5;
-    long retryIntervalMS = 5000;
-    TTransportException lastExp = null;
-    for (int i = 0; i < maxRetry; i++) {
-      try {
-        return new TServerSocket(new InetSocketAddress(bindAddress, port));
-      } catch (TTransportException e) {
-        lastExp = e;
-        try {
-          Thread.sleep(retryIntervalMS);
-        } catch (InterruptedException interruptedException) {
-          Thread.currentThread().interrupt();
-          break;
+    @SuppressWarnings("squid:S107")
+    public ThriftServiceThread(
+            TProcessor processor,
+            String serviceName,
+            String threadsName,
+            String bindAddress,
+            int port,
+            int maxWorkerThreads,
+            int timeoutMs,
+            TServerEventHandler serverEventHandler,
+            boolean compress) {
+        if (compress) {
+            protocolFactory = new TCompactProtocol.Factory();
+        } else {
+            protocolFactory = new TBinaryProtocol.Factory();
         }
-      }
+        this.serviceName = serviceName;
+
+        try {
+            serverTransport = openTransport(bindAddress, port);
+            poolArgs =
+                    new TThreadPoolServer.Args(serverTransport)
+                            .maxWorkerThreads(maxWorkerThreads)
+                            .minWorkerThreads(CommonUtils.getCpuCores())
+                            .stopTimeoutVal(timeoutMs);
+            poolArgs.executorService =
+                    IoTDBThreadPoolFactory.createThriftRpcClientThreadPool(poolArgs, threadsName);
+            poolArgs.processor(processor);
+            poolArgs.protocolFactory(protocolFactory);
+            poolArgs.transportFactory(RpcTransportFactory.INSTANCE);
+            poolServer = new TThreadPoolServer(poolArgs);
+            poolServer.setServerEventHandler(serverEventHandler);
+        } catch (TTransportException e) {
+            close();
+            if (threadStopLatch == null) {
+                logger.debug("Stop Count Down latch is null");
+            } else {
+                logger.debug("Stop Count Down latch is {}", threadStopLatch.getCount());
+            }
+            if (threadStopLatch != null && threadStopLatch.getCount() == 1) {
+                threadStopLatch.countDown();
+            }
+            logger.debug(
+                    "{}: close TThreadPoolServer and TServerSocket for {}",
+                    IoTDBConstant.GLOBAL_DB_NAME,
+                    serviceName);
+            throw new RPCServiceException(
+                    String.format(
+                            "%s: failed to start %s, because ",
+                            IoTDBConstant.GLOBAL_DB_NAME, serviceName),
+                    e);
+        }
     }
-    throw lastExp;
-  }
 
-
-  public void setThreadStopLatch(CountDownLatch threadStopLatch) {
-    this.threadStopLatch = threadStopLatch;
-  }
-
-  @SuppressWarnings("squid:S2093") // socket will be used later
-  @Override
-  public void run() {
-    logger.info("The {} service thread begin to run...", serviceName);
-    try {
-      poolServer.serve();
-    } catch (Exception e) {
-      throw new RPCServiceException(String.format("%s: %s exit, because ",
-          IoTDBConstant.GLOBAL_DB_NAME, serviceName), e);
-    } finally {
-      close();
-      if (threadStopLatch == null) {
-        logger.debug("Stop Count Down latch is null");
-      } else {
-        logger.debug("Stop Count Down latch is {}", threadStopLatch.getCount());
-      }
-
-      if (threadStopLatch != null && threadStopLatch.getCount() == 1) {
-        threadStopLatch.countDown();
-      }
-      logger.debug("{}: close TThreadPoolServer and TServerSocket for {}",
-          IoTDBConstant.GLOBAL_DB_NAME, serviceName);
+    @SuppressWarnings("java:S2259")
+    public TServerTransport openTransport(String bindAddress, int port) throws TTransportException {
+        int maxRetry = 5;
+        long retryIntervalMS = 5000;
+        TTransportException lastExp = null;
+        for (int i = 0; i < maxRetry; i++) {
+            try {
+                return new TServerSocket(new InetSocketAddress(bindAddress, port));
+            } catch (TTransportException e) {
+                lastExp = e;
+                try {
+                    Thread.sleep(retryIntervalMS);
+                } catch (InterruptedException interruptedException) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+        throw lastExp;
     }
-  }
 
-  public synchronized void close() {
-    if (poolServer != null) {
-      poolServer.setShouldStop(true);
-      poolServer.stop();
+    public void setThreadStopLatch(CountDownLatch threadStopLatch) {
+        this.threadStopLatch = threadStopLatch;
+    }
 
-      poolServer = null;
-    }
-    if (serverTransport != null) {
-      serverTransport.close();
-      serverTransport = null;
-    }
-  }
+    @SuppressWarnings("squid:S2093") // socket will be used later
+    @Override
+    public void run() {
+        logger.info("The {} service thread begin to run...", serviceName);
+        try {
+            poolServer.serve();
+        } catch (Exception e) {
+            throw new RPCServiceException(
+                    String.format(
+                            "%s: %s exit, because ", IoTDBConstant.GLOBAL_DB_NAME, serviceName),
+                    e);
+        } finally {
+            close();
+            if (threadStopLatch == null) {
+                logger.debug("Stop Count Down latch is null");
+            } else {
+                logger.debug("Stop Count Down latch is {}", threadStopLatch.getCount());
+            }
 
-  public boolean isServing() {
-    if (poolServer != null) {
-      return poolServer.isServing();
+            if (threadStopLatch != null && threadStopLatch.getCount() == 1) {
+                threadStopLatch.countDown();
+            }
+            logger.debug(
+                    "{}: close TThreadPoolServer and TServerSocket for {}",
+                    IoTDBConstant.GLOBAL_DB_NAME,
+                    serviceName);
+        }
     }
-    return false;
-  }
+
+    public synchronized void close() {
+        if (poolServer != null) {
+            poolServer.setShouldStop(true);
+            poolServer.stop();
+
+            poolServer = null;
+        }
+        if (serverTransport != null) {
+            serverTransport.close();
+            serverTransport = null;
+        }
+    }
+
+    public boolean isServing() {
+        if (poolServer != null) {
+            return poolServer.isServing();
+        }
+        return false;
+    }
 }

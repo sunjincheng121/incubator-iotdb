@@ -24,21 +24,21 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class MoveFileOperator extends RootOperator {
 
-  private File file;
-  private File targetDir;
+    private File file;
+    private File targetDir;
 
-  public MoveFileOperator(File file, File targetDir) {
-    super(SQLConstant.TOK_MOVE_FILE);
-    this.file = file;
-    this.targetDir = targetDir;
-    this.operatorType = OperatorType.MOVE_FILE;
-  }
+    public MoveFileOperator(File file, File targetDir) {
+        super(SQLConstant.TOK_MOVE_FILE);
+        this.file = file;
+        this.targetDir = targetDir;
+        this.operatorType = OperatorType.MOVE_FILE;
+    }
 
-  public File getFile() {
-    return file;
-  }
+    public File getFile() {
+        return file;
+    }
 
-  public File getTargetDir() {
-    return targetDir;
-  }
+    public File getTargetDir() {
+        return targetDir;
+    }
 }

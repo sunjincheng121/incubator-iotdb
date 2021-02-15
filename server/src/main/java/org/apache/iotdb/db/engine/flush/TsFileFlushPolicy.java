@@ -29,18 +29,21 @@ import org.apache.iotdb.db.engine.storagegroup.TsFileProcessor;
  */
 public interface TsFileFlushPolicy {
 
-  void apply(StorageGroupProcessor storageGroupProcessor, TsFileProcessor processor, boolean isSeq);
+    void apply(
+            StorageGroupProcessor storageGroupProcessor, TsFileProcessor processor, boolean isSeq);
 
-  class DirectFlushPolicy implements TsFileFlushPolicy {
+    class DirectFlushPolicy implements TsFileFlushPolicy {
 
-    @Override
-    public void apply(StorageGroupProcessor storageGroupProcessor, TsFileProcessor tsFileProcessor,
-        boolean isSeq) {
-      if (tsFileProcessor.shouldClose()) {
-        storageGroupProcessor.asyncCloseOneTsFileProcessor(isSeq, tsFileProcessor);
-      } else {
-        tsFileProcessor.asyncFlush();
-      }
+        @Override
+        public void apply(
+                StorageGroupProcessor storageGroupProcessor,
+                TsFileProcessor tsFileProcessor,
+                boolean isSeq) {
+            if (tsFileProcessor.shouldClose()) {
+                storageGroupProcessor.asyncCloseOneTsFileProcessor(isSeq, tsFileProcessor);
+            } else {
+                tsFileProcessor.asyncFlush();
+            }
+        }
     }
-  }
 }

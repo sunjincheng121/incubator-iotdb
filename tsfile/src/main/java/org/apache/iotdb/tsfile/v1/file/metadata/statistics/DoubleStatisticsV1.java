@@ -23,57 +23,55 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Statistics for double type.
- */
+/** Statistics for double type. */
 public class DoubleStatisticsV1 extends StatisticsV1<Double> {
 
-  private double min;
-  private double max;
-  private double first;
-  private double last;
-  private double sum;
+    private double min;
+    private double max;
+    private double first;
+    private double last;
+    private double sum;
 
-  @Override
-  public Double getMin() {
-    return min;
-  }
+    @Override
+    public Double getMin() {
+        return min;
+    }
 
-  @Override
-  public Double getMax() {
-    return max;
-  }
+    @Override
+    public Double getMax() {
+        return max;
+    }
 
-  @Override
-  public Double getFirst() {
-    return first;
-  }
+    @Override
+    public Double getFirst() {
+        return first;
+    }
 
-  @Override
-  public Double getLast() {
-    return last;
-  }
+    @Override
+    public Double getLast() {
+        return last;
+    }
 
-  @Override
-  public double getSum() {
-    return sum;
-  }
+    @Override
+    public double getSum() {
+        return sum;
+    }
 
-  @Override
-  void deserialize(ByteBuffer byteBuffer) throws IOException {
-    this.min = ReadWriteIOUtils.readDouble(byteBuffer);
-    this.max = ReadWriteIOUtils.readDouble(byteBuffer);
-    this.first = ReadWriteIOUtils.readDouble(byteBuffer);
-    this.last = ReadWriteIOUtils.readDouble(byteBuffer);
-    this.sum = ReadWriteIOUtils.readDouble(byteBuffer);
-  }
+    @Override
+    void deserialize(ByteBuffer byteBuffer) throws IOException {
+        this.min = ReadWriteIOUtils.readDouble(byteBuffer);
+        this.max = ReadWriteIOUtils.readDouble(byteBuffer);
+        this.first = ReadWriteIOUtils.readDouble(byteBuffer);
+        this.last = ReadWriteIOUtils.readDouble(byteBuffer);
+        this.sum = ReadWriteIOUtils.readDouble(byteBuffer);
+    }
 
-  @Override
-  void deserialize(InputStream inputStream) throws IOException {
-    this.min = ReadWriteIOUtils.readDouble(inputStream);
-    this.max = ReadWriteIOUtils.readDouble(inputStream);
-    this.first = ReadWriteIOUtils.readDouble(inputStream);
-    this.last = ReadWriteIOUtils.readDouble(inputStream);
-    this.sum = ReadWriteIOUtils.readDouble(inputStream);
-  }
+    @Override
+    void deserialize(InputStream inputStream) throws IOException {
+        this.min = ReadWriteIOUtils.readDouble(inputStream);
+        this.max = ReadWriteIOUtils.readDouble(inputStream);
+        this.first = ReadWriteIOUtils.readDouble(inputStream);
+        this.last = ReadWriteIOUtils.readDouble(inputStream);
+        this.sum = ReadWriteIOUtils.readDouble(inputStream);
+    }
 }

@@ -28,30 +28,30 @@ import org.slf4j.LoggerFactory;
 
 public class GetTimeseriesSchemaHandler implements AsyncMethodCallback<ByteBuffer> {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetTimeseriesSchemaHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(GetTimeseriesSchemaHandler.class);
 
-  private Node contact;
-  private AtomicReference<ByteBuffer> result;
+    private Node contact;
+    private AtomicReference<ByteBuffer> result;
 
-  @Override
-  public void onComplete(ByteBuffer resp) {
-    logger.info("Received timeseries schema from {}", contact);
-    synchronized (result) {
-      result.set(resp);
-      result.notifyAll();
+    @Override
+    public void onComplete(ByteBuffer resp) {
+        logger.info("Received timeseries schema from {}", contact);
+        synchronized (result) {
+            result.set(resp);
+            result.notifyAll();
+        }
     }
-  }
 
-  @Override
-  public void onError(Exception exception) {
-    logger.warn("Cannot get timeseries schema from {}, because ", contact, exception);
-  }
+    @Override
+    public void onError(Exception exception) {
+        logger.warn("Cannot get timeseries schema from {}, because ", contact, exception);
+    }
 
-  public void setResponse(AtomicReference<ByteBuffer> response) {
-    this.result = response;
-  }
+    public void setResponse(AtomicReference<ByteBuffer> response) {
+        this.result = response;
+    }
 
-  public void setContact(Node contact) {
-    this.contact = contact;
-  }
+    public void setContact(Node contact) {
+        this.contact = contact;
+    }
 }

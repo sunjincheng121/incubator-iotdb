@@ -28,39 +28,39 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class MetricsWebUI {
 
-  private List<ServletContextHandler> handlers = new ArrayList<>();
-  private MetricRegistry metricRegistry;
+    private List<ServletContextHandler> handlers = new ArrayList<>();
+    private MetricRegistry metricRegistry;
 
-  public MetricsWebUI(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
-  }
+    public MetricsWebUI(MetricRegistry metricRegistry) {
+        this.metricRegistry = metricRegistry;
+    }
 
-  public MetricRegistry getMetricRegistry() {
-    return metricRegistry;
-  }
+    public MetricRegistry getMetricRegistry() {
+        return metricRegistry;
+    }
 
-  public void setMetricRegistry(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
-  }
+    public void setMetricRegistry(MetricRegistry metricRegistry) {
+        this.metricRegistry = metricRegistry;
+    }
 
-  public List<ServletContextHandler> getHandlers() {
-    return handlers;
-  }
+    public List<ServletContextHandler> getHandlers() {
+        return handlers;
+    }
 
-  public void setHandlers(List<ServletContextHandler> handlers) {
-    this.handlers = handlers;
-  }
+    public void setHandlers(List<ServletContextHandler> handlers) {
+        this.handlers = handlers;
+    }
 
-  public void initialize() {
-    MetricsPage masterPage = new MetricsPage(metricRegistry);
-    QueryServlet queryServlet = new QueryServlet(masterPage);
-    ServletContextHandler staticHandler = JettyUtil.createStaticHandler();
-    ServletContextHandler queryHandler = JettyUtil.createServletHandler("/",queryServlet);
-    handlers.add(staticHandler);
-    handlers.add(queryHandler);
-  }
+    public void initialize() {
+        MetricsPage masterPage = new MetricsPage(metricRegistry);
+        QueryServlet queryServlet = new QueryServlet(masterPage);
+        ServletContextHandler staticHandler = JettyUtil.createStaticHandler();
+        ServletContextHandler queryHandler = JettyUtil.createServletHandler("/", queryServlet);
+        handlers.add(staticHandler);
+        handlers.add(queryHandler);
+    }
 
-  public Server getServer(int port) {
-    return JettyUtil.getJettyServer(handlers, port);
-  }
+    public Server getServer(int port) {
+        return JettyUtil.getJettyServer(handlers, port);
+    }
 }

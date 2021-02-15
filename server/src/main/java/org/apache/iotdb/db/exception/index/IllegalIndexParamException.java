@@ -20,10 +20,9 @@ package org.apache.iotdb.db.exception.index;
 
 public class IllegalIndexParamException extends IndexRuntimeException {
 
-  private static final long serialVersionUID = -5037203268436084405L;
+    private static final long serialVersionUID = -5037203268436084405L;
 
-  public IllegalIndexParamException(String message) {
-    super(message);
-  }
-
+    public IllegalIndexParamException(String message) {
+        super(message);
+    }
 }

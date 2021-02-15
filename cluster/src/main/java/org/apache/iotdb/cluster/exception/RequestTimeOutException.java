@@ -21,16 +21,14 @@ package org.apache.iotdb.cluster.exception;
 
 import org.apache.iotdb.cluster.log.Log;
 
-/**
- * Raised when a request times out before reaching an agreement in a group.
- */
+/** Raised when a request times out before reaching an agreement in a group. */
 public class RequestTimeOutException extends Exception {
 
-  public RequestTimeOutException(Log log) {
-    super("Request \"" + log + "\" timeout");
-  }
+    public RequestTimeOutException(Log log) {
+        super("Request \"" + log + "\" timeout");
+    }
 
-  public RequestTimeOutException(String request) {
-    super("Request \"" + request + "\" timeout");
-  }
+    public RequestTimeOutException(String request) {
+        super("Request \"" + request + "\" timeout");
+    }
 }

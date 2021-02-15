@@ -30,64 +30,68 @@ import org.apache.iotdb.tsfile.read.common.TimeRange;
 
 public class QueryUtils {
 
-  private QueryUtils() {
-    // util class
-  }
-
-  /**
-   * modifyChunkMetaData iterates the chunkMetaData and applies all available modifications on it to
-   * generate a ModifiedChunkMetadata. <br/> the caller should guarantee that chunkMetaData and
-   * modifications refer to the same time series paths.
-   *
-   * @param chunkMetaData the original chunkMetaData.
-   * @param modifications all possible modifications.
-   */
-  @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  public static void modifyChunkMetaData(List<ChunkMetadata> chunkMetaData,
-      List<Modification> modifications) {
-    int modIndex = 0;
-    for (int metaIndex = 0; metaIndex < chunkMetaData.size(); metaIndex++) {
-      ChunkMetadata metaData = chunkMetaData.get(metaIndex);
-      for (Modification modification : modifications) {
-        if (modification.getVersionNum() > metaData.getVersion()) {
-          doModifyChunkMetaData(modification, metaData);
-        }
-      }
+    private QueryUtils() {
+        // util class
     }
-    // remove chunks that are completely deleted
-    chunkMetaData.removeIf(metaData -> {
-      if (metaData.getDeleteIntervalList() != null) {
-        for (TimeRange range : metaData.getDeleteIntervalList()) {
-          if (range.contains(metaData.getStartTime(), metaData.getEndTime())) {
-            return true;
-          } else {
-            if (range.overlaps(new TimeRange(metaData.getStartTime(), metaData.getEndTime()))) {
-              metaData.setModified(true);
+
+    /**
+     * modifyChunkMetaData iterates the chunkMetaData and applies all available modifications on it
+     * to generate a ModifiedChunkMetadata. <br>
+     * the caller should guarantee that chunkMetaData and modifications refer to the same time
+     * series paths.
+     *
+     * @param chunkMetaData the original chunkMetaData.
+     * @param modifications all possible modifications.
+     */
+    @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
+    public static void modifyChunkMetaData(
+            List<ChunkMetadata> chunkMetaData, List<Modification> modifications) {
+        int modIndex = 0;
+        for (int metaIndex = 0; metaIndex < chunkMetaData.size(); metaIndex++) {
+            ChunkMetadata metaData = chunkMetaData.get(metaIndex);
+            for (Modification modification : modifications) {
+                if (modification.getVersionNum() > metaData.getVersion()) {
+                    doModifyChunkMetaData(modification, metaData);
+                }
             }
-            return false;
-          }
         }
-      }
-      return false;
-    });
-  }
-
-  private static void doModifyChunkMetaData(Modification modification, ChunkMetadata metaData) {
-    if (modification instanceof Deletion) {
-      Deletion deletion = (Deletion) modification;
-      metaData.insertIntoSortedDeletions(deletion.getStartTime(), deletion.getEndTime());
+        // remove chunks that are completely deleted
+        chunkMetaData.removeIf(
+                metaData -> {
+                    if (metaData.getDeleteIntervalList() != null) {
+                        for (TimeRange range : metaData.getDeleteIntervalList()) {
+                            if (range.contains(metaData.getStartTime(), metaData.getEndTime())) {
+                                return true;
+                            } else {
+                                if (range.overlaps(
+                                        new TimeRange(
+                                                metaData.getStartTime(), metaData.getEndTime()))) {
+                                    metaData.setModified(true);
+                                }
+                                return false;
+                            }
+                        }
+                    }
+                    return false;
+                });
     }
-  }
 
-  // remove files that do not satisfy the filter
-  public static void filterQueryDataSource(QueryDataSource queryDataSource,
-      TsFileFilter fileFilter) {
-    if (fileFilter == null) {
-      return;
+    private static void doModifyChunkMetaData(Modification modification, ChunkMetadata metaData) {
+        if (modification instanceof Deletion) {
+            Deletion deletion = (Deletion) modification;
+            metaData.insertIntoSortedDeletions(deletion.getStartTime(), deletion.getEndTime());
+        }
     }
-    List<TsFileResource> seqResources = queryDataSource.getSeqResources();
-    List<TsFileResource> unseqResources = queryDataSource.getUnseqResources();
-    seqResources.removeIf(fileFilter::fileNotSatisfy);
-    unseqResources.removeIf(fileFilter::fileNotSatisfy);
-  }
+
+    // remove files that do not satisfy the filter
+    public static void filterQueryDataSource(
+            QueryDataSource queryDataSource, TsFileFilter fileFilter) {
+        if (fileFilter == null) {
+            return;
+        }
+        List<TsFileResource> seqResources = queryDataSource.getSeqResources();
+        List<TsFileResource> unseqResources = queryDataSource.getUnseqResources();
+        seqResources.removeIf(fileFilter::fileNotSatisfy);
+        unseqResources.removeIf(fileFilter::fileNotSatisfy);
+    }
 }

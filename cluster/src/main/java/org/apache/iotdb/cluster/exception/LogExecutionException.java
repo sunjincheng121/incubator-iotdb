@@ -21,7 +21,7 @@ package org.apache.iotdb.cluster.exception;
 
 public class LogExecutionException extends Exception {
 
-  public LogExecutionException(Throwable cause) {
-    super(cause);
-  }
+    public LogExecutionException(Throwable cause) {
+        super(cause);
+    }
 }

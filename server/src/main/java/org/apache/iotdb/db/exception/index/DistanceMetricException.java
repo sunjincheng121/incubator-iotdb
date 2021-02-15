@@ -20,10 +20,9 @@ package org.apache.iotdb.db.exception.index;
 
 public class DistanceMetricException extends IndexRuntimeException {
 
-  private static final long serialVersionUID = -2772568110478978387L;
+    private static final long serialVersionUID = -2772568110478978387L;
 
-  public DistanceMetricException(String message) {
-    super(message);
-  }
-
+    public DistanceMetricException(String message) {
+        super(message);
+    }
 }

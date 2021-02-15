@@ -28,64 +28,65 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * GenericHandler simply put the response into an AtomicReference and wake up the caller.
- * Notice: the caller should wait on "result" if it wants to get the result. Please refer to the
- * current usages before using this class.
+ * GenericHandler simply put the response into an AtomicReference and wake up the caller. Notice:
+ * the caller should wait on "result" if it wants to get the result. Please refer to the current
+ * usages before using this class.
+ *
  * @param <T>
  */
 public class GenericHandler<T> implements AsyncMethodCallback<T> {
 
-  private static final Logger logger = LoggerFactory.getLogger(GenericHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(GenericHandler.class);
 
-  private Node source;
-  private AtomicReference<T> result;
-  private Exception e;
+    private Node source;
+    private AtomicReference<T> result;
+    private Exception e;
 
-  public GenericHandler(Node source, AtomicReference<T> result) {
-    this.source = source;
-    this.result = result;
-  }
-
-  @Override
-  public void onComplete(T response) {
-    if (result != null) {
-      synchronized (result) {
-        result.set(response);
-        result.notifyAll();
-      }
-    }
-  }
-
-  @Override
-  public void onError(Exception exception) {
-    if (!(exception instanceof ConnectException)) {
-      logger.error("Cannot receive result from {}", source, exception);
-    } else {
-      logger.warn("Cannot receive result from {} : {}", source, exception.getMessage());
+    public GenericHandler(Node source, AtomicReference<T> result) {
+        this.source = source;
+        this.result = result;
     }
 
-    if (result != null) {
-      synchronized (result) {
-        result.notifyAll();
-        e = exception;
-      }
+    @Override
+    public void onComplete(T response) {
+        if (result != null) {
+            synchronized (result) {
+                result.set(response);
+                result.notifyAll();
+            }
+        }
     }
-  }
 
-  public Exception getException() {
-    return e;
-  }
+    @Override
+    public void onError(Exception exception) {
+        if (!(exception instanceof ConnectException)) {
+            logger.error("Cannot receive result from {}", source, exception);
+        } else {
+            logger.warn("Cannot receive result from {} : {}", source, exception.getMessage());
+        }
 
-  @SuppressWarnings("java:S2274") // enable timeout
-  public T getResult(long timeout) throws InterruptedException, TException {
-    synchronized (result) {
-      if (result.get() == null && getException() == null) {
-        result.wait(timeout);
-      }
+        if (result != null) {
+            synchronized (result) {
+                result.notifyAll();
+                e = exception;
+            }
+        }
     }
-    if (getException() != null) {
-      throw new TException(getException());
+
+    public Exception getException() {
+        return e;
     }
-    return result.get();
-  }
+
+    @SuppressWarnings("java:S2274") // enable timeout
+    public T getResult(long timeout) throws InterruptedException, TException {
+        synchronized (result) {
+            if (result.get() == null && getException() == null) {
+                result.wait(timeout);
+            }
+        }
+        if (getException() != null) {
+            throw new TException(getException());
+        }
+        return result.get();
+    }
 }

@@ -44,74 +44,82 @@ import org.junit.Test;
 @SuppressWarnings({"java:S2925"})
 public class QueryCoordinatorTest {
 
-  private Map<Node, NodeStatus> nodeStatusMap;
-  private Map<Node, Long> nodeLatencyMap;
-  private QueryCoordinator coordinator = QueryCoordinator.getINSTANCE();
-  private boolean prevUseAsyncServer;
+    private Map<Node, NodeStatus> nodeStatusMap;
+    private Map<Node, Long> nodeLatencyMap;
+    private QueryCoordinator coordinator = QueryCoordinator.getINSTANCE();
+    private boolean prevUseAsyncServer;
 
-  @Before
-  public void setUp() {
-    prevUseAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
-    ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(true);
-    nodeStatusMap = new HashMap<>();
-    nodeLatencyMap = new HashMap<>();
-    for (int i = 0; i < 5; i++) {
-      NodeStatus status = new NodeStatus();
-      TNodeStatus nodeStatus = new TNodeStatus();
-      status.setStatus(nodeStatus);
-      status.setLastResponseLatency(i);
-      Node node = TestUtils.getNode(i);
-      nodeStatusMap.put(node, status);
-      // nodes with smaller num have lower latency
-      nodeLatencyMap.put(node, i * 200L);
-    }
-
-    MetaGroupMember metaGroupMember = new MetaGroupMember() {
-      @Override
-      public AsyncClient getAsyncClient(Node node) {
-        try {
-          return new TestAsyncMetaClient(new Factory(),  null, node, null) {
-            @Override
-            public void queryNodeStatus(AsyncMethodCallback<TNodeStatus> resultHandler) {
-              new Thread(() -> {
-                try {
-                  Thread.sleep(nodeLatencyMap.get(getNode()));
-                } catch (InterruptedException e) {
-                  // ignored
-                }
-                resultHandler.onComplete(nodeStatusMap.get(getNode()).getStatus());
-              }).start();
-            }
-          };
-        } catch (IOException e) {
-          fail(e.getMessage());
-          return null;
+    @Before
+    public void setUp() {
+        prevUseAsyncServer = ClusterDescriptor.getInstance().getConfig().isUseAsyncServer();
+        ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(true);
+        nodeStatusMap = new HashMap<>();
+        nodeLatencyMap = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            NodeStatus status = new NodeStatus();
+            TNodeStatus nodeStatus = new TNodeStatus();
+            status.setStatus(nodeStatus);
+            status.setLastResponseLatency(i);
+            Node node = TestUtils.getNode(i);
+            nodeStatusMap.put(node, status);
+            // nodes with smaller num have lower latency
+            nodeLatencyMap.put(node, i * 200L);
         }
-      }
-    };
-    coordinator.setMetaGroupMember(metaGroupMember);
-    coordinator.clear();
-  }
 
-  @After
-  public void tearDown() {
-    ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(prevUseAsyncServer);
-  }
-
-  @Test
-  public void test() {
-    List<Node> orderedNodes = new ArrayList<>();
-    for (int i = 0; i < 5; i++) {
-      orderedNodes.add(TestUtils.getNode(i));
+        MetaGroupMember metaGroupMember =
+                new MetaGroupMember() {
+                    @Override
+                    public AsyncClient getAsyncClient(Node node) {
+                        try {
+                            return new TestAsyncMetaClient(new Factory(), null, node, null) {
+                                @Override
+                                public void queryNodeStatus(
+                                        AsyncMethodCallback<TNodeStatus> resultHandler) {
+                                    new Thread(
+                                                    () -> {
+                                                        try {
+                                                            Thread.sleep(
+                                                                    nodeLatencyMap.get(getNode()));
+                                                        } catch (InterruptedException e) {
+                                                            // ignored
+                                                        }
+                                                        resultHandler.onComplete(
+                                                                nodeStatusMap
+                                                                        .get(getNode())
+                                                                        .getStatus());
+                                                    })
+                                            .start();
+                                }
+                            };
+                        } catch (IOException e) {
+                            fail(e.getMessage());
+                            return null;
+                        }
+                    }
+                };
+        coordinator.setMetaGroupMember(metaGroupMember);
+        coordinator.clear();
     }
-    List<Node> unorderedNodes = new ArrayList<>(orderedNodes);
-    Collections.shuffle(unorderedNodes);
 
-    List<Node> reorderedNodes = coordinator.reorderNodes(unorderedNodes);
-    for (Node orderedNode : orderedNodes) {
-      long latency = coordinator.getLastResponseLatency(orderedNode);
-      System.out.printf("%s -> %d%n", orderedNode, latency);
+    @After
+    public void tearDown() {
+        ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(prevUseAsyncServer);
     }
-    assertEquals(orderedNodes, reorderedNodes);
-  }
+
+    @Test
+    public void test() {
+        List<Node> orderedNodes = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            orderedNodes.add(TestUtils.getNode(i));
+        }
+        List<Node> unorderedNodes = new ArrayList<>(orderedNodes);
+        Collections.shuffle(unorderedNodes);
+
+        List<Node> reorderedNodes = coordinator.reorderNodes(unorderedNodes);
+        for (Node orderedNode : orderedNodes) {
+            long latency = coordinator.getLastResponseLatency(orderedNode);
+            System.out.printf("%s -> %d%n", orderedNode, latency);
+        }
+        assertEquals(orderedNodes, reorderedNodes);
+    }
 }

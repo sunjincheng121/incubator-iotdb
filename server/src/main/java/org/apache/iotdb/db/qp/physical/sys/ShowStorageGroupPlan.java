@@ -22,15 +22,14 @@ import org.apache.iotdb.db.metadata.PartialPath;
 
 public class ShowStorageGroupPlan extends ShowPlan {
 
-  private PartialPath path;
+    private PartialPath path;
 
-  public ShowStorageGroupPlan(ShowContentType showContentType, PartialPath path) {
-    super(showContentType);
-    this.path = path;
-  }
+    public ShowStorageGroupPlan(ShowContentType showContentType, PartialPath path) {
+        super(showContentType);
+        this.path = path;
+    }
 
-  public PartialPath getPath() {
-    return this.path;
-  }
+    public PartialPath getPath() {
+        return this.path;
+    }
 }
-

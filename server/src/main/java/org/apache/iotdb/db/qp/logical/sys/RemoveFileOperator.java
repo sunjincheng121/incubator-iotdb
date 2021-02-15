@@ -24,20 +24,20 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class RemoveFileOperator extends RootOperator {
 
-  private File file;
+    private File file;
 
-  public RemoveFileOperator(File file) {
-    super(SQLConstant.TOK_REMOVE_FILE);
-    this.file = file;
-    this.operatorType = OperatorType.REMOVE_FILE;
-  }
+    public RemoveFileOperator(File file) {
+        super(SQLConstant.TOK_REMOVE_FILE);
+        this.file = file;
+        this.operatorType = OperatorType.REMOVE_FILE;
+    }
 
-  public RemoveFileOperator(int tokenIntType, File file) {
-    super(tokenIntType);
-    this.file = file;
-  }
+    public RemoveFileOperator(int tokenIntType, File file) {
+        super(tokenIntType);
+        this.file = file;
+    }
 
-  public File getFile() {
-    return file;
-  }
+    public File getFile() {
+        return file;
+    }
 }

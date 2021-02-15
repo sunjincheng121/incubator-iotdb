@@ -39,87 +39,86 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
  */
 public class In<T extends Comparable<T>> implements Filter {
 
-  private static final long serialVersionUID = 8572705136773595399L;
+    private static final long serialVersionUID = 8572705136773595399L;
 
-  private Set<T> values;
+    private Set<T> values;
 
-  private boolean not;
+    private boolean not;
 
-  private FilterType filterType;
+    private FilterType filterType;
 
-  public In() {
-  }
+    public In() {}
 
-  public In(Set<T> values, FilterType filterType, boolean not) {
-    this.values = values;
-    this.filterType = filterType;
-    this.not = not;
-  }
-
-  @Override
-  public boolean satisfy(Statistics statistics) {
-    return true;
-  }
-
-  @Override
-  public boolean satisfy(long time, Object value) {
-    Object v = filterType == FilterType.TIME_FILTER ? time : value;
-    return this.values.contains(v) != not;
-  }
-
-  @Override
-  public boolean satisfyStartEndTime(long startTime, long endTime) {
-    return true;
-  }
-
-  @Override
-  public boolean containStartEndTime(long startTime, long endTime) {
-    return true;
-  }
-
-  @Override
-  public Filter copy() {
-    return new In(new HashSet(values), filterType, not);
-  }
-
-  @Override
-  public void serialize(DataOutputStream outputStream) {
-    try {
-      outputStream.write(getSerializeId().ordinal());
-      outputStream.write(filterType.ordinal());
-      ReadWriteIOUtils.write(not, outputStream);
-      outputStream.write(values.size());
-      for (T value : values) {
-        ReadWriteIOUtils.writeObject(value, outputStream);
-      }
-    } catch (IOException ignored) {
-      // ignored
+    public In(Set<T> values, FilterType filterType, boolean not) {
+        this.values = values;
+        this.filterType = filterType;
+        this.not = not;
     }
-  }
 
-  @Override
-  public void deserialize(ByteBuffer buffer) {
-    filterType = FilterType.values()[buffer.get()];
-    not = ReadWriteIOUtils.readBool(buffer);
-    values = new HashSet<>();
-    for (int i = 0; i < buffer.get(); i++) {
-      values.add((T) ReadWriteIOUtils.readObject(buffer));
+    @Override
+    public boolean satisfy(Statistics statistics) {
+        return true;
     }
-  }
 
-  @Override
-  public String toString() {
-    List<T> valueList = new ArrayList<>(values);
-    Collections.sort(valueList);
-    return filterType + " < " + "reverse: " + not + ", " + valueList;
-  }
+    @Override
+    public boolean satisfy(long time, Object value) {
+        Object v = filterType == FilterType.TIME_FILTER ? time : value;
+        return this.values.contains(v) != not;
+    }
 
-  @Override
-  public FilterSerializeId getSerializeId() {
-    return FilterSerializeId.IN;
-  }
+    @Override
+    public boolean satisfyStartEndTime(long startTime, long endTime) {
+        return true;
+    }
 
-  public Set<T> getValues() {
-    return values;
-  }
+    @Override
+    public boolean containStartEndTime(long startTime, long endTime) {
+        return true;
+    }
+
+    @Override
+    public Filter copy() {
+        return new In(new HashSet(values), filterType, not);
+    }
+
+    @Override
+    public void serialize(DataOutputStream outputStream) {
+        try {
+            outputStream.write(getSerializeId().ordinal());
+            outputStream.write(filterType.ordinal());
+            ReadWriteIOUtils.write(not, outputStream);
+            outputStream.write(values.size());
+            for (T value : values) {
+                ReadWriteIOUtils.writeObject(value, outputStream);
+            }
+        } catch (IOException ignored) {
+            // ignored
+        }
+    }
+
+    @Override
+    public void deserialize(ByteBuffer buffer) {
+        filterType = FilterType.values()[buffer.get()];
+        not = ReadWriteIOUtils.readBool(buffer);
+        values = new HashSet<>();
+        for (int i = 0; i < buffer.get(); i++) {
+            values.add((T) ReadWriteIOUtils.readObject(buffer));
+        }
+    }
+
+    @Override
+    public String toString() {
+        List<T> valueList = new ArrayList<>(values);
+        Collections.sort(valueList);
+        return filterType + " < " + "reverse: " + not + ", " + valueList;
+    }
+
+    @Override
+    public FilterSerializeId getSerializeId() {
+        return FilterSerializeId.IN;
+    }
+
+    public Set<T> getValues() {
+        return values;
+    }
 }

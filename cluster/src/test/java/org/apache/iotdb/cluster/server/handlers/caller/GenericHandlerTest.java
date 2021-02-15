@@ -26,32 +26,31 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.iotdb.cluster.common.TestException;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
-import org.apache.iotdb.cluster.server.handlers.caller.GenericHandler;
 import org.junit.Test;
 
 public class GenericHandlerTest {
 
-  @Test
-  public void testComplete() throws InterruptedException {
-    Node node = TestUtils.getNode(1);
-    AtomicReference<String> result = new AtomicReference<>();
-    GenericHandler<String> handler = new GenericHandler<>(node, result);
-    synchronized (result) {
-      new Thread(() -> handler.onComplete("Hello world!")).start();
-      result.wait();
+    @Test
+    public void testComplete() throws InterruptedException {
+        Node node = TestUtils.getNode(1);
+        AtomicReference<String> result = new AtomicReference<>();
+        GenericHandler<String> handler = new GenericHandler<>(node, result);
+        synchronized (result) {
+            new Thread(() -> handler.onComplete("Hello world!")).start();
+            result.wait();
+        }
+        assertEquals("Hello world!", result.get());
     }
-    assertEquals("Hello world!", result.get());
-  }
 
-  @Test
-  public void testError() throws InterruptedException {
-    Node node = TestUtils.getNode(1);
-    AtomicReference<String> result = new AtomicReference<>();
-    GenericHandler<String> handler = new GenericHandler<>(node, result);
-    synchronized (result) {
-      new Thread(() -> handler.onError(new TestException())).start();
-      result.wait();
+    @Test
+    public void testError() throws InterruptedException {
+        Node node = TestUtils.getNode(1);
+        AtomicReference<String> result = new AtomicReference<>();
+        GenericHandler<String> handler = new GenericHandler<>(node, result);
+        synchronized (result) {
+            new Thread(() -> handler.onError(new TestException())).start();
+            result.wait();
+        }
+        assertNull(result.get());
     }
-    assertNull(result.get());
-  }
 }

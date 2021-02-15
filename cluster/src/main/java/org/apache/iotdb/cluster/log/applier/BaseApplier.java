@@ -41,110 +41,110 @@ import org.apache.iotdb.db.utils.SchemaUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * BaseApplier use PlanExecutor to execute PhysicalPlans.
- */
+/** BaseApplier use PlanExecutor to execute PhysicalPlans. */
 abstract class BaseApplier implements LogApplier {
 
-  private static final Logger logger = LoggerFactory.getLogger(BaseApplier.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseApplier.class);
 
-  MetaGroupMember metaGroupMember;
-  private PlanExecutor queryExecutor;
+    MetaGroupMember metaGroupMember;
+    private PlanExecutor queryExecutor;
 
-  BaseApplier(MetaGroupMember metaGroupMember) {
-    this.metaGroupMember = metaGroupMember;
-  }
+    BaseApplier(MetaGroupMember metaGroupMember) {
+        this.metaGroupMember = metaGroupMember;
+    }
 
-  /**
-   * @param plan
-   * @param dataGroupMember the data group member that is applying the log, null if the log is
-   *                        applied by a meta group member
-   * @throws QueryProcessException
-   * @throws StorageGroupNotSetException
-   * @throws StorageEngineException
-   */
-  void applyPhysicalPlan(PhysicalPlan plan, DataGroupMember dataGroupMember)
-      throws QueryProcessException, StorageGroupNotSetException, StorageEngineException {
-    if (plan instanceof InsertPlan) {
-      processPlanWithTolerance((InsertPlan) plan, dataGroupMember);
-    } else if (plan != null && !plan.isQuery()) {
-      try {
-        getQueryExecutor().processNonQuery(plan);
-      } catch (QueryProcessException e) {
-        if (e.getCause() instanceof StorageGroupNotSetException) {
-          executeAfterSync(plan);
-        } else {
-          throw e;
+    /**
+     * @param plan
+     * @param dataGroupMember the data group member that is applying the log, null if the log is
+     *     applied by a meta group member
+     * @throws QueryProcessException
+     * @throws StorageGroupNotSetException
+     * @throws StorageEngineException
+     */
+    void applyPhysicalPlan(PhysicalPlan plan, DataGroupMember dataGroupMember)
+            throws QueryProcessException, StorageGroupNotSetException, StorageEngineException {
+        if (plan instanceof InsertPlan) {
+            processPlanWithTolerance((InsertPlan) plan, dataGroupMember);
+        } else if (plan != null && !plan.isQuery()) {
+            try {
+                getQueryExecutor().processNonQuery(plan);
+            } catch (QueryProcessException e) {
+                if (e.getCause() instanceof StorageGroupNotSetException) {
+                    executeAfterSync(plan);
+                } else {
+                    throw e;
+                }
+            } catch (StorageGroupNotSetException e) {
+                executeAfterSync(plan);
+            }
+        } else if (plan != null) {
+            logger.error("Unsupported physical plan: {}", plan);
         }
-      } catch (StorageGroupNotSetException e) {
-        executeAfterSync(plan);
-      }
-    } else if (plan != null){
-      logger.error("Unsupported physical plan: {}", plan);
     }
-  }
 
-  private void executeAfterSync(PhysicalPlan plan)
-      throws QueryProcessException, StorageGroupNotSetException, StorageEngineException {
-    try {
-      metaGroupMember.syncLeaderWithConsistencyCheck(true);
-    } catch (CheckConsistencyException ce) {
-      throw new QueryProcessException(ce.getMessage());
-    }
-    getQueryExecutor().processNonQuery(plan);
-  }
-
-  /**
-   * @param plan
-   * @param dataGroupMember the data group member that is applying the log, null if the log is
-   *                        applied by a meta group member
-   * @throws QueryProcessException
-   * @throws StorageGroupNotSetException
-   * @throws StorageEngineException
-   */
-  private void processPlanWithTolerance(InsertPlan plan, DataGroupMember dataGroupMember)
-      throws QueryProcessException, StorageGroupNotSetException, StorageEngineException {
-    try {
-      getQueryExecutor().processNonQuery(plan);
-    } catch (QueryProcessException | StorageGroupNotSetException | StorageEngineException e) {
-      // check if this is caused by metadata missing, if so, pull metadata and retry
-      Throwable metaMissingException = SchemaUtils.findMetaMissingException(e);
-      boolean causedByPathNotExist = metaMissingException instanceof PathNotExistException;
-
-      if (causedByPathNotExist) {
-        if (logger.isDebugEnabled()) {
-          logger.debug("Timeseries is not found locally[{}], try pulling it from another group: {}",
-              metaGroupMember.getName(), e.getCause().getMessage());
+    private void executeAfterSync(PhysicalPlan plan)
+            throws QueryProcessException, StorageGroupNotSetException, StorageEngineException {
+        try {
+            metaGroupMember.syncLeaderWithConsistencyCheck(true);
+        } catch (CheckConsistencyException ce) {
+            throw new QueryProcessException(ce.getMessage());
         }
-        pullTimeseriesSchema(plan, dataGroupMember.getHeader());
-        plan.recoverFromFailure();
         getQueryExecutor().processNonQuery(plan);
-      } else {
-        throw e;
-      }
     }
-  }
 
-  /**
-   * @param plan
-   * @param ignoredGroup do not pull schema from the group to avoid backward dependency
-   * @throws QueryProcessException
-   */
-  private void pullTimeseriesSchema(InsertPlan plan, Node ignoredGroup)
-      throws QueryProcessException {
-    try {
-      PartialPath path = plan.getDeviceId();
-      ((CMManager) IoTDB.metaManager)
-          .pullTimeSeriesSchemas(Collections.singletonList(path), ignoredGroup);
-    } catch (MetadataException e1) {
-      throw new QueryProcessException(e1);
-    }
-  }
+    /**
+     * @param plan
+     * @param dataGroupMember the data group member that is applying the log, null if the log is
+     *     applied by a meta group member
+     * @throws QueryProcessException
+     * @throws StorageGroupNotSetException
+     * @throws StorageEngineException
+     */
+    private void processPlanWithTolerance(InsertPlan plan, DataGroupMember dataGroupMember)
+            throws QueryProcessException, StorageGroupNotSetException, StorageEngineException {
+        try {
+            getQueryExecutor().processNonQuery(plan);
+        } catch (QueryProcessException | StorageGroupNotSetException | StorageEngineException e) {
+            // check if this is caused by metadata missing, if so, pull metadata and retry
+            Throwable metaMissingException = SchemaUtils.findMetaMissingException(e);
+            boolean causedByPathNotExist = metaMissingException instanceof PathNotExistException;
 
-  private PlanExecutor getQueryExecutor() throws QueryProcessException {
-    if (queryExecutor == null) {
-      queryExecutor = new ClusterPlanExecutor(metaGroupMember);
+            if (causedByPathNotExist) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(
+                            "Timeseries is not found locally[{}], try pulling it from another group: {}",
+                            metaGroupMember.getName(),
+                            e.getCause().getMessage());
+                }
+                pullTimeseriesSchema(plan, dataGroupMember.getHeader());
+                plan.recoverFromFailure();
+                getQueryExecutor().processNonQuery(plan);
+            } else {
+                throw e;
+            }
+        }
     }
-    return queryExecutor;
-  }
+
+    /**
+     * @param plan
+     * @param ignoredGroup do not pull schema from the group to avoid backward dependency
+     * @throws QueryProcessException
+     */
+    private void pullTimeseriesSchema(InsertPlan plan, Node ignoredGroup)
+            throws QueryProcessException {
+        try {
+            PartialPath path = plan.getDeviceId();
+            ((CMManager) IoTDB.metaManager)
+                    .pullTimeSeriesSchemas(Collections.singletonList(path), ignoredGroup);
+        } catch (MetadataException e1) {
+            throw new QueryProcessException(e1);
+        }
+    }
+
+    private PlanExecutor getQueryExecutor() throws QueryProcessException {
+        if (queryExecutor == null) {
+            queryExecutor = new ClusterPlanExecutor(metaGroupMember);
+        }
+        return queryExecutor;
+    }
 }

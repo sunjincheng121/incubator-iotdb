@@ -19,12 +19,10 @@
 
 package org.apache.iotdb.cluster.exception;
 
-/**
- * Raised when the type of a raft log is unknown.
- */
+/** Raised when the type of a raft log is unknown. */
 public class UnknownLogTypeException extends Exception {
 
-  public UnknownLogTypeException(int logType) {
-    super("Unknown log type: " + logType);
-  }
+    public UnknownLogTypeException(int logType) {
+        super("Unknown log type: " + logType);
+    }
 }

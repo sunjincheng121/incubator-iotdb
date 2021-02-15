@@ -24,10 +24,11 @@ import org.apache.iotdb.rpc.TSStatusCode;
 
 public class PathAlreadyExistException extends MetadataException {
 
-  private static final long serialVersionUID = -6713847897890531438L;
+    private static final long serialVersionUID = -6713847897890531438L;
 
-  public PathAlreadyExistException(String path) {
-    super(String.format("Path [%s] already exist", path),
-        TSStatusCode.PATH_ALREADY_EXIST_ERROR.getStatusCode());
-  }
+    public PathAlreadyExistException(String path) {
+        super(
+                String.format("Path [%s] already exist", path),
+                TSStatusCode.PATH_ALREADY_EXIST_ERROR.getStatusCode());
+    }
 }

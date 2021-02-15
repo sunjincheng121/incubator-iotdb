@@ -24,44 +24,46 @@ import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 
 /**
- * PreviousFillParameter records necessary parameters of a previous fill over a single
- * timeseries, avoiding the corresponding method call having too many arguments and increasing
- * flexibility.
+ * PreviousFillParameter records necessary parameters of a previous fill over a single timeseries,
+ * avoiding the corresponding method call having too many arguments and increasing flexibility.
  */
 public class PreviousFillArguments {
-  private PartialPath path;
-  private TSDataType dataType;
-  private long queryTime;
-  private long beforeRange;
-  private Set<String> deviceMeasurements;
+    private PartialPath path;
+    private TSDataType dataType;
+    private long queryTime;
+    private long beforeRange;
+    private Set<String> deviceMeasurements;
 
-  public PreviousFillArguments(PartialPath path,
-      TSDataType dataType, long queryTime, long beforeRange,
-      Set<String> deviceMeasurements) {
-    this.path = path;
-    this.dataType = dataType;
-    this.queryTime = queryTime;
-    this.beforeRange = beforeRange;
-    this.deviceMeasurements = deviceMeasurements;
-  }
+    public PreviousFillArguments(
+            PartialPath path,
+            TSDataType dataType,
+            long queryTime,
+            long beforeRange,
+            Set<String> deviceMeasurements) {
+        this.path = path;
+        this.dataType = dataType;
+        this.queryTime = queryTime;
+        this.beforeRange = beforeRange;
+        this.deviceMeasurements = deviceMeasurements;
+    }
 
-  public PartialPath getPath() {
-    return path;
-  }
+    public PartialPath getPath() {
+        return path;
+    }
 
-  public TSDataType getDataType() {
-    return dataType;
-  }
+    public TSDataType getDataType() {
+        return dataType;
+    }
 
-  public long getQueryTime() {
-    return queryTime;
-  }
+    public long getQueryTime() {
+        return queryTime;
+    }
 
-  public long getBeforeRange() {
-    return beforeRange;
-  }
+    public long getBeforeRange() {
+        return beforeRange;
+    }
 
-  public Set<String> getDeviceMeasurements() {
-    return deviceMeasurements;
-  }
+    public Set<String> getDeviceMeasurements() {
+        return deviceMeasurements;
+    }
 }

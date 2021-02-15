@@ -22,17 +22,17 @@ import org.apache.iotdb.rpc.TSStatusCode;
 
 public class PathException extends QueryProcessException {
 
-  private static final long serialVersionUID = 2141197032898163234L;
+    private static final long serialVersionUID = 2141197032898163234L;
 
-  public PathException() {
-    super("Timeseries is null", TSStatusCode.PATH_ERROR.getStatusCode());
-  }
+    public PathException() {
+        super("Timeseries is null", TSStatusCode.PATH_ERROR.getStatusCode());
+    }
 
-  public PathException(String message) {
-    super(message, TSStatusCode.PATH_ERROR.getStatusCode());
-  }
+    public PathException(String message) {
+        super(message, TSStatusCode.PATH_ERROR.getStatusCode());
+    }
 
-  public PathException(String message, int errorCode) {
-    super(message, errorCode);
-  }
+    public PathException(String message, int errorCode) {
+        super(message, errorCode);
+    }
 }

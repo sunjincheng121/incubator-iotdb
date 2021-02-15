@@ -57,180 +57,201 @@ import org.slf4j.LoggerFactory;
  */
 public class QueryRouter implements IQueryRouter {
 
-  private static Logger logger = LoggerFactory.getLogger(QueryRouter.class);
+    private static Logger logger = LoggerFactory.getLogger(QueryRouter.class);
 
-  @Override
-  public QueryDataSet rawDataQuery(RawDataQueryPlan queryPlan, QueryContext context)
-      throws StorageEngineException, QueryProcessException {
-    IExpression expression = queryPlan.getExpression();
-    List<PartialPath> deduplicatedPaths = queryPlan.getDeduplicatedPaths();
+    @Override
+    public QueryDataSet rawDataQuery(RawDataQueryPlan queryPlan, QueryContext context)
+            throws StorageEngineException, QueryProcessException {
+        IExpression expression = queryPlan.getExpression();
+        List<PartialPath> deduplicatedPaths = queryPlan.getDeduplicatedPaths();
 
-    IExpression optimizedExpression;
-    try {
-      optimizedExpression = expression == null ? null : ExpressionOptimizer.getInstance()
-          .optimize(expression, new ArrayList<>(deduplicatedPaths));
-    } catch (QueryFilterOptimizationException e) {
-      throw new StorageEngineException(e.getMessage());
-    }
-    queryPlan.setExpression(optimizedExpression);
+        IExpression optimizedExpression;
+        try {
+            optimizedExpression =
+                    expression == null
+                            ? null
+                            : ExpressionOptimizer.getInstance()
+                                    .optimize(expression, new ArrayList<>(deduplicatedPaths));
+        } catch (QueryFilterOptimizationException e) {
+            throw new StorageEngineException(e.getMessage());
+        }
+        queryPlan.setExpression(optimizedExpression);
 
-    RawDataQueryExecutor rawDataQueryExecutor = getRawDataQueryExecutor(queryPlan);
+        RawDataQueryExecutor rawDataQueryExecutor = getRawDataQueryExecutor(queryPlan);
 
-    if (!queryPlan.isAlignByTime()) {
-      return rawDataQueryExecutor.executeNonAlign(context);
-    }
+        if (!queryPlan.isAlignByTime()) {
+            return rawDataQueryExecutor.executeNonAlign(context);
+        }
 
-    if (optimizedExpression != null
-        && optimizedExpression.getType() != ExpressionType.GLOBAL_TIME) {
-      return rawDataQueryExecutor.executeWithValueFilter(context);
-
-    }
-    return rawDataQueryExecutor.executeWithoutValueFilter(context);
-  }
-
-  protected RawDataQueryExecutor getRawDataQueryExecutor(RawDataQueryPlan queryPlan) {
-    return new RawDataQueryExecutor(queryPlan);
-  }
-
-  @Override
-  public QueryDataSet aggregate(AggregationPlan aggregationPlan, QueryContext context)
-      throws QueryFilterOptimizationException, StorageEngineException, QueryProcessException,
-      IOException {
-
-    if (logger.isDebugEnabled()) {
-      logger.debug("paths:" + aggregationPlan.getPaths()
-          + " level:" + aggregationPlan.getLevel()
-          + " duplicatePaths:" + aggregationPlan.getDeduplicatedPaths()
-          + " deduplicatePaths:" + aggregationPlan.getDeduplicatedAggregations());
+        if (optimizedExpression != null
+                && optimizedExpression.getType() != ExpressionType.GLOBAL_TIME) {
+            return rawDataQueryExecutor.executeWithValueFilter(context);
+        }
+        return rawDataQueryExecutor.executeWithoutValueFilter(context);
     }
 
-    IExpression expression = aggregationPlan.getExpression();
-    List<PartialPath> deduplicatedPaths = aggregationPlan.getDeduplicatedPaths();
-
-    // optimize expression to an executable one
-    IExpression optimizedExpression =
-        expression == null ? null :
-            ExpressionOptimizer.getInstance().optimize(expression, new ArrayList<>(deduplicatedPaths));
-
-    aggregationPlan.setExpression(optimizedExpression);
-
-    AggregationExecutor engineExecutor = getAggregationExecutor(aggregationPlan);
-
-    QueryDataSet dataSet = null;
-
-    if (optimizedExpression != null
-        && optimizedExpression.getType() != ExpressionType.GLOBAL_TIME) {
-      dataSet =  engineExecutor.executeWithValueFilter(context, aggregationPlan);
-    } else {
-      dataSet = engineExecutor.executeWithoutValueFilter(context, aggregationPlan);
+    protected RawDataQueryExecutor getRawDataQueryExecutor(RawDataQueryPlan queryPlan) {
+        return new RawDataQueryExecutor(queryPlan);
     }
 
-    return dataSet;
-  }
+    @Override
+    public QueryDataSet aggregate(AggregationPlan aggregationPlan, QueryContext context)
+            throws QueryFilterOptimizationException, StorageEngineException, QueryProcessException,
+                    IOException {
 
-  protected AggregationExecutor getAggregationExecutor(AggregationPlan aggregationPlan) {
-    return new AggregationExecutor(aggregationPlan);
-  }
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "paths:"
+                            + aggregationPlan.getPaths()
+                            + " level:"
+                            + aggregationPlan.getLevel()
+                            + " duplicatePaths:"
+                            + aggregationPlan.getDeduplicatedPaths()
+                            + " deduplicatePaths:"
+                            + aggregationPlan.getDeduplicatedAggregations());
+        }
 
-  @Override
-  public QueryDataSet groupBy(GroupByTimePlan groupByTimePlan, QueryContext context)
-      throws QueryFilterOptimizationException, StorageEngineException, QueryProcessException, IOException {
+        IExpression expression = aggregationPlan.getExpression();
+        List<PartialPath> deduplicatedPaths = aggregationPlan.getDeduplicatedPaths();
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("paths:" + groupByTimePlan.getPaths() + " level:" + groupByTimePlan.getLevel());
+        // optimize expression to an executable one
+        IExpression optimizedExpression =
+                expression == null
+                        ? null
+                        : ExpressionOptimizer.getInstance()
+                                .optimize(expression, new ArrayList<>(deduplicatedPaths));
+
+        aggregationPlan.setExpression(optimizedExpression);
+
+        AggregationExecutor engineExecutor = getAggregationExecutor(aggregationPlan);
+
+        QueryDataSet dataSet = null;
+
+        if (optimizedExpression != null
+                && optimizedExpression.getType() != ExpressionType.GLOBAL_TIME) {
+            dataSet = engineExecutor.executeWithValueFilter(context, aggregationPlan);
+        } else {
+            dataSet = engineExecutor.executeWithoutValueFilter(context, aggregationPlan);
+        }
+
+        return dataSet;
     }
 
-    GroupByEngineDataSet dataSet = null;
-    long unit = groupByTimePlan.getInterval();
-    long slidingStep = groupByTimePlan.getSlidingStep();
-    long startTime = groupByTimePlan.getStartTime();
-    long endTime = groupByTimePlan.getEndTime();
-
-    IExpression expression = groupByTimePlan.getExpression();
-    List<PartialPath> selectedSeries = groupByTimePlan.getDeduplicatedPaths();
-
-    GlobalTimeExpression timeExpression = new GlobalTimeExpression(
-        new GroupByFilter(unit, slidingStep, startTime, endTime));
-
-    if (expression == null) {
-      expression = timeExpression;
-    } else {
-      expression = BinaryExpression.and(expression, timeExpression);
+    protected AggregationExecutor getAggregationExecutor(AggregationPlan aggregationPlan) {
+        return new AggregationExecutor(aggregationPlan);
     }
 
-    // optimize expression to an executable one
-    IExpression optimizedExpression = ExpressionOptimizer.getInstance()
-        .optimize(expression, new ArrayList<>(selectedSeries));
-    groupByTimePlan.setExpression(optimizedExpression);
+    @Override
+    public QueryDataSet groupBy(GroupByTimePlan groupByTimePlan, QueryContext context)
+            throws QueryFilterOptimizationException, StorageEngineException, QueryProcessException,
+                    IOException {
 
-    if (optimizedExpression.getType() == ExpressionType.GLOBAL_TIME) {
-      dataSet = getGroupByWithoutValueFilterDataSet(context, groupByTimePlan);
-    } else {
-      dataSet = getGroupByWithValueFilterDataSet(context, groupByTimePlan);
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "paths:" + groupByTimePlan.getPaths() + " level:" + groupByTimePlan.getLevel());
+        }
+
+        GroupByEngineDataSet dataSet = null;
+        long unit = groupByTimePlan.getInterval();
+        long slidingStep = groupByTimePlan.getSlidingStep();
+        long startTime = groupByTimePlan.getStartTime();
+        long endTime = groupByTimePlan.getEndTime();
+
+        IExpression expression = groupByTimePlan.getExpression();
+        List<PartialPath> selectedSeries = groupByTimePlan.getDeduplicatedPaths();
+
+        GlobalTimeExpression timeExpression =
+                new GlobalTimeExpression(new GroupByFilter(unit, slidingStep, startTime, endTime));
+
+        if (expression == null) {
+            expression = timeExpression;
+        } else {
+            expression = BinaryExpression.and(expression, timeExpression);
+        }
+
+        // optimize expression to an executable one
+        IExpression optimizedExpression =
+                ExpressionOptimizer.getInstance()
+                        .optimize(expression, new ArrayList<>(selectedSeries));
+        groupByTimePlan.setExpression(optimizedExpression);
+
+        if (optimizedExpression.getType() == ExpressionType.GLOBAL_TIME) {
+            dataSet = getGroupByWithoutValueFilterDataSet(context, groupByTimePlan);
+        } else {
+            dataSet = getGroupByWithValueFilterDataSet(context, groupByTimePlan);
+        }
+
+        // we support group by level for count operation
+        // details at https://issues.apache.org/jira/browse/IOTDB-622
+        // and UserGuide/Operation Manual/DML
+        if (groupByTimePlan.getLevel() >= 0) {
+            return groupByLevelWithoutTimeIntervalDataSet(context, groupByTimePlan, dataSet);
+        }
+        return dataSet;
     }
 
-    // we support group by level for count operation
-    // details at https://issues.apache.org/jira/browse/IOTDB-622
-    // and UserGuide/Operation Manual/DML
-    if (groupByTimePlan.getLevel() >= 0) {
-      return groupByLevelWithoutTimeIntervalDataSet(context, groupByTimePlan, dataSet);
+    protected GroupByWithoutValueFilterDataSet getGroupByWithoutValueFilterDataSet(
+            QueryContext context, GroupByTimePlan plan)
+            throws StorageEngineException, QueryProcessException {
+        return new GroupByWithoutValueFilterDataSet(context, plan);
     }
-    return dataSet;
-  }
 
-  protected GroupByWithoutValueFilterDataSet getGroupByWithoutValueFilterDataSet(QueryContext context, GroupByTimePlan plan)
-      throws StorageEngineException, QueryProcessException {
-    return new GroupByWithoutValueFilterDataSet(context, plan);
-  }
+    protected GroupByWithValueFilterDataSet getGroupByWithValueFilterDataSet(
+            QueryContext context, GroupByTimePlan plan)
+            throws StorageEngineException, QueryProcessException {
+        return new GroupByWithValueFilterDataSet(context, plan);
+    }
 
-  protected GroupByWithValueFilterDataSet getGroupByWithValueFilterDataSet(QueryContext context, GroupByTimePlan plan)
-      throws StorageEngineException, QueryProcessException {
-    return new GroupByWithValueFilterDataSet(context, plan);
-  }
+    protected GroupByTimeDataSet groupByLevelWithoutTimeIntervalDataSet(
+            QueryContext context, GroupByTimePlan plan, GroupByEngineDataSet dataSet)
+            throws QueryProcessException, IOException {
+        return new GroupByTimeDataSet(context, plan, dataSet);
+    }
 
-  protected GroupByTimeDataSet groupByLevelWithoutTimeIntervalDataSet(QueryContext context, GroupByTimePlan plan,
-      GroupByEngineDataSet dataSet)
-      throws QueryProcessException, IOException {
-    return new GroupByTimeDataSet(context, plan, dataSet);
-  }
+    @Override
+    public QueryDataSet fill(FillQueryPlan fillQueryPlan, QueryContext context)
+            throws StorageEngineException, QueryProcessException, IOException {
+        List<PartialPath> fillPaths = fillQueryPlan.getDeduplicatedPaths();
+        List<TSDataType> dataTypes = fillQueryPlan.getDeduplicatedDataTypes();
+        long queryTime = fillQueryPlan.getQueryTime();
+        Map<TSDataType, IFill> fillType = fillQueryPlan.getFillType();
 
-  @Override
-  public QueryDataSet fill(FillQueryPlan fillQueryPlan, QueryContext context)
-      throws StorageEngineException, QueryProcessException, IOException {
-    List<PartialPath> fillPaths = fillQueryPlan.getDeduplicatedPaths();
-    List<TSDataType> dataTypes = fillQueryPlan.getDeduplicatedDataTypes();
-    long queryTime = fillQueryPlan.getQueryTime();
-    Map<TSDataType, IFill> fillType = fillQueryPlan.getFillType();
+        FillQueryExecutor fillQueryExecutor =
+                getFillExecutor(fillPaths, dataTypes, queryTime, fillType);
+        return fillQueryExecutor.execute(context, fillQueryPlan);
+    }
 
-    FillQueryExecutor fillQueryExecutor = getFillExecutor(fillPaths, dataTypes, queryTime,
-        fillType);
-    return fillQueryExecutor.execute(context, fillQueryPlan);
-  }
+    protected FillQueryExecutor getFillExecutor(
+            List<PartialPath> fillPaths,
+            List<TSDataType> dataTypes,
+            long queryTime,
+            Map<TSDataType, IFill> fillType) {
+        return new FillQueryExecutor(fillPaths, dataTypes, queryTime, fillType);
+    }
 
-  protected FillQueryExecutor getFillExecutor(
-      List<PartialPath> fillPaths,
-      List<TSDataType> dataTypes, long queryTime,
-      Map<TSDataType, IFill> fillType) {
-    return new FillQueryExecutor(fillPaths, dataTypes, queryTime, fillType);
-  }
+    @Override
+    public QueryDataSet groupByFill(GroupByTimeFillPlan groupByFillPlan, QueryContext context)
+            throws QueryFilterOptimizationException, StorageEngineException, QueryProcessException,
+                    IOException {
+        GroupByEngineDataSet groupByEngineDataSet =
+                (GroupByEngineDataSet) groupBy(groupByFillPlan, context);
+        return new GroupByFillDataSet(
+                groupByFillPlan.getDeduplicatedPaths(),
+                groupByFillPlan.getDeduplicatedDataTypes(),
+                groupByEngineDataSet,
+                groupByFillPlan.getFillType(),
+                context,
+                groupByFillPlan);
+    }
 
-  @Override
-  public QueryDataSet groupByFill(GroupByTimeFillPlan groupByFillPlan, QueryContext context)
-      throws QueryFilterOptimizationException, StorageEngineException, QueryProcessException, IOException {
-    GroupByEngineDataSet groupByEngineDataSet = (GroupByEngineDataSet) groupBy(groupByFillPlan, context);
-    return new GroupByFillDataSet(groupByFillPlan.getDeduplicatedPaths(), groupByFillPlan.getDeduplicatedDataTypes(),
-        groupByEngineDataSet, groupByFillPlan.getFillType(), context, groupByFillPlan);
-  }
+    @Override
+    public QueryDataSet lastQuery(LastQueryPlan lastQueryPlan, QueryContext context)
+            throws StorageEngineException, QueryProcessException, IOException {
+        LastQueryExecutor lastQueryExecutor = getLastQueryExecutor(lastQueryPlan);
+        return lastQueryExecutor.execute(context, lastQueryPlan);
+    }
 
-  @Override
-  public QueryDataSet lastQuery(LastQueryPlan lastQueryPlan, QueryContext context)
-      throws StorageEngineException, QueryProcessException, IOException {
-    LastQueryExecutor lastQueryExecutor = getLastQueryExecutor(lastQueryPlan);
-    return lastQueryExecutor.execute(context, lastQueryPlan);
-  }
-
-  protected LastQueryExecutor getLastQueryExecutor(LastQueryPlan lastQueryPlan) {
-    return new LastQueryExecutor(lastQueryPlan);
-  }
-
+    protected LastQueryExecutor getLastQueryExecutor(LastQueryPlan lastQueryPlan) {
+        return new LastQueryExecutor(lastQueryPlan);
+    }
 }

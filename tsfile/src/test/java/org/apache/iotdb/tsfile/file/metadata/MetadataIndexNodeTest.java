@@ -27,22 +27,22 @@ import org.junit.Test;
 
 public class MetadataIndexNodeTest {
 
-  @Test
-  public void testBinarySearchInChildren() {
-    List<MetadataIndexEntry> list = new ArrayList<>();
-    list.add(new MetadataIndexEntry("s0", -1L));
-    list.add(new MetadataIndexEntry("s5", -1L));
-    list.add(new MetadataIndexEntry("s10", -1L));
-    list.add(new MetadataIndexEntry("s15", -1L));
-    list.add(new MetadataIndexEntry("s20", -1L));
+    @Test
+    public void testBinarySearchInChildren() {
+        List<MetadataIndexEntry> list = new ArrayList<>();
+        list.add(new MetadataIndexEntry("s0", -1L));
+        list.add(new MetadataIndexEntry("s5", -1L));
+        list.add(new MetadataIndexEntry("s10", -1L));
+        list.add(new MetadataIndexEntry("s15", -1L));
+        list.add(new MetadataIndexEntry("s20", -1L));
 
-    MetadataIndexNode metadataIndexNode = new MetadataIndexNode(list, -1L,
-        MetadataIndexNodeType.LEAF_MEASUREMENT);
-    Assert.assertEquals(0, metadataIndexNode.binarySearchInChildren("s0", false));
-    Assert.assertEquals(2, metadataIndexNode.binarySearchInChildren("s10", false));
-    Assert.assertEquals(2, metadataIndexNode.binarySearchInChildren("s13", false));
-    Assert.assertEquals(4, metadataIndexNode.binarySearchInChildren("s23", false));
-    Assert.assertEquals(-1, metadataIndexNode.binarySearchInChildren("s13", true));
-    Assert.assertEquals(-1, metadataIndexNode.binarySearchInChildren("s23", true));
-  }
+        MetadataIndexNode metadataIndexNode =
+                new MetadataIndexNode(list, -1L, MetadataIndexNodeType.LEAF_MEASUREMENT);
+        Assert.assertEquals(0, metadataIndexNode.binarySearchInChildren("s0", false));
+        Assert.assertEquals(2, metadataIndexNode.binarySearchInChildren("s10", false));
+        Assert.assertEquals(2, metadataIndexNode.binarySearchInChildren("s13", false));
+        Assert.assertEquals(4, metadataIndexNode.binarySearchInChildren("s23", false));
+        Assert.assertEquals(-1, metadataIndexNode.binarySearchInChildren("s13", true));
+        Assert.assertEquals(-1, metadataIndexNode.binarySearchInChildren("s23", true));
+    }
 }

@@ -29,18 +29,18 @@ import org.apache.iotdb.cluster.server.member.DataGroupMember;
 
 public class TestDataGroupMember extends DataGroupMember {
 
-  public TestDataGroupMember() {
-    super();
-    setQueryManager(new ClusterQueryManager());
-    this.slotManager = new SlotManager(ClusterConstant.SLOT_NUM, null);
-    this.allNodes = Collections.singletonList(TestUtils.getNode(0));
-  }
+    public TestDataGroupMember() {
+        super();
+        setQueryManager(new ClusterQueryManager());
+        this.slotManager = new SlotManager(ClusterConstant.SLOT_NUM, null);
+        this.allNodes = Collections.singletonList(TestUtils.getNode(0));
+    }
 
-  public TestDataGroupMember(Node thisNode, List<Node> allNodes) {
-    super();
-    this.thisNode = thisNode;
-    this.allNodes = allNodes;
-    this.slotManager = new SlotManager(ClusterConstant.SLOT_NUM, null);
-    setQueryManager(new ClusterQueryManager());
-  }
+    public TestDataGroupMember(Node thisNode, List<Node> allNodes) {
+        super();
+        this.thisNode = thisNode;
+        this.allNodes = allNodes;
+        this.slotManager = new SlotManager(ClusterConstant.SLOT_NUM, null);
+        setQueryManager(new ClusterQueryManager());
+    }
 }

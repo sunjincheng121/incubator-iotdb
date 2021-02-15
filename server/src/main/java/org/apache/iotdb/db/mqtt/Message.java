@@ -20,9 +20,7 @@ package org.apache.iotdb.db.mqtt;
 
 import java.util.List;
 
-/**
- * Message describes the information sometime sent from the devices.
- */
+/** Message describes the information sometime sent from the devices. */
 public class Message {
     private String device;
     private Long timestamp;
@@ -63,11 +61,16 @@ public class Message {
 
     @Override
     public String toString() {
-        return "Message{" +
-                "device='" + device + '\'' +
-                ", timestamp=" + timestamp +
-                ", measurements=" + measurements +
-                ", values=" + values +
-                '}';
+        return "Message{"
+                + "device='"
+                + device
+                + '\''
+                + ", timestamp="
+                + timestamp
+                + ", measurements="
+                + measurements
+                + ", values="
+                + values
+                + '}';
     }
 }

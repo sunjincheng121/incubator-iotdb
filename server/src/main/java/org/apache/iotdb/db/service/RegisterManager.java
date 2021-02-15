@@ -28,55 +28,49 @@ import org.slf4j.LoggerFactory;
 
 public class RegisterManager {
 
-  private static final Logger logger = LoggerFactory.getLogger(RegisterManager.class);
-  private List<IService> iServices;
+    private static final Logger logger = LoggerFactory.getLogger(RegisterManager.class);
+    private List<IService> iServices;
 
-  public RegisterManager() {
-    iServices = new ArrayList<>();
-  }
+    public RegisterManager() {
+        iServices = new ArrayList<>();
+    }
 
-  /**
-   * register service.
-   */
-  public void register(IService service) throws StartupException {
-    for (IService s : iServices) {
-      if (s.getID() == service.getID()) {
-        logger.info("{} has already been registered. skip", service.getID().getName());
-        return;
-      }
+    /** register service. */
+    public void register(IService service) throws StartupException {
+        for (IService s : iServices) {
+            if (s.getID() == service.getID()) {
+                logger.info("{} has already been registered. skip", service.getID().getName());
+                return;
+            }
+        }
+        iServices.add(service);
+        service.start();
     }
-    iServices.add(service);
-    service.start();
-  }
 
-  /**
-   * stop all service and clear iService list.
-   */
-  public void deregisterAll() {
-    //we stop JMXServer at last
-    Collections.reverse(iServices);
-    for (IService service : iServices) {
-      try {
-        service.waitAndStop(10000);
-        logger.info("{} deregistered", service.getID());
-      } catch (Exception e) {
-        logger.error("Failed to stop {} because:", service.getID().getName(), e);
-      }
+    /** stop all service and clear iService list. */
+    public void deregisterAll() {
+        // we stop JMXServer at last
+        Collections.reverse(iServices);
+        for (IService service : iServices) {
+            try {
+                service.waitAndStop(10000);
+                logger.info("{} deregistered", service.getID());
+            } catch (Exception e) {
+                logger.error("Failed to stop {} because:", service.getID().getName(), e);
+            }
+        }
+        iServices.clear();
+        logger.info("deregister all service.");
     }
-    iServices.clear();
-    logger.info("deregister all service.");
-  }
-  
-  /**
-   * stop all service and clear iService list.
-   */
-  public void shutdownAll() throws ShutdownException {
-    //we stop JMXServer at last
-    Collections.reverse(iServices);
-    for (IService service : iServices) {
-      service.shutdown(10000);
+
+    /** stop all service and clear iService list. */
+    public void shutdownAll() throws ShutdownException {
+        // we stop JMXServer at last
+        Collections.reverse(iServices);
+        for (IService service : iServices) {
+            service.shutdown(10000);
+        }
+        iServices.clear();
+        logger.info("deregister all service.");
     }
-    iServices.clear();
-    logger.info("deregister all service.");
-  }
 }

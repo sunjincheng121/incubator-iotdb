@@ -28,118 +28,125 @@ import org.apache.thrift.transport.TTransportFactory;
 
 public class TElasticFramedTransport extends TTransport {
 
-  /**
-   * It is used to prevent the size of the parsing package from being too large and allocating the
-   * buffer will cause oom. Therefore, the maximum length of the requested memory is limited when
-   * reading. The default value is 512MB
-   */
-  private static final int PROTECT_MAX_LENGTH = 536870912;
+    /**
+     * It is used to prevent the size of the parsing package from being too large and allocating the
+     * buffer will cause oom. Therefore, the maximum length of the requested memory is limited when
+     * reading. The default value is 512MB
+     */
+    private static final int PROTECT_MAX_LENGTH = 536870912;
 
-  public static class Factory extends TTransportFactory {
+    public static class Factory extends TTransportFactory {
 
-    protected final int initialCapacity;
+        protected final int initialCapacity;
+        protected final int maxLength;
+
+        public Factory() {
+            this(DEFAULT_BUF_CAPACITY, DEFAULT_MAX_LENGTH);
+        }
+
+        public Factory(int initialCapacity) {
+            this(initialCapacity, DEFAULT_MAX_LENGTH);
+        }
+
+        public Factory(int initialCapacity, int maxLength) {
+            this.initialCapacity = initialCapacity;
+            this.maxLength = maxLength;
+        }
+
+        @Override
+        public TTransport getTransport(TTransport trans) {
+            return new TElasticFramedTransport(trans, initialCapacity, maxLength);
+        }
+    }
+
+    public TElasticFramedTransport(TTransport underlying) {
+        this(underlying, DEFAULT_BUF_CAPACITY, DEFAULT_MAX_LENGTH);
+    }
+
+    public TElasticFramedTransport(
+            TTransport underlying, int initialBufferCapacity, int maxLength) {
+        this.underlying = underlying;
+        this.maxLength = maxLength;
+        readBuffer = new AutoScalingBufferReadTransport(initialBufferCapacity);
+        writeBuffer = new AutoScalingBufferWriteTransport(initialBufferCapacity);
+    }
+
     protected final int maxLength;
+    protected final TTransport underlying;
+    protected AutoScalingBufferReadTransport readBuffer;
+    protected AutoScalingBufferWriteTransport writeBuffer;
+    protected final byte[] i32buf = new byte[4];
 
-    public Factory() {
-      this(DEFAULT_BUF_CAPACITY, DEFAULT_MAX_LENGTH);
-    }
-
-    public Factory(int initialCapacity) {
-      this(initialCapacity, DEFAULT_MAX_LENGTH);
-    }
-
-    public Factory(int initialCapacity, int maxLength) {
-      this.initialCapacity = initialCapacity;
-      this.maxLength = maxLength;
+    @Override
+    public boolean isOpen() {
+        return underlying.isOpen();
     }
 
     @Override
-    public TTransport getTransport(TTransport trans) {
-      return new TElasticFramedTransport(trans, initialCapacity, maxLength);
-    }
-  }
-
-  public TElasticFramedTransport(TTransport underlying) {
-    this(underlying, DEFAULT_BUF_CAPACITY, DEFAULT_MAX_LENGTH);
-  }
-
-  public TElasticFramedTransport(TTransport underlying, int initialBufferCapacity, int maxLength) {
-    this.underlying = underlying;
-    this.maxLength = maxLength;
-    readBuffer = new AutoScalingBufferReadTransport(initialBufferCapacity);
-    writeBuffer = new AutoScalingBufferWriteTransport(initialBufferCapacity);
-  }
-
-  protected final int maxLength;
-  protected final TTransport underlying;
-  protected AutoScalingBufferReadTransport readBuffer;
-  protected AutoScalingBufferWriteTransport writeBuffer;
-  protected final byte[] i32buf = new byte[4];
-
-  @Override
-  public boolean isOpen() {
-    return underlying.isOpen();
-  }
-
-  @Override
-  public void open() throws TTransportException {
-    underlying.open();
-  }
-
-  @Override
-  public void close() {
-    underlying.close();
-  }
-
-  @Override
-  public int read(byte[] buf, int off, int len) throws TTransportException {
-    int got = readBuffer.read(buf, off, len);
-    if (got > 0) {
-      return got;
+    public void open() throws TTransportException {
+        underlying.open();
     }
 
-    // Read another frame of data
-    readFrame();
-    return readBuffer.read(buf, off, len);
-  }
-
-  protected void readFrame() throws TTransportException {
-    underlying.readAll(i32buf, 0, 4);
-    int size = TFramedTransport.decodeFrameSize(i32buf);
-
-    if (size < 0) {
-      close();
-      throw new TTransportException(TTransportException.CORRUPTED_DATA,
-          "Read a negative frame size (" + size + ")!");
+    @Override
+    public void close() {
+        underlying.close();
     }
 
-    if (size > PROTECT_MAX_LENGTH) {
-      close();
-      throw new TTransportException(TTransportException.CORRUPTED_DATA,
-          "Frame size (" + size + ") larger than protect max length (" + PROTECT_MAX_LENGTH + ")!");
+    @Override
+    public int read(byte[] buf, int off, int len) throws TTransportException {
+        int got = readBuffer.read(buf, off, len);
+        if (got > 0) {
+            return got;
+        }
+
+        // Read another frame of data
+        readFrame();
+        return readBuffer.read(buf, off, len);
     }
 
-    if (size < maxLength) {
-      readBuffer.resizeIfNecessary(maxLength);
-    }
-    readBuffer.fill(underlying, size);
-  }
+    protected void readFrame() throws TTransportException {
+        underlying.readAll(i32buf, 0, 4);
+        int size = TFramedTransport.decodeFrameSize(i32buf);
 
-  @Override
-  public void flush() throws TTransportException {
-    int length = writeBuffer.getPos();
-    TFramedTransport.encodeFrameSize(length, i32buf);
-    underlying.write(i32buf, 0, 4);
-    underlying.write(writeBuffer.getBuf().array(), 0, length);
-    writeBuffer.reset();
-    if (length > maxLength) {
-      writeBuffer.resizeIfNecessary(maxLength);
-    }
-    underlying.flush();
-  }
+        if (size < 0) {
+            close();
+            throw new TTransportException(
+                    TTransportException.CORRUPTED_DATA,
+                    "Read a negative frame size (" + size + ")!");
+        }
 
-  @Override
-  public void write(byte[] buf, int off, int len) {
-    writeBuffer.write(buf, off, len);
-  }
+        if (size > PROTECT_MAX_LENGTH) {
+            close();
+            throw new TTransportException(
+                    TTransportException.CORRUPTED_DATA,
+                    "Frame size ("
+                            + size
+                            + ") larger than protect max length ("
+                            + PROTECT_MAX_LENGTH
+                            + ")!");
+        }
+
+        if (size < maxLength) {
+            readBuffer.resizeIfNecessary(maxLength);
+        }
+        readBuffer.fill(underlying, size);
+    }
+
+    @Override
+    public void flush() throws TTransportException {
+        int length = writeBuffer.getPos();
+        TFramedTransport.encodeFrameSize(length, i32buf);
+        underlying.write(i32buf, 0, 4);
+        underlying.write(writeBuffer.getBuf().array(), 0, length);
+        writeBuffer.reset();
+        if (length > maxLength) {
+            writeBuffer.resizeIfNecessary(maxLength);
+        }
+        underlying.flush();
+    }
+
+    @Override
+    public void write(byte[] buf, int off, int len) {
+        writeBuffer.write(buf, off, len);
+    }
 }

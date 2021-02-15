@@ -34,131 +34,160 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 
 public class SeriesRawDataBatchReader implements ManagedSeriesReader {
 
-  private final SeriesReader seriesReader;
+    private final SeriesReader seriesReader;
 
-  private boolean hasRemaining;
-  private boolean managedByQueryManager;
+    private boolean hasRemaining;
+    private boolean managedByQueryManager;
 
-  private BatchData batchData;
-  private boolean hasCachedBatchData = false;
+    private BatchData batchData;
+    private boolean hasCachedBatchData = false;
 
-
-  public SeriesRawDataBatchReader(SeriesReader seriesReader) {
-    this.seriesReader = seriesReader;
-  }
-
-  public SeriesRawDataBatchReader(PartialPath seriesPath, Set<String> allSensors, TSDataType dataType,
-      QueryContext context, QueryDataSource dataSource, Filter timeFilter, Filter valueFilter,
-      TsFileFilter fileFilter, boolean ascending) {
-    this.seriesReader = new SeriesReader(seriesPath, allSensors, dataType, context, dataSource,
-        timeFilter, valueFilter, fileFilter, ascending);
-  }
-
-  @TestOnly
-  @SuppressWarnings("squid:S107")
-  public SeriesRawDataBatchReader(PartialPath seriesPath, TSDataType dataType, QueryContext context,
-      List<TsFileResource> seqFileResource, List<TsFileResource> unseqFileResource,
-      Filter timeFilter, Filter valueFilter, boolean ascending) {
-    Set<String> allSensors = new HashSet<>();
-    allSensors.add(seriesPath.getMeasurement());
-    this.seriesReader = new SeriesReader(seriesPath, allSensors, dataType, context,
-        seqFileResource, unseqFileResource, timeFilter, valueFilter, ascending);
-  }
-
-  /**
-   * This method overrides the AbstractDataReader.hasNextOverlappedPage for pause reads, to achieve
-   * a continuous read
-   */
-  @Override
-  public boolean hasNextBatch() throws IOException {
-
-    if (hasCachedBatchData) {
-      return true;
+    public SeriesRawDataBatchReader(SeriesReader seriesReader) {
+        this.seriesReader = seriesReader;
     }
 
-    /*
-     * consume page data firstly
+    public SeriesRawDataBatchReader(
+            PartialPath seriesPath,
+            Set<String> allSensors,
+            TSDataType dataType,
+            QueryContext context,
+            QueryDataSource dataSource,
+            Filter timeFilter,
+            Filter valueFilter,
+            TsFileFilter fileFilter,
+            boolean ascending) {
+        this.seriesReader =
+                new SeriesReader(
+                        seriesPath,
+                        allSensors,
+                        dataType,
+                        context,
+                        dataSource,
+                        timeFilter,
+                        valueFilter,
+                        fileFilter,
+                        ascending);
+    }
+
+    @TestOnly
+    @SuppressWarnings("squid:S107")
+    public SeriesRawDataBatchReader(
+            PartialPath seriesPath,
+            TSDataType dataType,
+            QueryContext context,
+            List<TsFileResource> seqFileResource,
+            List<TsFileResource> unseqFileResource,
+            Filter timeFilter,
+            Filter valueFilter,
+            boolean ascending) {
+        Set<String> allSensors = new HashSet<>();
+        allSensors.add(seriesPath.getMeasurement());
+        this.seriesReader =
+                new SeriesReader(
+                        seriesPath,
+                        allSensors,
+                        dataType,
+                        context,
+                        seqFileResource,
+                        unseqFileResource,
+                        timeFilter,
+                        valueFilter,
+                        ascending);
+    }
+
+    /**
+     * This method overrides the AbstractDataReader.hasNextOverlappedPage for pause reads, to
+     * achieve a continuous read
      */
-    if (readPageData()) {
-      hasCachedBatchData = true;
-      return true;
+    @Override
+    public boolean hasNextBatch() throws IOException {
+
+        if (hasCachedBatchData) {
+            return true;
+        }
+
+        /*
+         * consume page data firstly
+         */
+        if (readPageData()) {
+            hasCachedBatchData = true;
+            return true;
+        }
+
+        /*
+         * consume chunk data secondly
+         */
+        if (readChunkData()) {
+            hasCachedBatchData = true;
+            return true;
+        }
+
+        /*
+         * consume next file finally
+         */
+        while (seriesReader.hasNextFile()) {
+            if (readChunkData()) {
+                hasCachedBatchData = true;
+                return true;
+            }
+        }
+        return hasCachedBatchData;
     }
 
-    /*
-     * consume chunk data secondly
-     */
-    if (readChunkData()) {
-      hasCachedBatchData = true;
-      return true;
+    @Override
+    public BatchData nextBatch() throws IOException {
+        if (hasCachedBatchData || hasNextBatch()) {
+            hasCachedBatchData = false;
+            return batchData;
+        }
+        throw new IOException("no next batch");
     }
 
-    /*
-     * consume next file finally
-     */
-    while (seriesReader.hasNextFile()) {
-      if (readChunkData()) {
-        hasCachedBatchData = true;
-        return true;
-      }
+    @Override
+    public void close() throws IOException {
+        // no resources need to close
     }
-    return hasCachedBatchData;
-  }
 
-
-  @Override
-  public BatchData nextBatch() throws IOException {
-    if (hasCachedBatchData || hasNextBatch()) {
-      hasCachedBatchData = false;
-      return batchData;
+    @Override
+    public boolean isManagedByQueryManager() {
+        return managedByQueryManager;
     }
-    throw new IOException("no next batch");
-  }
 
-  @Override
-  public void close() throws IOException {
-    //no resources need to close
-  }
-
-  @Override
-  public boolean isManagedByQueryManager() {
-    return managedByQueryManager;
-  }
-
-  @Override
-  public void setManagedByQueryManager(boolean managedByQueryManager) {
-    this.managedByQueryManager = managedByQueryManager;
-  }
-
-  @Override
-  public boolean hasRemaining() {
-    return hasRemaining;
-  }
-
-  @Override
-  public void setHasRemaining(boolean hasRemaining) {
-    this.hasRemaining = hasRemaining;
-  }
-
-  private boolean readChunkData() throws IOException {
-    while (seriesReader.hasNextChunk()) {
-      if (readPageData()) {
-        return true;
-      }
+    @Override
+    public void setManagedByQueryManager(boolean managedByQueryManager) {
+        this.managedByQueryManager = managedByQueryManager;
     }
-    return false;
-  }
 
-  private boolean readPageData() throws IOException {
-    while (seriesReader.hasNextPage()) {
-      batchData = seriesReader.nextPage();
-      if (!isEmpty(batchData)) {
-        return true;
-      }
+    @Override
+    public boolean hasRemaining() {
+        return hasRemaining;
     }
-    return false;
-  }
 
-  private boolean isEmpty(BatchData batchData) {
-    return batchData == null || !batchData.hasCurrent();
-  }
+    @Override
+    public void setHasRemaining(boolean hasRemaining) {
+        this.hasRemaining = hasRemaining;
+    }
+
+    private boolean readChunkData() throws IOException {
+        while (seriesReader.hasNextChunk()) {
+            if (readPageData()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean readPageData() throws IOException {
+        while (seriesReader.hasNextPage()) {
+            batchData = seriesReader.nextPage();
+            if (!isEmpty(batchData)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isEmpty(BatchData batchData) {
+        return batchData == null || !batchData.hasCurrent();
+    }
 }

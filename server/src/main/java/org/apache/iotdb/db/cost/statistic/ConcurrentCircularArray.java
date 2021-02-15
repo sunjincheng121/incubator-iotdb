@@ -21,49 +21,48 @@ package org.apache.iotdb.db.cost.statistic;
 
 public class ConcurrentCircularArray {
 
-  long[] data;
-  int tail;
-  int head;
+    long[] data;
+    int tail;
+    int head;
 
-  public ConcurrentCircularArray(int size) {
-    this.data = new long[size];
-    tail = head = 0;
-  }
-
-  /**
-   * @param d the data
-   * @return true if successfully; false if there is no space.
-   */
-  public synchronized boolean put(long d) {
-    if ((tail + 1) % data.length == head) {
-      return false;
+    public ConcurrentCircularArray(int size) {
+        this.data = new long[size];
+        tail = head = 0;
     }
-    data[tail++] = d;
-    tail = tail % data.length;
-    return true;
-  }
 
-  public synchronized boolean hasData() {
-    return tail != head;
-  }
-
-  /**
-   * @return -1 if there is no data.(However, you should call hasData() frist to avoid returning -1)
-   */
-  public synchronized long take() {
-    if (tail != head) {
-      long result = data[head++];
-      head = head % data.length;
-      return result;
-    } else {
-      return -1;
+    /**
+     * @param d the data
+     * @return true if successfully; false if there is no space.
+     */
+    public synchronized boolean put(long d) {
+        if ((tail + 1) % data.length == head) {
+            return false;
+        }
+        data[tail++] = d;
+        tail = tail % data.length;
+        return true;
     }
-  }
 
-  /**
-   * drop all of the elements in array.
-   */
-  public synchronized void clear(){
-    tail = head = 0;
-  }
+    public synchronized boolean hasData() {
+        return tail != head;
+    }
+
+    /**
+     * @return -1 if there is no data.(However, you should call hasData() frist to avoid returning
+     *     -1)
+     */
+    public synchronized long take() {
+        if (tail != head) {
+            long result = data[head++];
+            head = head % data.length;
+            return result;
+        } else {
+            return -1;
+        }
+    }
+
+    /** drop all of the elements in array. */
+    public synchronized void clear() {
+        tail = head = 0;
+    }
 }

@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.exception.UnknownLogTypeException;
 import org.apache.iotdb.cluster.log.Log;
@@ -39,7 +37,6 @@ import org.apache.iotdb.cluster.log.logtypes.PhysicalPlanLog;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.metadata.PartialPath;
-import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import org.apache.iotdb.db.qp.physical.crud.InsertTabletPlan;
 import org.apache.iotdb.db.qp.physical.sys.CreateMultiTimeSeriesPlan;
 import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
@@ -50,130 +47,133 @@ import org.junit.Test;
 
 public class SerializeUtilTest {
 
-  @Test
-  public void testStrToNode() {
-    for (int i = 0; i < 10; i++) {
-      Node node = TestUtils.getNode(i);
-      String nodeStr = node.toString();
-      Node fromStr = ClusterUtils.stringToNode(nodeStr);
-      assertEquals(node, fromStr);
-    }
-  }
-
-  @Test
-  public void testInsertTabletPlanLog()
-      throws UnknownLogTypeException, IOException, IllegalPathException {
-    long[] times = new long[]{110L, 111L, 112L, 113L};
-    List<Integer> dataTypes = new ArrayList<>();
-    dataTypes.add(TSDataType.DOUBLE.ordinal());
-    dataTypes.add(TSDataType.FLOAT.ordinal());
-    dataTypes.add(TSDataType.INT64.ordinal());
-    dataTypes.add(TSDataType.INT32.ordinal());
-    dataTypes.add(TSDataType.BOOLEAN.ordinal());
-    dataTypes.add(TSDataType.TEXT.ordinal());
-
-    Object[] columns = new Object[6];
-    columns[0] = new double[4];
-    columns[1] = new float[4];
-    columns[2] = new long[4];
-    columns[3] = new int[4];
-    columns[4] = new boolean[4];
-    columns[5] = new Binary[4];
-
-    for (int r = 0; r < 4; r++) {
-      ((double[]) columns[0])[r] = 1.0;
-      ((float[]) columns[1])[r] = 2;
-      ((long[]) columns[2])[r] = 10000;
-      ((int[]) columns[3])[r] = 100;
-      ((boolean[]) columns[4])[r] = false;
-      ((Binary[]) columns[5])[r] = new Binary("hh" + r);
+    @Test
+    public void testStrToNode() {
+        for (int i = 0; i < 10; i++) {
+            Node node = TestUtils.getNode(i);
+            String nodeStr = node.toString();
+            Node fromStr = ClusterUtils.stringToNode(nodeStr);
+            assertEquals(node, fromStr);
+        }
     }
 
-    InsertTabletPlan tabletPlan = new InsertTabletPlan(new PartialPath("root.test"),
-        new String[]{"s1", "s2", "s3", "s4", "s5", "s6"}, dataTypes);
-    tabletPlan.setTimes(times);
-    tabletPlan.setColumns(columns);
-    tabletPlan.setRowCount(times.length);
-    tabletPlan.setStart(0);
-    tabletPlan.setEnd(4);
+    @Test
+    public void testInsertTabletPlanLog()
+            throws UnknownLogTypeException, IOException, IllegalPathException {
+        long[] times = new long[] {110L, 111L, 112L, 113L};
+        List<Integer> dataTypes = new ArrayList<>();
+        dataTypes.add(TSDataType.DOUBLE.ordinal());
+        dataTypes.add(TSDataType.FLOAT.ordinal());
+        dataTypes.add(TSDataType.INT64.ordinal());
+        dataTypes.add(TSDataType.INT32.ordinal());
+        dataTypes.add(TSDataType.BOOLEAN.ordinal());
+        dataTypes.add(TSDataType.TEXT.ordinal());
 
-    Log log = new PhysicalPlanLog(tabletPlan);
-    log.setCurrLogTerm(1);
-    log.setCurrLogIndex(2);
+        Object[] columns = new Object[6];
+        columns[0] = new double[4];
+        columns[1] = new float[4];
+        columns[2] = new long[4];
+        columns[3] = new int[4];
+        columns[4] = new boolean[4];
+        columns[5] = new Binary[4];
 
-    ByteBuffer serialized = log.serialize();
+        for (int r = 0; r < 4; r++) {
+            ((double[]) columns[0])[r] = 1.0;
+            ((float[]) columns[1])[r] = 2;
+            ((long[]) columns[2])[r] = 10000;
+            ((int[]) columns[3])[r] = 100;
+            ((boolean[]) columns[4])[r] = false;
+            ((Binary[]) columns[5])[r] = new Binary("hh" + r);
+        }
 
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-    tabletPlan.serialize(dataOutputStream);
-    ByteBuffer bufferA = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-    ByteBuffer bufferB = ByteBuffer.allocate(bufferA.limit());
-    tabletPlan.serialize(bufferB);
-    bufferB.flip();
-    assertEquals(bufferA, bufferB);
+        InsertTabletPlan tabletPlan =
+                new InsertTabletPlan(
+                        new PartialPath("root.test"),
+                        new String[] {"s1", "s2", "s3", "s4", "s5", "s6"},
+                        dataTypes);
+        tabletPlan.setTimes(times);
+        tabletPlan.setColumns(columns);
+        tabletPlan.setRowCount(times.length);
+        tabletPlan.setStart(0);
+        tabletPlan.setEnd(4);
 
-    Log parsed = LogParser.getINSTANCE().parse(serialized);
-    assertEquals(log, parsed);
-  }
+        Log log = new PhysicalPlanLog(tabletPlan);
+        log.setCurrLogTerm(1);
+        log.setCurrLogIndex(2);
 
-  @Test
-  public void testCreateMultiTimeSeriesPlanLog()
-      throws UnknownLogTypeException, IOException, IllegalPathException {
-    List<PartialPath> paths = new ArrayList<>();
-    paths.add(new PartialPath("root.sg1.d2.s1"));
-    paths.add(new PartialPath("root.sg1.d2.s2"));
-    List<TSDataType> tsDataTypes = new ArrayList<>();
-    tsDataTypes.add(TSDataType.INT64);
-    tsDataTypes.add(TSDataType.INT32);
-    List<TSEncoding> tsEncodings = new ArrayList<>();
-    tsEncodings.add(TSEncoding.RLE);
-    tsEncodings.add(TSEncoding.RLE);
-    List<CompressionType> tsCompressionTypes = new ArrayList<>();
-    tsCompressionTypes.add(CompressionType.SNAPPY);
-    tsCompressionTypes.add(CompressionType.SNAPPY);
+        ByteBuffer serialized = log.serialize();
 
-    List<Map<String, String>> tagsList = new ArrayList<>();
-    Map<String, String> tags = new HashMap<>();
-    tags.put("unit", "kg");
-    tagsList.add(tags);
-    tagsList.add(tags);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+        tabletPlan.serialize(dataOutputStream);
+        ByteBuffer bufferA = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
+        ByteBuffer bufferB = ByteBuffer.allocate(bufferA.limit());
+        tabletPlan.serialize(bufferB);
+        bufferB.flip();
+        assertEquals(bufferA, bufferB);
 
-    List<Map<String, String>> attributesList = new ArrayList<>();
-    Map<String, String> attributes = new HashMap<>();
-    attributes.put("minValue", "1");
-    attributes.put("maxValue", "100");
-    attributesList.add(attributes);
-    attributesList.add(attributes);
+        Log parsed = LogParser.getINSTANCE().parse(serialized);
+        assertEquals(log, parsed);
+    }
 
-    List<String> alias = new ArrayList<>();
-    alias.add("weight1");
-    alias.add("weight2");
+    @Test
+    public void testCreateMultiTimeSeriesPlanLog()
+            throws UnknownLogTypeException, IOException, IllegalPathException {
+        List<PartialPath> paths = new ArrayList<>();
+        paths.add(new PartialPath("root.sg1.d2.s1"));
+        paths.add(new PartialPath("root.sg1.d2.s2"));
+        List<TSDataType> tsDataTypes = new ArrayList<>();
+        tsDataTypes.add(TSDataType.INT64);
+        tsDataTypes.add(TSDataType.INT32);
+        List<TSEncoding> tsEncodings = new ArrayList<>();
+        tsEncodings.add(TSEncoding.RLE);
+        tsEncodings.add(TSEncoding.RLE);
+        List<CompressionType> tsCompressionTypes = new ArrayList<>();
+        tsCompressionTypes.add(CompressionType.SNAPPY);
+        tsCompressionTypes.add(CompressionType.SNAPPY);
 
-    CreateMultiTimeSeriesPlan plan = new CreateMultiTimeSeriesPlan();
-    plan.setPaths(paths);
-    plan.setDataTypes(tsDataTypes);
-    plan.setEncodings(tsEncodings);
-    plan.setCompressors(tsCompressionTypes);
-    plan.setTags(tagsList);
-    plan.setAttributes(attributesList);
-    plan.setAlias(alias);
+        List<Map<String, String>> tagsList = new ArrayList<>();
+        Map<String, String> tags = new HashMap<>();
+        tags.put("unit", "kg");
+        tagsList.add(tags);
+        tagsList.add(tags);
 
-    Log log = new PhysicalPlanLog(plan);
-    log.setCurrLogTerm(1);
-    log.setCurrLogIndex(2);
+        List<Map<String, String>> attributesList = new ArrayList<>();
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("minValue", "1");
+        attributes.put("maxValue", "100");
+        attributesList.add(attributes);
+        attributesList.add(attributes);
 
-    ByteBuffer serialized = log.serialize();
+        List<String> alias = new ArrayList<>();
+        alias.add("weight1");
+        alias.add("weight2");
 
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-    plan.serialize(dataOutputStream);
-    ByteBuffer bufferA = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-    ByteBuffer bufferB = ByteBuffer.allocate(bufferA.limit());
-    plan.serialize(bufferB);
-    bufferB.flip();
-    assertEquals(bufferA, bufferB);
+        CreateMultiTimeSeriesPlan plan = new CreateMultiTimeSeriesPlan();
+        plan.setPaths(paths);
+        plan.setDataTypes(tsDataTypes);
+        plan.setEncodings(tsEncodings);
+        plan.setCompressors(tsCompressionTypes);
+        plan.setTags(tagsList);
+        plan.setAttributes(attributesList);
+        plan.setAlias(alias);
 
-    Log parsed = LogParser.getINSTANCE().parse(serialized);
-    assertEquals(log, parsed);
-  }
+        Log log = new PhysicalPlanLog(plan);
+        log.setCurrLogTerm(1);
+        log.setCurrLogIndex(2);
+
+        ByteBuffer serialized = log.serialize();
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+        plan.serialize(dataOutputStream);
+        ByteBuffer bufferA = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
+        ByteBuffer bufferB = ByteBuffer.allocate(bufferA.limit());
+        plan.serialize(bufferB);
+        bufferB.flip();
+        assertEquals(bufferA, bufferB);
+
+        Log parsed = LogParser.getINSTANCE().parse(serialized);
+        assertEquals(log, parsed);
+    }
 }

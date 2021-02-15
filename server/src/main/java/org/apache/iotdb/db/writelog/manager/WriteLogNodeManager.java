@@ -21,29 +21,25 @@ package org.apache.iotdb.db.writelog.manager;
 import java.io.IOException;
 import org.apache.iotdb.db.writelog.node.WriteLogNode;
 
-/**
- * This interface provides accesses to WriteLogNode.
- */
+/** This interface provides accesses to WriteLogNode. */
 public interface WriteLogNodeManager {
 
-  /**
-   * Get a WriteLogNode by a identifier like "{storageGroupName}-{BufferWrite/Overflow}-{
-   * nameOfTsFile}". The WriteLogNode will be automatically created if not exist.
-   *
-   * @param identifier -identifier, the format: "{storageGroupName}-{BufferWrite/Overflow}-{
-   * nameOfTsFile}"
-   */
-  WriteLogNode getNode(String identifier);
+    /**
+     * Get a WriteLogNode by a identifier like "{storageGroupName}-{BufferWrite/Overflow}-{
+     * nameOfTsFile}". The WriteLogNode will be automatically created if not exist.
+     *
+     * @param identifier -identifier, the format: "{storageGroupName}-{BufferWrite/Overflow}-{
+     *     nameOfTsFile}"
+     */
+    WriteLogNode getNode(String identifier);
 
-  /**
-   * Delete a log node. If the log node does not exist, this will be an empty operation.
-   *
-   * @param identifier -identifier
-   */
-  void deleteNode(String identifier) throws IOException;
+    /**
+     * Delete a log node. If the log node does not exist, this will be an empty operation.
+     *
+     * @param identifier -identifier
+     */
+    void deleteNode(String identifier) throws IOException;
 
-  /**
-   * Close all nodes.
-   */
-  void close();
+    /** Close all nodes. */
+    void close();
 }

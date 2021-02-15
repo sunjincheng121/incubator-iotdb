@@ -26,52 +26,52 @@ import org.apache.iotdb.tsfile.read.expression.impl.SingleSeriesExpression;
 import org.apache.iotdb.tsfile.read.filter.TimeFilter;
 import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
 import org.apache.iotdb.tsfile.read.query.timegenerator.TimeGenerator;
-import org.apache.iotdb.tsfile.read.query.timegenerator.node.AndNode;
-import org.apache.iotdb.tsfile.read.query.timegenerator.node.LeafNode;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class FakedTimeGenerator extends TimeGenerator {
 
-  public FakedTimeGenerator() throws IOException {
+    public FakedTimeGenerator() throws IOException {
 
-    // or(and(d1.s1, d2.s2), d2.s2)
-    IExpression expression =
-        BinaryExpression.or(
-            BinaryExpression.and(
-                new SingleSeriesExpression(new Path("d1", "s1"),
-                    FilterFactory.and(TimeFilter.gtEq(1L), TimeFilter.ltEq(5L))),
-                new SingleSeriesExpression(new Path("d2", "s2"),
-                    FilterFactory.and(TimeFilter.gtEq(1L), TimeFilter.ltEq(10L)))
-            ),
-            new SingleSeriesExpression(new Path("d2", "s2"),
-                FilterFactory.and(TimeFilter.gtEq(11L), TimeFilter.ltEq(15L)))
-        );
+        // or(and(d1.s1, d2.s2), d2.s2)
+        IExpression expression =
+                BinaryExpression.or(
+                        BinaryExpression.and(
+                                new SingleSeriesExpression(
+                                        new Path("d1", "s1"),
+                                        FilterFactory.and(
+                                                TimeFilter.gtEq(1L), TimeFilter.ltEq(5L))),
+                                new SingleSeriesExpression(
+                                        new Path("d2", "s2"),
+                                        FilterFactory.and(
+                                                TimeFilter.gtEq(1L), TimeFilter.ltEq(10L)))),
+                        new SingleSeriesExpression(
+                                new Path("d2", "s2"),
+                                FilterFactory.and(TimeFilter.gtEq(11L), TimeFilter.ltEq(15L))));
 
-    super.constructNode(expression);
-  }
-
-  @Override
-  protected IBatchReader generateNewBatchReader(SingleSeriesExpression expression) {
-    return new FakedMultiBatchReader(10, 10, expression.getFilter());
-  }
-
-  @Override
-  protected boolean isAscending() {
-    return true;
-  }
-
-  @Test
-  public void testTimeGenerator() throws IOException {
-    FakedTimeGenerator fakedTimeGenerator = new FakedTimeGenerator();
-    Path path = new Path("d1", "s1");
-    long count = 0;
-    while (fakedTimeGenerator.hasNext()) {
-      long time = fakedTimeGenerator.next();
-      fakedTimeGenerator.getValue(path, time);
-      count++;
+        super.constructNode(expression);
     }
-    Assert.assertEquals(10L, count);
-  }
 
+    @Override
+    protected IBatchReader generateNewBatchReader(SingleSeriesExpression expression) {
+        return new FakedMultiBatchReader(10, 10, expression.getFilter());
+    }
+
+    @Override
+    protected boolean isAscending() {
+        return true;
+    }
+
+    @Test
+    public void testTimeGenerator() throws IOException {
+        FakedTimeGenerator fakedTimeGenerator = new FakedTimeGenerator();
+        Path path = new Path("d1", "s1");
+        long count = 0;
+        while (fakedTimeGenerator.hasNext()) {
+            long time = fakedTimeGenerator.next();
+            fakedTimeGenerator.getValue(path, time);
+            count++;
+        }
+        Assert.assertEquals(10L, count);
+    }
 }

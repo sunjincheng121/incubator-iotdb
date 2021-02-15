@@ -31,52 +31,62 @@ import org.apache.iotdb.cluster.utils.nodetool.Printer;
 @Command(name = "log", description = "Print raft logs from a log file")
 public class LogView implements Runnable {
 
-  @Option(title = "detailed information", name = {"-d",
-      "--detail"}, description = "Show detail information of logs")
-  private boolean detail = false;
+    @Option(
+            title = "detailed information",
+            name = {"-d", "--detail"},
+            description = "Show detail information of logs")
+    private boolean detail = false;
 
-  @Option(title = "path", required = true, name = {"-path",
-      "--path"}, description = "Specify a path for accurate hosts information")
-  private String path = null;
+    @Option(
+            title = "path",
+            required = true,
+            name = {"-path", "--path"},
+            description = "Specify a path for accurate hosts information")
+    private String path = null;
 
-  @Override
-  public void run() {
-    SyncLogDequeSerializer logDequeSerializer = new SyncLogDequeSerializer(path);
+    @Override
+    public void run() {
+        SyncLogDequeSerializer logDequeSerializer = new SyncLogDequeSerializer(path);
 
-    List<Log> logs = logDequeSerializer.getAllEntriesAfterAppliedIndex();
-    HardState state = logDequeSerializer.getHardState();
-    LogManagerMeta managerMeta = logDequeSerializer.getMeta();
+        List<Log> logs = logDequeSerializer.getAllEntriesAfterAppliedIndex();
+        HardState state = logDequeSerializer.getHardState();
+        LogManagerMeta managerMeta = logDequeSerializer.getMeta();
 
-    Printer.msgPrintln("-------------------LOG META-------------------------");
-    Printer.msgPrintln(managerMeta.toString());
-    Printer.msgPrintln("-------------------LOG DATA-------------------------");
-    Printer.msgPrintln("-------------------NODE STATE-------------------------");
-    Printer.msgPrintln(state.toString());
-    Printer.msgPrintln("-------------------NODE STATE-------------------------");
+        Printer.msgPrintln("-------------------LOG META-------------------------");
+        Printer.msgPrintln(managerMeta.toString());
+        Printer.msgPrintln("-------------------LOG DATA-------------------------");
+        Printer.msgPrintln("-------------------NODE STATE-------------------------");
+        Printer.msgPrintln(state.toString());
+        Printer.msgPrintln("-------------------NODE STATE-------------------------");
 
-    Printer.msgPrintln("-------------------LOG DATA FILES-------------------------");
-    List<File> dataFileList = logDequeSerializer.getLogDataFileList();
-    List<File> indexFileList = logDequeSerializer.getLogIndexFileList();
-    for (int i = 0; i < dataFileList.size(); i++) {
-      Printer.msgPrintln(
-          "name=" + dataFileList.get(i).getName() + ",length=" + dataFileList.get(i).length());
-      Printer.msgPrintln(
-          "name=" + indexFileList.get(i).getName() + ",length=" + indexFileList.get(i).length());
+        Printer.msgPrintln("-------------------LOG DATA FILES-------------------------");
+        List<File> dataFileList = logDequeSerializer.getLogDataFileList();
+        List<File> indexFileList = logDequeSerializer.getLogIndexFileList();
+        for (int i = 0; i < dataFileList.size(); i++) {
+            Printer.msgPrintln(
+                    "name="
+                            + dataFileList.get(i).getName()
+                            + ",length="
+                            + dataFileList.get(i).length());
+            Printer.msgPrintln(
+                    "name="
+                            + indexFileList.get(i).getName()
+                            + ",length="
+                            + indexFileList.get(i).length());
+        }
+
+        Printer.msgPrintln("-------------------LOG DATA FILES-------------------------");
+
+        int count = 0;
+
+        for (Log log : logs) {
+            Printer.msgPrintln("Log NO " + count + ": ");
+            count++;
+            if (detail) {
+                Printer.msgPrintln(log.toString());
+            } else {
+                Printer.msgPrintln(log.getClass().getSimpleName());
+            }
+        }
     }
-
-    Printer.msgPrintln("-------------------LOG DATA FILES-------------------------");
-
-    int count = 0;
-
-    for (Log log : logs) {
-      Printer.msgPrintln("Log NO " + count + ": ");
-      count++;
-      if (detail) {
-        Printer.msgPrintln(log.toString());
-      } else {
-        Printer.msgPrintln(
-            log.getClass().getSimpleName());
-      }
-    }
-  }
 }

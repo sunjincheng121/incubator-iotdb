@@ -47,55 +47,63 @@ import org.junit.Test;
 
 public class FilePartitionedSnapshotLogManagerTest extends IoTDBTest {
 
-  @After
-  public void tearDown() throws IOException, StorageEngineException {
-    super.tearDown();
-  }
-
-  @Test
-  public void testSnapshot()
-      throws Exception {
-    PartitionTable partitionTable = TestUtils.getPartitionTable(3);
-    LogApplier applier = new TestLogApplier();
-    FilePartitionedSnapshotLogManager manager = new FilePartitionedSnapshotLogManager(applier,
-        partitionTable, TestUtils.getNode(0), TestUtils.getNode(0), new TestDataGroupMember());
-
-    try {
-      List<Log> logs = TestUtils.prepareTestLogs(10);
-      manager.append(logs);
-      manager.commitTo(10);
-      manager.setMaxHaveAppliedCommitIndex(manager.getCommitLogIndex());
-
-      Map<PartialPath, List<Pair<Long, Boolean>>> storageGroupPartitionIds = new HashMap<>();
-      // create files for sgs
-      for (int i = 1; i < 4; i++) {
-        PartialPath sg = new PartialPath(TestUtils.getTestSg(i));
-        storageGroupPartitionIds.put(sg, null);
-        for (int j = 0; j < 4; j++) {
-          // closed files
-          prepareData(i, j * 10, 10);
-          StorageEngine.getInstance().closeStorageGroupProcessor(sg, true, true);
-        }
-        // un closed files
-        prepareData(i, 40, 10);
-      }
-
-      FlushPlan plan = new FlushPlan(null, true, storageGroupPartitionIds);
-      PlanExecutor executor = new PlanExecutor();
-      executor.processNonQuery(plan);
-
-      manager.takeSnapshot();
-      PartitionedSnapshot snapshot = (PartitionedSnapshot) manager.getSnapshot();
-      for (int i = 1; i < 4; i++) {
-        FileSnapshot fileSnapshot =
-            (FileSnapshot) snapshot
-                .getSnapshot(SlotPartitionTable.getSlotStrategy().calculateSlotByTime(
-                    TestUtils.getTestSg(i), 0, ClusterConstant.SLOT_NUM));
-        assertEquals(10, fileSnapshot.getTimeseriesSchemas().size());
-        assertEquals(5, fileSnapshot.getDataFiles().size());
-      }
-    } finally {
-      manager.close();
+    @After
+    public void tearDown() throws IOException, StorageEngineException {
+        super.tearDown();
     }
-  }
+
+    @Test
+    public void testSnapshot() throws Exception {
+        PartitionTable partitionTable = TestUtils.getPartitionTable(3);
+        LogApplier applier = new TestLogApplier();
+        FilePartitionedSnapshotLogManager manager =
+                new FilePartitionedSnapshotLogManager(
+                        applier,
+                        partitionTable,
+                        TestUtils.getNode(0),
+                        TestUtils.getNode(0),
+                        new TestDataGroupMember());
+
+        try {
+            List<Log> logs = TestUtils.prepareTestLogs(10);
+            manager.append(logs);
+            manager.commitTo(10);
+            manager.setMaxHaveAppliedCommitIndex(manager.getCommitLogIndex());
+
+            Map<PartialPath, List<Pair<Long, Boolean>>> storageGroupPartitionIds = new HashMap<>();
+            // create files for sgs
+            for (int i = 1; i < 4; i++) {
+                PartialPath sg = new PartialPath(TestUtils.getTestSg(i));
+                storageGroupPartitionIds.put(sg, null);
+                for (int j = 0; j < 4; j++) {
+                    // closed files
+                    prepareData(i, j * 10, 10);
+                    StorageEngine.getInstance().closeStorageGroupProcessor(sg, true, true);
+                }
+                // un closed files
+                prepareData(i, 40, 10);
+            }
+
+            FlushPlan plan = new FlushPlan(null, true, storageGroupPartitionIds);
+            PlanExecutor executor = new PlanExecutor();
+            executor.processNonQuery(plan);
+
+            manager.takeSnapshot();
+            PartitionedSnapshot snapshot = (PartitionedSnapshot) manager.getSnapshot();
+            for (int i = 1; i < 4; i++) {
+                FileSnapshot fileSnapshot =
+                        (FileSnapshot)
+                                snapshot.getSnapshot(
+                                        SlotPartitionTable.getSlotStrategy()
+                                                .calculateSlotByTime(
+                                                        TestUtils.getTestSg(i),
+                                                        0,
+                                                        ClusterConstant.SLOT_NUM));
+                assertEquals(10, fileSnapshot.getTimeseriesSchemas().size());
+                assertEquals(5, fileSnapshot.getDataFiles().size());
+            }
+        } finally {
+            manager.close();
+        }
+    }
 }

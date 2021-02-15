@@ -51,289 +51,340 @@ import org.junit.Test;
 
 public class DeletionQueryTest {
 
-  private String processorName = "root.test";
+    private String processorName = "root.test";
 
-  private static String[] measurements = new String[10];
-  private TSDataType dataType = TSDataType.DOUBLE;
-  private TSEncoding encoding = TSEncoding.PLAIN;
-  private QueryRouter router = new QueryRouter();
+    private static String[] measurements = new String[10];
+    private TSDataType dataType = TSDataType.DOUBLE;
+    private TSEncoding encoding = TSEncoding.PLAIN;
+    private QueryRouter router = new QueryRouter();
 
-  private int prevUnseqLevelNum = 0;
+    private int prevUnseqLevelNum = 0;
 
-  static {
-    for (int i = 0; i < 10; i++) {
-      measurements[i] = "m" + i;
-    }
-  }
-
-  @Before
-  public void setup() throws MetadataException {
-    prevUnseqLevelNum = IoTDBDescriptor.getInstance().getConfig().getUnseqLevelNum();
-    IoTDBDescriptor.getInstance().getConfig().setUnseqLevelNum(2);
-    EnvironmentUtils.envSetUp();
-    IoTDB.metaManager.setStorageGroup(new PartialPath(processorName));
-    for (int i = 0; i < 10; i++) {
-      IoTDB.metaManager.createTimeseries(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[i]), dataType,
-          encoding, TSFileDescriptor.getInstance().getConfig().getCompressor(), Collections.emptyMap());
-    }
-  }
-
-  @After
-  public void teardown() throws IOException, StorageEngineException {
-    EnvironmentUtils.cleanEnv();
-    IoTDBDescriptor.getInstance().getConfig().setUnseqLevelNum(prevUnseqLevelNum);
-  }
-
-  private void insertToStorageEngine(TSRecord record)
-      throws StorageEngineException, IllegalPathException {
-    InsertRowPlan insertRowPlan = new InsertRowPlan(record);
-    StorageEngine.getInstance().insert(insertRowPlan);
-  }
-
-  @Test
-  public void testDeleteInBufferWriteCache() throws
-      StorageEngineException, IOException, QueryProcessException, IllegalPathException {
-
-    for (int i = 1; i <= 100; i++) {
-      TSRecord record = new TSRecord(i, processorName);
-      for (int j = 0; j < 10; j++) {
-        record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
-      }
-      StorageEngine.getInstance().insert(new InsertRowPlan(record));
+    static {
+        for (int i = 0; i < 10; i++) {
+            measurements[i] = "m" + i;
+        }
     }
 
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[3]), 0, 50, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[4]), 0, 50, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 0, 30, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 30, 50, -1);
-
-    List<PartialPath> pathList = new ArrayList<>();
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[3]));
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[4]));
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[5]));
-    List<TSDataType> dataTypes = new ArrayList<>();
-    dataTypes.add(dataType);
-    dataTypes.add(dataType);
-    dataTypes.add(dataType);
-
-    RawDataQueryPlan queryPlan = new RawDataQueryPlan();
-    queryPlan.setDeduplicatedDataTypes(dataTypes);
-    queryPlan.setDeduplicatedPaths(pathList);
-    QueryDataSet dataSet = router.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
-
-    int count = 0;
-    while (dataSet.hasNext()) {
-      dataSet.next();
-      count++;
-    }
-    assertEquals(50, count);
-  }
-
-  @Test
-  public void testDeleteInBufferWriteFile()
-      throws StorageEngineException, IOException, QueryProcessException, IllegalPathException {
-    for (int i = 1; i <= 100; i++) {
-      TSRecord record = new TSRecord(i, processorName);
-      for (int j = 0; j < 10; j++) {
-        record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
-      }
-      StorageEngine.getInstance().insert(new InsertRowPlan(record));
-    }
-    StorageEngine.getInstance().syncCloseAllProcessor();
-
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 0, 50, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[4]), 0, 40, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[3]), 0, 30, -1);
-
-    List<PartialPath> pathList = new ArrayList<>();
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[3]));
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[4]));
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[5]));
-
-    List<TSDataType> dataTypes = new ArrayList<>();
-    dataTypes.add(dataType);
-    dataTypes.add(dataType);
-    dataTypes.add(dataType);
-
-    RawDataQueryPlan queryPlan = new RawDataQueryPlan();
-    queryPlan.setDeduplicatedDataTypes(dataTypes);
-    queryPlan.setDeduplicatedPaths(pathList);
-    QueryDataSet dataSet = router.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
-
-    int count = 0;
-    while (dataSet.hasNext()) {
-      dataSet.next();
-      count++;
-    }
-    assertEquals(70, count);
-  }
-
-  @Test
-  public void testDeleteInOverflowCache()
-      throws StorageEngineException, IOException, QueryProcessException, IllegalPathException {
-    // insert into BufferWrite
-    for (int i = 101; i <= 200; i++) {
-      TSRecord record = new TSRecord(i, processorName);
-      for (int j = 0; j < 10; j++) {
-        record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
-      }
-      StorageEngine.getInstance().insert(new InsertRowPlan(record));
-    }
-    StorageEngine.getInstance().syncCloseAllProcessor();
-
-    // insert into Overflow
-    for (int i = 1; i <= 100; i++) {
-      TSRecord record = new TSRecord(i, processorName);
-      for (int j = 0; j < 10; j++) {
-        record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
-      }
-      StorageEngine.getInstance().insert(new InsertRowPlan(record));
+    @Before
+    public void setup() throws MetadataException {
+        prevUnseqLevelNum = IoTDBDescriptor.getInstance().getConfig().getUnseqLevelNum();
+        IoTDBDescriptor.getInstance().getConfig().setUnseqLevelNum(2);
+        EnvironmentUtils.envSetUp();
+        IoTDB.metaManager.setStorageGroup(new PartialPath(processorName));
+        for (int i = 0; i < 10; i++) {
+            IoTDB.metaManager.createTimeseries(
+                    new PartialPath(
+                            processorName + TsFileConstant.PATH_SEPARATOR + measurements[i]),
+                    dataType,
+                    encoding,
+                    TSFileDescriptor.getInstance().getConfig().getCompressor(),
+                    Collections.emptyMap());
+        }
     }
 
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[3]), 0, 50, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[4]), 0, 50, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 0, 30, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 30, 50, -1);
-
-    List<PartialPath> pathList = new ArrayList<>();
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[3]));
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[4]));
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[5]));
-    List<TSDataType> dataTypes = new ArrayList<>();
-    dataTypes.add(dataType);
-    dataTypes.add(dataType);
-    dataTypes.add(dataType);
-
-    RawDataQueryPlan queryPlan = new RawDataQueryPlan();
-    queryPlan.setDeduplicatedDataTypes(dataTypes);
-    queryPlan.setDeduplicatedPaths(pathList);
-    QueryDataSet dataSet = router.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
-
-    int count = 0;
-    while (dataSet.hasNext()) {
-      dataSet.next();
-      count++;
-    }
-    assertEquals(150, count);
-  }
-
-  @Test
-  public void testDeleteInOverflowFile()
-      throws StorageEngineException, IOException, QueryProcessException, IllegalPathException {
-    // insert into BufferWrite
-    for (int i = 101; i <= 200; i++) {
-      TSRecord record = new TSRecord(i, processorName);
-      for (int j = 0; j < 10; j++) {
-        record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
-      }
-      StorageEngine.getInstance().insert(new InsertRowPlan(record));
-    }
-    StorageEngine.getInstance().syncCloseAllProcessor();
-
-    // insert into Overflow
-    for (int i = 1; i <= 100; i++) {
-      TSRecord record = new TSRecord(i, processorName);
-      for (int j = 0; j < 10; j++) {
-        record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
-      }
-      StorageEngine.getInstance().insert(new InsertRowPlan(record));
-    }
-    StorageEngine.getInstance().syncCloseAllProcessor();
-
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 0, 50, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[4]), 0, 40, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[3]), 0, 30, -1);
-
-    List<PartialPath> pathList = new ArrayList<>();
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[3]));
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[4]));
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[5]));
-
-    List<TSDataType> dataTypes = new ArrayList<>();
-    dataTypes.add(dataType);
-    dataTypes.add(dataType);
-    dataTypes.add(dataType);
-
-    RawDataQueryPlan queryPlan = new RawDataQueryPlan();
-    queryPlan.setDeduplicatedDataTypes(dataTypes);
-    queryPlan.setDeduplicatedPaths(pathList);
-    QueryDataSet dataSet = router.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
-
-    int count = 0;
-    while (dataSet.hasNext()) {
-      dataSet.next();
-      count++;
-    }
-    assertEquals(170, count);
-  }
-
-  @Test
-  public void testSuccessiveDeletion()
-      throws StorageEngineException, IOException, QueryProcessException, IllegalPathException {
-    for (int i = 1; i <= 100; i++) {
-      TSRecord record = new TSRecord(i, processorName);
-      for (int j = 0; j < 10; j++) {
-        record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
-      }
-      StorageEngine.getInstance().insert(new InsertRowPlan(record));
+    @After
+    public void teardown() throws IOException, StorageEngineException {
+        EnvironmentUtils.cleanEnv();
+        IoTDBDescriptor.getInstance().getConfig().setUnseqLevelNum(prevUnseqLevelNum);
     }
 
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[3]), 0, 50, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[4]), 0, 50, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 0, 30, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 30, 50, -1);
-
-    StorageEngine.getInstance().syncCloseAllProcessor();
-
-    for (int i = 101; i <= 200; i++) {
-      TSRecord record = new TSRecord(i, processorName);
-      for (int j = 0; j < 10; j++) {
-        record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
-      }
-      StorageEngine.getInstance().insert(new InsertRowPlan(record));
+    private void insertToStorageEngine(TSRecord record)
+            throws StorageEngineException, IllegalPathException {
+        InsertRowPlan insertRowPlan = new InsertRowPlan(record);
+        StorageEngine.getInstance().insert(insertRowPlan);
     }
 
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[3]), 0, 250, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[4]), 0, 250, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 0, 230, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 230, 250, -1);
+    @Test
+    public void testDeleteInBufferWriteCache()
+            throws StorageEngineException, IOException, QueryProcessException,
+                    IllegalPathException {
 
-    StorageEngine.getInstance().syncCloseAllProcessor();
+        for (int i = 1; i <= 100; i++) {
+            TSRecord record = new TSRecord(i, processorName);
+            for (int j = 0; j < 10; j++) {
+                record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
+            }
+            StorageEngine.getInstance().insert(new InsertRowPlan(record));
+        }
 
-    for (int i = 201; i <= 300; i++) {
-      TSRecord record = new TSRecord(i, processorName);
-      for (int j = 0; j < 10; j++) {
-        record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
-      }
-      StorageEngine.getInstance().insert(new InsertRowPlan(record));
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[3]), 0, 50, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[4]), 0, 50, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 0, 30, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 30, 50, -1);
+
+        List<PartialPath> pathList = new ArrayList<>();
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[3]));
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[4]));
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[5]));
+        List<TSDataType> dataTypes = new ArrayList<>();
+        dataTypes.add(dataType);
+        dataTypes.add(dataType);
+        dataTypes.add(dataType);
+
+        RawDataQueryPlan queryPlan = new RawDataQueryPlan();
+        queryPlan.setDeduplicatedDataTypes(dataTypes);
+        queryPlan.setDeduplicatedPaths(pathList);
+        QueryDataSet dataSet = router.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
+
+        int count = 0;
+        while (dataSet.hasNext()) {
+            dataSet.next();
+            count++;
+        }
+        assertEquals(50, count);
     }
 
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[3]), 0, 50, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[4]), 0, 50, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 0, 30, -1);
-    StorageEngine.getInstance().delete(new PartialPath(processorName, measurements[5]), 30, 50, -1);
+    @Test
+    public void testDeleteInBufferWriteFile()
+            throws StorageEngineException, IOException, QueryProcessException,
+                    IllegalPathException {
+        for (int i = 1; i <= 100; i++) {
+            TSRecord record = new TSRecord(i, processorName);
+            for (int j = 0; j < 10; j++) {
+                record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
+            }
+            StorageEngine.getInstance().insert(new InsertRowPlan(record));
+        }
+        StorageEngine.getInstance().syncCloseAllProcessor();
 
-    StorageEngine.getInstance().syncCloseAllProcessor();
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 0, 50, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[4]), 0, 40, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[3]), 0, 30, -1);
 
-    List<PartialPath> pathList = new ArrayList<>();
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[3]));
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[4]));
-    pathList.add(new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[5]));
-    List<TSDataType> dataTypes = new ArrayList<>();
-    dataTypes.add(dataType);
-    dataTypes.add(dataType);
-    dataTypes.add(dataType);
+        List<PartialPath> pathList = new ArrayList<>();
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[3]));
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[4]));
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[5]));
 
-    RawDataQueryPlan queryPlan = new RawDataQueryPlan();
-    queryPlan.setDeduplicatedDataTypes(dataTypes);
-    queryPlan.setDeduplicatedPaths(pathList);
-    QueryDataSet dataSet = router.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
+        List<TSDataType> dataTypes = new ArrayList<>();
+        dataTypes.add(dataType);
+        dataTypes.add(dataType);
+        dataTypes.add(dataType);
 
-    int count = 0;
-    while (dataSet.hasNext()) {
-      dataSet.next();
-      count++;
+        RawDataQueryPlan queryPlan = new RawDataQueryPlan();
+        queryPlan.setDeduplicatedDataTypes(dataTypes);
+        queryPlan.setDeduplicatedPaths(pathList);
+        QueryDataSet dataSet = router.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
+
+        int count = 0;
+        while (dataSet.hasNext()) {
+            dataSet.next();
+            count++;
+        }
+        assertEquals(70, count);
     }
-    assertEquals(100, count);
-  }
+
+    @Test
+    public void testDeleteInOverflowCache()
+            throws StorageEngineException, IOException, QueryProcessException,
+                    IllegalPathException {
+        // insert into BufferWrite
+        for (int i = 101; i <= 200; i++) {
+            TSRecord record = new TSRecord(i, processorName);
+            for (int j = 0; j < 10; j++) {
+                record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
+            }
+            StorageEngine.getInstance().insert(new InsertRowPlan(record));
+        }
+        StorageEngine.getInstance().syncCloseAllProcessor();
+
+        // insert into Overflow
+        for (int i = 1; i <= 100; i++) {
+            TSRecord record = new TSRecord(i, processorName);
+            for (int j = 0; j < 10; j++) {
+                record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
+            }
+            StorageEngine.getInstance().insert(new InsertRowPlan(record));
+        }
+
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[3]), 0, 50, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[4]), 0, 50, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 0, 30, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 30, 50, -1);
+
+        List<PartialPath> pathList = new ArrayList<>();
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[3]));
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[4]));
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[5]));
+        List<TSDataType> dataTypes = new ArrayList<>();
+        dataTypes.add(dataType);
+        dataTypes.add(dataType);
+        dataTypes.add(dataType);
+
+        RawDataQueryPlan queryPlan = new RawDataQueryPlan();
+        queryPlan.setDeduplicatedDataTypes(dataTypes);
+        queryPlan.setDeduplicatedPaths(pathList);
+        QueryDataSet dataSet = router.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
+
+        int count = 0;
+        while (dataSet.hasNext()) {
+            dataSet.next();
+            count++;
+        }
+        assertEquals(150, count);
+    }
+
+    @Test
+    public void testDeleteInOverflowFile()
+            throws StorageEngineException, IOException, QueryProcessException,
+                    IllegalPathException {
+        // insert into BufferWrite
+        for (int i = 101; i <= 200; i++) {
+            TSRecord record = new TSRecord(i, processorName);
+            for (int j = 0; j < 10; j++) {
+                record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
+            }
+            StorageEngine.getInstance().insert(new InsertRowPlan(record));
+        }
+        StorageEngine.getInstance().syncCloseAllProcessor();
+
+        // insert into Overflow
+        for (int i = 1; i <= 100; i++) {
+            TSRecord record = new TSRecord(i, processorName);
+            for (int j = 0; j < 10; j++) {
+                record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
+            }
+            StorageEngine.getInstance().insert(new InsertRowPlan(record));
+        }
+        StorageEngine.getInstance().syncCloseAllProcessor();
+
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 0, 50, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[4]), 0, 40, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[3]), 0, 30, -1);
+
+        List<PartialPath> pathList = new ArrayList<>();
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[3]));
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[4]));
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[5]));
+
+        List<TSDataType> dataTypes = new ArrayList<>();
+        dataTypes.add(dataType);
+        dataTypes.add(dataType);
+        dataTypes.add(dataType);
+
+        RawDataQueryPlan queryPlan = new RawDataQueryPlan();
+        queryPlan.setDeduplicatedDataTypes(dataTypes);
+        queryPlan.setDeduplicatedPaths(pathList);
+        QueryDataSet dataSet = router.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
+
+        int count = 0;
+        while (dataSet.hasNext()) {
+            dataSet.next();
+            count++;
+        }
+        assertEquals(170, count);
+    }
+
+    @Test
+    public void testSuccessiveDeletion()
+            throws StorageEngineException, IOException, QueryProcessException,
+                    IllegalPathException {
+        for (int i = 1; i <= 100; i++) {
+            TSRecord record = new TSRecord(i, processorName);
+            for (int j = 0; j < 10; j++) {
+                record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
+            }
+            StorageEngine.getInstance().insert(new InsertRowPlan(record));
+        }
+
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[3]), 0, 50, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[4]), 0, 50, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 0, 30, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 30, 50, -1);
+
+        StorageEngine.getInstance().syncCloseAllProcessor();
+
+        for (int i = 101; i <= 200; i++) {
+            TSRecord record = new TSRecord(i, processorName);
+            for (int j = 0; j < 10; j++) {
+                record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
+            }
+            StorageEngine.getInstance().insert(new InsertRowPlan(record));
+        }
+
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[3]), 0, 250, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[4]), 0, 250, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 0, 230, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 230, 250, -1);
+
+        StorageEngine.getInstance().syncCloseAllProcessor();
+
+        for (int i = 201; i <= 300; i++) {
+            TSRecord record = new TSRecord(i, processorName);
+            for (int j = 0; j < 10; j++) {
+                record.addTuple(new DoubleDataPoint(measurements[j], i * 1.0));
+            }
+            StorageEngine.getInstance().insert(new InsertRowPlan(record));
+        }
+
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[3]), 0, 50, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[4]), 0, 50, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 0, 30, -1);
+        StorageEngine.getInstance()
+                .delete(new PartialPath(processorName, measurements[5]), 30, 50, -1);
+
+        StorageEngine.getInstance().syncCloseAllProcessor();
+
+        List<PartialPath> pathList = new ArrayList<>();
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[3]));
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[4]));
+        pathList.add(
+                new PartialPath(processorName + TsFileConstant.PATH_SEPARATOR + measurements[5]));
+        List<TSDataType> dataTypes = new ArrayList<>();
+        dataTypes.add(dataType);
+        dataTypes.add(dataType);
+        dataTypes.add(dataType);
+
+        RawDataQueryPlan queryPlan = new RawDataQueryPlan();
+        queryPlan.setDeduplicatedDataTypes(dataTypes);
+        queryPlan.setDeduplicatedPaths(pathList);
+        QueryDataSet dataSet = router.rawDataQuery(queryPlan, TEST_QUERY_CONTEXT);
+
+        int count = 0;
+        while (dataSet.hasNext()) {
+            dataSet.next();
+            count++;
+        }
+        assertEquals(100, count);
+    }
 }

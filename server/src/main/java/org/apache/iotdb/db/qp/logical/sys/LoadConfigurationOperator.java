@@ -24,19 +24,20 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class LoadConfigurationOperator extends RootOperator {
 
-  LoadConfigurationOperatorType loadConfigurationOperatorType;
+    LoadConfigurationOperatorType loadConfigurationOperatorType;
 
-  public LoadConfigurationOperator(LoadConfigurationOperatorType type) {
-    super(SQLConstant.TOK_LOAD_CONFIGURATION);
-    this.operatorType = OperatorType.LOAD_CONFIGURATION;
-    this.loadConfigurationOperatorType = type;
-  }
+    public LoadConfigurationOperator(LoadConfigurationOperatorType type) {
+        super(SQLConstant.TOK_LOAD_CONFIGURATION);
+        this.operatorType = OperatorType.LOAD_CONFIGURATION;
+        this.loadConfigurationOperatorType = type;
+    }
 
-  public LoadConfigurationOperatorType getLoadConfigurationOperatorType() {
-    return loadConfigurationOperatorType;
-  }
+    public LoadConfigurationOperatorType getLoadConfigurationOperatorType() {
+        return loadConfigurationOperatorType;
+    }
 
-  public enum LoadConfigurationOperatorType{
-    LOCAL, GLOBAL
-  }
+    public enum LoadConfigurationOperatorType {
+        LOCAL,
+        GLOBAL
+    }
 }

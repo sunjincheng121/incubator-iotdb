@@ -24,7 +24,7 @@ import org.apache.iotdb.tsfile.write.schema.TimeseriesSchema;
 
 public interface TimeseriesSchemaSnapshot {
 
-  Collection<TimeseriesSchema> getTimeseriesSchemas();
+    Collection<TimeseriesSchema> getTimeseriesSchemas();
 
-  void setTimeseriesSchemas(Collection<TimeseriesSchema> schemas);
+    void setTimeseriesSchemas(Collection<TimeseriesSchema> schemas);
 }

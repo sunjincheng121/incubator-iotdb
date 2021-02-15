@@ -26,93 +26,91 @@ import org.apache.iotdb.tsfile.read.common.RowRecord;
 
 public abstract class QueryDataSet {
 
-  protected List<Path> paths;
-  protected List<TSDataType> dataTypes;
+    protected List<Path> paths;
+    protected List<TSDataType> dataTypes;
 
-  protected int rowLimit = 0; // rowLimit > 0 means the LIMIT constraint exists
-  protected int rowOffset = 0;
-  protected int alreadyReturnedRowNum = 0;
-  protected boolean ascending;
+    protected int rowLimit = 0; // rowLimit > 0 means the LIMIT constraint exists
+    protected int rowOffset = 0;
+    protected int alreadyReturnedRowNum = 0;
+    protected boolean ascending;
 
-  public QueryDataSet() {
-  }
+    public QueryDataSet() {}
 
-  public QueryDataSet(List<Path> paths, List<TSDataType> dataTypes) {
-    initQueryDataSetFields(paths, dataTypes, true);
-  }
-
-  public QueryDataSet(List<Path> paths, List<TSDataType> dataTypes, boolean ascending) {
-    initQueryDataSetFields(paths, dataTypes, ascending);
-  }
-
-  protected void initQueryDataSetFields(List<Path> paths, List<TSDataType> dataTypes, boolean ascending) {
-    this.paths = paths;
-    this.dataTypes = dataTypes;
-    this.ascending = ascending;
-  }
-
-  public boolean hasNext() throws IOException {
-    // proceed to the OFFSET row by skipping rows
-    while (rowOffset > 0) {
-      if (hasNextWithoutConstraint()) {
-        nextWithoutConstraint(); // DO NOT use next()
-        rowOffset--;
-      } else {
-        return false;
-      }
+    public QueryDataSet(List<Path> paths, List<TSDataType> dataTypes) {
+        initQueryDataSetFields(paths, dataTypes, true);
     }
 
-    // make sure within the LIMIT constraint if exists
-    if (rowLimit > 0 && alreadyReturnedRowNum >= rowLimit) {
-      return false;
+    public QueryDataSet(List<Path> paths, List<TSDataType> dataTypes, boolean ascending) {
+        initQueryDataSetFields(paths, dataTypes, ascending);
     }
 
-    return hasNextWithoutConstraint();
-  }
-
-  protected abstract boolean hasNextWithoutConstraint() throws IOException;
-
-  /**
-   * This method is used for batch query, return RowRecord.
-   */
-  public RowRecord next() throws IOException {
-    if (rowLimit > 0) {
-      alreadyReturnedRowNum++;
+    protected void initQueryDataSetFields(
+            List<Path> paths, List<TSDataType> dataTypes, boolean ascending) {
+        this.paths = paths;
+        this.dataTypes = dataTypes;
+        this.ascending = ascending;
     }
-    return nextWithoutConstraint();
-  }
 
-  protected abstract RowRecord nextWithoutConstraint() throws IOException;
+    public boolean hasNext() throws IOException {
+        // proceed to the OFFSET row by skipping rows
+        while (rowOffset > 0) {
+            if (hasNextWithoutConstraint()) {
+                nextWithoutConstraint(); // DO NOT use next()
+                rowOffset--;
+            } else {
+                return false;
+            }
+        }
 
-  public List<Path> getPaths() {
-    return paths;
-  }
+        // make sure within the LIMIT constraint if exists
+        if (rowLimit > 0 && alreadyReturnedRowNum >= rowLimit) {
+            return false;
+        }
 
-  public List<TSDataType> getDataTypes() {
-    return dataTypes;
-  }
+        return hasNextWithoutConstraint();
+    }
 
-  public void setDataTypes(List<TSDataType> dataTypes) {
-    this.dataTypes = dataTypes;
-  }
+    protected abstract boolean hasNextWithoutConstraint() throws IOException;
 
-  public int getRowLimit() {
-    return rowLimit;
-  }
+    /** This method is used for batch query, return RowRecord. */
+    public RowRecord next() throws IOException {
+        if (rowLimit > 0) {
+            alreadyReturnedRowNum++;
+        }
+        return nextWithoutConstraint();
+    }
 
-  public void setRowLimit(int rowLimit) {
-    this.rowLimit = rowLimit;
-  }
+    protected abstract RowRecord nextWithoutConstraint() throws IOException;
 
-  public int getRowOffset() {
-    return rowOffset;
-  }
+    public List<Path> getPaths() {
+        return paths;
+    }
 
-  public void setRowOffset(int rowOffset) {
-    this.rowOffset = rowOffset;
-  }
+    public List<TSDataType> getDataTypes() {
+        return dataTypes;
+    }
 
-  public boolean hasLimit() {
-    return rowLimit > 0;
-  }
+    public void setDataTypes(List<TSDataType> dataTypes) {
+        this.dataTypes = dataTypes;
+    }
+
+    public int getRowLimit() {
+        return rowLimit;
+    }
+
+    public void setRowLimit(int rowLimit) {
+        this.rowLimit = rowLimit;
+    }
+
+    public int getRowOffset() {
+        return rowOffset;
+    }
+
+    public void setRowOffset(int rowOffset) {
+        this.rowOffset = rowOffset;
+    }
+
+    public boolean hasLimit() {
+        return rowLimit > 0;
+    }
 }

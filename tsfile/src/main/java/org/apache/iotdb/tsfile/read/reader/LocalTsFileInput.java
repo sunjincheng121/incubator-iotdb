@@ -30,99 +30,99 @@ import org.slf4j.LoggerFactory;
 
 public class LocalTsFileInput implements TsFileInput {
 
-  private static final Logger logger = LoggerFactory.getLogger(LocalTsFileInput.class);
+    private static final Logger logger = LoggerFactory.getLogger(LocalTsFileInput.class);
 
-  private final FileChannel channel;
-  private final String filePath;
+    private final FileChannel channel;
+    private final String filePath;
 
-  public LocalTsFileInput(Path file) throws IOException {
-    channel = FileChannel.open(file, StandardOpenOption.READ);
-    filePath = file.toString();
-  }
-
-  @Override
-  public long size() throws IOException {
-    try {
-      return channel.size();
-    } catch (IOException e) {
-      logger.error("Error happened while getting {} size", filePath);
-      throw e;
+    public LocalTsFileInput(Path file) throws IOException {
+        channel = FileChannel.open(file, StandardOpenOption.READ);
+        filePath = file.toString();
     }
-  }
 
-  @Override
-  public long position() throws IOException {
-    try {
-      return channel.position();
-    } catch (IOException e) {
-      logger.error("Error happened while getting {} current position", filePath);
-      throw e;
+    @Override
+    public long size() throws IOException {
+        try {
+            return channel.size();
+        } catch (IOException e) {
+            logger.error("Error happened while getting {} size", filePath);
+            throw e;
+        }
     }
-  }
 
-  @Override
-  public TsFileInput position(long newPosition) throws IOException {
-    try {
-      channel.position(newPosition);
-      return this;
-    } catch (IOException e) {
-      logger.error("Error happened while changing {} position to {}", filePath, newPosition);
-      throw e;
+    @Override
+    public long position() throws IOException {
+        try {
+            return channel.position();
+        } catch (IOException e) {
+            logger.error("Error happened while getting {} current position", filePath);
+            throw e;
+        }
     }
-  }
 
-  @Override
-  public int read(ByteBuffer dst) throws IOException {
-    try {
-      return channel.read(dst);
-    } catch (IOException e) {
-      logger.error("Error happened while reading {} from current position", filePath);
-      throw e;
+    @Override
+    public TsFileInput position(long newPosition) throws IOException {
+        try {
+            channel.position(newPosition);
+            return this;
+        } catch (IOException e) {
+            logger.error("Error happened while changing {} position to {}", filePath, newPosition);
+            throw e;
+        }
     }
-  }
 
-  @Override
-  public int read(ByteBuffer dst, long position) throws IOException {
-    try {
-      return channel.read(dst, position);
-    } catch (IOException e) {
-      logger.error("Error happened while reading {} from position {}", filePath, position);
-      throw e;
+    @Override
+    public int read(ByteBuffer dst) throws IOException {
+        try {
+            return channel.read(dst);
+        } catch (IOException e) {
+            logger.error("Error happened while reading {} from current position", filePath);
+            throw e;
+        }
     }
-  }
 
-  @Override
-  public int read() throws IOException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public int read(byte[] b, int off, int len) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public FileChannel wrapAsFileChannel() {
-    return channel;
-  }
-
-  @Override
-  public InputStream wrapAsInputStream() {
-    return Channels.newInputStream(channel);
-  }
-
-  @Override
-  public void close() throws IOException {
-    try {
-      channel.close();
-    } catch (IOException e) {
-      logger.error("Error happened while closing {}", filePath);
-      throw e;
+    @Override
+    public int read(ByteBuffer dst, long position) throws IOException {
+        try {
+            return channel.read(dst, position);
+        } catch (IOException e) {
+            logger.error("Error happened while reading {} from position {}", filePath, position);
+            throw e;
+        }
     }
-  }
 
-  @Override
-  public int readInt() {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public int read() throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FileChannel wrapAsFileChannel() {
+        return channel;
+    }
+
+    @Override
+    public InputStream wrapAsInputStream() {
+        return Channels.newInputStream(channel);
+    }
+
+    @Override
+    public void close() throws IOException {
+        try {
+            channel.close();
+        } catch (IOException e) {
+            logger.error("Error happened while closing {}", filePath);
+            throw e;
+        }
+    }
+
+    @Override
+    public int readInt() {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -32,114 +32,128 @@ import org.apache.iotdb.tsfile.read.filter.basic.UnaryFilter;
 
 public class SeriesReaderByTimestamp implements IReaderByTimestamp {
 
-  private SeriesReader seriesReader;
-  private BatchData batchData;
-  private boolean ascending;
+    private SeriesReader seriesReader;
+    private BatchData batchData;
+    private boolean ascending;
 
-  public SeriesReaderByTimestamp(PartialPath seriesPath, Set<String> allSensors,
-      TSDataType dataType, QueryContext context, QueryDataSource dataSource,
-      TsFileFilter fileFilter, boolean ascending) {
-    UnaryFilter timeFilter =
-        ascending ? TimeFilter.gtEq(Long.MIN_VALUE) : TimeFilter.ltEq(Long.MAX_VALUE);
-    seriesReader = new SeriesReader(seriesPath, allSensors, dataType, context,
-        dataSource, timeFilter, null, fileFilter, ascending);
-    this.ascending = ascending;
-  }
-
-  public SeriesReaderByTimestamp(SeriesReader seriesReader, boolean ascending) {
-    this.seriesReader = seriesReader;
-    this.ascending = ascending;
-  }
-
-  @Override
-  public Object getValueInTimestamp(long timestamp) throws IOException {
-    seriesReader.setTimeFilter(timestamp);
-    if ((batchData == null || !hasAvailableData(batchData, timestamp)) && !hasNext(timestamp)) {
-      return null;
+    public SeriesReaderByTimestamp(
+            PartialPath seriesPath,
+            Set<String> allSensors,
+            TSDataType dataType,
+            QueryContext context,
+            QueryDataSource dataSource,
+            TsFileFilter fileFilter,
+            boolean ascending) {
+        UnaryFilter timeFilter =
+                ascending ? TimeFilter.gtEq(Long.MIN_VALUE) : TimeFilter.ltEq(Long.MAX_VALUE);
+        seriesReader =
+                new SeriesReader(
+                        seriesPath,
+                        allSensors,
+                        dataType,
+                        context,
+                        dataSource,
+                        timeFilter,
+                        null,
+                        fileFilter,
+                        ascending);
+        this.ascending = ascending;
     }
 
-    return batchData.getValueInTimestamp(timestamp);
-  }
-
-  @Override
-  public boolean readerIsEmpty() throws IOException {
-    return seriesReader.isEmpty() && isEmpty(batchData);
-  }
-
-  protected boolean hasNext(long timestamp) throws IOException {
-
-    /*
-     * consume pages firstly
-     */
-    if (readPageData(timestamp)) {
-      return true;
+    public SeriesReaderByTimestamp(SeriesReader seriesReader, boolean ascending) {
+        this.seriesReader = seriesReader;
+        this.ascending = ascending;
     }
 
-    /*
-     * consume chunk secondly
-     */
-    if (readChunkData(timestamp)) {
-      return true;
-    }
-
-    /*
-     * consume file thirdly
-     */
-    while (seriesReader.hasNextFile()) {
-      Statistics statistics = seriesReader.currentFileStatistics();
-      if (!satisfyTimeFilter(statistics)) {
-        seriesReader.skipCurrentFile();
-        continue;
-      }
-      if (readChunkData(timestamp)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private boolean readChunkData(long timestamp) throws IOException {
-    while (seriesReader.hasNextChunk()) {
-      Statistics statistics = seriesReader.currentChunkStatistics();
-      if (!satisfyTimeFilter(statistics)) {
-        seriesReader.skipCurrentChunk();
-        continue;
-      }
-      if (readPageData(timestamp)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private boolean readPageData(long timestamp) throws IOException {
-    while (seriesReader.hasNextPage()) {
-      if (!seriesReader.isPageOverlapped()) {
-        if (!satisfyTimeFilter(seriesReader.currentPageStatistics())) {
-          seriesReader.skipCurrentPage();
-          continue;
+    @Override
+    public Object getValueInTimestamp(long timestamp) throws IOException {
+        seriesReader.setTimeFilter(timestamp);
+        if ((batchData == null || !hasAvailableData(batchData, timestamp)) && !hasNext(timestamp)) {
+            return null;
         }
-      }
-      batchData = seriesReader.nextPage();
-      if (isEmpty(batchData)) {
-        continue;
-      }
-      if (hasAvailableData(batchData, timestamp)) {
-        return true;
-      }
+
+        return batchData.getValueInTimestamp(timestamp);
     }
-    return false;
-  }
 
-  private boolean satisfyTimeFilter(Statistics statistics) {
-    return seriesReader.getTimeFilter().satisfy(statistics);
-  }
+    @Override
+    public boolean readerIsEmpty() throws IOException {
+        return seriesReader.isEmpty() && isEmpty(batchData);
+    }
 
-  private boolean isEmpty(BatchData batchData) {
-    return batchData == null || !batchData.hasCurrent();
-  }
+    protected boolean hasNext(long timestamp) throws IOException {
 
-  private boolean hasAvailableData(BatchData data, long time) {
-    return ascending ? data.getMaxTimestamp() >= time : data.getMinTimestamp() <= time;
-  }
+        /*
+         * consume pages firstly
+         */
+        if (readPageData(timestamp)) {
+            return true;
+        }
+
+        /*
+         * consume chunk secondly
+         */
+        if (readChunkData(timestamp)) {
+            return true;
+        }
+
+        /*
+         * consume file thirdly
+         */
+        while (seriesReader.hasNextFile()) {
+            Statistics statistics = seriesReader.currentFileStatistics();
+            if (!satisfyTimeFilter(statistics)) {
+                seriesReader.skipCurrentFile();
+                continue;
+            }
+            if (readChunkData(timestamp)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean readChunkData(long timestamp) throws IOException {
+        while (seriesReader.hasNextChunk()) {
+            Statistics statistics = seriesReader.currentChunkStatistics();
+            if (!satisfyTimeFilter(statistics)) {
+                seriesReader.skipCurrentChunk();
+                continue;
+            }
+            if (readPageData(timestamp)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean readPageData(long timestamp) throws IOException {
+        while (seriesReader.hasNextPage()) {
+            if (!seriesReader.isPageOverlapped()) {
+                if (!satisfyTimeFilter(seriesReader.currentPageStatistics())) {
+                    seriesReader.skipCurrentPage();
+                    continue;
+                }
+            }
+            batchData = seriesReader.nextPage();
+            if (isEmpty(batchData)) {
+                continue;
+            }
+            if (hasAvailableData(batchData, timestamp)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean satisfyTimeFilter(Statistics statistics) {
+        return seriesReader.getTimeFilter().satisfy(statistics);
+    }
+
+    private boolean isEmpty(BatchData batchData) {
+        return batchData == null || !batchData.hasCurrent();
+    }
+
+    private boolean hasAvailableData(BatchData data, long time) {
+        return ascending ? data.getMaxTimestamp() >= time : data.getMinTimestamp() <= time;
+    }
 }

@@ -32,71 +32,71 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class SetTTLPlan extends PhysicalPlan {
 
-  private PartialPath storageGroup;
-  private long dataTTL;
+    private PartialPath storageGroup;
+    private long dataTTL;
 
-  public SetTTLPlan() {
-    super(false, OperatorType.TTL);
-  }
+    public SetTTLPlan() {
+        super(false, OperatorType.TTL);
+    }
 
-  public SetTTLPlan(PartialPath storageGroup, long dataTTL) {
-    // set TTL
-    super(false, OperatorType.TTL);
-    this.storageGroup = storageGroup;
-    this.dataTTL = dataTTL;
-  }
+    public SetTTLPlan(PartialPath storageGroup, long dataTTL) {
+        // set TTL
+        super(false, OperatorType.TTL);
+        this.storageGroup = storageGroup;
+        this.dataTTL = dataTTL;
+    }
 
-  public SetTTLPlan(PartialPath storageGroup) {
-    // unset TTL
-    this(storageGroup, Long.MAX_VALUE);
-  }
+    public SetTTLPlan(PartialPath storageGroup) {
+        // unset TTL
+        this(storageGroup, Long.MAX_VALUE);
+    }
 
-  @Override
-  public List<PartialPath> getPaths() {
-    return Collections.emptyList();
-  }
+    @Override
+    public List<PartialPath> getPaths() {
+        return Collections.emptyList();
+    }
 
-  @Override
-  public void serialize(DataOutputStream stream) throws IOException {
-    int type = PhysicalPlanType.TTL.ordinal();
-    stream.writeByte((byte) type);
-    stream.writeLong(dataTTL);
-    putString(stream, storageGroup.getFullPath());
+    @Override
+    public void serialize(DataOutputStream stream) throws IOException {
+        int type = PhysicalPlanType.TTL.ordinal();
+        stream.writeByte((byte) type);
+        stream.writeLong(dataTTL);
+        putString(stream, storageGroup.getFullPath());
 
-    stream.writeLong(index);
-  }
+        stream.writeLong(index);
+    }
 
-  @Override
-  public void serialize(ByteBuffer buffer) {
-    int type = PhysicalPlanType.TTL.ordinal();
-    buffer.put((byte) type);
-    buffer.putLong(dataTTL);
-    putString(buffer, storageGroup.getFullPath());
+    @Override
+    public void serialize(ByteBuffer buffer) {
+        int type = PhysicalPlanType.TTL.ordinal();
+        buffer.put((byte) type);
+        buffer.putLong(dataTTL);
+        putString(buffer, storageGroup.getFullPath());
 
-    buffer.putLong(index);
-  }
+        buffer.putLong(index);
+    }
 
-  @Override
-  public void deserialize(ByteBuffer buffer) throws IllegalPathException {
-    this.dataTTL = buffer.getLong();
-    this.storageGroup = new PartialPath(readString(buffer));
+    @Override
+    public void deserialize(ByteBuffer buffer) throws IllegalPathException {
+        this.dataTTL = buffer.getLong();
+        this.storageGroup = new PartialPath(readString(buffer));
 
-    this.index = buffer.getLong();
-  }
+        this.index = buffer.getLong();
+    }
 
-  public PartialPath getStorageGroup() {
-    return storageGroup;
-  }
+    public PartialPath getStorageGroup() {
+        return storageGroup;
+    }
 
-  public void setStorageGroup(PartialPath storageGroup) {
-    this.storageGroup = storageGroup;
-  }
+    public void setStorageGroup(PartialPath storageGroup) {
+        this.storageGroup = storageGroup;
+    }
 
-  public long getDataTTL() {
-    return dataTTL;
-  }
+    public long getDataTTL() {
+        return dataTTL;
+    }
 
-  public void setDataTTL(long dataTTL) {
-    this.dataTTL = dataTTL;
-  }
+    public void setDataTTL(long dataTTL) {
+        this.dataTTL = dataTTL;
+    }
 }

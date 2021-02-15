@@ -17,11 +17,10 @@
  */
 package org.apache.iotdb.mqtt;
 
+import java.util.Random;
 import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
-
-import java.util.Random;
 
 public class MQTTClient {
     public static void main(String[] args) throws Exception {
@@ -35,12 +34,15 @@ public class MQTTClient {
 
         Random random = new Random();
         for (int i = 0; i < 10; i++) {
-            String payload = String.format("{\n" +
-                    "\"device\":\"root.sg.d1\",\n" +
-                    "\"timestamp\":%d,\n" +
-                    "\"measurements\":[\"s1\"],\n" +
-                    "\"values\":[%f]\n" +
-                    "}", System.currentTimeMillis(), random.nextDouble());
+            String payload =
+                    String.format(
+                            "{\n"
+                                    + "\"device\":\"root.sg.d1\",\n"
+                                    + "\"timestamp\":%d,\n"
+                                    + "\"measurements\":[\"s1\"],\n"
+                                    + "\"values\":[%f]\n"
+                                    + "}",
+                            System.currentTimeMillis(), random.nextDouble());
 
             connection.publish("root.sg.d1.s1", payload.getBytes(), QoS.AT_LEAST_ONCE, false);
         }
