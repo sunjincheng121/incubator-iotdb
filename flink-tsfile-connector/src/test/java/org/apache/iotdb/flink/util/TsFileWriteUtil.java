@@ -19,7 +19,6 @@
 
 package org.apache.iotdb.flink.util;
 
-import java.io.File;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.iotdb.tsfile.write.TsFileWriter;
@@ -29,6 +28,8 @@ import org.apache.iotdb.tsfile.write.record.datapoint.FloatDataPoint;
 import org.apache.iotdb.tsfile.write.record.datapoint.IntDataPoint;
 import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
 import org.apache.iotdb.tsfile.write.schema.Schema;
+
+import java.io.File;
 
 /** Utils used to prepare TsFiles for testing. */
 public class TsFileWriteUtil {

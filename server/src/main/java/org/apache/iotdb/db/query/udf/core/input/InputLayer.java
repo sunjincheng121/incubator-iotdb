@@ -19,8 +19,6 @@
 
 package org.apache.iotdb.db.query.udf.core.input;
 
-import java.io.IOException;
-import java.util.List;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.query.dataset.RawQueryDataSetWithValueFilter;
@@ -47,6 +45,9 @@ import org.apache.iotdb.db.query.udf.datastructure.row.ElasticSerializableRowRec
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.query.timegenerator.TimeGenerator;
 import org.apache.iotdb.tsfile.utils.Binary;
+
+import java.io.IOException;
+import java.util.List;
 
 public class InputLayer {
 

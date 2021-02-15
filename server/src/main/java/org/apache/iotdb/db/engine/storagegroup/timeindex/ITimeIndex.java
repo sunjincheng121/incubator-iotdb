@@ -19,12 +19,13 @@
 
 package org.apache.iotdb.db.engine.storagegroup.timeindex;
 
+import org.apache.iotdb.db.exception.PartitionViolationException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Set;
-import org.apache.iotdb.db.exception.PartitionViolationException;
 
 public interface ITimeIndex {
 

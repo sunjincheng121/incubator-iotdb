@@ -18,9 +18,6 @@
  */
 package org.apache.iotdb.db.query.reader.chunk;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import org.apache.iotdb.db.engine.querycontext.ReadOnlyMemChunk;
 import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.read.common.BatchData;
@@ -28,6 +25,10 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.reader.IChunkReader;
 import org.apache.iotdb.tsfile.read.reader.IPageReader;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 /** To read chunk data in memory */
 public class MemChunkReader implements IChunkReader, IPointReader {

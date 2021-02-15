@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.cluster.utils;
 
-import java.util.Objects;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
+
+import java.util.Objects;
 
 /**
  * ClusterNode overrides hashcode() and equals() in Node to avoid duplicates in hash data structures

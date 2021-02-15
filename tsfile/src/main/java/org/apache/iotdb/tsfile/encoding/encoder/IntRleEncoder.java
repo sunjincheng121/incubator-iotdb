@@ -19,12 +19,13 @@
 
 package org.apache.iotdb.tsfile.encoding.encoder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 import org.apache.iotdb.tsfile.encoding.bitpacking.IntPacker;
 import org.apache.iotdb.tsfile.utils.ReadWriteForEncodingUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /** Encoder for int value using rle or bit-packing. */
 public class IntRleEncoder extends RleEncoder<Integer> {

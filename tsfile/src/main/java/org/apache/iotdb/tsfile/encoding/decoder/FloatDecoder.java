@@ -19,16 +19,18 @@
 
 package org.apache.iotdb.tsfile.encoding.decoder;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.encoding.encoder.FloatEncoder;
 import org.apache.iotdb.tsfile.exception.encoding.TsFileDecodingException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.iotdb.tsfile.utils.Binary;
 import org.apache.iotdb.tsfile.utils.ReadWriteForEncodingUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * Decoder for float or double value using rle or two diff. For more info about encoding pattern,

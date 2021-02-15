@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.db.utils;
 
+import org.apache.iotdb.db.sync.conf.SyncSenderDescriptor;
+
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.iotdb.db.sync.conf.SyncSenderDescriptor;
 
 public class SyncUtils {
 

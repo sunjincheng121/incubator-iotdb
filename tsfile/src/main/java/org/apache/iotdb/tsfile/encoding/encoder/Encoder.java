@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.tsfile.encoding.encoder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
 import org.apache.iotdb.tsfile.exception.encoding.TsFileEncodingException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.iotdb.tsfile.utils.Binary;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
 
 /**
  * This class is the parent class of all Encoders. Every encoder has a specific {@code

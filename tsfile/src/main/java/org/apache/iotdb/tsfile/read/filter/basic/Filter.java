@@ -18,10 +18,11 @@
  */
 package org.apache.iotdb.tsfile.read.filter.basic;
 
-import java.io.DataOutputStream;
-import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.read.filter.factory.FilterSerializeId;
+
+import java.io.DataOutputStream;
+import java.nio.ByteBuffer;
 
 /** Filter is a top level filter abstraction. */
 public interface Filter {

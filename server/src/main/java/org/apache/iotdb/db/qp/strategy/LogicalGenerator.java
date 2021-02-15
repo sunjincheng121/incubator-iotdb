@@ -18,17 +18,19 @@
  */
 package org.apache.iotdb.db.qp.strategy;
 
-import java.time.ZoneId;
+import org.apache.iotdb.db.qp.logical.Operator;
+import org.apache.iotdb.db.qp.sql.IoTDBSqlVisitor;
+import org.apache.iotdb.db.qp.sql.SqlBaseLexer;
+import org.apache.iotdb.db.qp.sql.SqlBaseParser;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.iotdb.db.qp.logical.Operator;
-import org.apache.iotdb.db.qp.sql.IoTDBSqlVisitor;
-import org.apache.iotdb.db.qp.sql.SqlBaseLexer;
-import org.apache.iotdb.db.qp.sql.SqlBaseParser;
+
+import java.time.ZoneId;
 
 /** LogicalGenerator. */
 public class LogicalGenerator {

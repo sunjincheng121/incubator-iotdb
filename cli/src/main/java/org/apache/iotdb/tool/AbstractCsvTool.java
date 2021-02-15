@@ -18,16 +18,18 @@
  */
 package org.apache.iotdb.tool;
 
-import java.io.IOException;
-import java.time.ZoneId;
-import jline.console.ConsoleReader;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import org.apache.iotdb.exception.ArgsErrorException;
 import org.apache.iotdb.rpc.IoTDBConnectionException;
 import org.apache.iotdb.rpc.StatementExecutionException;
 import org.apache.iotdb.session.Session;
+
+import jline.console.ConsoleReader;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+
+import java.io.IOException;
+import java.time.ZoneId;
 
 public abstract class AbstractCsvTool {
 

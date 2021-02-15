@@ -19,14 +19,15 @@
 
 package org.apache.iotdb.db.tools;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Comparator;
 import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.qp.utils.DatetimeUtils;
 import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * This tool can analyze the tsfile.resource files from a folder, or analyze a single

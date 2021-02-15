@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.db.qp.physical.crud;
 
-import java.util.List;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.query.udf.core.context.UDFContext;
+
+import java.util.List;
 
 /**
  * UDF execution plan.

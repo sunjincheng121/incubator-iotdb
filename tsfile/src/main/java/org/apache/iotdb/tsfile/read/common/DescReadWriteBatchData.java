@@ -18,10 +18,11 @@
  */
 package org.apache.iotdb.tsfile.read.common;
 
-import java.util.LinkedList;
 import org.apache.iotdb.tsfile.exception.write.UnSupportedDataTypeException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.utils.Binary;
+
+import java.util.LinkedList;
 
 /**
  * This class is for reading and writing batch data in reverse. The data source is from mergeReader.

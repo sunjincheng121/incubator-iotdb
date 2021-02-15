@@ -19,12 +19,14 @@
 
 package org.apache.iotdb.tsfile.fileSystem.fileInputFactory;
 
-import java.io.IOException;
-import java.nio.file.Paths;
 import org.apache.iotdb.tsfile.read.reader.LocalTsFileInput;
 import org.apache.iotdb.tsfile.read.reader.TsFileInput;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Paths;
 
 public class LocalFSInputFactory implements FileInputFactory {
 

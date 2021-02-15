@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.db.engine;
 
-import java.util.Collections;
 import org.apache.iotdb.db.metadata.MManager;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.service.IoTDB;
@@ -26,6 +25,8 @@ import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
 import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
+
+import java.util.Collections;
 
 public class MetadataManagerHelper {
 

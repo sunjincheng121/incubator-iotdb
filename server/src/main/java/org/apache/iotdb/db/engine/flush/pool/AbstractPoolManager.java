@@ -19,12 +19,13 @@
 
 package org.apache.iotdb.db.engine.flush.pool;
 
+import org.slf4j.Logger;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
 
 public abstract class AbstractPoolManager {
 

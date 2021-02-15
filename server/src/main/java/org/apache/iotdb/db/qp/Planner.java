@@ -18,12 +18,6 @@
  */
 package org.apache.iotdb.db.qp;
 
-import static org.apache.iotdb.db.conf.IoTDBConstant.TIME;
-
-import java.time.ZoneId;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.query.LogicalOperatorException;
 import org.apache.iotdb.db.exception.query.LogicalOptimizeException;
@@ -48,6 +42,13 @@ import org.apache.iotdb.db.qp.strategy.optimizer.RemoveNotOptimizer;
 import org.apache.iotdb.db.query.control.QueryResourceManager;
 import org.apache.iotdb.db.utils.TestOnly;
 import org.apache.iotdb.service.rpc.thrift.TSRawDataQueryReq;
+
+import java.time.ZoneId;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.apache.iotdb.db.conf.IoTDBConstant.TIME;
 
 /** provide a integration method for other user. */
 public class Planner {

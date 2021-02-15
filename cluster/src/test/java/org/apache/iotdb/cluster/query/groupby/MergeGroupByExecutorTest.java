@@ -19,9 +19,6 @@
 
 package org.apache.iotdb.cluster.query.groupby;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.query.BaseQueryTest;
 import org.apache.iotdb.cluster.query.RemoteQueryContext;
@@ -37,7 +34,12 @@ import org.apache.iotdb.db.query.factory.AggregateResultFactory;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.filter.TimeFilter;
 import org.apache.iotdb.tsfile.read.filter.basic.Filter;
+
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 public class MergeGroupByExecutorTest extends BaseQueryTest {
 

@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.rpc;
 
-import static org.apache.iotdb.rpc.RpcUtils.DEFAULT_BUF_CAPACITY;
-import static org.apache.iotdb.rpc.RpcUtils.DEFAULT_MAX_LENGTH;
-
-import java.io.IOException;
 import org.apache.thrift.transport.TTransport;
 import org.xerial.snappy.Snappy;
+
+import java.io.IOException;
+
+import static org.apache.iotdb.rpc.RpcUtils.DEFAULT_BUF_CAPACITY;
+import static org.apache.iotdb.rpc.RpcUtils.DEFAULT_MAX_LENGTH;
 
 public class TSnappyElasticFramedTransport extends TCompressedElasticFramedTransport {
 

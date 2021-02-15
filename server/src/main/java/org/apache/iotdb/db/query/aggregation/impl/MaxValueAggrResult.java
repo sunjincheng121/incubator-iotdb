@@ -19,15 +19,16 @@
 
 package org.apache.iotdb.db.query.aggregation.impl;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import org.apache.iotdb.db.query.aggregation.AggregateResult;
 import org.apache.iotdb.db.query.aggregation.AggregationType;
 import org.apache.iotdb.db.query.reader.series.IReaderByTimestamp;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.read.common.BatchData;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 public class MaxValueAggrResult extends AggregateResult {
 

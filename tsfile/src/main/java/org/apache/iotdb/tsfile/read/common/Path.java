@@ -18,8 +18,9 @@
  */
 package org.apache.iotdb.tsfile.read.common;
 
-import java.io.Serializable;
 import org.apache.iotdb.tsfile.common.constant.TsFileConstant;
+
+import java.io.Serializable;
 
 /**
  * This class represent a time series in TsFile, which is usually defined by a device and a

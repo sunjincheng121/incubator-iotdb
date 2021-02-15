@@ -18,12 +18,14 @@
  */
 package org.apache.iotdb.tsfile.encoding.decoder;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public abstract class GorillaDecoderV1 extends Decoder {
 

@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.db.auth;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import org.apache.iotdb.db.auth.authorizer.BasicAuthorizer;
 import org.apache.iotdb.db.auth.authorizer.IAuthorizer;
 import org.apache.iotdb.db.auth.entity.PrivilegeType;
@@ -28,10 +26,14 @@ import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.qp.logical.Operator.OperatorType;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class AuthorityCheckerTest {
 

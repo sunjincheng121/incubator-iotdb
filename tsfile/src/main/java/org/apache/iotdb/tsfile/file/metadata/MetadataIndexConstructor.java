@@ -19,6 +19,11 @@
 
 package org.apache.iotdb.tsfile.file.metadata;
 
+import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
+import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
+import org.apache.iotdb.tsfile.file.metadata.enums.MetadataIndexNodeType;
+import org.apache.iotdb.tsfile.write.writer.TsFileOutput;
+
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.List;
@@ -26,10 +31,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.TreeMap;
-import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
-import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
-import org.apache.iotdb.tsfile.file.metadata.enums.MetadataIndexNodeType;
-import org.apache.iotdb.tsfile.write.writer.TsFileOutput;
 
 public class MetadataIndexConstructor {
 

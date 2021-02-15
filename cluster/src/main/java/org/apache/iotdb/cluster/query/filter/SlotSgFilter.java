@@ -19,10 +19,11 @@
 
 package org.apache.iotdb.cluster.query.filter;
 
-import java.util.List;
 import org.apache.iotdb.cluster.config.ClusterConstant;
 import org.apache.iotdb.cluster.partition.slot.SlotPartitionTable;
 import org.apache.iotdb.db.metadata.MManager.StorageGroupFilter;
+
+import java.util.List;
 
 public class SlotSgFilter implements StorageGroupFilter {
 

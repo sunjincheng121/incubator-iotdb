@@ -19,10 +19,6 @@
 
 package org.apache.iotdb.db.query.udf.builtin;
 
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.PriorityQueue;
-import java.util.stream.Collectors;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.query.udf.api.UDTF;
@@ -36,6 +32,11 @@ import org.apache.iotdb.db.query.udf.api.exception.UDFException;
 import org.apache.iotdb.db.query.udf.api.exception.UDFInputSeriesDataTypeNotValidException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.utils.Pair;
+
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 public abstract class UDTFSelectK implements UDTF {
 

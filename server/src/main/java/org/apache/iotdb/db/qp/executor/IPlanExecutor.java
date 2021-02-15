@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.db.qp.executor;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import org.apache.iotdb.db.exception.BatchProcessException;
 import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
@@ -35,7 +33,11 @@ import org.apache.iotdb.db.qp.physical.crud.InsertTabletPlan;
 import org.apache.iotdb.db.query.context.QueryContext;
 import org.apache.iotdb.tsfile.exception.filter.QueryFilterOptimizationException;
 import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
+
 import org.apache.thrift.TException;
+
+import java.io.IOException;
+import java.sql.SQLException;
 
 public interface IPlanExecutor {
 

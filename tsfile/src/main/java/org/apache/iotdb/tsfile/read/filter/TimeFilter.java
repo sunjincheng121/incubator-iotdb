@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.tsfile.read.filter;
 
-import java.util.Set;
 import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.filter.factory.FilterType;
 import org.apache.iotdb.tsfile.read.filter.operator.Eq;
@@ -29,6 +28,8 @@ import org.apache.iotdb.tsfile.read.filter.operator.Lt;
 import org.apache.iotdb.tsfile.read.filter.operator.LtEq;
 import org.apache.iotdb.tsfile.read.filter.operator.NotEq;
 import org.apache.iotdb.tsfile.read.filter.operator.NotFilter;
+
+import java.util.Set;
 
 public class TimeFilter {
 

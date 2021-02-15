@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.cluster.server;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import org.apache.iotdb.cluster.config.ClusterDescriptor;
 import org.apache.iotdb.cluster.coordinator.Coordinator;
 import org.apache.iotdb.cluster.exception.ConfigInconsistentException;
@@ -51,6 +49,7 @@ import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.service.IoTDB;
 import org.apache.iotdb.db.service.RegisterManager;
 import org.apache.iotdb.service.rpc.thrift.TSStatus;
+
 import org.apache.thrift.TException;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.async.AsyncMethodCallback;
@@ -58,6 +57,9 @@ import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TServerTransport;
 import org.apache.thrift.transport.TTransportException;
+
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
 /**
  * MetaCluster manages the whole cluster's metadata, such as what nodes are in the cluster and the

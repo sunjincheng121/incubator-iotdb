@@ -19,10 +19,11 @@
 
 package org.apache.iotdb.rpc;
 
-import java.net.SocketException;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportFactory;
+
+import java.net.SocketException;
 
 public class TimeoutChangeableTFastFramedTransport extends TElasticFramedTransport
     implements TimeoutChangeableTransport {

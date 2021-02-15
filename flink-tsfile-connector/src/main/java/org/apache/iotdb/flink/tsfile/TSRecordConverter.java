@@ -19,11 +19,13 @@
 
 package org.apache.iotdb.flink.tsfile;
 
-import java.io.IOException;
-import java.io.Serializable;
-import org.apache.flink.util.Collector;
 import org.apache.iotdb.tsfile.write.record.TSRecord;
 import org.apache.iotdb.tsfile.write.schema.Schema;
+
+import org.apache.flink.util.Collector;
+
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * The converter describes how to turn a data object into multiple TSRecord objects, which is

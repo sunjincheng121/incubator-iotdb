@@ -19,9 +19,6 @@
 
 package org.apache.iotdb.cluster.query;
 
-import static org.junit.Assert.assertEquals;
-
-import java.time.ZoneId;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
@@ -31,8 +28,13 @@ import org.apache.iotdb.db.qp.logical.crud.FromOperator;
 import org.apache.iotdb.db.qp.logical.crud.QueryOperator;
 import org.apache.iotdb.db.qp.logical.crud.SelectOperator;
 import org.apache.iotdb.db.qp.physical.crud.RawDataQueryPlan;
+
 import org.junit.Before;
 import org.junit.Test;
+
+import java.time.ZoneId;
+
+import static org.junit.Assert.assertEquals;
 
 public class ClusterPhysicalGeneratorTest extends BaseQueryTest {
 

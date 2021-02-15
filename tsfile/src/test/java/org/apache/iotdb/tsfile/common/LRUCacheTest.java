@@ -18,10 +18,12 @@
  */
 package org.apache.iotdb.tsfile.common;
 
-import java.io.IOException;
 import org.apache.iotdb.tsfile.common.cache.LRUCache;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class LRUCacheTest {
 

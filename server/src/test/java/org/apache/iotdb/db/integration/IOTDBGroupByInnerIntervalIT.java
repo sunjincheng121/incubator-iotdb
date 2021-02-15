@@ -18,16 +18,18 @@
  */
 package org.apache.iotdb.db.integration;
 
-import static org.apache.iotdb.db.constant.TestConstant.*;
-import static org.junit.Assert.*;
-
-import java.sql.*;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
 import org.apache.iotdb.jdbc.Config;
 import org.apache.iotdb.jdbc.IoTDBSQLException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.sql.*;
+
+import static org.apache.iotdb.db.constant.TestConstant.*;
+import static org.junit.Assert.*;
 
 public class IOTDBGroupByInnerIntervalIT {
 

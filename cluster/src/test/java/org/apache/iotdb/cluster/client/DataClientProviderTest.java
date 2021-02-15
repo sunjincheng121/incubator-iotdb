@@ -19,18 +19,20 @@
 
 package org.apache.iotdb.cluster.client;
 
-import static org.junit.Assert.assertNotNull;
-
-import java.io.IOException;
-import java.net.ServerSocket;
 import org.apache.iotdb.cluster.client.sync.SyncDataClient;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.config.ClusterDescriptor;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
+
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol.Factory;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+
+import static org.junit.Assert.assertNotNull;
 
 public class DataClientProviderTest {
 

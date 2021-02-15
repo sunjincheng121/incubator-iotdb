@@ -19,10 +19,11 @@
 
 package org.apache.iotdb.db.engine.memtable;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.iotdb.db.rescon.TVListAllocator;
 import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PrimitiveMemTable extends AbstractMemTable {
 

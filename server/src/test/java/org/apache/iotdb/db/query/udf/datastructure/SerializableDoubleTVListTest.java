@@ -19,17 +19,19 @@
 
 package org.apache.iotdb.db.query.udf.datastructure;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.apache.iotdb.db.query.udf.datastructure.tv.SerializableDoubleTVList;
+import org.apache.iotdb.db.query.udf.datastructure.tv.SerializableTVList;
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+import org.junit.After;
+import org.junit.Before;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.iotdb.db.query.udf.datastructure.tv.SerializableDoubleTVList;
-import org.apache.iotdb.db.query.udf.datastructure.tv.SerializableTVList;
-import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
-import org.junit.After;
-import org.junit.Before;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class SerializableDoubleTVListTest extends SerializableTVListTest {
 

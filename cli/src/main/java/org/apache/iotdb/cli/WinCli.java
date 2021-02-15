@@ -18,24 +18,26 @@
  */
 package org.apache.iotdb.cli;
 
-import static org.apache.iotdb.cli.utils.IoTPrinter.print;
-import static org.apache.iotdb.cli.utils.IoTPrinter.println;
+import org.apache.iotdb.exception.ArgsErrorException;
+import org.apache.iotdb.jdbc.Config;
+import org.apache.iotdb.jdbc.IoTDBConnection;
+import org.apache.iotdb.rpc.RpcUtils;
 
-import java.io.Console;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Scanner;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.iotdb.exception.ArgsErrorException;
-import org.apache.iotdb.jdbc.Config;
-import org.apache.iotdb.jdbc.IoTDBConnection;
-import org.apache.iotdb.rpc.RpcUtils;
 import org.apache.thrift.TException;
+
+import java.io.Console;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+import static org.apache.iotdb.cli.utils.IoTPrinter.print;
+import static org.apache.iotdb.cli.utils.IoTPrinter.println;
 
 /** args[]: -h 127.0.0.1 -p 6667 -u root -pw root */
 public class WinCli extends AbstractCli {

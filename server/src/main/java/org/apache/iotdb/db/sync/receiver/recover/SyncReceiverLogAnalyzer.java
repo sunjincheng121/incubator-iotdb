@@ -18,11 +18,6 @@
  */
 package org.apache.iotdb.db.sync.receiver.recover;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import org.apache.commons.io.FileUtils;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.sync.conf.SyncConstant;
 import org.apache.iotdb.db.sync.receiver.load.FileLoader;
@@ -31,8 +26,15 @@ import org.apache.iotdb.db.sync.receiver.load.IFileLoader;
 import org.apache.iotdb.db.sync.receiver.load.LoadLogger;
 import org.apache.iotdb.db.sync.receiver.load.LoadType;
 import org.apache.iotdb.db.utils.FilePathUtils;
+
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class SyncReceiverLogAnalyzer implements ISyncReceiverLogAnalyzer {
 

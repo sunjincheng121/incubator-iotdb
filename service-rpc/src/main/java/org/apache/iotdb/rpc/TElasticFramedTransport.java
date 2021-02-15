@@ -18,13 +18,13 @@
  */
 package org.apache.iotdb.rpc;
 
-import static org.apache.iotdb.rpc.RpcUtils.DEFAULT_BUF_CAPACITY;
-import static org.apache.iotdb.rpc.RpcUtils.DEFAULT_MAX_LENGTH;
-
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.apache.thrift.transport.TTransportFactory;
+
+import static org.apache.iotdb.rpc.RpcUtils.DEFAULT_BUF_CAPACITY;
+import static org.apache.iotdb.rpc.RpcUtils.DEFAULT_MAX_LENGTH;
 
 public class TElasticFramedTransport extends TTransport {
 

@@ -18,12 +18,14 @@
  */
 package org.apache.iotdb.db.metadata;
 
-import static org.junit.Assert.assertArrayEquals;
-
-import java.util.Arrays;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertArrayEquals;
 
 public class MetaUtilsTest {
 

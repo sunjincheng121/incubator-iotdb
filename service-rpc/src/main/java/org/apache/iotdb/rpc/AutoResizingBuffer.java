@@ -18,9 +18,10 @@
  */
 package org.apache.iotdb.rpc;
 
-import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
 
 /**
  * Helper class that wraps a byte[] so that it can expand and be reused. Users should call

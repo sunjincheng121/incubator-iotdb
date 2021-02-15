@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.tsfile.v2.file.metadata;
 
-import java.nio.ByteBuffer;
-import java.util.List;
 import org.apache.iotdb.tsfile.file.metadata.TsFileMetadata;
 import org.apache.iotdb.tsfile.utils.BloomFilter;
 import org.apache.iotdb.tsfile.utils.Pair;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
+
+import java.nio.ByteBuffer;
+import java.util.List;
 
 public class TsFileMetadataV2 {
 

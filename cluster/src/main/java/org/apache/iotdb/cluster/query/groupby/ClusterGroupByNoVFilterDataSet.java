@@ -19,8 +19,6 @@
 
 package org.apache.iotdb.cluster.query.groupby;
 
-import java.util.ArrayList;
-import java.util.Set;
 import org.apache.iotdb.cluster.server.member.MetaGroupMember;
 import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
@@ -32,6 +30,9 @@ import org.apache.iotdb.db.query.dataset.groupby.GroupByWithoutValueFilterDataSe
 import org.apache.iotdb.db.query.filter.TsFileFilter;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.filter.basic.Filter;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class ClusterGroupByNoVFilterDataSet extends GroupByWithoutValueFilterDataSet {

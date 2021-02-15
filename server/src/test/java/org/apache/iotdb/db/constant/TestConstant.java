@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.db.constant;
 
-import java.io.File;
 import org.apache.iotdb.tsfile.write.record.TSRecord;
 import org.apache.iotdb.tsfile.write.record.datapoint.DataPoint;
+
+import java.io.File;
 
 public class TestConstant {
 

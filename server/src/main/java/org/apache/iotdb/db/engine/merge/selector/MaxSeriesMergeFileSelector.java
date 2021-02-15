@@ -19,14 +19,16 @@
 
 package org.apache.iotdb.db.engine.merge.selector;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import org.apache.iotdb.db.engine.merge.manage.MergeResource;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.exception.MergeException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * MaxSeriesMergeFileSelector is an extension of IMergeFileSelector which tries to maximize the

@@ -19,18 +19,20 @@
 
 package org.apache.iotdb.flink.tsfile;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.fs.FileInputSplit;
 import org.apache.flink.types.Row;
-import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /** Tests for RowTsFileInputFormat. */
 public class RowTsFileInputFormatTest extends RowTsFileInputFormatTestBase {

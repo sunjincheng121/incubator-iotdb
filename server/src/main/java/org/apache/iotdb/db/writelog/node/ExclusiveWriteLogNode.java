@@ -18,7 +18,21 @@
  */
 package org.apache.iotdb.db.writelog.node;
 
+import org.apache.iotdb.db.conf.IoTDBConfig;
+import org.apache.iotdb.db.conf.IoTDBDescriptor;
+import org.apache.iotdb.db.conf.directories.DirectoryManager;
+import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
+import org.apache.iotdb.db.qp.physical.PhysicalPlan;
+import org.apache.iotdb.db.writelog.io.ILogReader;
+import org.apache.iotdb.db.writelog.io.ILogWriter;
+import org.apache.iotdb.db.writelog.io.LogWriter;
+import org.apache.iotdb.db.writelog.io.MultiFileLogReader;
+
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,18 +44,6 @@ import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.io.FileUtils;
-import org.apache.iotdb.db.conf.IoTDBConfig;
-import org.apache.iotdb.db.conf.IoTDBDescriptor;
-import org.apache.iotdb.db.conf.directories.DirectoryManager;
-import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
-import org.apache.iotdb.db.qp.physical.PhysicalPlan;
-import org.apache.iotdb.db.writelog.io.ILogReader;
-import org.apache.iotdb.db.writelog.io.ILogWriter;
-import org.apache.iotdb.db.writelog.io.LogWriter;
-import org.apache.iotdb.db.writelog.io.MultiFileLogReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** This WriteLogNode is used to manage insert ahead logs of a TsFile. */
 public class ExclusiveWriteLogNode implements WriteLogNode, Comparable<ExclusiveWriteLogNode> {

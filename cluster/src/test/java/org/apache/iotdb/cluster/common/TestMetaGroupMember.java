@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.cluster.common;
 
-import java.util.ArrayList;
 import org.apache.iotdb.cluster.log.manage.MetaSingleSnapshotLogManager;
 import org.apache.iotdb.cluster.server.member.MetaGroupMember;
+
+import java.util.ArrayList;
 
 public class TestMetaGroupMember extends MetaGroupMember {
 

@@ -19,10 +19,6 @@
 
 package org.apache.iotdb.tsfile.read.reader.chunk;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.LinkedList;
-import java.util.List;
 import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
 import org.apache.iotdb.tsfile.compress.IUnCompressor;
 import org.apache.iotdb.tsfile.encoding.decoder.Decoder;
@@ -41,6 +37,11 @@ import org.apache.iotdb.tsfile.read.reader.IPageReader;
 import org.apache.iotdb.tsfile.read.reader.page.PageReader;
 import org.apache.iotdb.tsfile.v2.file.header.PageHeaderV2;
 import org.apache.iotdb.tsfile.v2.read.reader.page.PageReaderV2;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ChunkReader implements IChunkReader {
 

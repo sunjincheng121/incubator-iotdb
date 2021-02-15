@@ -18,18 +18,20 @@
 
 package org.apache.iotdb.flink;
 
+import org.apache.iotdb.session.pool.SessionPool;
+
+import com.google.common.collect.Lists;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-
-import com.google.common.collect.Lists;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.iotdb.session.pool.SessionPool;
-import org.junit.Before;
-import org.junit.Test;
 
 public class IoTDBSinkBatchInsertTest {
 

@@ -19,15 +19,17 @@
 
 package org.apache.iotdb.db.engine.modification;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.apache.iotdb.db.constant.TestConstant;
+import org.apache.iotdb.db.metadata.PartialPath;
+
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import org.apache.iotdb.db.constant.TestConstant;
-import org.apache.iotdb.db.metadata.PartialPath;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class ModificationFileTest {
 

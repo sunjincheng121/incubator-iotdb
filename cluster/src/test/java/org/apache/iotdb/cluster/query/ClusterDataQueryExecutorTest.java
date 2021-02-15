@@ -19,7 +19,6 @@
 
 package org.apache.iotdb.cluster.query;
 
-import java.io.IOException;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
@@ -31,7 +30,10 @@ import org.apache.iotdb.tsfile.read.expression.IExpression;
 import org.apache.iotdb.tsfile.read.expression.impl.SingleSeriesExpression;
 import org.apache.iotdb.tsfile.read.filter.ValueFilter;
 import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
+
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class ClusterDataQueryExecutorTest extends BaseQueryTest {
 

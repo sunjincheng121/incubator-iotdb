@@ -18,6 +18,11 @@
  */
 package org.apache.iotdb.db.engine.storagegroup;
 
+import org.apache.iotdb.db.conf.IoTDBDescriptor;
+import org.apache.iotdb.db.rescon.SystemInfo;
+import org.apache.iotdb.db.utils.MmapUtil;
+import org.apache.iotdb.db.utils.TestOnly;
+
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.util.List;
@@ -25,10 +30,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.apache.iotdb.db.conf.IoTDBDescriptor;
-import org.apache.iotdb.db.rescon.SystemInfo;
-import org.apache.iotdb.db.utils.MmapUtil;
-import org.apache.iotdb.db.utils.TestOnly;
 
 /** The storageGroupInfo records the total memory cost of the Storage Group. */
 public class StorageGroupInfo {

@@ -18,9 +18,10 @@
  */
 package org.apache.iotdb.db.auth.role;
 
+import org.apache.iotdb.db.auth.entity.Role;
+
 import java.io.IOException;
 import java.util.List;
-import org.apache.iotdb.db.auth.entity.Role;
 
 /** This interface manages the serialization/deserialization of the role objects. */
 public interface IRoleAccessor {

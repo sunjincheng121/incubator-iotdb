@@ -18,16 +18,18 @@
  */
 package org.apache.iotdb.tsfile.compress;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ThreadLocalRandom;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xerial.snappy.Snappy;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SnappyTest {
 

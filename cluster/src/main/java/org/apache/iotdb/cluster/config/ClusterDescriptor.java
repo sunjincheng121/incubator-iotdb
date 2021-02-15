@@ -19,7 +19,20 @@
 
 package org.apache.iotdb.cluster.config;
 
+import org.apache.iotdb.cluster.exception.BadSeedUrlFormatException;
+import org.apache.iotdb.db.conf.IoTDBConstant;
+import org.apache.iotdb.db.exception.query.QueryProcessException;
+
 import com.google.common.net.InetAddresses;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,17 +43,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.iotdb.cluster.exception.BadSeedUrlFormatException;
-import org.apache.iotdb.db.conf.IoTDBConstant;
-import org.apache.iotdb.db.exception.query.QueryProcessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ClusterDescriptor {
 

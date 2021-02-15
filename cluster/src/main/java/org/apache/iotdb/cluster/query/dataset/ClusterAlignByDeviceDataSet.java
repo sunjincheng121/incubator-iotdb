@@ -19,10 +19,6 @@
 
 package org.apache.iotdb.cluster.query.dataset;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.apache.iotdb.cluster.metadata.CMManager;
 import org.apache.iotdb.db.conf.IoTDBConstant;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
@@ -32,6 +28,11 @@ import org.apache.iotdb.db.query.context.QueryContext;
 import org.apache.iotdb.db.query.dataset.AlignByDeviceDataSet;
 import org.apache.iotdb.db.query.executor.IQueryRouter;
 import org.apache.iotdb.db.service.IoTDB;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ClusterAlignByDeviceDataSet extends AlignByDeviceDataSet {
 

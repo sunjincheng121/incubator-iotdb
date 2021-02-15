@@ -18,9 +18,10 @@
  */
 package org.apache.iotdb.tsfile.utils;
 
-import java.io.Serializable;
 import org.apache.iotdb.tsfile.exception.write.UnSupportedDataTypeException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+import java.io.Serializable;
 
 public abstract class TsPrimitiveType implements Serializable {
 

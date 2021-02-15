@@ -18,10 +18,11 @@
  */
 package org.apache.iotdb.db.auth.user;
 
-import java.util.List;
-import java.util.Map;
 import org.apache.iotdb.db.auth.AuthException;
 import org.apache.iotdb.db.auth.entity.User;
+
+import java.util.List;
+import java.util.Map;
 
 /** This interface provides accesses to users. */
 public interface IUserManager {

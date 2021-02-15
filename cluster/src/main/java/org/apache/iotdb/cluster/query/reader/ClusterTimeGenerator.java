@@ -19,8 +19,6 @@
 
 package org.apache.iotdb.cluster.query.reader;
 
-import java.io.IOException;
-import java.util.Collections;
 import org.apache.iotdb.cluster.metadata.CMManager;
 import org.apache.iotdb.cluster.server.member.MetaGroupMember;
 import org.apache.iotdb.db.exception.StorageEngineException;
@@ -34,6 +32,9 @@ import org.apache.iotdb.tsfile.read.expression.IExpression;
 import org.apache.iotdb.tsfile.read.expression.impl.SingleSeriesExpression;
 import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.reader.IBatchReader;
+
+import java.io.IOException;
+import java.util.Collections;
 
 public class ClusterTimeGenerator extends ServerTimeGenerator {
 

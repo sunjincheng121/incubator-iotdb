@@ -19,14 +19,15 @@
 
 package org.apache.iotdb.cluster.log.logtypes;
 
-import static org.apache.iotdb.cluster.log.Log.Types.TEST_LARGE_CONTENT;
+import org.apache.iotdb.cluster.log.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
-import org.apache.iotdb.cluster.log.Log;
+
+import static org.apache.iotdb.cluster.log.Log.Types.TEST_LARGE_CONTENT;
 
 public class LargeTestLog extends Log {
   private ByteBuffer data;

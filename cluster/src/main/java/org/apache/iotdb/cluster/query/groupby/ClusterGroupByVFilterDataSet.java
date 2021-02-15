@@ -19,7 +19,6 @@
 
 package org.apache.iotdb.cluster.query.groupby;
 
-import java.util.ArrayList;
 import org.apache.iotdb.cluster.query.reader.ClusterReaderFactory;
 import org.apache.iotdb.cluster.query.reader.ClusterTimeGenerator;
 import org.apache.iotdb.cluster.server.member.MetaGroupMember;
@@ -36,6 +35,8 @@ import org.apache.iotdb.db.query.reader.series.IReaderByTimestamp;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.expression.IExpression;
 import org.apache.iotdb.tsfile.read.query.timegenerator.TimeGenerator;
+
+import java.util.ArrayList;
 
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class ClusterGroupByVFilterDataSet extends GroupByWithValueFilterDataSet {

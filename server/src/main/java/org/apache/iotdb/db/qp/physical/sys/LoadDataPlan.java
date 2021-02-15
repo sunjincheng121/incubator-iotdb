@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.db.qp.physical.sys;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.qp.logical.Operator;
 import org.apache.iotdb.db.qp.physical.PhysicalPlan;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 public class LoadDataPlan extends PhysicalPlan {
 

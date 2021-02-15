@@ -18,11 +18,12 @@
  */
 package org.apache.iotdb.db.writelog.manager;
 
+import org.apache.iotdb.db.writelog.node.WriteLogNode;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.apache.iotdb.db.writelog.node.WriteLogNode;
 
 /** This interface provides accesses to WriteLogNode. */
 public interface WriteLogNodeManager {

@@ -19,12 +19,6 @@
 
 package org.apache.iotdb.db.engine.compaction;
 
-import static org.apache.iotdb.db.engine.compaction.utils.CompactionLogger.COMPACTION_LOG_NAME;
-import static org.junit.Assert.assertFalse;
-
-import java.io.File;
-import java.io.IOException;
-import org.apache.commons.io.FileUtils;
 import org.apache.iotdb.db.constant.TestConstant;
 import org.apache.iotdb.db.engine.compaction.TsFileManagement.CompactionMergeTask;
 import org.apache.iotdb.db.engine.compaction.level.LevelCompactionTsFileManagement;
@@ -32,9 +26,17 @@ import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
 import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
+
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.apache.iotdb.db.engine.compaction.utils.CompactionLogger.COMPACTION_LOG_NAME;
+import static org.junit.Assert.assertFalse;
 
 public class LevelCompactionLogTest extends LevelCompactionTest {
 

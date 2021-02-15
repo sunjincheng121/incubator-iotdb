@@ -17,10 +17,11 @@
  */
 package org.apache.iotdb.mqtt;
 
-import java.util.Random;
 import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
+
+import java.util.Random;
 
 public class MQTTClient {
   public static void main(String[] args) throws Exception {

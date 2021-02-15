@@ -18,15 +18,6 @@
  */
 package org.apache.iotdb.db.qp.logical;
 
-import static org.apache.iotdb.db.index.common.IndexConstant.BLOCK_SIZE;
-import static org.apache.iotdb.db.index.common.IndexConstant.PAA_DIM;
-import static org.apache.iotdb.db.index.common.IndexConstant.PATTERN;
-import static org.apache.iotdb.db.index.common.IndexConstant.THRESHOLD;
-import static org.apache.iotdb.db.index.common.IndexConstant.TOP_K;
-
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.List;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.index.common.IndexType;
 import org.apache.iotdb.db.qp.logical.Operator.OperatorType;
@@ -34,9 +25,20 @@ import org.apache.iotdb.db.qp.logical.crud.QueryOperator;
 import org.apache.iotdb.db.qp.logical.sys.CreateIndexOperator;
 import org.apache.iotdb.db.qp.logical.sys.DropIndexOperator;
 import org.apache.iotdb.db.qp.strategy.LogicalGenerator;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.apache.iotdb.db.index.common.IndexConstant.BLOCK_SIZE;
+import static org.apache.iotdb.db.index.common.IndexConstant.PAA_DIM;
+import static org.apache.iotdb.db.index.common.IndexConstant.PATTERN;
+import static org.apache.iotdb.db.index.common.IndexConstant.THRESHOLD;
+import static org.apache.iotdb.db.index.common.IndexConstant.TOP_K;
 
 public class IndexLogicalPlanTest {
 

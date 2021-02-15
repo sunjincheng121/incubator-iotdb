@@ -19,15 +19,16 @@
 
 package org.apache.iotdb.cluster.log.snapshot;
 
+import org.apache.iotdb.cluster.partition.PartitionGroup;
+import org.apache.iotdb.cluster.rpc.thrift.Node;
+import org.apache.iotdb.db.utils.SerializeUtils;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.apache.iotdb.cluster.partition.PartitionGroup;
-import org.apache.iotdb.cluster.rpc.thrift.Node;
-import org.apache.iotdb.db.utils.SerializeUtils;
 
 /**
  * PullSnapshotTaskDescriptor describes a pull-snapshot-task with the slots to pull, the previous

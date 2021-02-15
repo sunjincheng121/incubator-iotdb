@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.cross.tests.tools.importCsv;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -28,6 +26,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractScript {
 

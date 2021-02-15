@@ -18,11 +18,12 @@
  */
 package org.apache.iotdb.tsfile.read.controller;
 
-import java.io.IOException;
 import org.apache.iotdb.tsfile.common.cache.LRUCache;
 import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
 import org.apache.iotdb.tsfile.read.TsFileSequenceReader;
 import org.apache.iotdb.tsfile.read.common.Chunk;
+
+import java.io.IOException;
 
 /** Read one Chunk and cache it into a LRUCache, only used in tsfile module. */
 public class CachedChunkLoaderImpl implements IChunkLoader {

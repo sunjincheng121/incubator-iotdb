@@ -19,11 +19,6 @@
 
 package org.apache.iotdb.cluster.utils;
 
-import static org.apache.iotdb.cluster.config.ClusterConstant.HASH_SALT;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import org.apache.iotdb.cluster.partition.PartitionTable;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.db.engine.StorageEngine;
@@ -57,6 +52,12 @@ import org.apache.iotdb.tsfile.read.filter.operator.AndFilter;
 import org.apache.iotdb.tsfile.read.filter.operator.NotFilter;
 import org.apache.iotdb.tsfile.read.filter.operator.OrFilter;
 import org.apache.iotdb.tsfile.utils.Murmur128Hash;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static org.apache.iotdb.cluster.config.ClusterConstant.HASH_SALT;
 
 public class PartitionUtils {
 

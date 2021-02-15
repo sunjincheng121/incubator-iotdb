@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.cluster.server.monitor;
 
-import java.util.Objects;
 import org.apache.iotdb.cluster.rpc.thrift.TNodeStatus;
+
+import java.util.Objects;
 
 /** NodeStatus contains the last-known spec and load of a node in the cluster. */
 @SuppressWarnings("java:S1135")

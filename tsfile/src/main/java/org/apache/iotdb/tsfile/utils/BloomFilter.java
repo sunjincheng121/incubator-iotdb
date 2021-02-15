@@ -18,8 +18,9 @@
  */
 package org.apache.iotdb.tsfile.utils;
 
-import java.util.BitSet;
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
+
+import java.util.BitSet;
 
 public class BloomFilter {
 

@@ -18,11 +18,12 @@
  */
 package org.apache.iotdb.db.conf.directories.strategy;
 
+import org.apache.iotdb.db.exception.DiskSpaceInsufficientException;
+import org.apache.iotdb.db.utils.CommonUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import org.apache.iotdb.db.exception.DiskSpaceInsufficientException;
-import org.apache.iotdb.db.utils.CommonUtils;
 
 public class RandomOnDiskUsableSpaceStrategy extends DirectoryStrategy {
 

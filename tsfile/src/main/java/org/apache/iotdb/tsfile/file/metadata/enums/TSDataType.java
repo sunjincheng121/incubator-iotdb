@@ -18,10 +18,11 @@
  */
 package org.apache.iotdb.tsfile.file.metadata.enums;
 
+import org.apache.iotdb.tsfile.exception.write.UnSupportedDataTypeException;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import org.apache.iotdb.tsfile.exception.write.UnSupportedDataTypeException;
 
 public enum TSDataType {
   /** BOOLEAN */

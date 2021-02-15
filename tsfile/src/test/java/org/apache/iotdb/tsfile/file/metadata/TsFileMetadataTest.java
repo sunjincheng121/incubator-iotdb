@@ -18,19 +18,21 @@
  */
 package org.apache.iotdb.tsfile.file.metadata;
 
+import org.apache.iotdb.tsfile.constant.TestConstant;
+import org.apache.iotdb.tsfile.file.metadata.utils.TestHelper;
+import org.apache.iotdb.tsfile.file.metadata.utils.Utils;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import org.apache.iotdb.tsfile.constant.TestConstant;
-import org.apache.iotdb.tsfile.file.metadata.utils.TestHelper;
-import org.apache.iotdb.tsfile.file.metadata.utils.Utils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class TsFileMetadataTest {
 

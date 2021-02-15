@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.tsfile.encoding.encoder;
 
+import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 
 /** Encoder for int value using gorilla encoding. */
 public class SinglePrecisionEncoderV1 extends GorillaEncoderV1 {

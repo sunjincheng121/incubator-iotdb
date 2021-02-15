@@ -19,14 +19,15 @@
 
 package org.apache.iotdb.db.query.udf.datastructure;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
 import org.apache.iotdb.db.query.udf.service.TemporaryQueryDataFileService;
 import org.apache.iotdb.tsfile.utils.PublicBAOS;
+
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 public interface SerializableList {
 

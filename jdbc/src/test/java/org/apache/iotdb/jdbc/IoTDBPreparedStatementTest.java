@@ -18,22 +18,24 @@
  */
 package org.apache.iotdb.jdbc;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.ZoneId;
 import org.apache.iotdb.rpc.TSStatusCode;
 import org.apache.iotdb.service.rpc.thrift.*;
 import org.apache.iotdb.service.rpc.thrift.TSIService.Iface;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.ZoneId;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class IoTDBPreparedStatementTest {
 

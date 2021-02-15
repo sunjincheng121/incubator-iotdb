@@ -18,10 +18,6 @@
  */
 package org.apache.iotdb.db.qp.physical;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import org.antlr.v4.runtime.RecognitionException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.metadata.PartialPath;
@@ -38,9 +34,15 @@ import org.apache.iotdb.tsfile.read.expression.IExpression;
 import org.apache.iotdb.tsfile.read.expression.impl.BinaryExpression;
 import org.apache.iotdb.tsfile.read.expression.impl.SingleSeriesExpression;
 import org.apache.iotdb.tsfile.read.filter.ValueFilter;
+
+import org.antlr.v4.runtime.RecognitionException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+
+import static org.junit.Assert.assertEquals;
 
 /** test the correctness of {@linkplain ConcatPathOptimizer ConcatPathOptimizer} */
 public class ConcatOptimizerTest {

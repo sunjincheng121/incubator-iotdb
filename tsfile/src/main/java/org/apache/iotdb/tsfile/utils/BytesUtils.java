@@ -18,12 +18,14 @@
  */
 package org.apache.iotdb.tsfile.utils;
 
+import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * BytesUtils is a utility class. It provide conversion among byte array and other type including

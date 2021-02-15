@@ -18,20 +18,22 @@
  */
 package org.apache.iotdb.db.qp.other;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
-
-import java.util.Arrays;
-import java.util.Collection;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.qp.Planner;
 import org.apache.iotdb.db.qp.physical.sys.AuthorPlan;
 import org.apache.iotdb.tsfile.read.common.Path;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 
 /** test ast node parsing on authorization */
 @RunWith(Parameterized.class)

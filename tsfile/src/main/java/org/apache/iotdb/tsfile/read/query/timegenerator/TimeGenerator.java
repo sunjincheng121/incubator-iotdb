@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.tsfile.read.query.timegenerator;
 
-import java.io.IOException;
-import java.util.*;
 import org.apache.iotdb.tsfile.exception.write.UnSupportedDataTypeException;
 import org.apache.iotdb.tsfile.read.common.Path;
 import org.apache.iotdb.tsfile.read.expression.ExpressionType;
@@ -31,6 +29,9 @@ import org.apache.iotdb.tsfile.read.query.timegenerator.node.LeafNode;
 import org.apache.iotdb.tsfile.read.query.timegenerator.node.Node;
 import org.apache.iotdb.tsfile.read.query.timegenerator.node.OrNode;
 import org.apache.iotdb.tsfile.read.reader.IBatchReader;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * All SingleSeriesExpression involved in a IExpression will be transferred to a TimeGenerator tree

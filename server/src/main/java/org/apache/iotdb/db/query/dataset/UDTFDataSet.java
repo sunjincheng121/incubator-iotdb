@@ -19,9 +19,6 @@
 
 package org.apache.iotdb.db.query.dataset;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.metadata.PartialPath;
@@ -40,6 +37,10 @@ import org.apache.iotdb.db.query.udf.core.transformer.UDFQueryRowWindowTransform
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
 import org.apache.iotdb.tsfile.read.query.timegenerator.TimeGenerator;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class UDTFDataSet extends QueryDataSet {
 

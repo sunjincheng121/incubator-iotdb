@@ -18,13 +18,6 @@
  */
 package org.apache.iotdb.spark.tsfile.qp.optimizer;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.iotdb.spark.tsfile.qp.common.BasicOperator;
 import org.apache.iotdb.spark.tsfile.qp.common.FilterOperator;
 import org.apache.iotdb.spark.tsfile.qp.common.SQLConstant;
@@ -33,6 +26,14 @@ import org.apache.iotdb.spark.tsfile.qp.common.TSQueryPlan;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.TsFileSequenceReader;
 import org.apache.iotdb.tsfile.utils.Pair;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PhysicalOptimizer {
 

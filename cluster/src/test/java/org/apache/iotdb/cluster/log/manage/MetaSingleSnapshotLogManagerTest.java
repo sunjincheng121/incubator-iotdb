@@ -19,11 +19,6 @@
 
 package org.apache.iotdb.cluster.log.manage;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import org.apache.iotdb.cluster.common.IoTDBTest;
 import org.apache.iotdb.cluster.common.TestLogApplier;
 import org.apache.iotdb.cluster.common.TestUtils;
@@ -37,9 +32,16 @@ import org.apache.iotdb.db.exception.StartupException;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.metadata.PartialPath;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 public class MetaSingleSnapshotLogManagerTest extends IoTDBTest {
 

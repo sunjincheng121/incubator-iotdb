@@ -18,8 +18,9 @@
  */
 package org.apache.iotdb.tsfile.utils;
 
-import java.io.File;
 import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
+
+import java.io.File;
 
 /**
  * FileUtils is just used for return file attribute like file size, and contains some measurement

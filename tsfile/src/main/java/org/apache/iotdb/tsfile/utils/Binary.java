@@ -18,9 +18,10 @@
  */
 package org.apache.iotdb.tsfile.utils;
 
+import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
+
 import java.io.Serializable;
 import java.util.Arrays;
-import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 
 /**
  * Override compareTo() and equals() function to Binary class. This class is used to accept Java

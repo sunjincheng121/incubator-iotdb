@@ -19,11 +19,6 @@
 
 package org.apache.iotdb.cluster.query.groupby;
 
-import static org.junit.Assert.assertFalse;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.query.BaseQueryTest;
 import org.apache.iotdb.cluster.query.RemoteQueryContext;
@@ -41,7 +36,14 @@ import org.apache.iotdb.tsfile.read.expression.impl.BinaryExpression;
 import org.apache.iotdb.tsfile.read.expression.impl.SingleSeriesExpression;
 import org.apache.iotdb.tsfile.read.filter.TimeFilter;
 import org.apache.iotdb.tsfile.read.filter.ValueFilter;
+
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertFalse;
 
 public class ClusterGroupByVFilterDataSetTest extends BaseQueryTest {
 

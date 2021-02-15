@@ -18,14 +18,16 @@
  */
 package org.apache.iotdb.db.qp.utils;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.iotdb.db.exception.query.LogicalOperatorException;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import org.apache.iotdb.db.exception.query.LogicalOperatorException;
-import org.junit.Assert;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class DatetimeQueryDataSetUtilsTest {
 

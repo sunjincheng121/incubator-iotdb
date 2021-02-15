@@ -19,18 +19,6 @@
 
 package org.apache.iotdb.flink.tsfile;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Optional;
-import javax.annotation.Nullable;
-import org.apache.flink.api.common.io.FileOutputFormat;
-import org.apache.flink.core.fs.Path;
-import org.apache.flink.runtime.util.HadoopUtils;
-import org.apache.flink.util.Preconditions;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.iotdb.flink.tsfile.util.TSFileConfigUtil;
 import org.apache.iotdb.hadoop.fileSystem.HDFSOutput;
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
@@ -38,6 +26,21 @@ import org.apache.iotdb.tsfile.write.TsFileWriter;
 import org.apache.iotdb.tsfile.write.schema.Schema;
 import org.apache.iotdb.tsfile.write.writer.LocalTsFileOutput;
 import org.apache.iotdb.tsfile.write.writer.TsFileOutput;
+
+import org.apache.flink.api.common.io.FileOutputFormat;
+import org.apache.flink.core.fs.Path;
+import org.apache.flink.runtime.util.HadoopUtils;
+import org.apache.flink.util.Preconditions;
+import org.apache.hadoop.conf.Configuration;
+
+import javax.annotation.Nullable;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Optional;
 
 /**
  * The abstract base class of the output formats which write data to TsFile.

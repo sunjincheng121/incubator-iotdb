@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.tsfile.read;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
 import org.apache.iotdb.tsfile.read.common.Path;
 import org.apache.iotdb.tsfile.read.common.RowRecord;
@@ -35,8 +33,12 @@ import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
 import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
 import org.apache.iotdb.tsfile.utils.Binary;
 import org.apache.iotdb.tsfile.utils.TsFileGeneratorForTest;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class ReadOnlyTsFileTest {
 

@@ -19,12 +19,14 @@
 
 package org.apache.iotdb.cluster.server.handlers.caller;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.iotdb.cluster.log.Snapshot;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
+
 import org.apache.thrift.async.AsyncMethodCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** SnapshotCatchUpHandler receives the result of sending a snapshot to a stale node. */
 public class SnapshotCatchUpHandler implements AsyncMethodCallback<Void> {

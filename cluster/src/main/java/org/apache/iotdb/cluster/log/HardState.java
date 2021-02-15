@@ -19,12 +19,14 @@
 
 package org.apache.iotdb.cluster.log;
 
-import java.nio.ByteBuffer;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.db.utils.SerializeUtils;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.nio.ByteBuffer;
 
 public class HardState {
 

@@ -19,14 +19,16 @@
 
 package org.apache.iotdb.flink.util;
 
-import static org.junit.Assert.assertTrue;
+import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
+
+import org.junit.Test;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
-import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * This test is used to help maintain the {@link

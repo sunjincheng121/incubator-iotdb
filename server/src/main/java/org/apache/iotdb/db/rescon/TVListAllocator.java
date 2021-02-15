@@ -19,10 +19,6 @@
 
 package org.apache.iotdb.db.rescon;
 
-import java.util.ArrayDeque;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Queue;
 import org.apache.iotdb.db.conf.IoTDBConstant;
 import org.apache.iotdb.db.exception.StartupException;
 import org.apache.iotdb.db.service.IService;
@@ -30,6 +26,11 @@ import org.apache.iotdb.db.service.JMXService;
 import org.apache.iotdb.db.service.ServiceType;
 import org.apache.iotdb.db.utils.datastructure.TVList;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+import java.util.ArrayDeque;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Queue;
 
 public class TVListAllocator implements TVListAllocatorMBean, IService {
 

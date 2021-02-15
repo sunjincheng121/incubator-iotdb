@@ -18,9 +18,10 @@
  */
 package org.apache.iotdb.spark.tsfile.qp.common;
 
+import org.apache.iotdb.tsfile.utils.StringContainer;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.iotdb.tsfile.utils.StringContainer;
 
 /**
  * This class is for filter operator and implements {@link Operator} .<br>

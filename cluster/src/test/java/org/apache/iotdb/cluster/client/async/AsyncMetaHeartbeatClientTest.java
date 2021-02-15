@@ -19,13 +19,15 @@
 
 package org.apache.iotdb.cluster.client.async;
 
-import java.io.IOException;
 import org.apache.iotdb.cluster.client.async.AsyncMetaHeartbeatClient.FactoryAsync;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.rpc.thrift.RaftService.AsyncClient;
+
 import org.apache.thrift.protocol.TBinaryProtocol.Factory;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class AsyncMetaHeartbeatClientTest {
 

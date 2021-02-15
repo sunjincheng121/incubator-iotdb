@@ -18,11 +18,13 @@
  */
 package org.apache.iotdb.tsfile.write.record.datapoint;
 
-import java.io.IOException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.write.chunk.IChunkWriter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * a subclass for Long data type extends DataPoint.

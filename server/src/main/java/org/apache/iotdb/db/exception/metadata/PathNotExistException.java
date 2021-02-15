@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.db.exception.metadata;
 
-import java.util.List;
 import org.apache.iotdb.rpc.TSStatusCode;
+
+import java.util.List;
 
 public class PathNotExistException extends MetadataException {
 

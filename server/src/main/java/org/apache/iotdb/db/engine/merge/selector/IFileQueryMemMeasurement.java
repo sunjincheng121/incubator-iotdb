@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.db.engine.merge.selector;
 
-import java.io.IOException;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
+
+import java.io.IOException;
 
 @FunctionalInterface
 /**

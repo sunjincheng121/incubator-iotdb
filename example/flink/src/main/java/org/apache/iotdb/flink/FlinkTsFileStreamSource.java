@@ -17,12 +17,12 @@
  */
 package org.apache.iotdb.flink;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.apache.iotdb.flink.tsfile.RowRowRecordParser;
+import org.apache.iotdb.flink.tsfile.TsFileInputFormat;
+import org.apache.iotdb.tsfile.common.constant.QueryConstant;
+import org.apache.iotdb.tsfile.read.common.Path;
+import org.apache.iotdb.tsfile.read.expression.QueryExpression;
+
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
@@ -30,11 +30,13 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamUtils;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.types.Row;
-import org.apache.iotdb.flink.tsfile.RowRowRecordParser;
-import org.apache.iotdb.flink.tsfile.TsFileInputFormat;
-import org.apache.iotdb.tsfile.common.constant.QueryConstant;
-import org.apache.iotdb.tsfile.read.common.Path;
-import org.apache.iotdb.tsfile.read.expression.QueryExpression;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /** The example of reading TsFile via Flink DataStream API. */
 public class FlinkTsFileStreamSource {

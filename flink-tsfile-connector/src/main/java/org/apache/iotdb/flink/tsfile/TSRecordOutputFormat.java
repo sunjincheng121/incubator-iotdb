@@ -19,13 +19,15 @@
 
 package org.apache.iotdb.flink.tsfile;
 
-import java.io.IOException;
-import org.apache.flink.util.Collector;
-import org.apache.flink.util.FlinkRuntimeException;
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
 import org.apache.iotdb.tsfile.write.record.TSRecord;
 import org.apache.iotdb.tsfile.write.schema.Schema;
+
+import org.apache.flink.util.Collector;
+import org.apache.flink.util.FlinkRuntimeException;
+
+import java.io.IOException;
 
 /**
  * Output format that writes TsFiles by {@link TSRecord}. Users need to provide a {@link

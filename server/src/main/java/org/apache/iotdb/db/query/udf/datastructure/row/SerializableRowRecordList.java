@@ -19,12 +19,6 @@
 
 package org.apache.iotdb.db.query.udf.datastructure.row;
 
-import static org.apache.iotdb.db.conf.IoTDBConstant.MB;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.query.udf.datastructure.SerializableList;
 import org.apache.iotdb.tsfile.exception.write.UnSupportedDataTypeException;
@@ -32,6 +26,13 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.utils.Binary;
 import org.apache.iotdb.tsfile.utils.PublicBAOS;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.iotdb.db.conf.IoTDBConstant.MB;
 
 public class SerializableRowRecordList implements SerializableList {
 

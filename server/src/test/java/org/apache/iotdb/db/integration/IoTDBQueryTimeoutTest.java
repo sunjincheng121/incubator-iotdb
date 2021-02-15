@@ -18,21 +18,23 @@
  */
 package org.apache.iotdb.db.integration;
 
-import static org.junit.Assert.fail;
+import org.apache.iotdb.db.utils.EnvironmentUtils;
+import org.apache.iotdb.jdbc.Config;
+import org.apache.iotdb.jdbc.IoTDBSQLException;
+import org.apache.iotdb.jdbc.IoTDBStatement;
+
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-import org.apache.iotdb.db.utils.EnvironmentUtils;
-import org.apache.iotdb.jdbc.Config;
-import org.apache.iotdb.jdbc.IoTDBSQLException;
-import org.apache.iotdb.jdbc.IoTDBStatement;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 public class IoTDBQueryTimeoutTest {
 

@@ -18,6 +18,8 @@
  */
 package org.apache.iotdb.db.auth.entity;
 
+import org.apache.iotdb.db.utils.SerializeUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.nio.ByteBuffer;
@@ -26,7 +28,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.iotdb.db.utils.SerializeUtils;
 
 /**
  * This class represents a privilege on a specific seriesPath. If the privilege is seriesPath-free,

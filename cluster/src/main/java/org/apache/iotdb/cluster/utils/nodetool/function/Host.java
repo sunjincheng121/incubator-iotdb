@@ -14,14 +14,16 @@
  */
 package org.apache.iotdb.cluster.utils.nodetool.function;
 
-import static org.apache.iotdb.cluster.utils.nodetool.Printer.msgPrintln;
+import org.apache.iotdb.cluster.partition.PartitionGroup;
+import org.apache.iotdb.cluster.utils.nodetool.ClusterMonitorMBean;
 
 import io.airlift.airline.Command;
 import io.airlift.airline.Option;
+
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.iotdb.cluster.partition.PartitionGroup;
-import org.apache.iotdb.cluster.utils.nodetool.ClusterMonitorMBean;
+
+import static org.apache.iotdb.cluster.utils.nodetool.Printer.msgPrintln;
 
 @Command(
     name = "host",

@@ -19,6 +19,16 @@
 
 package org.apache.iotdb.cluster.log.snapshot;
 
+import org.apache.iotdb.cluster.exception.CheckConsistencyException;
+import org.apache.iotdb.cluster.exception.SnapshotInstallationException;
+import org.apache.iotdb.cluster.log.Snapshot;
+import org.apache.iotdb.cluster.partition.slot.SlotPartitionTable;
+import org.apache.iotdb.cluster.server.member.DataGroupMember;
+import org.apache.iotdb.cluster.server.member.RaftMember;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -28,14 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import org.apache.iotdb.cluster.exception.CheckConsistencyException;
-import org.apache.iotdb.cluster.exception.SnapshotInstallationException;
-import org.apache.iotdb.cluster.log.Snapshot;
-import org.apache.iotdb.cluster.partition.slot.SlotPartitionTable;
-import org.apache.iotdb.cluster.server.member.DataGroupMember;
-import org.apache.iotdb.cluster.server.member.RaftMember;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** PartitionedSnapshot stores the snapshot of each slot in a map. */
 public class PartitionedSnapshot<T extends Snapshot> extends Snapshot {

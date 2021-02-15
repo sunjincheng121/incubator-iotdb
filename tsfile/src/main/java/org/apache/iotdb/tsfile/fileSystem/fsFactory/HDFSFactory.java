@@ -19,6 +19,9 @@
 
 package org.apache.iotdb.tsfile.fileSystem.fsFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -28,8 +31,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HDFSFactory implements FSFactory {
 

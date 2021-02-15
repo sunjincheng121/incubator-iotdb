@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.db.auth.authorizer;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.iotdb.db.auth.AuthException;
 import org.apache.iotdb.db.auth.entity.Role;
 import org.apache.iotdb.db.auth.entity.User;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /** This interface provides all authorization-relative operations. */
 public interface IAuthorizer {

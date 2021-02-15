@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.tsfile.read.query.timegenerator;
 
-import java.io.IOException;
 import org.apache.iotdb.tsfile.read.query.timegenerator.node.AndNode;
 import org.apache.iotdb.tsfile.read.query.timegenerator.node.LeafNode;
 import org.apache.iotdb.tsfile.read.query.timegenerator.node.Node;
@@ -26,8 +25,11 @@ import org.apache.iotdb.tsfile.read.query.timegenerator.node.NodeType;
 import org.apache.iotdb.tsfile.read.query.timegenerator.node.OrNode;
 import org.apache.iotdb.tsfile.read.reader.FakedBatchReader;
 import org.apache.iotdb.tsfile.read.reader.IBatchReader;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class NodeTest {
 

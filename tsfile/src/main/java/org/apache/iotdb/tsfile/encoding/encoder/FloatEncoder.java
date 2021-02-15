@@ -19,12 +19,13 @@
 
 package org.apache.iotdb.tsfile.encoding.encoder;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import org.apache.iotdb.tsfile.exception.encoding.TsFileEncodingException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.iotdb.tsfile.utils.ReadWriteForEncodingUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * Encoder for float or double value using rle or two-diff according to following grammar.

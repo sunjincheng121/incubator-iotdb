@@ -19,9 +19,9 @@
 
 package org.apache.iotdb.tsfile.encoding.decoder;
 
-import static org.apache.iotdb.tsfile.common.conf.TSFileConfig.GORILLA_ENCODING_ENDING_DOUBLE;
-
 import java.nio.ByteBuffer;
+
+import static org.apache.iotdb.tsfile.common.conf.TSFileConfig.GORILLA_ENCODING_ENDING_DOUBLE;
 
 /**
  * This class includes code modified from Michael Burman's gorilla-tsc project.

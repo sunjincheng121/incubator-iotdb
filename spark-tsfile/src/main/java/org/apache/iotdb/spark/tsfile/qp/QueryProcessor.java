@@ -18,11 +18,6 @@
  */
 package org.apache.iotdb.spark.tsfile.qp;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.iotdb.spark.tsfile.qp.common.FilterOperator;
 import org.apache.iotdb.spark.tsfile.qp.common.SQLConstant;
 import org.apache.iotdb.spark.tsfile.qp.common.SingleQuery;
@@ -34,6 +29,12 @@ import org.apache.iotdb.spark.tsfile.qp.optimizer.MergeSingleFilterOptimizer;
 import org.apache.iotdb.spark.tsfile.qp.optimizer.PhysicalOptimizer;
 import org.apache.iotdb.spark.tsfile.qp.optimizer.RemoveNotOptimizer;
 import org.apache.iotdb.tsfile.read.TsFileSequenceReader;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is used to convert information given by sparkSQL to construct TSFile's query plans.

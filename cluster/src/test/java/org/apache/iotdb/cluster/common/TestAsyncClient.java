@@ -20,6 +20,7 @@
 package org.apache.iotdb.cluster.common;
 
 import org.apache.iotdb.cluster.rpc.thrift.RaftService.AsyncClient;
+
 import org.apache.thrift.async.TAsyncClientManager;
 import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.transport.TNonblockingTransport;

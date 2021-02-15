@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.db.query.externalsort;
 
-import java.io.IOException;
-import java.util.List;
 import org.apache.iotdb.db.query.control.QueryResourceManager;
 import org.apache.iotdb.db.query.externalsort.serialize.IExternalSortFileDeserializer;
 import org.apache.iotdb.db.query.externalsort.serialize.IExternalSortFileSerializer;
@@ -27,6 +25,9 @@ import org.apache.iotdb.db.query.externalsort.serialize.impl.FixLengthIExternalS
 import org.apache.iotdb.db.query.externalsort.serialize.impl.FixLengthTimeValuePairSerializer;
 import org.apache.iotdb.db.query.reader.universal.PriorityMergeReader;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
+
+import java.io.IOException;
+import java.util.List;
 
 public class LineMerger {
 

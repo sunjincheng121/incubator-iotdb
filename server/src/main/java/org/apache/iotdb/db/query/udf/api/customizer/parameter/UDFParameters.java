@@ -19,14 +19,15 @@
 
 package org.apache.iotdb.db.query.udf.api.customizer.parameter;
 
-import java.util.List;
-import java.util.Map;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.query.udf.api.UDTF;
 import org.apache.iotdb.db.query.udf.api.customizer.config.UDTFConfigurations;
 import org.apache.iotdb.db.utils.SchemaUtils;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Used in {@link UDTF#beforeStart(UDFParameters, UDTFConfigurations)}.

@@ -18,7 +18,8 @@
  */
 package org.apache.iotdb.tsfile.utils;
 
-import static org.junit.Assert.fail;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -26,8 +27,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Assert;
-import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 public class ReadWriteIOUtilsTest {
 

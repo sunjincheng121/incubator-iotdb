@@ -19,7 +19,6 @@
 
 package org.apache.iotdb.cluster.log.applier;
 
-import java.util.Collections;
 import org.apache.iotdb.cluster.exception.CheckConsistencyException;
 import org.apache.iotdb.cluster.log.LogApplier;
 import org.apache.iotdb.cluster.metadata.CMManager;
@@ -38,8 +37,11 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import org.apache.iotdb.db.qp.physical.crud.InsertPlan;
 import org.apache.iotdb.db.service.IoTDB;
 import org.apache.iotdb.db.utils.SchemaUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
 
 /** BaseApplier use PlanExecutor to execute PhysicalPlans. */
 abstract class BaseApplier implements LogApplier {

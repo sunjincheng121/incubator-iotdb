@@ -19,15 +19,17 @@
 
 package org.apache.iotdb.tsfile.read;
 
-import java.io.IOException;
-import java.util.List;
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
 import org.apache.iotdb.tsfile.utils.FileGenerator;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.List;
 
 public class GetAllDevicesTest {
 

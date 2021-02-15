@@ -19,6 +19,12 @@
 
 package org.apache.iotdb.jdbc;
 
+import org.apache.iotdb.rpc.IoTDBRpcDataSet;
+import org.apache.iotdb.rpc.StatementExecutionException;
+import org.apache.iotdb.service.rpc.thrift.TSIService;
+
+import org.apache.thrift.TException;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -42,10 +48,6 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import org.apache.iotdb.rpc.IoTDBRpcDataSet;
-import org.apache.iotdb.rpc.StatementExecutionException;
-import org.apache.iotdb.service.rpc.thrift.TSIService;
-import org.apache.thrift.TException;
 
 public abstract class AbstractIoTDBJDBCResultSet implements ResultSet {
 

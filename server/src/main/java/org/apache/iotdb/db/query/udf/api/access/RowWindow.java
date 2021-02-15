@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.db.query.udf.api.access;
 
-import java.io.IOException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+import java.io.IOException;
 
 public interface RowWindow {
 

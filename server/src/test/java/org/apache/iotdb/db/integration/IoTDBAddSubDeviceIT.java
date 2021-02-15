@@ -18,7 +18,13 @@
  */
 package org.apache.iotdb.db.integration;
 
-import static org.junit.Assert.fail;
+import org.apache.iotdb.db.utils.EnvironmentUtils;
+import org.apache.iotdb.jdbc.Config;
+
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,12 +32,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.Types;
-import org.apache.iotdb.db.utils.EnvironmentUtils;
-import org.apache.iotdb.jdbc.Config;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 /** Test if measurement is also a sub device. */
 public class IoTDBAddSubDeviceIT {

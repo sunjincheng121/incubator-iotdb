@@ -18,9 +18,6 @@
  */
 package org.apache.iotdb.db.query.externalsort;
 
-import java.io.File;
-import java.io.IOException;
-import org.apache.commons.io.FileUtils;
 import org.apache.iotdb.db.constant.TestConstant;
 import org.apache.iotdb.db.query.externalsort.serialize.IExternalSortFileDeserializer;
 import org.apache.iotdb.db.query.externalsort.serialize.IExternalSortFileSerializer;
@@ -30,8 +27,13 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.utils.Binary;
 import org.apache.iotdb.tsfile.utils.TsPrimitiveType;
+
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
 
 /** Created by zhangjinrui on 2018/1/20. */
 public class IExternalSortFileSerializerDeserializerTest {

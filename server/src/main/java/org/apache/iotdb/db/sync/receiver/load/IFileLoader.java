@@ -18,9 +18,10 @@
  */
 package org.apache.iotdb.db.sync.receiver.load;
 
+import org.apache.iotdb.db.sync.receiver.load.FileLoader.LoadTask;
+
 import java.io.File;
 import java.io.IOException;
-import org.apache.iotdb.db.sync.receiver.load.FileLoader.LoadTask;
 
 /**
  * This interface is used to load files, including deleted files and new tsfiles. The

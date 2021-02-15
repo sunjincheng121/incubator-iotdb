@@ -20,6 +20,7 @@
 package org.apache.iotdb.cluster.log;
 
 import org.apache.iotdb.cluster.log.manage.RaftLogManager;
+
 import org.apache.thrift.async.AsyncMethodCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

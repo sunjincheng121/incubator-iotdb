@@ -19,12 +19,6 @@
 
 package org.apache.iotdb.cluster.log.manage;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.iotdb.cluster.common.IoTDBTest;
 import org.apache.iotdb.cluster.common.TestDataGroupMember;
 import org.apache.iotdb.cluster.common.TestLogApplier;
@@ -42,8 +36,16 @@ import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.qp.executor.PlanExecutor;
 import org.apache.iotdb.db.qp.physical.sys.FlushPlan;
 import org.apache.iotdb.tsfile.utils.Pair;
+
 import org.junit.After;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 public class FilePartitionedSnapshotLogManagerTest extends IoTDBTest {
 

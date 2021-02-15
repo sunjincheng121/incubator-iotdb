@@ -19,14 +19,6 @@
 
 package org.apache.iotdb.cluster.query;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertNull;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.server.member.MemberTest;
 import org.apache.iotdb.cluster.server.monitor.NodeStatusManager;
@@ -38,9 +30,19 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.common.Field;
 import org.apache.iotdb.tsfile.read.common.RowRecord;
 import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertNull;
 
 /**
  * allNodes: node0, node1... node9 localNode: node0 pathList: root.sg0.s0, root.sg0.s1...

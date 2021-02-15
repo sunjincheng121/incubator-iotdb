@@ -18,10 +18,11 @@
  */
 package org.apache.iotdb.db.auth.role;
 
-import java.util.List;
-import java.util.Map;
 import org.apache.iotdb.db.auth.AuthException;
 import org.apache.iotdb.db.auth.entity.Role;
+
+import java.util.List;
+import java.util.Map;
 
 /** This interface maintains roles in memory and is responsible for their modifications. */
 public interface IRoleManager {

@@ -19,13 +19,14 @@
 
 package org.apache.iotdb.cluster.query;
 
+import org.apache.iotdb.cluster.rpc.thrift.Node;
+import org.apache.iotdb.db.query.context.QueryContext;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
-import org.apache.iotdb.cluster.rpc.thrift.Node;
-import org.apache.iotdb.db.query.context.QueryContext;
 
 public class RemoteQueryContext extends QueryContext {
   /** The remote nodes that are queried in this query, grouped by the header nodes. */

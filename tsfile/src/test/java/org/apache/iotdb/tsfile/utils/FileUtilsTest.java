@@ -18,11 +18,12 @@
  */
 package org.apache.iotdb.tsfile.utils;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.iotdb.tsfile.constant.TestConstant;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class FileUtilsTest {
 

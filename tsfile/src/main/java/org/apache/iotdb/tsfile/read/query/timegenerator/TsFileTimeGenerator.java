@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.tsfile.read.query.timegenerator;
 
-import java.io.IOException;
-import java.util.List;
 import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
 import org.apache.iotdb.tsfile.read.controller.IChunkLoader;
 import org.apache.iotdb.tsfile.read.controller.IMetadataQuerier;
@@ -27,6 +25,9 @@ import org.apache.iotdb.tsfile.read.expression.IExpression;
 import org.apache.iotdb.tsfile.read.expression.impl.SingleSeriesExpression;
 import org.apache.iotdb.tsfile.read.reader.IBatchReader;
 import org.apache.iotdb.tsfile.read.reader.series.FileSeriesReader;
+
+import java.io.IOException;
+import java.util.List;
 
 public class TsFileTimeGenerator extends TimeGenerator {
 

@@ -18,11 +18,12 @@
  */
 package org.apache.iotdb.tsfile.read.query.dataset;
 
-import java.io.IOException;
-import java.util.List;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.common.Path;
 import org.apache.iotdb.tsfile.read.common.RowRecord;
+
+import java.io.IOException;
+import java.util.List;
 
 public abstract class QueryDataSet {
 

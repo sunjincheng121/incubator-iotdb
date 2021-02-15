@@ -4,10 +4,10 @@
 
 package org.apache.iotdb.cluster.partition.slot;
 
-import static org.apache.iotdb.cluster.config.ClusterConstant.HASH_SALT;
-
 import org.apache.iotdb.db.engine.StorageEngine;
 import org.apache.iotdb.tsfile.utils.Murmur128Hash;
+
+import static org.apache.iotdb.cluster.config.ClusterConstant.HASH_SALT;
 
 /** SlotStrategy determines how a {storageGroupName, value} pair is distributed to a slot. */
 public interface SlotStrategy {

@@ -4,19 +4,21 @@
 
 package org.apache.iotdb.cluster.client.sync;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.net.ServerSocket;
 import org.apache.iotdb.cluster.client.sync.SyncDataClient.FactorySync;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.cluster.rpc.thrift.RaftService.Client;
+
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TBinaryProtocol.Factory;
 import org.apache.thrift.transport.TSocket;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class SyncDataClientTest {
 

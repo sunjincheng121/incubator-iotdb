@@ -19,7 +19,6 @@
 
 package org.apache.iotdb.db.query.udf.api.customizer.config;
 
-import java.time.ZoneId;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.query.udf.api.UDTF;
 import org.apache.iotdb.db.query.udf.api.access.Row;
@@ -31,6 +30,8 @@ import org.apache.iotdb.db.query.udf.api.customizer.strategy.RowByRowAccessStrat
 import org.apache.iotdb.db.query.udf.api.customizer.strategy.SlidingSizeWindowAccessStrategy;
 import org.apache.iotdb.db.query.udf.api.customizer.strategy.SlidingTimeWindowAccessStrategy;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+import java.time.ZoneId;
 
 /**
  * Used in {@link UDTF#beforeStart(UDFParameters, UDTFConfigurations)}.

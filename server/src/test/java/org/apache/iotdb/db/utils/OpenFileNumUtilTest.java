@@ -19,7 +19,15 @@
 
 package org.apache.iotdb.db.utils;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.iotdb.db.constant.TestConstant;
+import org.apache.iotdb.db.utils.OpenFileNumUtil.OpenFileNumStatistics;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -28,14 +36,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import org.apache.commons.io.FileUtils;
-import org.apache.iotdb.db.constant.TestConstant;
-import org.apache.iotdb.db.utils.OpenFileNumUtil.OpenFileNumStatistics;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertEquals;
 
 public class OpenFileNumUtilTest {
 

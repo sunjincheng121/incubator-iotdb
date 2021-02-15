@@ -18,14 +18,6 @@
  */
 package org.apache.iotdb.cluster.log.manage.serializable;
 
-import static org.apache.iotdb.db.conf.IoTDBConstant.FILE_NAME_SEPARATOR;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.BufferOverflowException;
-import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.Properties;
 import org.apache.iotdb.cluster.common.IoTDBTest;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.config.ClusterDescriptor;
@@ -33,8 +25,18 @@ import org.apache.iotdb.cluster.log.HardState;
 import org.apache.iotdb.cluster.log.Log;
 import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
 import org.apache.iotdb.tsfile.utils.Pair;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.BufferOverflowException;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Properties;
+
+import static org.apache.iotdb.db.conf.IoTDBConstant.FILE_NAME_SEPARATOR;
 
 public class SyncLogDequeSerializerTest extends IoTDBTest {
 

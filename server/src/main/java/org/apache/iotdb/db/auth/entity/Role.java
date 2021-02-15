@@ -18,6 +18,9 @@
  */
 package org.apache.iotdb.db.auth.entity;
 
+import org.apache.iotdb.db.utils.AuthUtils;
+import org.apache.iotdb.db.utils.SerializeUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -26,8 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import org.apache.iotdb.db.utils.AuthUtils;
-import org.apache.iotdb.db.utils.SerializeUtils;
 
 /** This class contains all information of a role. */
 public class Role {

@@ -14,12 +14,14 @@
  */
 package org.apache.iotdb.cluster.utils.nodetool.function;
 
-import static org.apache.iotdb.cluster.utils.nodetool.Printer.msgPrintln;
-
-import io.airlift.airline.Command;
-import java.util.List;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.cluster.utils.nodetool.ClusterMonitorMBean;
+
+import io.airlift.airline.Command;
+
+import java.util.List;
+
+import static org.apache.iotdb.cluster.utils.nodetool.Printer.msgPrintln;
 
 @Command(name = "ring", description = "Print information about the hash ring of nodes")
 public class Ring extends NodeToolCmd {

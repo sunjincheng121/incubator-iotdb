@@ -19,13 +19,15 @@
 
 package org.apache.iotdb.cluster.server;
 
+import org.apache.iotdb.db.conf.directories.DirectoryManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
-import org.apache.iotdb.db.conf.directories.DirectoryManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HardLinkCleaner implements Runnable {
 

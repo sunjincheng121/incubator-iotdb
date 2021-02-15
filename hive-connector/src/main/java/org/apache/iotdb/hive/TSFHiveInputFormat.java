@@ -18,14 +18,16 @@
  */
 package org.apache.iotdb.hive;
 
-import java.io.IOException;
-import java.util.Arrays;
+import org.apache.iotdb.hadoop.tsfile.TSFInputFormat;
+
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapred.*;
-import org.apache.iotdb.hadoop.tsfile.TSFInputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * The class implement is same as {@link org.apache.iotdb.hadoop.tsfile.TSFInputFormat} and is

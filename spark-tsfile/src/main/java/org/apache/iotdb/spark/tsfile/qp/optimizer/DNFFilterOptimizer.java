@@ -18,13 +18,14 @@
  */
 package org.apache.iotdb.spark.tsfile.qp.optimizer;
 
-import static org.apache.iotdb.spark.tsfile.qp.common.SQLConstant.KW_AND;
-import static org.apache.iotdb.spark.tsfile.qp.common.SQLConstant.KW_OR;
+import org.apache.iotdb.spark.tsfile.qp.common.FilterOperator;
+import org.apache.iotdb.spark.tsfile.qp.exception.DNFOptimizeException;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.iotdb.spark.tsfile.qp.common.FilterOperator;
-import org.apache.iotdb.spark.tsfile.qp.exception.DNFOptimizeException;
+
+import static org.apache.iotdb.spark.tsfile.qp.common.SQLConstant.KW_AND;
+import static org.apache.iotdb.spark.tsfile.qp.common.SQLConstant.KW_OR;
 
 public class DNFFilterOptimizer implements IFilterOptimizer {
 

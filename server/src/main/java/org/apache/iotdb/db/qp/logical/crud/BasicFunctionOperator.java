@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.db.qp.logical.crud;
 
-import java.util.Map;
-import java.util.Objects;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.exception.query.LogicalOperatorException;
 import org.apache.iotdb.db.exception.runtime.SQLParserException;
@@ -31,8 +29,12 @@ import org.apache.iotdb.tsfile.read.expression.IUnaryExpression;
 import org.apache.iotdb.tsfile.utils.Binary;
 import org.apache.iotdb.tsfile.utils.Pair;
 import org.apache.iotdb.tsfile.utils.StringContainer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Objects;
 
 /** basic operator includes < > >= <= !=. */
 public class BasicFunctionOperator extends FunctionOperator {

@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.db.query.udf.api.exception;
 
-import java.util.Arrays;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+import java.util.Arrays;
 
 public class UDFInputSeriesDataTypeNotValidException extends UDFParameterNotValidException {
 

@@ -19,12 +19,14 @@
 
 package org.apache.iotdb.db.engine.version;
 
-import java.io.File;
-import java.io.IOException;
-import org.apache.commons.io.FileUtils;
 import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
+
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 /** SimpleFileVersionController uses a local file and its file name to store the version. */
 public class SimpleFileVersionController implements VersionController {

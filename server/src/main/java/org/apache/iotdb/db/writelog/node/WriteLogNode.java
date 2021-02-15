@@ -18,10 +18,11 @@
  */
 package org.apache.iotdb.db.writelog.node;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import org.apache.iotdb.db.writelog.io.ILogReader;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /** WriteLogNode is the minimum unit of managing WALs. */
 public interface WriteLogNode {

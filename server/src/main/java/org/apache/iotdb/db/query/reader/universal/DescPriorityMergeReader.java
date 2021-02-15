@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.db.query.reader.universal;
 
+import org.apache.iotdb.tsfile.read.reader.IPointReader;
+
 import java.io.IOException;
 import java.util.PriorityQueue;
-import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
 public class DescPriorityMergeReader extends PriorityMergeReader {
 

@@ -18,10 +18,11 @@
  */
 package org.apache.iotdb.db.query.externalsort;
 
+import org.apache.iotdb.tsfile.read.reader.IPointReader;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
 public class MultiSourceExternalSortJobPart extends ExternalSortJobPart {
 

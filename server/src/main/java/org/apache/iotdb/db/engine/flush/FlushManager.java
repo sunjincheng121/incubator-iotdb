@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.db.engine.flush;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
 import org.apache.iotdb.db.concurrent.WrappedRunnable;
 import org.apache.iotdb.db.conf.IoTDBConfig;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
@@ -32,8 +31,11 @@ import org.apache.iotdb.db.monitor.StatMonitor;
 import org.apache.iotdb.db.service.IService;
 import org.apache.iotdb.db.service.JMXService;
 import org.apache.iotdb.db.service.ServiceType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class FlushManager implements FlushManagerMBean, IService {
 

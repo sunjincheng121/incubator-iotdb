@@ -18,11 +18,12 @@
  */
 package org.apache.iotdb.tsfile.read.filter.operator;
 
-import java.io.Serializable;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.read.filter.basic.BinaryFilter;
 import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.filter.factory.FilterSerializeId;
+
+import java.io.Serializable;
 
 /** Either of the left and right operators of AndExpression must satisfy the condition. */
 public class OrFilter extends BinaryFilter implements Serializable {

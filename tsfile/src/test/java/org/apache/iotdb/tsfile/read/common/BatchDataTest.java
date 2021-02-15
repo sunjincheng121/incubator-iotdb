@@ -19,13 +19,15 @@
 
 package org.apache.iotdb.tsfile.read.common;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
+
 import org.junit.Test;
+
+import java.io.IOException;
+
+import static org.junit.Assert.*;
 
 public class BatchDataTest {
 

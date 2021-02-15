@@ -18,11 +18,13 @@
  */
 package org.apache.iotdb.cluster.partition;
 
+import org.apache.iotdb.db.metadata.MManager;
+
+import org.mockito.internal.util.reflection.Whitebox;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import org.apache.iotdb.db.metadata.MManager;
-import org.mockito.internal.util.reflection.Whitebox;
 
 public class MManagerWhiteBox {
 

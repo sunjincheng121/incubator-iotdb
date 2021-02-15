@@ -17,12 +17,13 @@
  */
 package org.apache.iotdb.db.mqtt;
 
-import static org.junit.Assert.assertEquals;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.nio.charset.StandardCharsets;
 import org.junit.Test;
+
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.Assert.assertEquals;
 
 public class JSONPayloadFormatTest {
 

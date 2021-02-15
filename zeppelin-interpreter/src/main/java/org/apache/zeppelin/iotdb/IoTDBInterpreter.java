@@ -16,8 +16,23 @@
  */
 package org.apache.zeppelin.iotdb;
 
-import static org.apache.iotdb.rpc.IoTDBRpcDataSet.TIMESTAMP_STR;
-import static org.apache.iotdb.rpc.RpcUtils.setTimeFormat;
+import org.apache.iotdb.jdbc.Config;
+import org.apache.iotdb.jdbc.IoTDBConnection;
+import org.apache.iotdb.jdbc.IoTDBJDBCResultSet;
+import org.apache.iotdb.rpc.IoTDBConnectionException;
+import org.apache.iotdb.rpc.RpcUtils;
+import org.apache.iotdb.rpc.StatementExecutionException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.thrift.TException;
+import org.apache.zeppelin.interpreter.AbstractInterpreter;
+import org.apache.zeppelin.interpreter.InterpreterContext;
+import org.apache.zeppelin.interpreter.InterpreterResult;
+import org.apache.zeppelin.interpreter.InterpreterResult.Code;
+import org.apache.zeppelin.interpreter.InterpreterResult.Type;
+import org.apache.zeppelin.interpreter.ZeppelinContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -30,22 +45,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.iotdb.jdbc.Config;
-import org.apache.iotdb.jdbc.IoTDBConnection;
-import org.apache.iotdb.jdbc.IoTDBJDBCResultSet;
-import org.apache.iotdb.rpc.IoTDBConnectionException;
-import org.apache.iotdb.rpc.RpcUtils;
-import org.apache.iotdb.rpc.StatementExecutionException;
-import org.apache.thrift.TException;
-import org.apache.zeppelin.interpreter.AbstractInterpreter;
-import org.apache.zeppelin.interpreter.InterpreterContext;
-import org.apache.zeppelin.interpreter.InterpreterResult;
-import org.apache.zeppelin.interpreter.InterpreterResult.Code;
-import org.apache.zeppelin.interpreter.InterpreterResult.Type;
-import org.apache.zeppelin.interpreter.ZeppelinContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.apache.iotdb.rpc.IoTDBRpcDataSet.TIMESTAMP_STR;
+import static org.apache.iotdb.rpc.RpcUtils.setTimeFormat;
 
 public class IoTDBInterpreter extends AbstractInterpreter {
 

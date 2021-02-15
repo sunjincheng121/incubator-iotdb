@@ -18,15 +18,16 @@
  */
 package org.apache.iotdb.tsfile.v2.file.metadata.statistics;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.exception.write.UnknownColumnTypeException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.statistics.BooleanStatistics;
 import org.apache.iotdb.tsfile.file.metadata.statistics.IntegerStatistics;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 public class StatisticsV2 {
 

@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.hadoop.tsfile;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -27,6 +25,9 @@ import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * One example for reading TsFile with MapReduce. This MR Job is used to get the result of

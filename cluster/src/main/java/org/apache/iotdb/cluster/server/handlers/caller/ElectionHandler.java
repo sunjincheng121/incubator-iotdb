@@ -19,17 +19,19 @@
 
 package org.apache.iotdb.cluster.server.handlers.caller;
 
-import static org.apache.iotdb.cluster.server.Response.RESPONSE_AGREE;
-import static org.apache.iotdb.cluster.server.Response.RESPONSE_LEADER_STILL_ONLINE;
+import org.apache.iotdb.cluster.rpc.thrift.Node;
+import org.apache.iotdb.cluster.server.member.RaftMember;
+
+import org.apache.thrift.async.AsyncMethodCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.ConnectException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.iotdb.cluster.rpc.thrift.Node;
-import org.apache.iotdb.cluster.server.member.RaftMember;
-import org.apache.thrift.async.AsyncMethodCallback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.apache.iotdb.cluster.server.Response.RESPONSE_AGREE;
+import static org.apache.iotdb.cluster.server.Response.RESPONSE_LEADER_STILL_ONLINE;
 
 /**
  * ElectionHandler checks the result from a voter and decides whether the election goes on, succeeds

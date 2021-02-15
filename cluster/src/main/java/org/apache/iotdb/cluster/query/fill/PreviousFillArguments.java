@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.cluster.query.fill;
 
-import java.util.Set;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+import java.util.Set;
 
 /**
  * PreviousFillParameter records necessary parameters of a previous fill over a single timeseries,

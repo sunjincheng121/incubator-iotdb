@@ -18,13 +18,14 @@
  */
 package org.apache.iotdb.db.metadata;
 
-import static org.apache.iotdb.db.conf.IoTDBConstant.PATH_WILDCARD;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.iotdb.db.conf.IoTDBConstant;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.iotdb.db.conf.IoTDBConstant.PATH_WILDCARD;
 
 public class MetaUtils {
 

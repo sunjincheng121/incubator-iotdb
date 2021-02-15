@@ -19,11 +19,14 @@
 
 package org.apache.iotdb.db.integration;
 
-import static org.apache.iotdb.db.constant.TestConstant.count;
-import static org.apache.iotdb.db.constant.TestConstant.max_value;
-import static org.apache.iotdb.db.constant.TestConstant.min_time;
-import static org.apache.iotdb.db.constant.TestConstant.min_value;
-import static org.junit.Assert.fail;
+import org.apache.iotdb.db.exception.StartupException;
+import org.apache.iotdb.db.utils.EnvironmentUtils;
+import org.apache.iotdb.jdbc.Config;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -32,13 +35,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Locale;
-import org.apache.iotdb.db.exception.StartupException;
-import org.apache.iotdb.db.utils.EnvironmentUtils;
-import org.apache.iotdb.jdbc.Config;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+
+import static org.apache.iotdb.db.constant.TestConstant.count;
+import static org.apache.iotdb.db.constant.TestConstant.max_value;
+import static org.apache.iotdb.db.constant.TestConstant.min_time;
+import static org.apache.iotdb.db.constant.TestConstant.min_value;
+import static org.junit.Assert.fail;
 
 public class IoTDBRecoverUnclosedIT {
 

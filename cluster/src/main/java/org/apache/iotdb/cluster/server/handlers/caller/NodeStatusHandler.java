@@ -19,10 +19,12 @@
 
 package org.apache.iotdb.cluster.server.handlers.caller;
 
+import org.apache.iotdb.cluster.rpc.thrift.Node;
+
+import org.apache.thrift.async.AsyncMethodCallback;
+
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.iotdb.cluster.rpc.thrift.Node;
-import org.apache.thrift.async.AsyncMethodCallback;
 
 public class NodeStatusHandler implements AsyncMethodCallback<Node> {
 

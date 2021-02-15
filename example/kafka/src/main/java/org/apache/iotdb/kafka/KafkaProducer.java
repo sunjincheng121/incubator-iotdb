@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.kafka;
 
-import java.util.Properties;
 import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Properties;
 
 /** The class is to show how to send data to kafka through multi-threads. */
 public class KafkaProducer {

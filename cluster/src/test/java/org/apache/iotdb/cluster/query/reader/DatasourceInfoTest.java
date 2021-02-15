@@ -19,9 +19,6 @@
 
 package org.apache.iotdb.cluster.query.reader;
 
-import static org.junit.Assert.assertFalse;
-
-import java.io.IOException;
 import org.apache.iotdb.cluster.client.DataClientProvider;
 import org.apache.iotdb.cluster.client.async.AsyncDataClient;
 import org.apache.iotdb.cluster.common.TestMetaGroupMember;
@@ -34,11 +31,16 @@ import org.apache.iotdb.cluster.server.member.MetaGroupMember;
 import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.query.control.QueryResourceManager;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
 import org.apache.thrift.TException;
 import org.apache.thrift.async.AsyncMethodCallback;
 import org.apache.thrift.protocol.TBinaryProtocol.Factory;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+
+import static org.junit.Assert.assertFalse;
 
 public class DatasourceInfoTest {
   private MetaGroupMember metaGroupMember;

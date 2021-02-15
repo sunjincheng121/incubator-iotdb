@@ -19,12 +19,13 @@
 
 package org.apache.iotdb.cluster.server.monitor;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.cluster.server.NodeCharacter;
 import org.apache.iotdb.rpc.RpcStat;
 import org.apache.iotdb.rpc.RpcTransportFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A node report collects the current runtime information of the local node, which contains: 1. The

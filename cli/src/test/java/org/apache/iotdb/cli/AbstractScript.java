@@ -18,12 +18,12 @@
  */
 package org.apache.iotdb.cli;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
 
 public abstract class AbstractScript {
 

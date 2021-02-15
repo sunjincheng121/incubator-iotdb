@@ -18,6 +18,15 @@
  */
 package org.apache.iotdb.db.auth.user;
 
+import org.apache.iotdb.db.auth.entity.PathPrivilege;
+import org.apache.iotdb.db.auth.entity.User;
+import org.apache.iotdb.db.conf.IoTDBConstant;
+import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
+import org.apache.iotdb.db.utils.IOUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -32,13 +41,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.iotdb.db.auth.entity.PathPrivilege;
-import org.apache.iotdb.db.auth.entity.User;
-import org.apache.iotdb.db.conf.IoTDBConstant;
-import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
-import org.apache.iotdb.db.utils.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class loads a user's information from the corresponding file.The user file is a sequential

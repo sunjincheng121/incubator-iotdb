@@ -19,8 +19,6 @@
 
 package org.apache.iotdb.cluster.log.manage;
 
-import java.io.IOException;
-import java.util.Map;
 import org.apache.iotdb.cluster.log.LogApplier;
 import org.apache.iotdb.cluster.log.Snapshot;
 import org.apache.iotdb.cluster.log.manage.serializable.SyncLogDequeSerializer;
@@ -33,8 +31,12 @@ import org.apache.iotdb.db.auth.entity.Role;
 import org.apache.iotdb.db.auth.entity.User;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.service.IoTDB;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Map;
 
 /** MetaSingleSnapshotLogManager provides a MetaSimpleSnapshot as snapshot. */
 public class MetaSingleSnapshotLogManager extends RaftLogManager {

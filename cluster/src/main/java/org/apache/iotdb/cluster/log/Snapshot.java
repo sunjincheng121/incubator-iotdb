@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.cluster.log;
 
-import java.nio.ByteBuffer;
 import org.apache.iotdb.cluster.log.snapshot.SnapshotInstaller;
 import org.apache.iotdb.cluster.server.member.RaftMember;
+
+import java.nio.ByteBuffer;
 
 /**
  * As we can only hold a certain amount of logs in memory, when the logs' size exceed the memory

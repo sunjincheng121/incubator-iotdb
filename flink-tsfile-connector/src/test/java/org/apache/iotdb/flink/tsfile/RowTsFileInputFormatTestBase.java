@@ -19,11 +19,13 @@
 
 package org.apache.iotdb.flink.tsfile;
 
-import java.io.File;
-import org.apache.flink.types.Row;
 import org.apache.iotdb.flink.util.TsFileWriteUtil;
 import org.apache.iotdb.tsfile.read.expression.QueryExpression;
+
+import org.apache.flink.types.Row;
 import org.junit.Before;
+
+import java.io.File;
 
 /** Base class for TsFileInputFormat tests. */
 public abstract class RowTsFileInputFormatTestBase extends RowTsFileConnectorTestBase {

@@ -19,15 +19,17 @@
 
 package org.apache.iotdb.db.engine.merge;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import com.google.common.util.concurrent.RateLimiter;
-import java.util.PriorityQueue;
 import org.apache.iotdb.db.engine.merge.manage.MergeManager;
 import org.apache.iotdb.db.engine.merge.task.MergeMultiChunkTask;
 import org.apache.iotdb.db.engine.merge.task.MergeTask;
+
+import com.google.common.util.concurrent.RateLimiter;
 import org.junit.Test;
+
+import java.util.PriorityQueue;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MergeManagerTest extends MergeTest {
 

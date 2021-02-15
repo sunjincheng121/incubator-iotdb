@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.db.engine.merge.selector;
 
+import org.apache.iotdb.db.metadata.PartialPath;
+
 import java.util.List;
 import java.util.NoSuchElementException;
-import org.apache.iotdb.db.metadata.PartialPath;
 
 public class NaivePathSelector implements IMergePathSelector {
 

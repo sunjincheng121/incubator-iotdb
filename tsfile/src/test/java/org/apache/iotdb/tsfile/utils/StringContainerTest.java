@@ -18,13 +18,14 @@
  */
 package org.apache.iotdb.tsfile.utils;
 
+import org.apache.iotdb.tsfile.common.constant.TsFileConstant;
+
+import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-
-import org.apache.iotdb.tsfile.common.constant.TsFileConstant;
-import org.junit.Test;
 
 public class StringContainerTest {
 

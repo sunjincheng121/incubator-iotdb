@@ -18,15 +18,6 @@
  */
 package org.apache.iotdb.db.qp.physical;
 
-import static org.apache.iotdb.db.index.common.IndexConstant.PATTERN;
-import static org.apache.iotdb.db.index.common.IndexConstant.TOP_K;
-import static org.junit.Assert.assertEquals;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
@@ -42,10 +33,21 @@ import org.apache.iotdb.db.utils.EnvironmentUtils;
 import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
+import static org.apache.iotdb.db.index.common.IndexConstant.PATTERN;
+import static org.apache.iotdb.db.index.common.IndexConstant.TOP_K;
+import static org.junit.Assert.assertEquals;
 
 /** refer to org.apache.iotdb.db.qp.plan.PhysicalPlanTest */
 public class IndexWholeMatchingPhysicalPlanTest {

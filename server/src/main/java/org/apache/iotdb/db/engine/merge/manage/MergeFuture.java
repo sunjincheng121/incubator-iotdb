@@ -19,14 +19,15 @@
 
 package org.apache.iotdb.db.engine.merge.manage;
 
+import org.apache.iotdb.db.engine.merge.task.MergeMultiChunkTask.MergeChunkHeapTask;
+import org.apache.iotdb.db.engine.merge.task.MergeTask;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
-import org.apache.iotdb.db.engine.merge.task.MergeMultiChunkTask.MergeChunkHeapTask;
-import org.apache.iotdb.db.engine.merge.task.MergeTask;
 
 public abstract class MergeFuture extends FutureTask<Void> implements Comparable<MergeFuture> {
 

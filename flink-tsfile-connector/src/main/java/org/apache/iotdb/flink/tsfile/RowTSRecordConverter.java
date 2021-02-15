@@ -19,13 +19,6 @@
 
 package org.apache.iotdb.flink.tsfile;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.flink.api.java.typeutils.RowTypeInfo;
-import org.apache.flink.types.Row;
-import org.apache.flink.util.Collector;
 import org.apache.iotdb.tsfile.common.constant.QueryConstant;
 import org.apache.iotdb.tsfile.common.constant.TsFileConstant;
 import org.apache.iotdb.tsfile.exception.write.UnSupportedDataTypeException;
@@ -39,6 +32,15 @@ import org.apache.iotdb.tsfile.write.record.datapoint.IntDataPoint;
 import org.apache.iotdb.tsfile.write.record.datapoint.LongDataPoint;
 import org.apache.iotdb.tsfile.write.record.datapoint.StringDataPoint;
 import org.apache.iotdb.tsfile.write.schema.Schema;
+
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
+import org.apache.flink.types.Row;
+import org.apache.flink.util.Collector;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /** The converter that convert a Row object to multiple TSRecord objects. */
 public class RowTSRecordConverter implements TSRecordConverter<Row> {

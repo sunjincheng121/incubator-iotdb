@@ -18,16 +18,18 @@
  */
 package org.apache.iotdb.tsfile.compress;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import org.apache.iotdb.tsfile.utils.PublicBAOS;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xerial.snappy.Snappy;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 public class CompressTest {
 

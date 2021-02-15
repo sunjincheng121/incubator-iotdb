@@ -18,8 +18,9 @@
  */
 package org.apache.iotdb.db.exception;
 
-import java.util.List;
 import org.apache.iotdb.rpc.TSStatusCode;
+
+import java.util.List;
 
 public class DiskSpaceInsufficientException extends StorageEngineException {
 

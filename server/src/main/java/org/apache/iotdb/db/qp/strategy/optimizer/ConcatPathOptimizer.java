@@ -18,10 +18,6 @@
  */
 package org.apache.iotdb.db.qp.strategy.optimizer;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.exception.query.LogicalOptimizeException;
 import org.apache.iotdb.db.exception.query.PathNumOverLimitException;
@@ -39,8 +35,14 @@ import org.apache.iotdb.db.qp.logical.crud.SelectOperator;
 import org.apache.iotdb.db.query.udf.core.context.UDFContext;
 import org.apache.iotdb.db.service.IoTDB;
 import org.apache.iotdb.tsfile.utils.Pair;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /** concat paths in select and from clause. */
 public class ConcatPathOptimizer implements ILogicalOptimizer {

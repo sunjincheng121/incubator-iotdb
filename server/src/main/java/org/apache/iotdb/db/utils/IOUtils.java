@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.db.utils;
 
+import org.apache.iotdb.db.auth.entity.PathPrivilege;
+
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import org.apache.iotdb.db.auth.entity.PathPrivilege;
 
 public class IOUtils {
 

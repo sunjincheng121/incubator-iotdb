@@ -19,14 +19,16 @@
 
 package org.apache.iotdb.cluster.client.sync;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import org.apache.iotdb.cluster.client.sync.SyncMetaHeartbeatClient.FactorySync;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
+
 import org.apache.thrift.protocol.TBinaryProtocol.Factory;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.net.ServerSocket;
 
 public class SyncMetaHeartbeatClientTest {
 

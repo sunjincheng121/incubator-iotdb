@@ -18,10 +18,11 @@
  */
 package org.apache.iotdb.cluster.config;
 
+import org.apache.iotdb.cluster.utils.ClusterConsistent;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.iotdb.cluster.utils.ClusterConsistent;
 
 public class ClusterConfig {
 

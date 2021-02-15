@@ -19,12 +19,12 @@
 
 package org.apache.iotdb.tsfile.encoding.encoder;
 
+import java.io.ByteArrayOutputStream;
+
 import static org.apache.iotdb.tsfile.common.conf.TSFileConfig.GORILLA_ENCODING_ENDING_INTEGER;
 import static org.apache.iotdb.tsfile.common.conf.TSFileConfig.LEADING_ZERO_BITS_LENGTH_32BIT;
 import static org.apache.iotdb.tsfile.common.conf.TSFileConfig.MEANINGFUL_XOR_BITS_LENGTH_32BIT;
 import static org.apache.iotdb.tsfile.common.conf.TSFileConfig.VALUE_BITS_LENGTH_32BIT;
-
-import java.io.ByteArrayOutputStream;
 
 /**
  * This class includes code modified from Michael Burman's gorilla-tsc project.

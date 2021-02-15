@@ -18,10 +18,11 @@
  */
 package org.apache.iotdb.rpc;
 
-import java.io.IOException;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
+
+import java.io.IOException;
 
 public abstract class TCompressedElasticFramedTransport extends TElasticFramedTransport {
 

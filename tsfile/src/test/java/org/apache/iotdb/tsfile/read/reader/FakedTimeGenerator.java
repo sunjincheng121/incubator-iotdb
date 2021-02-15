@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.tsfile.read.reader;
 
-import java.io.IOException;
 import org.apache.iotdb.tsfile.read.common.Path;
 import org.apache.iotdb.tsfile.read.expression.IExpression;
 import org.apache.iotdb.tsfile.read.expression.impl.BinaryExpression;
@@ -26,8 +25,11 @@ import org.apache.iotdb.tsfile.read.expression.impl.SingleSeriesExpression;
 import org.apache.iotdb.tsfile.read.filter.TimeFilter;
 import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
 import org.apache.iotdb.tsfile.read.query.timegenerator.TimeGenerator;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class FakedTimeGenerator extends TimeGenerator {
 

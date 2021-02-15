@@ -18,17 +18,19 @@
  */
 package org.apache.iotdb.db.conf.adapter;
 
-import com.google.common.util.concurrent.AtomicDouble;
-import java.io.File;
-import java.io.IOException;
-import java.util.Locale;
-import org.apache.commons.io.FileUtils;
 import org.apache.iotdb.db.conf.IoTDBConfig;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
 import org.apache.iotdb.db.utils.FilePathUtils;
+
+import com.google.common.util.concurrent.AtomicDouble;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Locale;
 
 /**
  * This class is used to count, compute and persist the compression ratio of tsfiles. Whenever the

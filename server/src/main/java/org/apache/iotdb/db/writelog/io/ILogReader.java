@@ -18,9 +18,10 @@
  */
 package org.apache.iotdb.db.writelog.io;
 
+import org.apache.iotdb.db.qp.physical.PhysicalPlan;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 /**
  * ILogReader is an iterator of PhysicalPlan but throws IOException and provide a close() method.

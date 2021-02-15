@@ -18,6 +18,19 @@
  */
 package org.apache.iotdb.cluster.partition;
 
+import org.apache.iotdb.cluster.common.TestUtils;
+import org.apache.iotdb.cluster.config.ClusterDescriptor;
+import org.apache.iotdb.cluster.partition.slot.SlotManager;
+import org.apache.iotdb.cluster.rpc.thrift.Node;
+import org.apache.iotdb.db.exception.StorageEngineException;
+import org.apache.iotdb.db.utils.EnvironmentUtils;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+
 import static org.apache.iotdb.cluster.partition.slot.SlotManager.SlotStatus.NULL;
 import static org.apache.iotdb.cluster.partition.slot.SlotManager.SlotStatus.PULLING;
 import static org.apache.iotdb.cluster.partition.slot.SlotManager.SlotStatus.PULLING_WRITABLE;
@@ -25,17 +38,6 @@ import static org.apache.iotdb.cluster.partition.slot.SlotManager.SlotStatus.SEN
 import static org.apache.iotdb.cluster.partition.slot.SlotManager.SlotStatus.SENT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-
-import java.io.File;
-import java.io.IOException;
-import org.apache.iotdb.cluster.common.TestUtils;
-import org.apache.iotdb.cluster.config.ClusterDescriptor;
-import org.apache.iotdb.cluster.partition.slot.SlotManager;
-import org.apache.iotdb.cluster.rpc.thrift.Node;
-import org.apache.iotdb.db.exception.StorageEngineException;
-import org.apache.iotdb.db.utils.EnvironmentUtils;
-import org.junit.Before;
-import org.junit.Test;
 
 @SuppressWarnings({"java:S2699", "java:S2925"})
 public class SlotManagerTest {

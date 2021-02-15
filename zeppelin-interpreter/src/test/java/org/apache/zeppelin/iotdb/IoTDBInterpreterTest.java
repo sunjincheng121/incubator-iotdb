@@ -18,6 +18,20 @@
  */
 package org.apache.zeppelin.iotdb;
 
+import org.apache.iotdb.db.conf.IoTDBConstant;
+import org.apache.iotdb.db.exception.StorageEngineException;
+import org.apache.iotdb.db.utils.EnvironmentUtils;
+
+import org.apache.zeppelin.interpreter.InterpreterResult;
+import org.apache.zeppelin.interpreter.InterpreterResult.Code;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.Properties;
+
 import static org.apache.zeppelin.iotdb.IoTDBInterpreter.DEFAULT_ENABLE_RPC_COMPRESSION;
 import static org.apache.zeppelin.iotdb.IoTDBInterpreter.DEFAULT_FETCH_SIZE;
 import static org.apache.zeppelin.iotdb.IoTDBInterpreter.DEFAULT_HOST;
@@ -33,18 +47,6 @@ import static org.apache.zeppelin.iotdb.IoTDBInterpreter.IOTDB_TIME_DISPLAY_TYPE
 import static org.apache.zeppelin.iotdb.IoTDBInterpreter.IOTDB_USERNAME;
 import static org.apache.zeppelin.iotdb.IoTDBInterpreter.IOTDB_ZONE_ID;
 import static org.apache.zeppelin.iotdb.IoTDBInterpreter.SET_TIMESTAMP_DISPLAY;
-
-import java.io.IOException;
-import java.util.Properties;
-import org.apache.iotdb.db.conf.IoTDBConstant;
-import org.apache.iotdb.db.exception.StorageEngineException;
-import org.apache.iotdb.db.utils.EnvironmentUtils;
-import org.apache.zeppelin.interpreter.InterpreterResult;
-import org.apache.zeppelin.interpreter.InterpreterResult.Code;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class IoTDBInterpreterTest {
 

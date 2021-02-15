@@ -18,11 +18,12 @@
 
 package org.apache.iotdb.flink;
 
-import java.io.Serializable;
-import java.util.List;
 import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
+
+import java.io.Serializable;
+import java.util.List;
 
 /** IoTDBOptions describes the configuration related information for IoTDB and timeseries. */
 public class IoTDBOptions implements Serializable {

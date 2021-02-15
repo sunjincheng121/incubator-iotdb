@@ -18,8 +18,6 @@
  */
 package org.apache.iotdb.db.query.dataset;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
@@ -31,11 +29,15 @@ import org.apache.iotdb.db.utils.EnvironmentUtils;
 import org.apache.iotdb.tsfile.exception.filter.QueryFilterOptimizationException;
 import org.apache.iotdb.tsfile.read.common.RowRecord;
 import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
+
 import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.sql.SQLException;
 
 public class SingleDataSetTest {
   private final IPlanExecutor queryExecutor = new PlanExecutor();

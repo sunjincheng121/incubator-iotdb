@@ -19,9 +19,11 @@
 
 package org.apache.iotdb.flink.tsfile;
 
-import java.io.Serializable;
-import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.iotdb.tsfile.read.common.RowRecord;
+
+import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
+
+import java.io.Serializable;
 
 /**
  * RowRecordParser parses the RowRecord objects read from TsFile into the user desired format. If

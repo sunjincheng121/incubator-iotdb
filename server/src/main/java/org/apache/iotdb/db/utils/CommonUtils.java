@@ -18,6 +18,12 @@
  */
 package org.apache.iotdb.db.utils;
 
+import org.apache.iotdb.db.exception.query.QueryProcessException;
+import org.apache.iotdb.db.qp.constant.SQLConstant;
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
+import org.apache.iotdb.tsfile.utils.Binary;
+
 import com.google.common.base.Throwables;
 import io.airlift.airline.Cli;
 import io.airlift.airline.Help;
@@ -28,6 +34,7 @@ import io.airlift.airline.ParseCommandUnrecognizedException;
 import io.airlift.airline.ParseOptionConversionException;
 import io.airlift.airline.ParseOptionMissingException;
 import io.airlift.airline.ParseOptionMissingValueException;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,11 +42,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
-import org.apache.iotdb.db.exception.query.QueryProcessException;
-import org.apache.iotdb.db.qp.constant.SQLConstant;
-import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
-import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
-import org.apache.iotdb.tsfile.utils.Binary;
 
 @SuppressWarnings("java:S106") // for console outputs
 public class CommonUtils {

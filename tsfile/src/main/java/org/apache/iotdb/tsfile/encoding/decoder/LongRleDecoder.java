@@ -19,14 +19,16 @@
 
 package org.apache.iotdb.tsfile.encoding.decoder;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 import org.apache.iotdb.tsfile.encoding.bitpacking.LongPacker;
 import org.apache.iotdb.tsfile.exception.encoding.TsFileDecodingException;
 import org.apache.iotdb.tsfile.utils.ReadWriteForEncodingUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /** Decoder for long value using rle or bit-packing. */
 public class LongRleDecoder extends RleDecoder {

@@ -19,10 +19,6 @@
 
 package org.apache.iotdb.cluster.query.reader;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.iotdb.cluster.client.sync.SyncDataClient;
 import org.apache.iotdb.cluster.config.ClusterDescriptor;
 import org.apache.iotdb.cluster.server.RaftServer;
@@ -32,9 +28,15 @@ import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.read.common.BatchData;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
 import org.apache.iotdb.tsfile.utils.TsPrimitiveType;
+
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * RemoteSimpleSeriesReader is a reader without value filter that reads points from a remote side.

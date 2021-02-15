@@ -18,11 +18,13 @@
  */
 package org.apache.iotdb.rpc;
 
+import org.apache.iotdb.service.rpc.thrift.TSIService;
+
+import org.apache.thrift.TException;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import org.apache.iotdb.service.rpc.thrift.TSIService;
-import org.apache.thrift.TException;
 
 public class SynchronizedHandler implements InvocationHandler {
 

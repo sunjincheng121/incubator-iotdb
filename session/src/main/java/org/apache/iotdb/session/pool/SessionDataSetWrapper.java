@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.session.pool;
 
-import java.util.List;
 import org.apache.iotdb.rpc.IoTDBConnectionException;
 import org.apache.iotdb.rpc.StatementExecutionException;
 import org.apache.iotdb.session.Session;
@@ -26,6 +25,8 @@ import org.apache.iotdb.session.SessionDataSet;
 import org.apache.iotdb.session.SessionDataSet.DataIterator;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.common.RowRecord;
+
+import java.util.List;
 
 public class SessionDataSetWrapper implements AutoCloseable {
 

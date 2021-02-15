@@ -18,8 +18,9 @@
  */
 package org.apache.iotdb.hive;
 
-import java.io.IOException;
-import java.util.Properties;
+import org.apache.iotdb.hadoop.tsfile.TSFOutputFormat;
+import org.apache.iotdb.hadoop.tsfile.record.HDFSTSRecord;
+
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.ql.exec.FileSinkOperator;
@@ -30,8 +31,9 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.Progressable;
-import org.apache.iotdb.hadoop.tsfile.TSFOutputFormat;
-import org.apache.iotdb.hadoop.tsfile.record.HDFSTSRecord;
+
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * The function implement is same as {@link org.apache.iotdb.hadoop.tsfile.TSFOutputFormat} and is

@@ -18,6 +18,14 @@
  */
 package org.apache.iotdb.db.auth.authorizer;
 
+import org.apache.iotdb.db.auth.AuthException;
+import org.apache.iotdb.db.auth.entity.Role;
+import org.apache.iotdb.db.auth.entity.User;
+import org.apache.iotdb.db.auth.role.LocalFileRoleManager;
+import org.apache.iotdb.db.auth.user.LocalFileUserManager;
+import org.apache.iotdb.db.conf.IoTDBConfig;
+import org.apache.iotdb.db.conf.IoTDBDescriptor;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -26,6 +34,11 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,17 +51,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import org.apache.iotdb.db.auth.AuthException;
-import org.apache.iotdb.db.auth.entity.Role;
-import org.apache.iotdb.db.auth.entity.User;
-import org.apache.iotdb.db.auth.role.LocalFileRoleManager;
-import org.apache.iotdb.db.auth.user.LocalFileUserManager;
-import org.apache.iotdb.db.conf.IoTDBConfig;
-import org.apache.iotdb.db.conf.IoTDBDescriptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Uses an OpenID Connect provider for Authorization / Authentication. */
 public class OpenIdAuthorizer extends BasicAuthorizer {

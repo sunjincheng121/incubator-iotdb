@@ -19,19 +19,6 @@
 
 package org.apache.iotdb.db.engine.merge.task;
 
-import static org.apache.iotdb.db.utils.MergeUtils.writeBatchPoint;
-import static org.apache.iotdb.db.utils.MergeUtils.writeTVPair;
-import static org.apache.iotdb.db.utils.QueryUtils.modifyChunkMetaData;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.engine.merge.manage.MergeContext;
 import org.apache.iotdb.db.engine.merge.manage.MergeManager;
@@ -55,8 +42,23 @@ import org.apache.iotdb.tsfile.write.chunk.IChunkWriter;
 import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
 import org.apache.iotdb.tsfile.write.writer.RestorableTsFileIOWriter;
 import org.apache.iotdb.tsfile.write.writer.TsFileIOWriter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.apache.iotdb.db.utils.MergeUtils.writeBatchPoint;
+import static org.apache.iotdb.db.utils.MergeUtils.writeTVPair;
+import static org.apache.iotdb.db.utils.QueryUtils.modifyChunkMetaData;
 
 public class MergeMultiChunkTask {
 

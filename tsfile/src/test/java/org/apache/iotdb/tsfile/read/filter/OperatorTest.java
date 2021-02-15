@@ -21,6 +21,7 @@ package org.apache.iotdb.tsfile.read.filter;
 import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
 import org.apache.iotdb.tsfile.utils.Binary;
+
 import org.junit.Assert;
 import org.junit.Test;
 

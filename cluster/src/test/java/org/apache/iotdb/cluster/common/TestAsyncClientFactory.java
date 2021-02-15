@@ -19,16 +19,18 @@
 
 package org.apache.iotdb.cluster.common;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.iotdb.cluster.client.async.AsyncClientFactory;
 import org.apache.iotdb.cluster.client.async.AsyncClientPool;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.cluster.rpc.thrift.RaftService.AsyncClient;
+
 import org.apache.thrift.async.TAsyncClientManager;
 import org.apache.thrift.protocol.TBinaryProtocol.Factory;
 import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.transport.TNonblockingSocket;
+
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestAsyncClientFactory extends AsyncClientFactory {
 

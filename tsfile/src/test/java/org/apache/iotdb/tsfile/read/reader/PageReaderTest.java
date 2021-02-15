@@ -18,10 +18,6 @@
  */
 package org.apache.iotdb.tsfile.read.reader;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.iotdb.tsfile.encoding.decoder.Decoder;
 import org.apache.iotdb.tsfile.encoding.decoder.DeltaBinaryDecoder;
 import org.apache.iotdb.tsfile.encoding.decoder.DoublePrecisionDecoderV1;
@@ -42,8 +38,14 @@ import org.apache.iotdb.tsfile.read.common.TimeRange;
 import org.apache.iotdb.tsfile.read.reader.page.PageReader;
 import org.apache.iotdb.tsfile.utils.Binary;
 import org.apache.iotdb.tsfile.write.page.PageWriter;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PageReaderTest {
 

@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.db.query.udf.service;
 
-import java.lang.reflect.InvocationTargetException;
 import org.apache.iotdb.db.query.udf.api.UDTF;
+
+import java.lang.reflect.InvocationTargetException;
 
 public class UDFRegistrationInformation {
 

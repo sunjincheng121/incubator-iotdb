@@ -19,15 +19,16 @@
 
 package org.apache.iotdb.cluster;
 
+import org.apache.iotdb.cluster.rpc.thrift.Node;
+import org.apache.iotdb.db.conf.IoTDBDescriptor;
+import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
+import org.apache.iotdb.db.utils.SerializeUtils;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
-import org.apache.iotdb.cluster.rpc.thrift.Node;
-import org.apache.iotdb.db.conf.IoTDBDescriptor;
-import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
-import org.apache.iotdb.db.utils.SerializeUtils;
 
 public class RemoteTsFileResource extends TsFileResource {
 

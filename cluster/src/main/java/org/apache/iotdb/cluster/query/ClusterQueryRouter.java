@@ -19,8 +19,6 @@
 
 package org.apache.iotdb.cluster.query;
 
-import java.util.List;
-import java.util.Map;
 import org.apache.iotdb.cluster.query.aggregate.ClusterAggregateExecutor;
 import org.apache.iotdb.cluster.query.fill.ClusterFillExecutor;
 import org.apache.iotdb.cluster.query.groupby.ClusterGroupByNoVFilterDataSet;
@@ -44,6 +42,9 @@ import org.apache.iotdb.db.query.executor.QueryRouter;
 import org.apache.iotdb.db.query.executor.RawDataQueryExecutor;
 import org.apache.iotdb.db.query.executor.fill.IFill;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+import java.util.List;
+import java.util.Map;
 
 public class ClusterQueryRouter extends QueryRouter {
 

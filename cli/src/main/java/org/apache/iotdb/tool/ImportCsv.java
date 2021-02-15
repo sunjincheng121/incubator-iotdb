@@ -18,6 +18,24 @@
  */
 package org.apache.iotdb.tool;
 
+import org.apache.iotdb.exception.ArgsErrorException;
+import org.apache.iotdb.rpc.IoTDBConnectionException;
+import org.apache.iotdb.rpc.StatementExecutionException;
+import org.apache.iotdb.session.Session;
+import org.apache.iotdb.tsfile.common.constant.TsFileConstant;
+
+import jline.console.ConsoleReader;
+import me.tongfei.progressbar.ProgressBar;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,22 +48,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import jline.console.ConsoleReader;
-import me.tongfei.progressbar.ProgressBar;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.iotdb.exception.ArgsErrorException;
-import org.apache.iotdb.rpc.IoTDBConnectionException;
-import org.apache.iotdb.rpc.StatementExecutionException;
-import org.apache.iotdb.session.Session;
-import org.apache.iotdb.tsfile.common.constant.TsFileConstant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** read a CSV formatted data File and insert all the data into IoTDB. */
 public class ImportCsv extends AbstractCsvTool {

@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.cluster.partition;
 
+import org.apache.iotdb.cluster.rpc.thrift.Node;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.apache.iotdb.cluster.rpc.thrift.Node;
 
 /**
  * PartitionGroup contains all the nodes that will form a data group with a certain node, which are

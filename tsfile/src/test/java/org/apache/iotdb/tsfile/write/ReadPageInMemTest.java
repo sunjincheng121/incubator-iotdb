@@ -18,10 +18,6 @@
  */
 package org.apache.iotdb.tsfile.write;
 
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.io.IOException;
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
 import org.apache.iotdb.tsfile.constant.TestConstant;
@@ -33,9 +29,15 @@ import org.apache.iotdb.tsfile.utils.RecordUtils;
 import org.apache.iotdb.tsfile.write.record.TSRecord;
 import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
 import org.apache.iotdb.tsfile.write.schema.Schema;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.Assert.fail;
 
 public class ReadPageInMemTest {
 

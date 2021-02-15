@@ -18,16 +18,18 @@
  */
 package org.apache.iotdb.db.integration.aggregation;
 
-import static org.apache.iotdb.db.constant.TestConstant.count;
-import static org.junit.Assert.*;
-
-import java.sql.*;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
 import org.apache.iotdb.jdbc.Config;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.sql.*;
+
+import static org.apache.iotdb.db.constant.TestConstant.count;
+import static org.junit.Assert.*;
 
 public class IoTDBAggregationDeleteIT {
 

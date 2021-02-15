@@ -19,10 +19,11 @@
 
 package org.apache.iotdb.cluster.partition.slot;
 
-import java.util.List;
-import java.util.Map;
 import org.apache.iotdb.cluster.partition.NodeRemovalResult;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
+
+import java.util.List;
+import java.util.Map;
 
 /** SlotNodeRemovalResult stores the removed partition group and who will take over its slots. */
 public class SlotNodeRemovalResult extends NodeRemovalResult {

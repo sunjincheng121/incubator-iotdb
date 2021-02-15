@@ -19,21 +19,23 @@
 
 package org.apache.iotdb.flink.tsfile;
 
+import org.apache.iotdb.flink.util.TsFileWriteUtil;
+import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
+import org.apache.iotdb.tsfile.common.constant.QueryConstant;
+import org.apache.iotdb.tsfile.read.common.Path;
+
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
+import org.apache.flink.util.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.java.typeutils.RowTypeInfo;
-import org.apache.flink.util.FileUtils;
-import org.apache.iotdb.flink.util.TsFileWriteUtil;
-import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
-import org.apache.iotdb.tsfile.common.constant.QueryConstant;
-import org.apache.iotdb.tsfile.read.common.Path;
-import org.junit.After;
-import org.junit.Before;
 
 /** Base class of the TsFile connector tests. */
 public abstract class RowTsFileConnectorTestBase {

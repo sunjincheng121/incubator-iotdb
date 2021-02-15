@@ -18,14 +18,16 @@
  */
 package org.apache.iotdb.db.utils.datastructure;
 
+import org.apache.iotdb.tsfile.read.TimeValuePair;
+import org.apache.iotdb.tsfile.utils.TsPrimitiveType.TsLong;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.iotdb.tsfile.read.TimeValuePair;
-import org.apache.iotdb.tsfile.utils.TsPrimitiveType.TsLong;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class LongTVListTest {
 

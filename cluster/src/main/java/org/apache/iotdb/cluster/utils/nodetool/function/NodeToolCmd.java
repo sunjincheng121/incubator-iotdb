@@ -18,15 +18,15 @@
  */
 package org.apache.iotdb.cluster.utils.nodetool.function;
 
-import static java.lang.String.format;
-import static org.apache.iotdb.cluster.utils.nodetool.Printer.errPrintln;
+import org.apache.iotdb.cluster.partition.PartitionGroup;
+import org.apache.iotdb.cluster.rpc.thrift.Node;
+import org.apache.iotdb.cluster.utils.nodetool.ClusterMonitor;
+import org.apache.iotdb.cluster.utils.nodetool.ClusterMonitorMBean;
 
 import com.google.common.base.Throwables;
 import io.airlift.airline.Option;
 import io.airlift.airline.OptionType;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
+
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -34,10 +34,13 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import org.apache.iotdb.cluster.partition.PartitionGroup;
-import org.apache.iotdb.cluster.rpc.thrift.Node;
-import org.apache.iotdb.cluster.utils.nodetool.ClusterMonitor;
-import org.apache.iotdb.cluster.utils.nodetool.ClusterMonitorMBean;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
+import static java.lang.String.format;
+import static org.apache.iotdb.cluster.utils.nodetool.Printer.errPrintln;
 
 @SuppressWarnings("squid:S2068")
 public abstract class NodeToolCmd implements Runnable {

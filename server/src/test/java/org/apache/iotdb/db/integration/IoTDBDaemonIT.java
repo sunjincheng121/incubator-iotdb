@@ -18,18 +18,20 @@
  */
 package org.apache.iotdb.db.integration;
 
-import static org.apache.iotdb.db.constant.TestConstant.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.sql.*;
 import org.apache.iotdb.db.conf.IoTDBConstant;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
 import org.apache.iotdb.jdbc.Config;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.sql.*;
+
+import static org.apache.iotdb.db.constant.TestConstant.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Notice that, all test begins with "IoTDB" is integration test. All test which will start the

@@ -19,14 +19,15 @@
 
 package org.apache.iotdb.jdbc;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.Map;
 import org.apache.iotdb.rpc.IoTDBConnectionException;
 import org.apache.iotdb.rpc.StatementExecutionException;
 import org.apache.iotdb.service.rpc.thrift.TSIService;
 import org.apache.iotdb.service.rpc.thrift.TSQueryDataSet;
+
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
 
 public class IoTDBJDBCResultSet extends AbstractIoTDBJDBCResultSet {
 

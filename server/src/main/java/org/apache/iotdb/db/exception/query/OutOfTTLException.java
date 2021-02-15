@@ -20,9 +20,10 @@
 
 package org.apache.iotdb.db.exception.query;
 
-import java.util.Date;
 import org.apache.iotdb.db.exception.WriteProcessException;
 import org.apache.iotdb.rpc.TSStatusCode;
+
+import java.util.Date;
 
 public class OutOfTTLException extends WriteProcessException {
 

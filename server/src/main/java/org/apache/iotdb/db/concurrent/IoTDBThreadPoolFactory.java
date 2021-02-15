@@ -18,14 +18,15 @@
  */
 package org.apache.iotdb.db.concurrent;
 
+import org.apache.thrift.server.TThreadPoolServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import org.apache.thrift.server.TThreadPoolServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** This class is used to create thread pool which must contain the pool name. */
 public class IoTDBThreadPoolFactory {

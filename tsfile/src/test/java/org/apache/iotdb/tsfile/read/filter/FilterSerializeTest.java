@@ -18,14 +18,16 @@
  */
 package org.apache.iotdb.tsfile.read.filter;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.iotdb.tsfile.read.filter.basic.Filter;
+import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
+
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.nio.ByteBuffer;
-import org.apache.iotdb.tsfile.read.filter.basic.Filter;
-import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class FilterSerializeTest {
 

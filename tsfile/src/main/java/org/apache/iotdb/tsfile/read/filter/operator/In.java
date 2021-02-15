@@ -18,6 +18,12 @@
  */
 package org.apache.iotdb.tsfile.read.filter.operator;
 
+import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
+import org.apache.iotdb.tsfile.read.filter.basic.Filter;
+import org.apache.iotdb.tsfile.read.filter.factory.FilterSerializeId;
+import org.apache.iotdb.tsfile.read.filter.factory.FilterType;
+import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,11 +32,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
-import org.apache.iotdb.tsfile.read.filter.basic.Filter;
-import org.apache.iotdb.tsfile.read.filter.factory.FilterSerializeId;
-import org.apache.iotdb.tsfile.read.filter.factory.FilterType;
-import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 /**
  * in clause.

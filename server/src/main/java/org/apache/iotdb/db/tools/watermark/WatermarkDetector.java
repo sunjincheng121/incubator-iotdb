@@ -19,15 +19,17 @@
 
 package org.apache.iotdb.db.tools.watermark;
 
+import org.apache.iotdb.db.exception.query.LogicalOperatorException;
+import org.apache.iotdb.db.qp.utils.DatetimeUtils;
+
+import org.apache.thrift.EncodingUtils;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.ZoneId;
-import org.apache.iotdb.db.exception.query.LogicalOperatorException;
-import org.apache.iotdb.db.qp.utils.DatetimeUtils;
-import org.apache.thrift.EncodingUtils;
 
 public class WatermarkDetector {
 

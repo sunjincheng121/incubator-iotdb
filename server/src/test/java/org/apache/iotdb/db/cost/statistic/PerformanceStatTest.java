@@ -20,6 +20,7 @@ package org.apache.iotdb.db.cost.statistic;
 
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.exception.StartupException;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

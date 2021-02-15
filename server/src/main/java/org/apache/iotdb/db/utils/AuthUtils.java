@@ -18,18 +18,20 @@
  */
 package org.apache.iotdb.db.utils;
 
+import org.apache.iotdb.db.auth.AuthException;
+import org.apache.iotdb.db.auth.entity.PathPrivilege;
+import org.apache.iotdb.db.auth.entity.PrivilegeType;
+import org.apache.iotdb.db.conf.IoTDBConstant;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.iotdb.db.auth.AuthException;
-import org.apache.iotdb.db.auth.entity.PathPrivilege;
-import org.apache.iotdb.db.auth.entity.PrivilegeType;
-import org.apache.iotdb.db.conf.IoTDBConstant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AuthUtils {
 

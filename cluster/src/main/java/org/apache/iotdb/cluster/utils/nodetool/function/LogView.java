@@ -18,15 +18,17 @@
  */
 package org.apache.iotdb.cluster.utils.nodetool.function;
 
-import io.airlift.airline.Command;
-import io.airlift.airline.Option;
-import java.io.File;
-import java.util.List;
 import org.apache.iotdb.cluster.log.HardState;
 import org.apache.iotdb.cluster.log.Log;
 import org.apache.iotdb.cluster.log.manage.serializable.LogManagerMeta;
 import org.apache.iotdb.cluster.log.manage.serializable.SyncLogDequeSerializer;
 import org.apache.iotdb.cluster.utils.nodetool.Printer;
+
+import io.airlift.airline.Command;
+import io.airlift.airline.Option;
+
+import java.io.File;
+import java.util.List;
 
 @Command(name = "log", description = "Print raft logs from a log file")
 public class LogView implements Runnable {

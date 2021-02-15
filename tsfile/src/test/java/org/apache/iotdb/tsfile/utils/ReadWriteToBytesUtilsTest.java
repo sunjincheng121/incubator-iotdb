@@ -18,11 +18,12 @@
  */
 package org.apache.iotdb.tsfile.utils;
 
+import org.junit.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import org.junit.Test;
 
 public class ReadWriteToBytesUtilsTest {
 

@@ -19,9 +19,6 @@
 
 package org.apache.iotdb.cluster.log.manage;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.apache.iotdb.cluster.exception.EntryCompactedException;
 import org.apache.iotdb.cluster.exception.EntryUnavailableException;
 import org.apache.iotdb.cluster.exception.TruncateCommittedEntryException;
@@ -29,8 +26,13 @@ import org.apache.iotdb.cluster.log.Log;
 import org.apache.iotdb.cluster.log.Snapshot;
 import org.apache.iotdb.cluster.log.logtypes.EmptyContentLog;
 import org.apache.iotdb.db.utils.TestOnly;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class CommittedEntryManager {
 

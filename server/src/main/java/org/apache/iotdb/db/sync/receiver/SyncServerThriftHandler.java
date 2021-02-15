@@ -15,6 +15,7 @@
 package org.apache.iotdb.db.sync.receiver;
 
 import org.apache.iotdb.db.sync.receiver.transfer.SyncServiceImpl;
+
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.server.ServerContext;
 import org.apache.thrift.server.TServerEventHandler;

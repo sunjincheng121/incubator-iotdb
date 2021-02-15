@@ -18,19 +18,21 @@
  */
 package org.apache.iotdb.db.query.control;
 
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.io.IOException;
 import org.apache.iotdb.db.conf.IoTDBConfig;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.constant.TestConstant;
 import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.Assert.fail;
 
 public class FileReaderManagerTest {
 

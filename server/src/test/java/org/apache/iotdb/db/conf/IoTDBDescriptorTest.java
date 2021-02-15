@@ -18,11 +18,12 @@
  */
 package org.apache.iotdb.db.conf;
 
-import java.net.URL;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.net.URL;
 
 public class IoTDBDescriptorTest {
   private final String confPath = System.getProperty(IoTDBConstant.IOTDB_CONF, null);

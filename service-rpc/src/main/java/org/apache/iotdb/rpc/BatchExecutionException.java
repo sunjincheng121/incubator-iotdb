@@ -18,8 +18,9 @@
  */
 package org.apache.iotdb.rpc;
 
-import java.util.List;
 import org.apache.iotdb.service.rpc.thrift.TSStatus;
+
+import java.util.List;
 
 public class BatchExecutionException extends StatementExecutionException {
 

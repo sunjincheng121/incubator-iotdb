@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.cluster.query.reader;
 
+import org.apache.iotdb.db.query.reader.series.IReaderByTimestamp;
+
 import java.io.IOException;
 import java.util.List;
-import org.apache.iotdb.db.query.reader.series.IReaderByTimestamp;
 
 public class MergedReaderByTime implements IReaderByTimestamp {
 

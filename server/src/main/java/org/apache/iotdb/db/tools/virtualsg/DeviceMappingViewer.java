@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.db.tools.virtualsg;
 
-import java.util.Set;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.engine.storagegroup.virtualSg.HashVirtualPartitioner;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.metadata.MManager;
 import org.apache.iotdb.db.metadata.PartialPath;
+
+import java.util.Set;
 
 /**
  * for DBA to view the mapping from device to virtual storage group ID usage: run this class with

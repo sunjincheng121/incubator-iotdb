@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.db.engine.merge.task;
 
+import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
+
 import java.io.File;
 import java.util.List;
-import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 
 @FunctionalInterface
 public interface MergeCallback {

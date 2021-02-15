@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.jdbc;
 
-import java.sql.SQLException;
 import org.apache.iotdb.service.rpc.thrift.TSStatus;
+
+import java.sql.SQLException;
 
 public class IoTDBSQLException extends SQLException {
 

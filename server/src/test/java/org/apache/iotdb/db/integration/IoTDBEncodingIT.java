@@ -19,7 +19,14 @@
 
 package org.apache.iotdb.db.integration;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.iotdb.db.engine.StorageEngine;
+import org.apache.iotdb.db.utils.EnvironmentUtils;
+import org.apache.iotdb.jdbc.Config;
+import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -29,13 +36,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.iotdb.db.engine.StorageEngine;
-import org.apache.iotdb.db.utils.EnvironmentUtils;
-import org.apache.iotdb.jdbc.Config;
-import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class IoTDBEncodingIT {
 

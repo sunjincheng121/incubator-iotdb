@@ -18,11 +18,17 @@
  */
 package org.apache.iotdb.cli;
 
-import static org.apache.iotdb.cli.utils.IoTPrinter.computeHANCount;
-import static org.apache.iotdb.cli.utils.IoTPrinter.printBlockLine;
-import static org.apache.iotdb.cli.utils.IoTPrinter.printCount;
-import static org.apache.iotdb.cli.utils.IoTPrinter.printRow;
-import static org.apache.iotdb.cli.utils.IoTPrinter.println;
+import org.apache.iotdb.exception.ArgsErrorException;
+import org.apache.iotdb.jdbc.IoTDBConnection;
+import org.apache.iotdb.jdbc.IoTDBJDBCResultSet;
+import org.apache.iotdb.rpc.RpcUtils;
+import org.apache.iotdb.service.rpc.thrift.ServerProperties;
+import org.apache.iotdb.tool.ImportCsv;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,16 +43,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.iotdb.exception.ArgsErrorException;
-import org.apache.iotdb.jdbc.IoTDBConnection;
-import org.apache.iotdb.jdbc.IoTDBJDBCResultSet;
-import org.apache.iotdb.rpc.RpcUtils;
-import org.apache.iotdb.service.rpc.thrift.ServerProperties;
-import org.apache.iotdb.tool.ImportCsv;
+
+import static org.apache.iotdb.cli.utils.IoTPrinter.computeHANCount;
+import static org.apache.iotdb.cli.utils.IoTPrinter.printBlockLine;
+import static org.apache.iotdb.cli.utils.IoTPrinter.printCount;
+import static org.apache.iotdb.cli.utils.IoTPrinter.printRow;
+import static org.apache.iotdb.cli.utils.IoTPrinter.println;
 
 public abstract class AbstractCli {
 

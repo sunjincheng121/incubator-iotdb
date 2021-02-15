@@ -18,9 +18,6 @@
  */
 package org.apache.iotdb.db.metadata.mnode;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.iotdb.db.metadata.logfile.MLogWriter;
 import org.apache.iotdb.db.qp.physical.sys.MeasurementMNodePlan;
 import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
@@ -28,6 +25,10 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /** Represents an MNode which has a Measurement or Sensor attached to it. */
 public class MeasurementMNode extends MNode {

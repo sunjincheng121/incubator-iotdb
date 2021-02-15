@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.db.query.reader.chunk;
 
-import java.io.IOException;
 import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.read.TimeValuePair;
@@ -28,6 +27,8 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.filter.operator.AndFilter;
 import org.apache.iotdb.tsfile.read.reader.IPageReader;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
+
+import java.io.IOException;
 
 public class MemPageReader implements IPageReader {
 

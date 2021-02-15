@@ -18,14 +18,16 @@
  */
 package org.apache.iotdb.db.metadata;
 
-import java.util.Arrays;
-import java.util.List;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class PartialPathTest {
   @Before

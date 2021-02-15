@@ -19,9 +19,6 @@
 
 package org.apache.iotdb.db.query.udf.example;
 
-import static org.apache.iotdb.db.integration.IoTDBUDFWindowQueryIT.*;
-
-import java.io.IOException;
 import org.apache.iotdb.db.query.udf.api.UDTF;
 import org.apache.iotdb.db.query.udf.api.access.Row;
 import org.apache.iotdb.db.query.udf.api.access.RowIterator;
@@ -34,8 +31,13 @@ import org.apache.iotdb.db.query.udf.api.customizer.strategy.RowByRowAccessStrat
 import org.apache.iotdb.db.query.udf.api.customizer.strategy.SlidingSizeWindowAccessStrategy;
 import org.apache.iotdb.db.query.udf.api.customizer.strategy.SlidingTimeWindowAccessStrategy;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+
+import static org.apache.iotdb.db.integration.IoTDBUDFWindowQueryIT.*;
 
 public class Accumulator implements UDTF {
 

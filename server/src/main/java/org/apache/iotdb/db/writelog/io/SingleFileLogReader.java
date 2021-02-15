@@ -18,6 +18,11 @@
  */
 package org.apache.iotdb.db.writelog.io;
 
+import org.apache.iotdb.db.qp.physical.PhysicalPlan;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -27,9 +32,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
 import java.util.zip.CRC32;
-import org.apache.iotdb.db.qp.physical.PhysicalPlan;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * SingleFileLogReader reads binarized WAL logs from a file through a DataInputStream by scanning

@@ -18,19 +18,16 @@
  */
 package org.apache.iotdb.cli;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
+import org.apache.iotdb.cli.AbstractCli.OperationResult;
+import org.apache.iotdb.exception.ArgsErrorException;
+import org.apache.iotdb.jdbc.IoTDBConnection;
+import org.apache.iotdb.jdbc.IoTDBDatabaseMetadata;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.iotdb.cli.AbstractCli.OperationResult;
-import org.apache.iotdb.exception.ArgsErrorException;
-import org.apache.iotdb.jdbc.IoTDBConnection;
-import org.apache.iotdb.jdbc.IoTDBDatabaseMetadata;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +35,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 public class AbstractCliIT {
   private static Logger logger = LoggerFactory.getLogger(AbstractCliIT.class);

@@ -18,7 +18,12 @@
  */
 package org.apache.iotdb.db.service;
 
-import java.lang.management.ManagementFactory;
+import org.apache.iotdb.db.conf.IoTDBConstant;
+import org.apache.iotdb.db.exception.StartupException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
@@ -26,10 +31,8 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import org.apache.iotdb.db.conf.IoTDBConstant;
-import org.apache.iotdb.db.exception.StartupException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.lang.management.ManagementFactory;
 
 public class JMXService implements IService {
 

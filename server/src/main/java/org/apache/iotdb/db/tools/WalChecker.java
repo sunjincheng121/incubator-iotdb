@@ -18,18 +18,20 @@
  */
 package org.apache.iotdb.db.tools;
 
-import static org.apache.iotdb.db.writelog.node.ExclusiveWriteLogNode.WAL_FILE_NAME;
+import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
+import org.apache.iotdb.db.exception.SystemCheckException;
+import org.apache.iotdb.db.writelog.io.SingleFileLogReader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
-import org.apache.iotdb.db.exception.SystemCheckException;
-import org.apache.iotdb.db.writelog.io.SingleFileLogReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.apache.iotdb.db.writelog.node.ExclusiveWriteLogNode.WAL_FILE_NAME;
 
 /** WalChecker verifies that whether all insert ahead logs in the WAL folder are recognizable. */
 public class WalChecker {

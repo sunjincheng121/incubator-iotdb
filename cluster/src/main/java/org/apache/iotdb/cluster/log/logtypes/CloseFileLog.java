@@ -19,15 +19,16 @@
 
 package org.apache.iotdb.cluster.log.logtypes;
 
-import static org.apache.iotdb.cluster.log.Log.Types.CLOSE_FILE;
+import org.apache.iotdb.cluster.log.Log;
+import org.apache.iotdb.db.utils.SerializeUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
-import org.apache.iotdb.cluster.log.Log;
-import org.apache.iotdb.db.utils.SerializeUtils;
+
+import static org.apache.iotdb.cluster.log.Log.Types.CLOSE_FILE;
 
 public class CloseFileLog extends Log {
 

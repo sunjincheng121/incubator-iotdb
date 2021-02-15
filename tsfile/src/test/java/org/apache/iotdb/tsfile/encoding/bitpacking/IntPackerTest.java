@@ -19,11 +19,12 @@
 
 package org.apache.iotdb.tsfile.encoding.bitpacking;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Random;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class IntPackerTest {
 

@@ -19,6 +19,11 @@
 
 package org.apache.iotdb.db.tools;
 
+import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
+import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
+import org.apache.iotdb.db.qp.utils.DatetimeUtils;
+import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,10 +33,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.apache.iotdb.db.engine.fileSystem.SystemFileFactory;
-import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
-import org.apache.iotdb.db.qp.utils.DatetimeUtils;
-import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
 
 public class IoTDBDataDirViewer {
 

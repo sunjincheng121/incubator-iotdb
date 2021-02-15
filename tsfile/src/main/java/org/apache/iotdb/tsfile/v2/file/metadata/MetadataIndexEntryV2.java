@@ -18,9 +18,10 @@
  */
 package org.apache.iotdb.tsfile.v2.file.metadata;
 
-import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.file.metadata.MetadataIndexEntry;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
+
+import java.nio.ByteBuffer;
 
 public class MetadataIndexEntryV2 {
 

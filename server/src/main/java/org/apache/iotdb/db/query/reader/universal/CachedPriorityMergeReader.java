@@ -19,10 +19,11 @@
 
 package org.apache.iotdb.db.query.reader.universal;
 
-import java.io.IOException;
 import org.apache.iotdb.db.utils.TimeValuePairUtils;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.TimeValuePair;
+
+import java.io.IOException;
 
 /**
  * CachedPriorityMergeReader use a cache to reduce unnecessary heap updates and increase locality.

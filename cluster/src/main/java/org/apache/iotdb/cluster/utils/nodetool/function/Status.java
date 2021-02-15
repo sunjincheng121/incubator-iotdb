@@ -14,12 +14,14 @@
  */
 package org.apache.iotdb.cluster.utils.nodetool.function;
 
-import static org.apache.iotdb.cluster.utils.nodetool.Printer.msgPrintln;
-
-import io.airlift.airline.Command;
-import java.util.Map;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.cluster.utils.nodetool.ClusterMonitorMBean;
+
+import io.airlift.airline.Command;
+
+import java.util.Map;
+
+import static org.apache.iotdb.cluster.utils.nodetool.Printer.msgPrintln;
 
 @Command(name = "status", description = "Print status of all nodes")
 public class Status extends NodeToolCmd {

@@ -19,16 +19,18 @@
 
 package org.apache.iotdb.tsfile.compress;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import org.apache.iotdb.tsfile.exception.compress.CompressionTypeNotSupportedException;
+import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
+
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4SafeDecompressor;
-import org.apache.iotdb.tsfile.exception.compress.CompressionTypeNotSupportedException;
-import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /** uncompress data according to type in metadata. */
 public interface IUnCompressor {

@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.db.service;
 
-import java.io.IOException;
 import org.apache.iotdb.db.concurrent.IoTDBDefaultThreadExceptionHandler;
 import org.apache.iotdb.db.conf.IoTDBConfigCheck;
 import org.apache.iotdb.db.conf.IoTDBConstant;
@@ -41,8 +40,11 @@ import org.apache.iotdb.db.rescon.SystemInfo;
 import org.apache.iotdb.db.rescon.TVListAllocator;
 import org.apache.iotdb.db.sync.receiver.SyncServerManager;
 import org.apache.iotdb.db.writelog.manager.MultiFileLogNodeManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class IoTDB implements IoTDBMBean {
 

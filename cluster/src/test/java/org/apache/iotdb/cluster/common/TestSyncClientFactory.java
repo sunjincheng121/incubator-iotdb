@@ -19,14 +19,16 @@
 
 package org.apache.iotdb.cluster.common;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.iotdb.cluster.client.sync.SyncClientFactory;
 import org.apache.iotdb.cluster.client.sync.SyncClientPool;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.cluster.rpc.thrift.RaftService.Client;
+
 import org.apache.thrift.protocol.TBinaryProtocol.Factory;
 import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.transport.TTransport;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TestSyncClientFactory implements SyncClientFactory {
   private AtomicInteger clientSerialNum = new AtomicInteger();

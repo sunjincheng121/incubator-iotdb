@@ -18,6 +18,11 @@
  */
 package org.apache.iotdb.jdbc;
 
+import org.apache.iotdb.service.rpc.thrift.TSIService.Iface;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -42,9 +47,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import org.apache.iotdb.service.rpc.thrift.TSIService.Iface;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IoTDBPreparedStatement extends IoTDBStatement implements PreparedStatement {
 

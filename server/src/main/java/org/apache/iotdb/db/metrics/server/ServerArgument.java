@@ -19,6 +19,9 @@
 package org.apache.iotdb.db.metrics.server;
 
 import com.sun.management.OperatingSystemMXBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -29,8 +32,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServerArgument {
 

@@ -19,10 +19,11 @@
 
 package org.apache.iotdb.cluster.common;
 
-import java.io.IOException;
 import org.apache.iotdb.cluster.log.Snapshot;
 import org.apache.iotdb.cluster.log.manage.RaftLogManager;
 import org.apache.iotdb.cluster.log.manage.serializable.SyncLogDequeSerializer;
+
+import java.io.IOException;
 
 public class TestLogManager extends RaftLogManager {
 

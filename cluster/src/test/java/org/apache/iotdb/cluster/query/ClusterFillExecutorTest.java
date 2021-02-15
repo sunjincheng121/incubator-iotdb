@@ -19,11 +19,6 @@
 
 package org.apache.iotdb.cluster.query;
 
-import static org.junit.Assert.assertFalse;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.query.fill.ClusterFillExecutor;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
@@ -39,7 +34,14 @@ import org.apache.iotdb.db.query.executor.fill.LinearFill;
 import org.apache.iotdb.db.query.executor.fill.PreviousFill;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
+
 import org.junit.Test;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
+import static org.junit.Assert.assertFalse;
 
 public class ClusterFillExecutorTest extends BaseQueryTest {
 

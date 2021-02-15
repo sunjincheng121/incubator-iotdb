@@ -18,10 +18,11 @@
  */
 package org.apache.iotdb.cli.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.PrintStream;
 import java.lang.Character.UnicodeScript;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 
 public class IoTPrinter {
   private static final PrintStream SCREEN_PRINTER = new PrintStream(System.out);

@@ -19,9 +19,10 @@
 
 package org.apache.iotdb.cluster.common;
 
+import org.apache.iotdb.cluster.log.Log;
+
 import java.nio.ByteBuffer;
 import java.util.Objects;
-import org.apache.iotdb.cluster.log.Log;
 
 public class TestLog extends Log {
 

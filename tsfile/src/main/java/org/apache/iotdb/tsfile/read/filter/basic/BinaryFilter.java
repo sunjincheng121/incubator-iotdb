@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.tsfile.read.filter.basic;
 
+import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Objects;
-import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
 
 /** Definition for binary filter operations. */
 public abstract class BinaryFilter implements Filter, Serializable {

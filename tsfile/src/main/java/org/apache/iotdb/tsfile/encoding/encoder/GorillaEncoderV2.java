@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.tsfile.encoding.encoder;
 
-import java.io.ByteArrayOutputStream;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * This class includes code modified from Michael Burman's gorilla-tsc project.

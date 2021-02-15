@@ -18,10 +18,12 @@
  */
 package org.apache.iotdb.cli;
 
+import org.apache.iotdb.db.utils.EnvironmentUtils;
+
+import org.junit.*;
+
 import java.io.File;
 import java.io.IOException;
-import org.apache.iotdb.db.utils.EnvironmentUtils;
-import org.junit.*;
 
 public class StartClientScriptIT extends AbstractScript {
 

@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.tsfile.v2.file.metadata;
 
-import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 import org.apache.iotdb.tsfile.v2.file.metadata.statistics.StatisticsV2;
+
+import java.nio.ByteBuffer;
 
 public class ChunkMetadataV2 {
 

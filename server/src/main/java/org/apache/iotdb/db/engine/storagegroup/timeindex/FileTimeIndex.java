@@ -19,14 +19,6 @@
 
 package org.apache.iotdb.db.engine.storagegroup.timeindex;
 
-import io.netty.util.internal.ConcurrentSet;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import org.apache.iotdb.db.engine.StorageEngine;
 import org.apache.iotdb.db.exception.PartitionViolationException;
 import org.apache.iotdb.db.rescon.CachedStringPool;
@@ -34,6 +26,16 @@ import org.apache.iotdb.db.utils.FilePathUtils;
 import org.apache.iotdb.db.utils.SerializeUtils;
 import org.apache.iotdb.tsfile.utils.RamUsageEstimator;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
+
+import io.netty.util.internal.ConcurrentSet;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class FileTimeIndex implements ITimeIndex {
 

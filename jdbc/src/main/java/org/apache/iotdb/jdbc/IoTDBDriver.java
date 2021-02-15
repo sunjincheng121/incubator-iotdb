@@ -18,6 +18,9 @@
  */
 package org.apache.iotdb.jdbc;
 
+import org.apache.thrift.transport.TTransportException;
+import org.osgi.service.component.annotations.Component;
+
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -27,8 +30,6 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import org.apache.thrift.transport.TTransportException;
-import org.osgi.service.component.annotations.Component;
 
 @Component(service = java.sql.Driver.class, immediate = true)
 public class IoTDBDriver implements Driver {

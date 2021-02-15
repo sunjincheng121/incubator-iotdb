@@ -18,9 +18,6 @@
  */
 package org.apache.iotdb.db.qp.logical;
 
-import java.time.ZoneId;
-import java.util.ArrayList;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.query.LogicalOptimizeException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
@@ -33,9 +30,14 @@ import org.apache.iotdb.db.qp.logical.sys.SetStorageGroupOperator;
 import org.apache.iotdb.db.qp.strategy.LogicalGenerator;
 import org.apache.iotdb.db.qp.strategy.optimizer.ConcatPathOptimizer;
 import org.apache.iotdb.db.service.IoTDB;
+
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.time.ZoneId;
+import java.util.ArrayList;
 
 public class LogicalPlanSmallTest {
 

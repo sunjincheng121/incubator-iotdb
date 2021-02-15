@@ -19,11 +19,12 @@
 
 package org.apache.iotdb.db.engine.cache;
 
+import org.apache.iotdb.tsfile.common.cache.Accountable;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.iotdb.tsfile.common.cache.Accountable;
 
 /** This class is an LRU cache. <b>Note: It's not thread safe.</b> */
 public abstract class LRULinkedHashMap<K extends Accountable, V> {

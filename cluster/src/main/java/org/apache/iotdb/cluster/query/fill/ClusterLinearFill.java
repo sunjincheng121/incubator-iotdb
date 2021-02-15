@@ -19,8 +19,6 @@
 
 package org.apache.iotdb.cluster.query.fill;
 
-import java.util.Arrays;
-import java.util.List;
 import org.apache.iotdb.cluster.query.aggregate.ClusterAggregator;
 import org.apache.iotdb.cluster.server.member.MetaGroupMember;
 import org.apache.iotdb.db.exception.StorageEngineException;
@@ -28,6 +26,9 @@ import org.apache.iotdb.db.qp.constant.SQLConstant;
 import org.apache.iotdb.db.query.aggregation.AggregateResult;
 import org.apache.iotdb.db.query.executor.fill.LinearFill;
 import org.apache.iotdb.tsfile.read.TimeValuePair;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * ClusterLinearFill overrides the dataReader in LinearFill so that it can read data from the whole

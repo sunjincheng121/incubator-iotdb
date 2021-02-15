@@ -18,17 +18,19 @@
  */
 package org.apache.iotdb.db.query.dataset.groupby;
 
+import org.apache.iotdb.db.qp.physical.crud.GroupByTimePlan;
+import org.apache.iotdb.db.query.aggregation.impl.CountAggrResult;
+import org.apache.iotdb.tsfile.utils.Pair;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.iotdb.db.qp.physical.crud.GroupByTimePlan;
-import org.apache.iotdb.db.query.aggregation.impl.CountAggrResult;
-import org.apache.iotdb.tsfile.utils.Pair;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class GroupByEngineDataSetTest {
 

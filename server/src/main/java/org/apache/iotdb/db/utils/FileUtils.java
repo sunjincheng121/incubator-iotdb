@@ -14,14 +14,15 @@
  */
 package org.apache.iotdb.db.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FileUtils {
   private static Logger logger = LoggerFactory.getLogger(FileUtils.class);

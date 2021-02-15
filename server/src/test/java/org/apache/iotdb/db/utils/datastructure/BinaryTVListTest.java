@@ -18,12 +18,14 @@
  */
 package org.apache.iotdb.db.utils.datastructure;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.iotdb.tsfile.utils.Binary;
+
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BinaryTVListTest {
 

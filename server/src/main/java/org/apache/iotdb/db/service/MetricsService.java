@@ -18,13 +18,6 @@
  */
 package org.apache.iotdb.db.service;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import org.apache.iotdb.db.concurrent.ThreadName;
 import org.apache.iotdb.db.concurrent.WrappedRunnable;
 import org.apache.iotdb.db.conf.IoTDBConfig;
@@ -34,9 +27,18 @@ import org.apache.iotdb.db.exception.StartupException;
 import org.apache.iotdb.db.metrics.server.MetricsSystem;
 import org.apache.iotdb.db.metrics.server.ServerArgument;
 import org.apache.iotdb.db.metrics.ui.MetricsWebUI;
+
 import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class MetricsService implements MetricsServiceMBean, IService {
 

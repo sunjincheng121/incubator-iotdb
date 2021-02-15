@@ -19,12 +19,13 @@
 
 package org.apache.iotdb.db.utils;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.tsfile.common.constant.TsFileConstant;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class TypeInferenceUtilsTest {
 

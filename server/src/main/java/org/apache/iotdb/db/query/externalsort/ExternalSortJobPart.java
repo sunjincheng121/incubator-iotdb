@@ -18,8 +18,9 @@
  */
 package org.apache.iotdb.db.query.externalsort;
 
-import java.io.IOException;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
+
+import java.io.IOException;
 
 public abstract class ExternalSortJobPart {
 

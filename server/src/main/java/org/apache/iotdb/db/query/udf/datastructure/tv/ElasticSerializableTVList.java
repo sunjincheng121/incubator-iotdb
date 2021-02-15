@@ -19,9 +19,6 @@
 
 package org.apache.iotdb.db.query.udf.datastructure.tv;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.query.udf.api.collector.PointCollector;
 import org.apache.iotdb.db.query.udf.core.reader.LayerPointReader;
@@ -30,6 +27,10 @@ import org.apache.iotdb.tsfile.exception.write.UnSupportedDataTypeException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.read.common.BatchData;
 import org.apache.iotdb.tsfile.utils.Binary;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ElasticSerializableTVList implements PointCollector {
 

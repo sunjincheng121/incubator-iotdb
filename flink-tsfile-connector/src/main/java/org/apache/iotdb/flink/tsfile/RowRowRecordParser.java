@@ -19,16 +19,18 @@
 
 package org.apache.iotdb.flink.tsfile;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
-import org.apache.flink.api.java.typeutils.RowTypeInfo;
-import org.apache.flink.types.Row;
 import org.apache.iotdb.tsfile.common.constant.QueryConstant;
 import org.apache.iotdb.tsfile.read.common.Field;
 import org.apache.iotdb.tsfile.read.common.Path;
 import org.apache.iotdb.tsfile.read.common.RowRecord;
+
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
+import org.apache.flink.types.Row;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /** The parser that parses the RowRecord objects read from TsFile into Flink Row object. */
 public class RowRowRecordParser implements RowRecordParser<Row>, ResultTypeQueryable<Row> {

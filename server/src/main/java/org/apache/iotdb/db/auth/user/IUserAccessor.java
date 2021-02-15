@@ -18,9 +18,10 @@
  */
 package org.apache.iotdb.db.auth.user;
 
+import org.apache.iotdb.db.auth.entity.User;
+
 import java.io.IOException;
 import java.util.List;
-import org.apache.iotdb.db.auth.entity.User;
 
 /** This interface manages the serialization/deserialization of the user objects. */
 public interface IUserAccessor {

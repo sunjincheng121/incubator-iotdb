@@ -19,8 +19,6 @@
 
 package org.apache.iotdb.cluster.query.reader;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.iotdb.db.query.aggregation.AggregateResult;
 import org.apache.iotdb.db.query.dataset.groupby.GroupByExecutor;
 import org.apache.iotdb.db.query.reader.series.BaseManagedSeriesReader;
@@ -32,6 +30,9 @@ import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.read.common.BatchData;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
 import org.apache.iotdb.tsfile.utils.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /** A placeholder when the remote node does not contain satisfying data of a series. */
 public class EmptyReader extends BaseManagedSeriesReader

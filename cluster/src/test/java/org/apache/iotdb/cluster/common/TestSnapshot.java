@@ -19,13 +19,14 @@
 
 package org.apache.iotdb.cluster.common;
 
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.Objects;
 import org.apache.iotdb.cluster.log.Snapshot;
 import org.apache.iotdb.cluster.log.snapshot.SnapshotFactory;
 import org.apache.iotdb.cluster.log.snapshot.SnapshotInstaller;
 import org.apache.iotdb.cluster.server.member.RaftMember;
+
+import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.Objects;
 
 public class TestSnapshot extends Snapshot {
 

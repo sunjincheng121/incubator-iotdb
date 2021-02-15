@@ -19,13 +19,6 @@
 
 package org.apache.iotdb.flink.tsfile;
 
-import static org.junit.Assert.assertArrayEquals;
-
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Spliterators;
-import java.util.stream.StreamSupport;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -34,6 +27,14 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.types.Row;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
+
+import static org.junit.Assert.assertArrayEquals;
 
 /** ITCases for RowTsFileInputFormat. */
 public class RowTsFileInputFormatITCase extends RowTsFileInputFormatTestBase {

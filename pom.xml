@@ -609,6 +609,11 @@
                                 <version>1.7</version>
                                 <style>GOOGLE</style>
                             </googleJavaFormat>
+
+                            <importOrder>
+                                <order>org.apache.iotdb,,javax,java,\#</order>
+                            </importOrder>
+
                             <removeUnusedImports />
                         </java>
                     </configuration>

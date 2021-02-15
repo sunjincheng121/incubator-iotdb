@@ -19,12 +19,13 @@
 
 package org.apache.iotdb.db.engine.querycontext;
 
-import java.util.List;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.tsfile.read.filter.TimeFilter;
 import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.filter.operator.AndFilter;
+
+import java.util.List;
 
 public class QueryDataSource {
   private PartialPath seriesPath;

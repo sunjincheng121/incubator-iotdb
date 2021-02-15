@@ -16,11 +16,12 @@
  */
 package org.apache.iotdb.jdbc;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.jdbc.DataSourceFactory;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 public class Activator implements BundleActivator {
 

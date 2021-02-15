@@ -19,7 +19,9 @@
 
 package org.apache.iotdb.tsfile.encoding.bitpacking;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.iotdb.tsfile.utils.ReadWriteForEncodingUtils;
+
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,8 +30,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import org.apache.iotdb.tsfile.utils.ReadWriteForEncodingUtils;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class LongPackerTest {
 

@@ -20,13 +20,6 @@
 
 package org.apache.iotdb.cluster.query;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URL;
 import org.apache.iotdb.cluster.config.ClusterDescriptor;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.constant.TestConstant;
@@ -37,6 +30,7 @@ import org.apache.iotdb.db.qp.physical.sys.LoadConfigurationPlan;
 import org.apache.iotdb.db.qp.strategy.PhysicalGenerator;
 import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
 import org.apache.iotdb.tsfile.fileSystem.fsFactory.FSFactory;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,6 +41,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 @PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "javax.management.*"})
 @RunWith(PowerMockRunner.class)

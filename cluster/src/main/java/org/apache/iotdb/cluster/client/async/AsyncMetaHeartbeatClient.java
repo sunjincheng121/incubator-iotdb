@@ -19,14 +19,16 @@
 
 package org.apache.iotdb.cluster.client.async;
 
-import java.io.IOException;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.cluster.rpc.thrift.RaftService;
 import org.apache.iotdb.cluster.server.RaftServer;
 import org.apache.iotdb.cluster.utils.ClusterUtils;
+
 import org.apache.thrift.async.TAsyncClientManager;
 import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.transport.TNonblockingSocket;
+
+import java.io.IOException;
 
 /**
  * Notice: Because a client will be returned to a pool immediately after a successful request, you

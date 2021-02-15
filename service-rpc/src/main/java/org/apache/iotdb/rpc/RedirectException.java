@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.rpc;
 
-import java.util.Map;
 import org.apache.iotdb.service.rpc.thrift.EndPoint;
+
+import java.util.Map;
 
 public class RedirectException extends Exception {
 

@@ -19,14 +19,15 @@
 
 package org.apache.iotdb.cluster.utils;
 
-import java.util.Collections;
-import java.util.List;
 import org.apache.iotdb.cluster.metadata.CMManager;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.service.IoTDB;
+
+import java.util.Collections;
+import java.util.List;
 
 public class ClusterQueryUtils {
 

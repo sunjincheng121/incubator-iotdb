@@ -18,11 +18,12 @@
  */
 package org.apache.iotdb.tsfile.v2.file.metadata;
 
-import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.file.metadata.TimeseriesMetadata;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 import org.apache.iotdb.tsfile.v2.file.metadata.statistics.StatisticsV2;
+
+import java.nio.ByteBuffer;
 
 public class TimeseriesMetadataV2 {
 

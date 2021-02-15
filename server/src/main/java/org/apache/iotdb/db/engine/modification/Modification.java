@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.db.engine.modification;
 
-import java.util.Objects;
 import org.apache.iotdb.db.metadata.PartialPath;
+
+import java.util.Objects;
 
 /** Modification represents an UPDATE or DELETE operation on a certain timeseries. */
 public abstract class Modification {

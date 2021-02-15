@@ -18,8 +18,39 @@
  */
 package org.apache.iotdb.db.sync.sender.transfer;
 
-import static org.apache.iotdb.db.sync.conf.SyncConstant.CONFLICT_CODE;
-import static org.apache.iotdb.db.sync.conf.SyncConstant.SUCCESS_CODE;
+import org.apache.iotdb.db.concurrent.IoTDBThreadPoolFactory;
+import org.apache.iotdb.db.concurrent.ThreadName;
+import org.apache.iotdb.db.conf.IoTDBConfig;
+import org.apache.iotdb.db.conf.IoTDBConstant;
+import org.apache.iotdb.db.conf.IoTDBDescriptor;
+import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
+import org.apache.iotdb.db.exception.SyncConnectionException;
+import org.apache.iotdb.db.exception.SyncDeviceOwnerConflictException;
+import org.apache.iotdb.db.metadata.MetadataConstant;
+import org.apache.iotdb.db.sync.conf.SyncConstant;
+import org.apache.iotdb.db.sync.conf.SyncSenderConfig;
+import org.apache.iotdb.db.sync.conf.SyncSenderDescriptor;
+import org.apache.iotdb.db.sync.sender.manage.ISyncFileManager;
+import org.apache.iotdb.db.sync.sender.manage.SyncFileManager;
+import org.apache.iotdb.db.sync.sender.recover.ISyncSenderLogger;
+import org.apache.iotdb.db.sync.sender.recover.SyncSenderLogAnalyzer;
+import org.apache.iotdb.db.sync.sender.recover.SyncSenderLogger;
+import org.apache.iotdb.db.utils.SyncUtils;
+import org.apache.iotdb.rpc.RpcTransportFactory;
+import org.apache.iotdb.service.sync.thrift.ConfirmInfo;
+import org.apache.iotdb.service.sync.thrift.SyncService;
+import org.apache.iotdb.service.sync.thrift.SyncStatus;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TCompactProtocol;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -50,38 +81,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.io.FileUtils;
-import org.apache.iotdb.db.concurrent.IoTDBThreadPoolFactory;
-import org.apache.iotdb.db.concurrent.ThreadName;
-import org.apache.iotdb.db.conf.IoTDBConfig;
-import org.apache.iotdb.db.conf.IoTDBConstant;
-import org.apache.iotdb.db.conf.IoTDBDescriptor;
-import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
-import org.apache.iotdb.db.exception.SyncConnectionException;
-import org.apache.iotdb.db.exception.SyncDeviceOwnerConflictException;
-import org.apache.iotdb.db.metadata.MetadataConstant;
-import org.apache.iotdb.db.sync.conf.SyncConstant;
-import org.apache.iotdb.db.sync.conf.SyncSenderConfig;
-import org.apache.iotdb.db.sync.conf.SyncSenderDescriptor;
-import org.apache.iotdb.db.sync.sender.manage.ISyncFileManager;
-import org.apache.iotdb.db.sync.sender.manage.SyncFileManager;
-import org.apache.iotdb.db.sync.sender.recover.ISyncSenderLogger;
-import org.apache.iotdb.db.sync.sender.recover.SyncSenderLogAnalyzer;
-import org.apache.iotdb.db.sync.sender.recover.SyncSenderLogger;
-import org.apache.iotdb.db.utils.SyncUtils;
-import org.apache.iotdb.rpc.RpcTransportFactory;
-import org.apache.iotdb.service.sync.thrift.ConfirmInfo;
-import org.apache.iotdb.service.sync.thrift.SyncService;
-import org.apache.iotdb.service.sync.thrift.SyncStatus;
-import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TCompactProtocol;
-import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static org.apache.iotdb.db.sync.conf.SyncConstant.CONFLICT_CODE;
+import static org.apache.iotdb.db.sync.conf.SyncConstant.SUCCESS_CODE;
 
 public class SyncClient implements ISyncClient {
 

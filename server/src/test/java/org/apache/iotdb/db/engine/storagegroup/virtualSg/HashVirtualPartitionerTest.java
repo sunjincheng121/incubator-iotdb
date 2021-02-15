@@ -18,17 +18,19 @@
  */
 package org.apache.iotdb.db.engine.storagegroup.virtualSg;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.HashMap;
-import java.util.Set;
 import org.apache.iotdb.db.engine.StorageEngine;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
 
 public class HashVirtualPartitionerTest {
   @Before

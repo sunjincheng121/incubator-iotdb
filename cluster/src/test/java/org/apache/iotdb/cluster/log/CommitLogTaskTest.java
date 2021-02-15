@@ -19,16 +19,18 @@
 
 package org.apache.iotdb.cluster.log;
 
-import static org.junit.Assert.*;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.iotdb.cluster.common.TestLogManager;
 import org.apache.iotdb.cluster.common.TestUtils;
 import org.apache.iotdb.cluster.log.manage.RaftLogManager;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
+
 import org.apache.thrift.async.AsyncMethodCallback;
 import org.junit.After;
 import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.junit.Assert.*;
 
 public class CommitLogTaskTest {
 

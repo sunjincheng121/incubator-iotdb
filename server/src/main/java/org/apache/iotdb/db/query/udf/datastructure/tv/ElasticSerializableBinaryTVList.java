@@ -19,12 +19,13 @@
 
 package org.apache.iotdb.db.query.udf.datastructure.tv;
 
-import static org.apache.iotdb.db.query.udf.datastructure.SerializableList.INITIAL_BYTE_ARRAY_LENGTH_FOR_MEMORY_CONTROL;
-
-import java.io.IOException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.utils.Binary;
+
+import java.io.IOException;
+
+import static org.apache.iotdb.db.query.udf.datastructure.SerializableList.INITIAL_BYTE_ARRAY_LENGTH_FOR_MEMORY_CONTROL;
 
 public class ElasticSerializableBinaryTVList extends ElasticSerializableTVList {
 

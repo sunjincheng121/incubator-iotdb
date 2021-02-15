@@ -16,13 +16,15 @@
  */
 package org.apache.iotdb.jdbc;
 
+import org.apache.thrift.transport.TTransportException;
+
+import javax.sql.DataSource;
+
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
-import javax.sql.DataSource;
-import org.apache.thrift.transport.TTransportException;
 
 public class IoTDBDataSource implements DataSource {
 

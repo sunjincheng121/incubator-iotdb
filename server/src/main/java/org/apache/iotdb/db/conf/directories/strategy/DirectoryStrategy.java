@@ -18,13 +18,15 @@
  */
 package org.apache.iotdb.db.conf.directories.strategy;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.exception.DiskSpaceInsufficientException;
 import org.apache.iotdb.db.utils.CommonUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The basic class of all the strategies of multiple directories. If a user wants to define his own

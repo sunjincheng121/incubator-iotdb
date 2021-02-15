@@ -19,13 +19,12 @@
 
 package org.apache.iotdb.db.service.thrift;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
 import org.apache.iotdb.db.concurrent.IoTDBThreadPoolFactory;
 import org.apache.iotdb.db.conf.IoTDBConstant;
 import org.apache.iotdb.db.exception.runtime.RPCServiceException;
 import org.apache.iotdb.db.utils.CommonUtils;
 import org.apache.iotdb.rpc.RpcTransportFactory;
+
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TCompactProtocol;
@@ -38,6 +37,9 @@ import org.apache.thrift.transport.TServerTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.concurrent.CountDownLatch;
 
 public class ThriftServiceThread extends Thread {
 

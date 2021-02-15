@@ -19,12 +19,14 @@
 
 package org.apache.iotdb.tsfile.read;
 
-import java.io.IOException;
 import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
 import org.apache.iotdb.tsfile.write.TsFileWriter;
 import org.apache.iotdb.tsfile.write.writer.RestorableTsFileIOWriter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class TsFileRestorableReader extends TsFileSequenceReader {
 

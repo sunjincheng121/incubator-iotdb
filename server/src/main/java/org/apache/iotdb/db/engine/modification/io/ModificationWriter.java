@@ -19,8 +19,9 @@
 
 package org.apache.iotdb.db.engine.modification.io;
 
-import java.io.IOException;
 import org.apache.iotdb.db.engine.modification.Modification;
+
+import java.io.IOException;
 
 /**
  * ModificationWriter provides methods for writing a modification to a persistent medium like file

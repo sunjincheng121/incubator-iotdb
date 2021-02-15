@@ -19,13 +19,14 @@
 
 package org.apache.iotdb.cluster.log.logtypes;
 
-import static org.apache.iotdb.cluster.log.Log.Types.EMPTY_CONTENT;
+import org.apache.iotdb.cluster.log.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import org.apache.iotdb.cluster.log.Log;
+
+import static org.apache.iotdb.cluster.log.Log.Types.EMPTY_CONTENT;
 
 public class EmptyContentLog extends Log {
 

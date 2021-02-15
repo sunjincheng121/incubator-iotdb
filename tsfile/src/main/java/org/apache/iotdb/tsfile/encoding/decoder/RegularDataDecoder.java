@@ -19,12 +19,13 @@
 
 package org.apache.iotdb.tsfile.encoding.decoder;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.BitSet;
 import org.apache.iotdb.tsfile.encoding.encoder.RegularDataEncoder;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 /**
  * This class is a decoder for decoding the byte array that encoded by {@code RegularDataEncoder}.

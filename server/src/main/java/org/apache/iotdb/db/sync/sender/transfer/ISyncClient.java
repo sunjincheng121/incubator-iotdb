@@ -18,12 +18,14 @@
  */
 package org.apache.iotdb.db.sync.sender.transfer;
 
+import org.apache.iotdb.db.exception.SyncConnectionException;
+import org.apache.iotdb.db.exception.SyncDeviceOwnerConflictException;
+
+import org.apache.thrift.TException;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
-import org.apache.iotdb.db.exception.SyncConnectionException;
-import org.apache.iotdb.db.exception.SyncDeviceOwnerConflictException;
-import org.apache.thrift.TException;
 
 /**
  * This interface is used to realize the data transmission part of synchronization task, and is also

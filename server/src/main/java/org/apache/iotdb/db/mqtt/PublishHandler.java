@@ -17,11 +17,6 @@
  */
 package org.apache.iotdb.db.mqtt;
 
-import io.moquette.interception.AbstractInterceptHandler;
-import io.moquette.interception.messages.InterceptPublishMessage;
-import io.netty.buffer.ByteBuf;
-import io.netty.handler.codec.mqtt.MqttQoS;
-import java.util.List;
 import org.apache.iotdb.db.conf.IoTDBConfig;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.exception.StorageEngineException;
@@ -33,8 +28,15 @@ import org.apache.iotdb.db.qp.executor.PlanExecutor;
 import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 import org.apache.iotdb.db.qp.physical.crud.InsertRowPlan;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+
+import io.moquette.interception.AbstractInterceptHandler;
+import io.moquette.interception.messages.InterceptPublishMessage;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.mqtt.MqttQoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /** PublishHandler handle the messages from MQTT clients. */
 public class PublishHandler extends AbstractInterceptHandler {

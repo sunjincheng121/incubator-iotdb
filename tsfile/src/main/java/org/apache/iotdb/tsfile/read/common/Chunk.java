@@ -18,15 +18,16 @@
  */
 package org.apache.iotdb.tsfile.read.common;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.List;
 import org.apache.iotdb.tsfile.common.cache.Accountable;
 import org.apache.iotdb.tsfile.file.MetaMarker;
 import org.apache.iotdb.tsfile.file.header.ChunkHeader;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.utils.PublicBAOS;
 import org.apache.iotdb.tsfile.utils.ReadWriteForEncodingUtils;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.List;
 
 /** used in query. */
 public class Chunk implements Accountable {

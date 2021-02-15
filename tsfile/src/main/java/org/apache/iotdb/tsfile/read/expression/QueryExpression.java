@@ -18,11 +18,12 @@
  */
 package org.apache.iotdb.tsfile.read.expression;
 
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+import org.apache.iotdb.tsfile.read.common.Path;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
-import org.apache.iotdb.tsfile.read.common.Path;
 
 public class QueryExpression implements Serializable {
 

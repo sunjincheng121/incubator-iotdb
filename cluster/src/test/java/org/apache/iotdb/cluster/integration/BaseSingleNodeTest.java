@@ -19,15 +19,17 @@
 
 package org.apache.iotdb.cluster.integration;
 
-import java.util.Collections;
-import java.util.List;
 import org.apache.iotdb.cluster.config.ClusterDescriptor;
 import org.apache.iotdb.cluster.server.MetaClusterServer;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
 import org.apache.iotdb.rpc.IoTDBConnectionException;
 import org.apache.iotdb.session.Session;
+
 import org.junit.After;
 import org.junit.Before;
+
+import java.util.Collections;
+import java.util.List;
 
 public abstract class BaseSingleNodeTest {
 

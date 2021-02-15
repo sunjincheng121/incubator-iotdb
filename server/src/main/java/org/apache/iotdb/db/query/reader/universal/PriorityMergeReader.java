@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.db.query.reader.universal;
 
+import org.apache.iotdb.tsfile.read.TimeValuePair;
+import org.apache.iotdb.tsfile.read.reader.IPointReader;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.PriorityQueue;
-import org.apache.iotdb.tsfile.read.TimeValuePair;
-import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
 /** This class implements {@link IPointReader} for data sources with different priorities. */
 public class PriorityMergeReader implements IPointReader {

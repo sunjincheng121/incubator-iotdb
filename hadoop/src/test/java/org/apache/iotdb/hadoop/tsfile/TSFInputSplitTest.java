@@ -18,14 +18,15 @@
  */
 package org.apache.iotdb.hadoop.tsfile;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DataInputBuffer;
 import org.apache.hadoop.io.DataOutputBuffer;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+
+import static org.junit.Assert.*;
 
 /** Test the {@link TSFInputSplit} Assert the readFields function and write function is right */
 public class TSFInputSplitTest {

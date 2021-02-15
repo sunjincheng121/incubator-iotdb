@@ -19,14 +19,16 @@
 
 package org.apache.iotdb.db.engine.compaction.no;
 
+import org.apache.iotdb.db.engine.compaction.TsFileManagement;
+import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
-import org.apache.iotdb.db.engine.compaction.TsFileManagement;
-import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class NoCompactionTsFileManagement extends TsFileManagement {
 

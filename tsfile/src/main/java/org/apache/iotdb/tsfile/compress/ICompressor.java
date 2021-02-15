@@ -19,9 +19,12 @@
 
 package org.apache.iotdb.tsfile.compress;
 
-import static org.apache.iotdb.tsfile.file.metadata.enums.CompressionType.GZIP;
-import static org.apache.iotdb.tsfile.file.metadata.enums.CompressionType.LZ4;
-import static org.apache.iotdb.tsfile.file.metadata.enums.CompressionType.SNAPPY;
+import org.apache.iotdb.tsfile.exception.compress.CompressionTypeNotSupportedException;
+import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
+
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Factory;
+import org.xerial.snappy.Snappy;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,11 +33,10 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import net.jpountz.lz4.LZ4Compressor;
-import net.jpountz.lz4.LZ4Factory;
-import org.apache.iotdb.tsfile.exception.compress.CompressionTypeNotSupportedException;
-import org.apache.iotdb.tsfile.file.metadata.enums.CompressionType;
-import org.xerial.snappy.Snappy;
+
+import static org.apache.iotdb.tsfile.file.metadata.enums.CompressionType.GZIP;
+import static org.apache.iotdb.tsfile.file.metadata.enums.CompressionType.LZ4;
+import static org.apache.iotdb.tsfile.file.metadata.enums.CompressionType.SNAPPY;
 
 /** compress data according to type in schema. */
 public interface ICompressor extends Serializable {

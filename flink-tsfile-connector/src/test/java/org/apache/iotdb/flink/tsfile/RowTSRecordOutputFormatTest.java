@@ -19,15 +19,16 @@
 
 package org.apache.iotdb.flink.tsfile;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.types.Row;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.types.Row;
-import org.junit.Test;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /** Tests for TSRecordOutputFormat */
 public class RowTSRecordOutputFormatTest extends RowTsFileOutputFormatTestBase {

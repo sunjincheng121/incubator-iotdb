@@ -18,14 +18,16 @@
  */
 package org.apache.iotdb.hadoop.fileSystem;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import org.apache.iotdb.tsfile.write.writer.TsFileOutput;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.iotdb.tsfile.write.writer.TsFileOutput;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 /**
  * This class is used to wrap the {@link}FSDataOutputStream and implement the interface

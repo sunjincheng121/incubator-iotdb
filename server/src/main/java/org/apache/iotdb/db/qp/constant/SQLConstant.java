@@ -18,13 +18,14 @@
  */
 package org.apache.iotdb.db.qp.constant;
 
+import org.apache.iotdb.db.metadata.PartialPath;
+import org.apache.iotdb.db.qp.sql.SqlBaseLexer;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.iotdb.db.metadata.PartialPath;
-import org.apache.iotdb.db.qp.sql.SqlBaseLexer;
 
 /** this class contains several constants used in SQL. */
 @SuppressWarnings("unused") // some fields are for future features

@@ -18,12 +18,13 @@
  */
 package org.apache.iotdb.tsfile.write.schema;
 
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+import org.apache.iotdb.tsfile.read.common.Path;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
-import org.apache.iotdb.tsfile.read.common.Path;
 
 /**
  * The schema of timeseries that exist in this file. The deviceTemplates is a simplified manner to

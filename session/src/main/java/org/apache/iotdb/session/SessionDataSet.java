@@ -18,12 +18,6 @@
  */
 package org.apache.iotdb.session;
 
-import static org.apache.iotdb.rpc.IoTDBRpcDataSet.START_INDEX;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.apache.iotdb.rpc.IoTDBConnectionException;
 import org.apache.iotdb.rpc.IoTDBRpcDataSet;
 import org.apache.iotdb.rpc.StatementExecutionException;
@@ -35,7 +29,15 @@ import org.apache.iotdb.tsfile.read.common.Field;
 import org.apache.iotdb.tsfile.read.common.RowRecord;
 import org.apache.iotdb.tsfile.utils.Binary;
 import org.apache.iotdb.tsfile.utils.BytesUtils;
+
 import org.apache.thrift.TException;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static org.apache.iotdb.rpc.IoTDBRpcDataSet.START_INDEX;
 
 public class SessionDataSet {
 

@@ -19,11 +19,13 @@
 
 package org.apache.iotdb.tsfile.encoding;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.iotdb.tsfile.encoding.encoder.SDTEncoder;
+
+import org.junit.Test;
 
 import java.io.IOException;
-import org.apache.iotdb.tsfile.encoding.encoder.SDTEncoder;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class SDTEncoderTest {
 
