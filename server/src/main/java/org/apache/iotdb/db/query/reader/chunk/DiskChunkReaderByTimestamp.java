@@ -26,52 +26,53 @@ import org.apache.iotdb.tsfile.read.reader.chunk.ChunkReaderByTimestamp;
 /**
  * To read chunk data on disk by timestamp, this class implements an interface {@link
  * IReaderByTimestamp} based on the data reader {@link ChunkReaderByTimestamp}.
+ *
  * <p>
  */
 public class DiskChunkReaderByTimestamp implements IReaderByTimestamp {
 
-  private ChunkReaderByTimestamp chunkReaderByTimestamp;
-  private BatchData data;
+    private ChunkReaderByTimestamp chunkReaderByTimestamp;
+    private BatchData data;
 
-  public DiskChunkReaderByTimestamp(ChunkReaderByTimestamp chunkReaderByTimestamp) {
-    this.chunkReaderByTimestamp = chunkReaderByTimestamp;
-  }
-
-  @Override
-  public Object getValueInTimestamp(long timestamp) throws IOException {
-
-    if (!hasNext()) {
-      return null;
+    public DiskChunkReaderByTimestamp(ChunkReaderByTimestamp chunkReaderByTimestamp) {
+        this.chunkReaderByTimestamp = chunkReaderByTimestamp;
     }
 
-    while (data != null) {
-      Object value = data.getValueInTimestamp(timestamp);
-      if (value != null) {
-        return value;
-      }
-      if (data.hasCurrent()) {
-        return null;
-      } else {
-        chunkReaderByTimestamp.setCurrentTimestamp(timestamp);
-        if (chunkReaderByTimestamp.hasNextSatisfiedPage()) {
-          data = chunkReaderByTimestamp.nextPageData();
-        } else {
-          return null;
+    @Override
+    public Object getValueInTimestamp(long timestamp) throws IOException {
+
+        if (!hasNext()) {
+            return null;
         }
-      }
+
+        while (data != null) {
+            Object value = data.getValueInTimestamp(timestamp);
+            if (value != null) {
+                return value;
+            }
+            if (data.hasCurrent()) {
+                return null;
+            } else {
+                chunkReaderByTimestamp.setCurrentTimestamp(timestamp);
+                if (chunkReaderByTimestamp.hasNextSatisfiedPage()) {
+                    data = chunkReaderByTimestamp.nextPageData();
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        return null;
     }
 
-    return null;
-  }
-
-  private boolean hasNext() throws IOException {
-    if (data != null && data.hasCurrent()) {
-      return true;
+    private boolean hasNext() throws IOException {
+        if (data != null && data.hasCurrent()) {
+            return true;
+        }
+        if (chunkReaderByTimestamp != null && chunkReaderByTimestamp.hasNextSatisfiedPage()) {
+            data = chunkReaderByTimestamp.nextPageData();
+            return true;
+        }
+        return false;
     }
-    if (chunkReaderByTimestamp != null && chunkReaderByTimestamp.hasNextSatisfiedPage()) {
-      data = chunkReaderByTimestamp.nextPageData();
-      return true;
-    }
-    return false;
-  }
 }

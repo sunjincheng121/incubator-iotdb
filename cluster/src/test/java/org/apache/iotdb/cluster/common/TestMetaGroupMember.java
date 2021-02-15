@@ -25,15 +25,15 @@ import org.apache.iotdb.cluster.server.member.MetaGroupMember;
 
 public class TestMetaGroupMember extends MetaGroupMember {
 
-  public TestMetaGroupMember() {
-    super();
-    allNodes = new ArrayList<>();
-    thisNode = TestUtils.getNode(0);
-    for (int i = 0; i < 10; i++) {
-      allNodes.add(TestUtils.getNode(i));
+    public TestMetaGroupMember() {
+        super();
+        allNodes = new ArrayList<>();
+        thisNode = TestUtils.getNode(0);
+        for (int i = 0; i < 10; i++) {
+            allNodes.add(TestUtils.getNode(i));
+        }
+        MetaSingleSnapshotLogManager manager =
+                new MetaSingleSnapshotLogManager(new TestLogApplier(), this);
+        setLogManager(manager);
     }
-    MetaSingleSnapshotLogManager manager = new MetaSingleSnapshotLogManager(new TestLogApplier(), this);
-    setLogManager(manager);
-  }
-
 }

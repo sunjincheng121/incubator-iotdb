@@ -23,50 +23,38 @@ import java.util.Map;
 
 public interface MeasurementMBean {
 
-  /**
-   * start calculating the statistic.
-   */
-  void startStatistics();
+    /** start calculating the statistic. */
+    void startStatistics();
 
-  /**
-   * start display performance statistic every interval of displayIntervalInMs.
-   */
-  void startContinuousPrintStatistics();
+    /** start display performance statistic every interval of displayIntervalInMs. */
+    void startContinuousPrintStatistics();
 
-  /**
-   * start display performance statistic after interval of displayIntervalInMs.
-   */
-  void startPrintStatisticsOnce();
+    /** start display performance statistic after interval of displayIntervalInMs. */
+    void startPrintStatisticsOnce();
 
-  /**
-   * stop display performance statistic.
-   */
-  void stopPrintStatistic();
+    /** stop display performance statistic. */
+    void stopPrintStatistic();
 
-  /**
-   * stop calculating the statistic
-   */
-  void stopStatistic();
+    /** stop calculating the statistic */
+    void stopStatistic();
 
-  /**
-   * clear current stat result, reset statistical state.
-   */
-  void clearStatisticalState();
+    /** clear current stat result, reset statistical state. */
+    void clearStatisticalState();
 
-  /**
-   * set whether to monitor operation status.
-   *
-   * @param operationName the name of operation, defined in attribute operationSwitch.
-   * @param operationState state of operation.
-   * @return true if successful, false if fail.
-   */
-  boolean changeOperationSwitch(String operationName, Boolean operationState);
+    /**
+     * set whether to monitor operation status.
+     *
+     * @param operationName the name of operation, defined in attribute operationSwitch.
+     * @param operationState state of operation.
+     * @return true if successful, false if fail.
+     */
+    boolean changeOperationSwitch(String operationName, Boolean operationState);
 
-  boolean isEnableStat();
+    boolean isEnableStat();
 
-  long getDisplayIntervalInMs();
+    long getDisplayIntervalInMs();
 
-  void setDisplayIntervalInMs(long displayIntervalInMs);
+    void setDisplayIntervalInMs(long displayIntervalInMs);
 
-  Map<String, Boolean> getOperationSwitch();
+    Map<String, Boolean> getOperationSwitch();
 }

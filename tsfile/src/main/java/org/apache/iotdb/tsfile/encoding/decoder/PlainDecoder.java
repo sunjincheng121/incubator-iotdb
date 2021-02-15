@@ -22,83 +22,81 @@ package org.apache.iotdb.tsfile.encoding.decoder;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.iotdb.tsfile.encoding.common.EndianType;
 import org.apache.iotdb.tsfile.exception.encoding.TsFileDecodingException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.iotdb.tsfile.utils.Binary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlainDecoder extends Decoder {
 
-  private static final Logger logger = LoggerFactory.getLogger(PlainDecoder.class);
-  private EndianType endianType;
+    private static final Logger logger = LoggerFactory.getLogger(PlainDecoder.class);
+    private EndianType endianType;
 
-  public EndianType getEndianType() {
-    return endianType;
-  }
+    public EndianType getEndianType() {
+        return endianType;
+    }
 
-  public void setEndianType(EndianType endianType) {
-    this.endianType = endianType;
-  }
+    public void setEndianType(EndianType endianType) {
+        this.endianType = endianType;
+    }
 
-  public PlainDecoder(EndianType endianType) {
-    super(TSEncoding.PLAIN);
-    this.endianType = endianType;
-  }
+    public PlainDecoder(EndianType endianType) {
+        super(TSEncoding.PLAIN);
+        this.endianType = endianType;
+    }
 
-  @Override
-  public boolean readBoolean(ByteBuffer buffer) {
-    return buffer.get() != 0;
-  }
+    @Override
+    public boolean readBoolean(ByteBuffer buffer) {
+        return buffer.get() != 0;
+    }
 
-  @Override
-  public short readShort(ByteBuffer buffer) {
-    return buffer.getShort();
-  }
+    @Override
+    public short readShort(ByteBuffer buffer) {
+        return buffer.getShort();
+    }
 
-  @Override
-  public int readInt(ByteBuffer buffer) {
-    return buffer.getInt();
-  }
+    @Override
+    public int readInt(ByteBuffer buffer) {
+        return buffer.getInt();
+    }
 
-  @Override
-  public long readLong(ByteBuffer buffer) {
-    return buffer.getLong();
-  }
+    @Override
+    public long readLong(ByteBuffer buffer) {
+        return buffer.getLong();
+    }
 
-  @Override
-  public float readFloat(ByteBuffer buffer) {
-    return buffer.getFloat();
-  }
+    @Override
+    public float readFloat(ByteBuffer buffer) {
+        return buffer.getFloat();
+    }
 
-  @Override
-  public double readDouble(ByteBuffer buffer) {
-    return buffer.getDouble();
-  }
+    @Override
+    public double readDouble(ByteBuffer buffer) {
+        return buffer.getDouble();
+    }
 
-  @Override
-  public Binary readBinary(ByteBuffer buffer) {
-    int length = readInt(buffer);
-    byte[] buf = new byte[length];
-    buffer.get(buf, 0, buf.length);
-    return new Binary(buf);
-  }
+    @Override
+    public Binary readBinary(ByteBuffer buffer) {
+        int length = readInt(buffer);
+        byte[] buf = new byte[length];
+        buffer.get(buf, 0, buf.length);
+        return new Binary(buf);
+    }
 
-  @Override
-  public boolean hasNext(ByteBuffer buffer) throws IOException {
-    return buffer.remaining() > 0;
-  }
+    @Override
+    public boolean hasNext(ByteBuffer buffer) throws IOException {
+        return buffer.remaining() > 0;
+    }
 
-  @Override
-  public BigDecimal readBigDecimal(ByteBuffer buffer) {
-    throw new TsFileDecodingException("Method readBigDecimal is not supproted by PlainDecoder");
-  }
+    @Override
+    public BigDecimal readBigDecimal(ByteBuffer buffer) {
+        throw new TsFileDecodingException("Method readBigDecimal is not supproted by PlainDecoder");
+    }
 
-  @Override
-  public void reset() {
-    // do nothing
-  }
+    @Override
+    public void reset() {
+        // do nothing
+    }
 }

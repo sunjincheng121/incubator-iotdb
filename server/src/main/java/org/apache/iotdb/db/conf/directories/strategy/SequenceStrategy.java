@@ -24,39 +24,39 @@ import org.apache.iotdb.db.utils.CommonUtils;
 
 public class SequenceStrategy extends DirectoryStrategy {
 
-  private int currentIndex;
+    private int currentIndex;
 
-  @Override
-  public void setFolders(List<String> folders) throws DiskSpaceInsufficientException {
-    super.setFolders(folders);
+    @Override
+    public void setFolders(List<String> folders) throws DiskSpaceInsufficientException {
+        super.setFolders(folders);
 
-    // super.setFolders() ensures at least one folder is not full,
-    // so currentIndex will not be -1 after loop
-    currentIndex = -1;
-    for (int i = 0; i < folders.size(); i++) {
-      if (CommonUtils.hasSpace(folders.get(i))) {
-        currentIndex = i;
-        break;
-      }
+        // super.setFolders() ensures at least one folder is not full,
+        // so currentIndex will not be -1 after loop
+        currentIndex = -1;
+        for (int i = 0; i < folders.size(); i++) {
+            if (CommonUtils.hasSpace(folders.get(i))) {
+                currentIndex = i;
+                break;
+            }
+        }
     }
-  }
 
-  @Override
-  public int nextFolderIndex() throws DiskSpaceInsufficientException {
-    int index = currentIndex;
-    currentIndex = tryGetNextIndex(index);
+    @Override
+    public int nextFolderIndex() throws DiskSpaceInsufficientException {
+        int index = currentIndex;
+        currentIndex = tryGetNextIndex(index);
 
-    return index;
-  }
-
-  private int tryGetNextIndex(int start) throws DiskSpaceInsufficientException {
-    int index = (start + 1) % folders.size();
-    while (!CommonUtils.hasSpace(folders.get(index))) {
-      index = (index + 1) % folders.size();
-      if (index == start) {
-        throw new DiskSpaceInsufficientException(folders);
-      }
+        return index;
     }
-    return index;
-  }
+
+    private int tryGetNextIndex(int start) throws DiskSpaceInsufficientException {
+        int index = (start + 1) % folders.size();
+        while (!CommonUtils.hasSpace(folders.get(index))) {
+            index = (index + 1) % folders.size();
+            if (index == start) {
+                throw new DiskSpaceInsufficientException(folders);
+            }
+        }
+        return index;
+    }
 }

@@ -41,119 +41,126 @@ import org.slf4j.LoggerFactory;
  */
 public class RemoteSimpleSeriesReader implements IPointReader {
 
-  private static final Logger logger = LoggerFactory.getLogger(RemoteSimpleSeriesReader.class);
-  private DataSourceInfo sourceInfo;
-  private long lastTimestamp;
+    private static final Logger logger = LoggerFactory.getLogger(RemoteSimpleSeriesReader.class);
+    private DataSourceInfo sourceInfo;
+    private long lastTimestamp;
 
-  private BatchData cachedBatch;
+    private BatchData cachedBatch;
 
-  private AtomicReference<ByteBuffer> fetchResult = new AtomicReference<>();
-  private GenericHandler<ByteBuffer> handler;
+    private AtomicReference<ByteBuffer> fetchResult = new AtomicReference<>();
+    private GenericHandler<ByteBuffer> handler;
 
-  public RemoteSimpleSeriesReader(DataSourceInfo sourceInfo) {
-    this.sourceInfo = sourceInfo;
-    handler = new GenericHandler<>(sourceInfo.getCurrentNode(), fetchResult);
-    lastTimestamp = Long.MIN_VALUE;
-  }
-
-  @Override
-  public boolean hasNextTimeValuePair() throws IOException {
-    if (cachedBatch != null && cachedBatch.hasCurrent()) {
-      return true;
-    }
-    fetchBatch();
-    return cachedBatch != null && cachedBatch.hasCurrent();
-  }
-
-  @Override
-  public TimeValuePair nextTimeValuePair() throws IOException {
-    if (!hasNextTimeValuePair()) {
-      throw new NoSuchElementException();
-    }
-    this.lastTimestamp = cachedBatch.currentTime();
-    TimeValuePair timeValuePair = new TimeValuePair(cachedBatch.currentTime(),
-        TsPrimitiveType.getByType(sourceInfo.getDataType(), cachedBatch.currentValue()));
-    cachedBatch.next();
-    return timeValuePair;
-  }
-
-  @Override
-  public TimeValuePair currentTimeValuePair() throws IOException {
-    if (!hasNextTimeValuePair()) {
-      throw new NoSuchElementException();
-    }
-    return new TimeValuePair(cachedBatch.currentTime(),
-        TsPrimitiveType.getByType(sourceInfo.getDataType(), cachedBatch.currentValue()));
-  }
-
-  @Override
-  public void close() {
-    // closed by Resource manager
-  }
-
-  private void fetchBatch() throws IOException {
-    if (!sourceInfo.checkCurClient()) {
-      cachedBatch = null;
-      return;
+    public RemoteSimpleSeriesReader(DataSourceInfo sourceInfo) {
+        this.sourceInfo = sourceInfo;
+        handler = new GenericHandler<>(sourceInfo.getCurrentNode(), fetchResult);
+        lastTimestamp = Long.MIN_VALUE;
     }
 
-    ByteBuffer result;
-    if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
-      result = fetchResultAsync();
-    } else {
-      result = fetchResultSync();
-    }
-
-    cachedBatch = SerializeUtils.deserializeBatchData(result);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Fetched a batch from {}, size:{}", sourceInfo.getCurrentNode(),
-          cachedBatch == null ? 0 : cachedBatch.length());
-    }
-  }
-
-  @SuppressWarnings("java:S2274") // enable timeout
-  private ByteBuffer fetchResultAsync() throws IOException {
-    synchronized (fetchResult) {
-      fetchResult.set(null);
-      try {
-        sourceInfo.getCurAsyncClient(RaftServer.getReadOperationTimeoutMS())
-            .fetchSingleSeries(sourceInfo.getHeader(),
-                sourceInfo.getReaderId(), handler);
-        fetchResult.wait(RaftServer.getReadOperationTimeoutMS());
-      } catch (TException e) {
-        //try other node
-        if (!sourceInfo.switchNode(false, lastTimestamp)) {
-          return null;
+    @Override
+    public boolean hasNextTimeValuePair() throws IOException {
+        if (cachedBatch != null && cachedBatch.hasCurrent()) {
+            return true;
         }
-        return fetchResultAsync();
-      } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        logger.warn("Query {} interrupted", sourceInfo);
-        return null;
-      }
+        fetchBatch();
+        return cachedBatch != null && cachedBatch.hasCurrent();
     }
-    return fetchResult.get();
-  }
 
-  private ByteBuffer fetchResultSync() throws IOException {
-    try {
-      SyncDataClient curSyncClient = sourceInfo
-          .getCurSyncClient(RaftServer.getReadOperationTimeoutMS());
-      ByteBuffer buffer = curSyncClient
-          .fetchSingleSeries(sourceInfo.getHeader(),
-              sourceInfo.getReaderId());
-      curSyncClient.putBack();
-      return buffer;
-    } catch (TException e) {
-      //try other node
-      if (!sourceInfo.switchNode(false, lastTimestamp)) {
-        return null;
-      }
-      return fetchResultSync();
+    @Override
+    public TimeValuePair nextTimeValuePair() throws IOException {
+        if (!hasNextTimeValuePair()) {
+            throw new NoSuchElementException();
+        }
+        this.lastTimestamp = cachedBatch.currentTime();
+        TimeValuePair timeValuePair =
+                new TimeValuePair(
+                        cachedBatch.currentTime(),
+                        TsPrimitiveType.getByType(
+                                sourceInfo.getDataType(), cachedBatch.currentValue()));
+        cachedBatch.next();
+        return timeValuePair;
     }
-  }
 
-  void clearCurDataForTest() {
-    this.cachedBatch = null;
-  }
+    @Override
+    public TimeValuePair currentTimeValuePair() throws IOException {
+        if (!hasNextTimeValuePair()) {
+            throw new NoSuchElementException();
+        }
+        return new TimeValuePair(
+                cachedBatch.currentTime(),
+                TsPrimitiveType.getByType(sourceInfo.getDataType(), cachedBatch.currentValue()));
+    }
+
+    @Override
+    public void close() {
+        // closed by Resource manager
+    }
+
+    private void fetchBatch() throws IOException {
+        if (!sourceInfo.checkCurClient()) {
+            cachedBatch = null;
+            return;
+        }
+
+        ByteBuffer result;
+        if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
+            result = fetchResultAsync();
+        } else {
+            result = fetchResultSync();
+        }
+
+        cachedBatch = SerializeUtils.deserializeBatchData(result);
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Fetched a batch from {}, size:{}",
+                    sourceInfo.getCurrentNode(),
+                    cachedBatch == null ? 0 : cachedBatch.length());
+        }
+    }
+
+    @SuppressWarnings("java:S2274") // enable timeout
+    private ByteBuffer fetchResultAsync() throws IOException {
+        synchronized (fetchResult) {
+            fetchResult.set(null);
+            try {
+                sourceInfo
+                        .getCurAsyncClient(RaftServer.getReadOperationTimeoutMS())
+                        .fetchSingleSeries(
+                                sourceInfo.getHeader(), sourceInfo.getReaderId(), handler);
+                fetchResult.wait(RaftServer.getReadOperationTimeoutMS());
+            } catch (TException e) {
+                // try other node
+                if (!sourceInfo.switchNode(false, lastTimestamp)) {
+                    return null;
+                }
+                return fetchResultAsync();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.warn("Query {} interrupted", sourceInfo);
+                return null;
+            }
+        }
+        return fetchResult.get();
+    }
+
+    private ByteBuffer fetchResultSync() throws IOException {
+        try {
+            SyncDataClient curSyncClient =
+                    sourceInfo.getCurSyncClient(RaftServer.getReadOperationTimeoutMS());
+            ByteBuffer buffer =
+                    curSyncClient.fetchSingleSeries(
+                            sourceInfo.getHeader(), sourceInfo.getReaderId());
+            curSyncClient.putBack();
+            return buffer;
+        } catch (TException e) {
+            // try other node
+            if (!sourceInfo.switchNode(false, lastTimestamp)) {
+                return null;
+            }
+            return fetchResultSync();
+        }
+    }
+
+    void clearCurDataForTest() {
+        this.cachedBatch = null;
+    }
 }

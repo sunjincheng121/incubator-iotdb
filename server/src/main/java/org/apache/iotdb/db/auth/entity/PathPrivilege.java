@@ -34,97 +34,93 @@ import org.apache.iotdb.db.utils.SerializeUtils;
  */
 public class PathPrivilege {
 
-  private Set<Integer> privileges;
-  private String path;
+    private Set<Integer> privileges;
+    private String path;
 
-  /**
-   * This field records how many times this privilege is referenced during a life cycle (from being
-   * loaded to being discarded). When serialized to a file, this determines the order of
-   * serialization. The higher this values is, the sooner this privilege will be serialized. As a
-   * result, the hot privileges will be in the first place so that the hit time will decrease when
-   * being queried.
-   */
-  private AtomicInteger referenceCnt = new AtomicInteger(0);
+    /**
+     * This field records how many times this privilege is referenced during a life cycle (from
+     * being loaded to being discarded). When serialized to a file, this determines the order of
+     * serialization. The higher this values is, the sooner this privilege will be serialized. As a
+     * result, the hot privileges will be in the first place so that the hit time will decrease when
+     * being queried.
+     */
+    private AtomicInteger referenceCnt = new AtomicInteger(0);
 
-  /**
-   * Sort PathPrivilege by referenceCnt in descent order.
-   */
-  public static final Comparator<PathPrivilege> REFERENCE_DESCENT_SORTER = (o1, o2) -> -Integer.
-      compare(o1.referenceCnt.get(), o2.referenceCnt.get());
+    /** Sort PathPrivilege by referenceCnt in descent order. */
+    public static final Comparator<PathPrivilege> REFERENCE_DESCENT_SORTER =
+            (o1, o2) -> -Integer.compare(o1.referenceCnt.get(), o2.referenceCnt.get());
 
-  public PathPrivilege() {
+    public PathPrivilege() {}
 
-  }
-
-  public PathPrivilege(String path) {
-    this.path = path;
-    this.privileges = new HashSet<>();
-  }
-
-  public Set<Integer> getPrivileges() {
-    return privileges;
-  }
-
-  public void setPrivileges(Set<Integer> privileges) {
-    this.privileges = privileges;
-  }
-
-  public String getPath() {
-    return path;
-  }
-
-  public void setPath(String path) {
-    this.path = path;
-  }
-
-  public AtomicInteger getReferenceCnt() {
-    return referenceCnt;
-  }
-
-  public void setReferenceCnt(AtomicInteger referenceCnt) {
-    this.referenceCnt = referenceCnt;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public PathPrivilege(String path) {
+        this.path = path;
+        this.privileges = new HashSet<>();
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public Set<Integer> getPrivileges() {
+        return privileges;
     }
-    PathPrivilege that = (PathPrivilege) o;
-    return Objects.equals(privileges, that.privileges) && Objects.equals(path, that.path);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(privileges, path);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder builder = new StringBuilder(path);
-    builder.append(" :");
-    for (Integer privilegeId : privileges) {
-      builder.append(" ").append(PrivilegeType.values()[privilegeId]);
+    public void setPrivileges(Set<Integer> privileges) {
+        this.privileges = privileges;
     }
-    return builder.toString();
-  }
 
-  public ByteBuffer serialize() {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+    public String getPath() {
+        return path;
+    }
 
-    SerializeUtils.serialize(privileges, dataOutputStream);
-    SerializeUtils.serialize(path, dataOutputStream);
+    public void setPath(String path) {
+        this.path = path;
+    }
 
-    return ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-  }
+    public AtomicInteger getReferenceCnt() {
+        return referenceCnt;
+    }
 
-  public void deserialize(ByteBuffer buffer) {
-    privileges = new HashSet<>();
-    SerializeUtils.deserialize(privileges, buffer);
-    path = SerializeUtils.deserializeString(buffer);
-  }
+    public void setReferenceCnt(AtomicInteger referenceCnt) {
+        this.referenceCnt = referenceCnt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        PathPrivilege that = (PathPrivilege) o;
+        return Objects.equals(privileges, that.privileges) && Objects.equals(path, that.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(privileges, path);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(path);
+        builder.append(" :");
+        for (Integer privilegeId : privileges) {
+            builder.append(" ").append(PrivilegeType.values()[privilegeId]);
+        }
+        return builder.toString();
+    }
+
+    public ByteBuffer serialize() {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+
+        SerializeUtils.serialize(privileges, dataOutputStream);
+        SerializeUtils.serialize(path, dataOutputStream);
+
+        return ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
+    }
+
+    public void deserialize(ByteBuffer buffer) {
+        privileges = new HashSet<>();
+        SerializeUtils.deserialize(privileges, buffer);
+        path = SerializeUtils.deserializeString(buffer);
+    }
 }

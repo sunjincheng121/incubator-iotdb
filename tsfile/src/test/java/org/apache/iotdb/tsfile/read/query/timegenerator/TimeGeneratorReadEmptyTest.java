@@ -52,92 +52,94 @@ import org.junit.Test;
 
 public class TimeGeneratorReadEmptyTest {
 
-  private final String TEMPLATE_NAME = "template";
-  private String tsfilePath = TestConstant.BASE_OUTPUT_PATH.concat("TimegeneratorReadEmpty.tsfile");
+    private final String TEMPLATE_NAME = "template";
+    private String tsfilePath =
+            TestConstant.BASE_OUTPUT_PATH.concat("TimegeneratorReadEmpty.tsfile");
 
-  @Before
-  public void before() throws IOException, WriteProcessException {
-    writeTsFile(tsfilePath);
-  }
-
-  @After
-  public void after() {
-    File file = new File(tsfilePath);
-    if (file.exists()) {
-      file.delete();
-    }
-  }
-
-  @Test
-  public void testFilterAnd() throws IOException {
-    Filter timeFilter = FilterFactory.and(TimeFilter.gtEq(2L), TimeFilter.ltEq(2L));
-    IExpression timeExpression = new GlobalTimeExpression(timeFilter);
-
-    IExpression valueExpression = BinaryExpression
-        .or(new SingleSeriesExpression(new Path("d1", "s1"), ValueFilter.gt(1.0f)),
-            new SingleSeriesExpression(new Path("d1", "s2"), ValueFilter.lt(22)));
-
-    IExpression finalExpression = BinaryExpression.and(valueExpression, timeExpression);
-
-    QueryExpression queryExpression = QueryExpression.create().addSelectedPath(new Path("d1", "s1"))
-        .addSelectedPath(new Path("d1", "s2")).setExpression(finalExpression);
-
-    try (TsFileSequenceReader fileReader = new TsFileSequenceReader(tsfilePath)) {
-      ReadOnlyTsFile readOnlyTsFile = new ReadOnlyTsFile(fileReader);
-      QueryDataSet dataSet = readOnlyTsFile.query(queryExpression);
-      int i = 0;
-      while (dataSet.hasNext()) {
-        dataSet.next();
-        i++;
-      }
-      Assert.assertEquals(0, i);
-    }
-  }
-
-
-  /**
-   * s1 -> 1, 3
-   * s2 ->     5, 6
-   */
-  private void writeTsFile(String tsfilePath) throws IOException, WriteProcessException {
-
-    File f = new File(tsfilePath);
-    if (f.exists()) {
-      f.delete();
+    @Before
+    public void before() throws IOException, WriteProcessException {
+        writeTsFile(tsfilePath);
     }
 
-    Schema schema = new Schema();
-    schema.extendTemplate(TEMPLATE_NAME, new MeasurementSchema("s1", TSDataType.FLOAT, TSEncoding.RLE));
-    schema.extendTemplate(TEMPLATE_NAME, new MeasurementSchema("s2", TSDataType.INT32, TSEncoding.TS_2DIFF));
+    @After
+    public void after() {
+        File file = new File(tsfilePath);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
 
-    TsFileWriter tsFileWriter = new TsFileWriter(new File(tsfilePath), schema);
+    @Test
+    public void testFilterAnd() throws IOException {
+        Filter timeFilter = FilterFactory.and(TimeFilter.gtEq(2L), TimeFilter.ltEq(2L));
+        IExpression timeExpression = new GlobalTimeExpression(timeFilter);
 
-    // s1 -> 1, 3
-    TSRecord tsRecord = new TSRecord(1, "d1");
-    DataPoint dPoint1 = new FloatDataPoint("s1", 1.2f);
-    tsRecord.addTuple(dPoint1);
-    tsFileWriter.write(tsRecord);
+        IExpression valueExpression =
+                BinaryExpression.or(
+                        new SingleSeriesExpression(new Path("d1", "s1"), ValueFilter.gt(1.0f)),
+                        new SingleSeriesExpression(new Path("d1", "s2"), ValueFilter.lt(22)));
 
-    tsRecord = new TSRecord(3, "d1");
-    dPoint1 = new FloatDataPoint("s1", 1.2f);
-    tsRecord.addTuple(dPoint1);
-    tsFileWriter.write(tsRecord);
+        IExpression finalExpression = BinaryExpression.and(valueExpression, timeExpression);
 
-    tsFileWriter.flushAllChunkGroups();
+        QueryExpression queryExpression =
+                QueryExpression.create()
+                        .addSelectedPath(new Path("d1", "s1"))
+                        .addSelectedPath(new Path("d1", "s2"))
+                        .setExpression(finalExpression);
 
+        try (TsFileSequenceReader fileReader = new TsFileSequenceReader(tsfilePath)) {
+            ReadOnlyTsFile readOnlyTsFile = new ReadOnlyTsFile(fileReader);
+            QueryDataSet dataSet = readOnlyTsFile.query(queryExpression);
+            int i = 0;
+            while (dataSet.hasNext()) {
+                dataSet.next();
+                i++;
+            }
+            Assert.assertEquals(0, i);
+        }
+    }
 
-    // s2 -> 5, 6
-    tsRecord = new TSRecord(5, "d1");
-    DataPoint dPoint2 = new IntDataPoint("s2", 20);
-    tsRecord.addTuple(dPoint2);
-    tsFileWriter.write(tsRecord);
+    /** s1 -> 1, 3 s2 -> 5, 6 */
+    private void writeTsFile(String tsfilePath) throws IOException, WriteProcessException {
 
-    tsRecord = new TSRecord(6, "d1");
-    dPoint2 = new IntDataPoint("s2", 20);
-    tsRecord.addTuple(dPoint2);
-    tsFileWriter.write(tsRecord);
+        File f = new File(tsfilePath);
+        if (f.exists()) {
+            f.delete();
+        }
 
-    // close TsFile
-    tsFileWriter.close();
-  }
+        Schema schema = new Schema();
+        schema.extendTemplate(
+                TEMPLATE_NAME, new MeasurementSchema("s1", TSDataType.FLOAT, TSEncoding.RLE));
+        schema.extendTemplate(
+                TEMPLATE_NAME, new MeasurementSchema("s2", TSDataType.INT32, TSEncoding.TS_2DIFF));
+
+        TsFileWriter tsFileWriter = new TsFileWriter(new File(tsfilePath), schema);
+
+        // s1 -> 1, 3
+        TSRecord tsRecord = new TSRecord(1, "d1");
+        DataPoint dPoint1 = new FloatDataPoint("s1", 1.2f);
+        tsRecord.addTuple(dPoint1);
+        tsFileWriter.write(tsRecord);
+
+        tsRecord = new TSRecord(3, "d1");
+        dPoint1 = new FloatDataPoint("s1", 1.2f);
+        tsRecord.addTuple(dPoint1);
+        tsFileWriter.write(tsRecord);
+
+        tsFileWriter.flushAllChunkGroups();
+
+        // s2 -> 5, 6
+        tsRecord = new TSRecord(5, "d1");
+        DataPoint dPoint2 = new IntDataPoint("s2", 20);
+        tsRecord.addTuple(dPoint2);
+        tsFileWriter.write(tsRecord);
+
+        tsRecord = new TSRecord(6, "d1");
+        dPoint2 = new IntDataPoint("s2", 20);
+        tsRecord.addTuple(dPoint2);
+        tsFileWriter.write(tsRecord);
+
+        // close TsFile
+        tsFileWriter.close();
+    }
 }

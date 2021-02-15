@@ -49,173 +49,172 @@ import org.apache.iotdb.db.query.control.QueryResourceManager;
 import org.apache.iotdb.db.utils.TestOnly;
 import org.apache.iotdb.service.rpc.thrift.TSRawDataQueryReq;
 
-/**
- * provide a integration method for other user.
- */
+/** provide a integration method for other user. */
 public class Planner {
 
-  protected LogicalGenerator logicalGenerator;
+    protected LogicalGenerator logicalGenerator;
 
-  public Planner() {
-    this.logicalGenerator = new LogicalGenerator();
-  }
-
-  @TestOnly
-  public PhysicalPlan parseSQLToPhysicalPlan(String sqlStr)
-      throws QueryProcessException {
-    return parseSQLToPhysicalPlan(sqlStr, ZoneId.systemDefault(), 1024);
-  }
-
-  /**
-   * @param fetchSize this parameter only take effect when it is a query plan
-   */
-  public PhysicalPlan parseSQLToPhysicalPlan(String sqlStr, ZoneId zoneId, int fetchSize)
-      throws QueryProcessException {
-    Operator operator = logicalGenerator.generate(sqlStr, zoneId);
-    int maxDeduplicatedPathNum = QueryResourceManager.getInstance()
-        .getMaxDeduplicatedPathNum(fetchSize);
-    if (operator instanceof SFWOperator && ((SFWOperator) operator).isLastQuery()) {
-      // Dataset of last query actually has only three columns, so we shouldn't limit the path num while constructing logical plan
-      // To avoid overflowing because logicalOptimize function may do maxDeduplicatedPathNum + 1, we set it to Integer.MAX_VALUE - 1
-      maxDeduplicatedPathNum = Integer.MAX_VALUE - 1;
+    public Planner() {
+        this.logicalGenerator = new LogicalGenerator();
     }
-    operator = logicalOptimize(operator, maxDeduplicatedPathNum);
-    PhysicalGenerator physicalGenerator = new PhysicalGenerator();
-    return physicalGenerator.transformToPhysicalPlan(operator, fetchSize);
-  }
 
-  /**
-   * convert raw data query to physical plan directly
-   */
-  public PhysicalPlan rawDataQueryReqToPhysicalPlan(TSRawDataQueryReq rawDataQueryReq)
-      throws QueryProcessException, IllegalPathException {
-    List<String> paths = rawDataQueryReq.getPaths();
-    long startTime = rawDataQueryReq.getStartTime();
-    long endTime = rawDataQueryReq.getEndTime();
-
-    //construct query operator and set its global time filter
-    QueryOperator queryOp = new QueryOperator(SQLConstant.TOK_QUERY);
-    FromOperator fromOp = new FromOperator(SQLConstant.TOK_FROM);
-    SelectOperator selectOp = new SelectOperator(SQLConstant.TOK_SELECT);
-
-    //iterate the path list and add it to from operator
-    for (String p : paths) {
-      PartialPath path = new PartialPath(p);
-      fromOp.addPrefixTablePath(path);
+    @TestOnly
+    public PhysicalPlan parseSQLToPhysicalPlan(String sqlStr) throws QueryProcessException {
+        return parseSQLToPhysicalPlan(sqlStr, ZoneId.systemDefault(), 1024);
     }
-    selectOp.addSelectPath(new PartialPath(""));
 
-    queryOp.setSelectOperator(selectOp);
-    queryOp.setFromOperator(fromOp);
-
-    //set time filter operator
-    FilterOperator filterOp = new FilterOperator(SQLConstant.KW_AND);
-    PartialPath timePath = new PartialPath(TIME);
-    filterOp.setSinglePath(timePath);
-    Set<PartialPath> pathSet = new HashSet<>();
-    pathSet.add(timePath);
-    filterOp.setIsSingle(true);
-    filterOp.setPathSet(pathSet);
-
-    BasicFunctionOperator left = new BasicFunctionOperator(SQLConstant.GREATERTHANOREQUALTO,
-        timePath, Long.toString(startTime));
-    BasicFunctionOperator right = new BasicFunctionOperator(SQLConstant.LESSTHAN, timePath,
-        Long.toString(endTime));
-    filterOp.addChildOperator(left);
-    filterOp.addChildOperator(right);
-
-    queryOp.setFilterOperator(filterOp);
-
-    int maxDeduplicatedPathNum = QueryResourceManager.getInstance()
-        .getMaxDeduplicatedPathNum(rawDataQueryReq.fetchSize);
-    if (queryOp.isLastQuery()) {
-      // Dataset of last query actually has only three columns, so we shouldn't limit the path num while constructing logical plan
-      // To avoid overflowing because logicalOptimize function may do maxDeduplicatedPathNum + 1, we set it to Integer.MAX_VALUE - 1
-      maxDeduplicatedPathNum = Integer.MAX_VALUE - 1;
+    /** @param fetchSize this parameter only take effect when it is a query plan */
+    public PhysicalPlan parseSQLToPhysicalPlan(String sqlStr, ZoneId zoneId, int fetchSize)
+            throws QueryProcessException {
+        Operator operator = logicalGenerator.generate(sqlStr, zoneId);
+        int maxDeduplicatedPathNum =
+                QueryResourceManager.getInstance().getMaxDeduplicatedPathNum(fetchSize);
+        if (operator instanceof SFWOperator && ((SFWOperator) operator).isLastQuery()) {
+            // Dataset of last query actually has only three columns, so we shouldn't limit the path
+            // num while constructing logical plan
+            // To avoid overflowing because logicalOptimize function may do maxDeduplicatedPathNum +
+            // 1, we set it to Integer.MAX_VALUE - 1
+            maxDeduplicatedPathNum = Integer.MAX_VALUE - 1;
+        }
+        operator = logicalOptimize(operator, maxDeduplicatedPathNum);
+        PhysicalGenerator physicalGenerator = new PhysicalGenerator();
+        return physicalGenerator.transformToPhysicalPlan(operator, fetchSize);
     }
-    SFWOperator op = (SFWOperator) logicalOptimize(queryOp, maxDeduplicatedPathNum);
 
-    PhysicalGenerator physicalGenerator = new PhysicalGenerator();
-    return physicalGenerator.transformToPhysicalPlan(op, rawDataQueryReq.fetchSize);
-  }
+    /** convert raw data query to physical plan directly */
+    public PhysicalPlan rawDataQueryReqToPhysicalPlan(TSRawDataQueryReq rawDataQueryReq)
+            throws QueryProcessException, IllegalPathException {
+        List<String> paths = rawDataQueryReq.getPaths();
+        long startTime = rawDataQueryReq.getStartTime();
+        long endTime = rawDataQueryReq.getEndTime();
 
-  /**
-   * given an unoptimized logical operator tree and return a optimized result.
-   *
-   * @param operator unoptimized logical operator
-   * @return optimized logical operator
-   * @throws LogicalOptimizeException exception in logical optimizing
-   */
-  protected Operator logicalOptimize(Operator operator, int maxDeduplicatedPathNum)
-      throws LogicalOperatorException, PathNumOverLimitException {
-    switch (operator.getType()) {
-      case AUTHOR:
-      case METADATA:
-      case SET_STORAGE_GROUP:
-      case DELETE_STORAGE_GROUP:
-      case CREATE_TIMESERIES:
-      case DELETE_TIMESERIES:
-      case ALTER_TIMESERIES:
-      case LOADDATA:
-      case INSERT:
-      case GRANT_WATERMARK_EMBEDDING:
-      case REVOKE_WATERMARK_EMBEDDING:
-      case TTL:
-      case LOAD_CONFIGURATION:
-      case SHOW:
-      case LOAD_FILES:
-      case REMOVE_FILE:
-      case MOVE_FILE:
-      case FLUSH:
-      case MERGE:
-      case TRACING:
-      case CLEAR_CACHE:
-      case NULL:
-      case SHOW_MERGE_STATUS:
-      case DELETE_PARTITION:
-      case CREATE_SCHEMA_SNAPSHOT:
-        return operator;
-      case QUERY:
-      case UPDATE:
-      case DELETE:
-      case CREATE_INDEX:
-      case DROP_INDEX:
-      case QUERY_INDEX:
-        SFWOperator root = (SFWOperator) operator;
-        return optimizeSFWOperator(root, maxDeduplicatedPathNum);
-      default:
-        throw new LogicalOperatorException(operator.getType().toString(), "");
+        // construct query operator and set its global time filter
+        QueryOperator queryOp = new QueryOperator(SQLConstant.TOK_QUERY);
+        FromOperator fromOp = new FromOperator(SQLConstant.TOK_FROM);
+        SelectOperator selectOp = new SelectOperator(SQLConstant.TOK_SELECT);
+
+        // iterate the path list and add it to from operator
+        for (String p : paths) {
+            PartialPath path = new PartialPath(p);
+            fromOp.addPrefixTablePath(path);
+        }
+        selectOp.addSelectPath(new PartialPath(""));
+
+        queryOp.setSelectOperator(selectOp);
+        queryOp.setFromOperator(fromOp);
+
+        // set time filter operator
+        FilterOperator filterOp = new FilterOperator(SQLConstant.KW_AND);
+        PartialPath timePath = new PartialPath(TIME);
+        filterOp.setSinglePath(timePath);
+        Set<PartialPath> pathSet = new HashSet<>();
+        pathSet.add(timePath);
+        filterOp.setIsSingle(true);
+        filterOp.setPathSet(pathSet);
+
+        BasicFunctionOperator left =
+                new BasicFunctionOperator(
+                        SQLConstant.GREATERTHANOREQUALTO, timePath, Long.toString(startTime));
+        BasicFunctionOperator right =
+                new BasicFunctionOperator(SQLConstant.LESSTHAN, timePath, Long.toString(endTime));
+        filterOp.addChildOperator(left);
+        filterOp.addChildOperator(right);
+
+        queryOp.setFilterOperator(filterOp);
+
+        int maxDeduplicatedPathNum =
+                QueryResourceManager.getInstance()
+                        .getMaxDeduplicatedPathNum(rawDataQueryReq.fetchSize);
+        if (queryOp.isLastQuery()) {
+            // Dataset of last query actually has only three columns, so we shouldn't limit the path
+            // num while constructing logical plan
+            // To avoid overflowing because logicalOptimize function may do maxDeduplicatedPathNum +
+            // 1, we set it to Integer.MAX_VALUE - 1
+            maxDeduplicatedPathNum = Integer.MAX_VALUE - 1;
+        }
+        SFWOperator op = (SFWOperator) logicalOptimize(queryOp, maxDeduplicatedPathNum);
+
+        PhysicalGenerator physicalGenerator = new PhysicalGenerator();
+        return physicalGenerator.transformToPhysicalPlan(op, rawDataQueryReq.fetchSize);
     }
-  }
 
-  /**
-   * given an unoptimized select-from-where operator and return an optimized result.
-   *
-   * @param root unoptimized select-from-where operator
-   * @return optimized select-from-where operator
-   * @throws LogicalOptimizeException exception in SFW optimizing
-   */
-  private SFWOperator optimizeSFWOperator(SFWOperator root, int maxDeduplicatedPathNum)
-      throws LogicalOperatorException, PathNumOverLimitException {
-    ConcatPathOptimizer concatPathOptimizer = getConcatPathOptimizer();
-    root = (SFWOperator) concatPathOptimizer.transform(root, maxDeduplicatedPathNum);
-    FilterOperator filter = root.getFilterOperator();
-    if (filter == null) {
-      return root;
+    /**
+     * given an unoptimized logical operator tree and return a optimized result.
+     *
+     * @param operator unoptimized logical operator
+     * @return optimized logical operator
+     * @throws LogicalOptimizeException exception in logical optimizing
+     */
+    protected Operator logicalOptimize(Operator operator, int maxDeduplicatedPathNum)
+            throws LogicalOperatorException, PathNumOverLimitException {
+        switch (operator.getType()) {
+            case AUTHOR:
+            case METADATA:
+            case SET_STORAGE_GROUP:
+            case DELETE_STORAGE_GROUP:
+            case CREATE_TIMESERIES:
+            case DELETE_TIMESERIES:
+            case ALTER_TIMESERIES:
+            case LOADDATA:
+            case INSERT:
+            case GRANT_WATERMARK_EMBEDDING:
+            case REVOKE_WATERMARK_EMBEDDING:
+            case TTL:
+            case LOAD_CONFIGURATION:
+            case SHOW:
+            case LOAD_FILES:
+            case REMOVE_FILE:
+            case MOVE_FILE:
+            case FLUSH:
+            case MERGE:
+            case TRACING:
+            case CLEAR_CACHE:
+            case NULL:
+            case SHOW_MERGE_STATUS:
+            case DELETE_PARTITION:
+            case CREATE_SCHEMA_SNAPSHOT:
+                return operator;
+            case QUERY:
+            case UPDATE:
+            case DELETE:
+            case CREATE_INDEX:
+            case DROP_INDEX:
+            case QUERY_INDEX:
+                SFWOperator root = (SFWOperator) operator;
+                return optimizeSFWOperator(root, maxDeduplicatedPathNum);
+            default:
+                throw new LogicalOperatorException(operator.getType().toString(), "");
+        }
     }
-    Set<PartialPath> pathSet = filter.getPathSet();
-    RemoveNotOptimizer removeNot = new RemoveNotOptimizer();
-    filter = removeNot.optimize(filter);
-    DnfFilterOptimizer dnf = new DnfFilterOptimizer();
-    filter = dnf.optimize(filter);
-    MergeSingleFilterOptimizer merge = new MergeSingleFilterOptimizer();
-    filter = merge.optimize(filter);
-    root.setFilterOperator(filter);
-    filter.setPathSet(pathSet);
-    return root;
-  }
 
-  protected ConcatPathOptimizer getConcatPathOptimizer() {
-    return new ConcatPathOptimizer();
-  }
+    /**
+     * given an unoptimized select-from-where operator and return an optimized result.
+     *
+     * @param root unoptimized select-from-where operator
+     * @return optimized select-from-where operator
+     * @throws LogicalOptimizeException exception in SFW optimizing
+     */
+    private SFWOperator optimizeSFWOperator(SFWOperator root, int maxDeduplicatedPathNum)
+            throws LogicalOperatorException, PathNumOverLimitException {
+        ConcatPathOptimizer concatPathOptimizer = getConcatPathOptimizer();
+        root = (SFWOperator) concatPathOptimizer.transform(root, maxDeduplicatedPathNum);
+        FilterOperator filter = root.getFilterOperator();
+        if (filter == null) {
+            return root;
+        }
+        Set<PartialPath> pathSet = filter.getPathSet();
+        RemoveNotOptimizer removeNot = new RemoveNotOptimizer();
+        filter = removeNot.optimize(filter);
+        DnfFilterOptimizer dnf = new DnfFilterOptimizer();
+        filter = dnf.optimize(filter);
+        MergeSingleFilterOptimizer merge = new MergeSingleFilterOptimizer();
+        filter = merge.optimize(filter);
+        root.setFilterOperator(filter);
+        filter.setPathSet(pathSet);
+        return root;
+    }
+
+    protected ConcatPathOptimizer getConcatPathOptimizer() {
+        return new ConcatPathOptimizer();
+    }
 }

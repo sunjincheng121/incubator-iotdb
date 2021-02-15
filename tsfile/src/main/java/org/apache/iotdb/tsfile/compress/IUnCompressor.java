@@ -30,241 +30,238 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
-
-/**
- * uncompress data according to type in metadata.
- */
+/** uncompress data according to type in metadata. */
 public interface IUnCompressor {
 
-  /**
-   * get the UnCompressor based on the CompressionType.
-   *
-   * @param name CompressionType
-   * @return the UnCompressor of specified CompressionType
-   */
-  static IUnCompressor getUnCompressor(CompressionType name) {
-    if (name == null) {
-      throw new CompressionTypeNotSupportedException("NULL");
-    }
-    switch (name) {
-      case UNCOMPRESSED:
-        return new NoUnCompressor();
-      case SNAPPY:
-        return new SnappyUnCompressor();
-      case LZ4:
-        return new LZ4UnCompressor();
-      default:
-        throw new CompressionTypeNotSupportedException(name.toString());
-    }
-  }
-
-  int getUncompressedLength(byte[] array, int offset, int length) throws IOException;
-
-  /**
-   * get the uncompressed length.
-   *
-   * @param buffer MUST be DirectByteBuffer
-   */
-  int getUncompressedLength(ByteBuffer buffer) throws IOException;
-
-  /**
-   * uncompress the byte array.
-   *
-   * @param byteArray to be uncompressed bytes
-   * @return bytes after uncompressed
-   */
-  byte[] uncompress(byte[] byteArray) throws IOException;
-
-  /**
-   * uncompress the byte array.
-   *
-   * @param byteArray -to be uncompressed bytes
-   * @param offset    -offset
-   * @param length    -length
-   * @param output    -output byte
-   * @param outOffset -
-   * @return the valid length of the output array
-   */
-  int uncompress(byte[] byteArray, int offset, int length, byte[] output, int outOffset)
-      throws IOException;
-
-  /**
-   * if the data is large, using this function is better.
-   *
-   * @param compressed   MUST be DirectByteBuffer
-   * @param uncompressed MUST be DirectByteBuffer
-   */
-  int uncompress(ByteBuffer compressed, ByteBuffer uncompressed) throws IOException;
-
-  CompressionType getCodecName();
-
-  class NoUnCompressor implements IUnCompressor {
-
-    @Override
-    public int getUncompressedLength(byte[] array, int offset, int length) {
-      return length;
+    /**
+     * get the UnCompressor based on the CompressionType.
+     *
+     * @param name CompressionType
+     * @return the UnCompressor of specified CompressionType
+     */
+    static IUnCompressor getUnCompressor(CompressionType name) {
+        if (name == null) {
+            throw new CompressionTypeNotSupportedException("NULL");
+        }
+        switch (name) {
+            case UNCOMPRESSED:
+                return new NoUnCompressor();
+            case SNAPPY:
+                return new SnappyUnCompressor();
+            case LZ4:
+                return new LZ4UnCompressor();
+            default:
+                throw new CompressionTypeNotSupportedException(name.toString());
+        }
     }
 
-    @Override
-    public int getUncompressedLength(ByteBuffer buffer) {
-      return buffer.remaining();
-    }
-
-    @Override
-    public byte[] uncompress(byte[] byteArray) {
-      return byteArray;
-    }
-
-    @Override
-    public int uncompress(byte[] byteArray, int offset, int length, byte[] output, int outOffset) {
-      System.arraycopy(byteArray, offset, output, outOffset, length);
-      return length;
-    }
-
-    @Override
-    public int uncompress(ByteBuffer compressed, ByteBuffer uncompressed) throws IOException {
-      throw new IOException("NoUnCompressor does not support this method.");
-    }
-
-    @Override
-    public CompressionType getCodecName() {
-      return CompressionType.UNCOMPRESSED;
-    }
-  }
-
-  class SnappyUnCompressor implements IUnCompressor {
-
-    private static final Logger logger = LoggerFactory.getLogger(SnappyUnCompressor.class);
-
-    @Override
-    public int getUncompressedLength(byte[] array, int offset, int length) throws IOException {
-      return Snappy.uncompressedLength(array, offset, length);
-    }
-
-    @Override
-    public int getUncompressedLength(ByteBuffer buffer) throws IOException {
-      return Snappy.uncompressedLength(buffer);
-    }
-
-    @Override
-    public byte[] uncompress(byte[] bytes) {
-      if (bytes == null) {
-        return new byte[0];
-      }
-
-      try {
-        return Snappy.uncompress(bytes);
-      } catch (IOException e) {
-        logger.error(
-            "tsfile-compression SnappyUnCompressor: errors occurs when uncompress input byte", e);
-      }
-      return new byte[0];
-    }
-
-    @Override
-    public int uncompress(byte[] byteArray, int offset, int length, byte[] output, int outOffset)
-        throws IOException {
-      return Snappy.uncompress(byteArray, offset, length, output, outOffset);
-    }
-
-    @Override
-    public int uncompress(ByteBuffer compressed, ByteBuffer uncompressed) {
-      if (compressed == null || !compressed.hasRemaining()) {
-        return 0;
-      }
-
-      try {
-        return Snappy.uncompress(compressed, uncompressed);
-      } catch (IOException e) {
-        logger.error(
-            "tsfile-compression SnappyUnCompressor: errors occurs when uncompress input byte", e);
-      }
-      return 0;
-    }
-
-    @Override
-    public CompressionType getCodecName() {
-      return CompressionType.SNAPPY;
-    }
-  }
-
-
-  class LZ4UnCompressor implements IUnCompressor {
-
-    private static final Logger logger = LoggerFactory.getLogger(LZ4Compressor.class);
-    private static final String UNCOMPRESS_INPUT_ERROR = "tsfile-compression LZ4UnCompressor: errors occurs when uncompress input byte";
-
-    private static final int MAX_COMPRESS_RATIO = 255;
-    private LZ4SafeDecompressor decompressor;
-
-
-    public LZ4UnCompressor() {
-      LZ4Factory factory = LZ4Factory.fastestInstance();
-      decompressor = factory.safeDecompressor();
-    }
-
-    @Override
-    public int getUncompressedLength(byte[] array, int offset, int length) throws IOException {
-      throw new UnsupportedOperationException("unsupported get uncompress length");
-    }
-
-    @Override
-    public int getUncompressedLength(ByteBuffer buffer) throws IOException {
-      throw new UnsupportedOperationException("unsupported get uncompress length");
-    }
+    int getUncompressedLength(byte[] array, int offset, int length) throws IOException;
 
     /**
-     * We don't recommend using this method because we have to allocate MAX_COMPRESS_RATIO *
-     * compressedSize to ensure uncompress safety, you can use other method if you know the
-     * uncompressed size
+     * get the uncompressed length.
+     *
+     * @param buffer MUST be DirectByteBuffer
      */
-    @Override
-    public byte[] uncompress(byte[] bytes) throws IOException {
-      if (bytes == null) {
-        return new byte[0];
-      }
+    int getUncompressedLength(ByteBuffer buffer) throws IOException;
 
-      try {
-        return decompressor.decompress(bytes, MAX_COMPRESS_RATIO * bytes.length);
-      } catch (RuntimeException e) {
-        logger.error(
-            UNCOMPRESS_INPUT_ERROR, e);
-        throw new IOException(e);
-      }
+    /**
+     * uncompress the byte array.
+     *
+     * @param byteArray to be uncompressed bytes
+     * @return bytes after uncompressed
+     */
+    byte[] uncompress(byte[] byteArray) throws IOException;
+
+    /**
+     * uncompress the byte array.
+     *
+     * @param byteArray -to be uncompressed bytes
+     * @param offset -offset
+     * @param length -length
+     * @param output -output byte
+     * @param outOffset -
+     * @return the valid length of the output array
+     */
+    int uncompress(byte[] byteArray, int offset, int length, byte[] output, int outOffset)
+            throws IOException;
+
+    /**
+     * if the data is large, using this function is better.
+     *
+     * @param compressed MUST be DirectByteBuffer
+     * @param uncompressed MUST be DirectByteBuffer
+     */
+    int uncompress(ByteBuffer compressed, ByteBuffer uncompressed) throws IOException;
+
+    CompressionType getCodecName();
+
+    class NoUnCompressor implements IUnCompressor {
+
+        @Override
+        public int getUncompressedLength(byte[] array, int offset, int length) {
+            return length;
+        }
+
+        @Override
+        public int getUncompressedLength(ByteBuffer buffer) {
+            return buffer.remaining();
+        }
+
+        @Override
+        public byte[] uncompress(byte[] byteArray) {
+            return byteArray;
+        }
+
+        @Override
+        public int uncompress(
+                byte[] byteArray, int offset, int length, byte[] output, int outOffset) {
+            System.arraycopy(byteArray, offset, output, outOffset, length);
+            return length;
+        }
+
+        @Override
+        public int uncompress(ByteBuffer compressed, ByteBuffer uncompressed) throws IOException {
+            throw new IOException("NoUnCompressor does not support this method.");
+        }
+
+        @Override
+        public CompressionType getCodecName() {
+            return CompressionType.UNCOMPRESSED;
+        }
     }
 
-    @Override
-    public int uncompress(byte[] byteArray, int offset, int length, byte[] output, int outOffset)
-        throws IOException {
-      try {
-        return decompressor.decompress(byteArray, offset, length, output, offset);
-      }
-      catch (RuntimeException e){
-        logger.error(
-            UNCOMPRESS_INPUT_ERROR, e);
-        throw new IOException(e);
-      }
+    class SnappyUnCompressor implements IUnCompressor {
+
+        private static final Logger logger = LoggerFactory.getLogger(SnappyUnCompressor.class);
+
+        @Override
+        public int getUncompressedLength(byte[] array, int offset, int length) throws IOException {
+            return Snappy.uncompressedLength(array, offset, length);
+        }
+
+        @Override
+        public int getUncompressedLength(ByteBuffer buffer) throws IOException {
+            return Snappy.uncompressedLength(buffer);
+        }
+
+        @Override
+        public byte[] uncompress(byte[] bytes) {
+            if (bytes == null) {
+                return new byte[0];
+            }
+
+            try {
+                return Snappy.uncompress(bytes);
+            } catch (IOException e) {
+                logger.error(
+                        "tsfile-compression SnappyUnCompressor: errors occurs when uncompress input byte",
+                        e);
+            }
+            return new byte[0];
+        }
+
+        @Override
+        public int uncompress(
+                byte[] byteArray, int offset, int length, byte[] output, int outOffset)
+                throws IOException {
+            return Snappy.uncompress(byteArray, offset, length, output, outOffset);
+        }
+
+        @Override
+        public int uncompress(ByteBuffer compressed, ByteBuffer uncompressed) {
+            if (compressed == null || !compressed.hasRemaining()) {
+                return 0;
+            }
+
+            try {
+                return Snappy.uncompress(compressed, uncompressed);
+            } catch (IOException e) {
+                logger.error(
+                        "tsfile-compression SnappyUnCompressor: errors occurs when uncompress input byte",
+                        e);
+            }
+            return 0;
+        }
+
+        @Override
+        public CompressionType getCodecName() {
+            return CompressionType.SNAPPY;
+        }
     }
 
-    @Override
-    public int uncompress(ByteBuffer compressed, ByteBuffer uncompressed) throws IOException {
-      if (compressed == null || !compressed.hasRemaining()) {
-        return 0;
-      }
+    class LZ4UnCompressor implements IUnCompressor {
 
-      try {
-        decompressor.decompress(compressed, uncompressed);
-        return compressed.limit();
-      } catch (RuntimeException e) {
-        logger.error(
-            UNCOMPRESS_INPUT_ERROR, e);
-        throw new IOException(e);
-      }
-    }
+        private static final Logger logger = LoggerFactory.getLogger(LZ4Compressor.class);
+        private static final String UNCOMPRESS_INPUT_ERROR =
+                "tsfile-compression LZ4UnCompressor: errors occurs when uncompress input byte";
 
-    @Override
-    public CompressionType getCodecName() {
-      return CompressionType.LZ4;
+        private static final int MAX_COMPRESS_RATIO = 255;
+        private LZ4SafeDecompressor decompressor;
+
+        public LZ4UnCompressor() {
+            LZ4Factory factory = LZ4Factory.fastestInstance();
+            decompressor = factory.safeDecompressor();
+        }
+
+        @Override
+        public int getUncompressedLength(byte[] array, int offset, int length) throws IOException {
+            throw new UnsupportedOperationException("unsupported get uncompress length");
+        }
+
+        @Override
+        public int getUncompressedLength(ByteBuffer buffer) throws IOException {
+            throw new UnsupportedOperationException("unsupported get uncompress length");
+        }
+
+        /**
+         * We don't recommend using this method because we have to allocate MAX_COMPRESS_RATIO *
+         * compressedSize to ensure uncompress safety, you can use other method if you know the
+         * uncompressed size
+         */
+        @Override
+        public byte[] uncompress(byte[] bytes) throws IOException {
+            if (bytes == null) {
+                return new byte[0];
+            }
+
+            try {
+                return decompressor.decompress(bytes, MAX_COMPRESS_RATIO * bytes.length);
+            } catch (RuntimeException e) {
+                logger.error(UNCOMPRESS_INPUT_ERROR, e);
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public int uncompress(
+                byte[] byteArray, int offset, int length, byte[] output, int outOffset)
+                throws IOException {
+            try {
+                return decompressor.decompress(byteArray, offset, length, output, offset);
+            } catch (RuntimeException e) {
+                logger.error(UNCOMPRESS_INPUT_ERROR, e);
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public int uncompress(ByteBuffer compressed, ByteBuffer uncompressed) throws IOException {
+            if (compressed == null || !compressed.hasRemaining()) {
+                return 0;
+            }
+
+            try {
+                decompressor.decompress(compressed, uncompressed);
+                return compressed.limit();
+            } catch (RuntimeException e) {
+                logger.error(UNCOMPRESS_INPUT_ERROR, e);
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public CompressionType getCodecName() {
+            return CompressionType.LZ4;
+        }
     }
-  }
 }

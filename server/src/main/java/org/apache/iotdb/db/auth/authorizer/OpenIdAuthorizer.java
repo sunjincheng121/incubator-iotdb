@@ -50,9 +50,7 @@ import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Uses an OpenID Connect provider for Authorization / Authentication.
- */
+/** Uses an OpenID Connect provider for Authorization / Authentication. */
 public class OpenIdAuthorizer extends BasicAuthorizer {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenIdAuthorizer.class);
@@ -66,26 +64,31 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
     /** Stores all claims to the respective user */
     private Map<String, Claims> loggedClaims = new HashMap<>();
 
-    public OpenIdAuthorizer() throws AuthException, ParseException, IOException, URISyntaxException {
+    public OpenIdAuthorizer()
+            throws AuthException, ParseException, IOException, URISyntaxException {
         this(config.getOpenIdProviderUrl());
     }
 
     OpenIdAuthorizer(JSONObject jwk) throws AuthException {
-        super(new LocalFileUserManager(config.getSystemDir() + File.separator + "users"),
+        super(
+                new LocalFileUserManager(config.getSystemDir() + File.separator + "users"),
                 new LocalFileRoleManager(config.getSystemDir() + File.separator + "roles"));
         try {
             providerKey = RSAKey.parse(jwk).toRSAPublicKey();
         } catch (java.text.ParseException | JOSEException e) {
-            throw new AuthException("Unable to get OIDC Provider Key from JWK " +  jwk.toString(), e);
+            throw new AuthException(
+                    "Unable to get OIDC Provider Key from JWK " + jwk.toString(), e);
         }
         logger.info("Initialized with providerKey: {}", providerKey);
     }
 
-    OpenIdAuthorizer(String providerUrl) throws AuthException, URISyntaxException, ParseException, IOException {
+    OpenIdAuthorizer(String providerUrl)
+            throws AuthException, URISyntaxException, ParseException, IOException {
         this(getJWKfromProvider(providerUrl));
     }
 
-    private static JSONObject getJWKfromProvider(String providerUrl) throws URISyntaxException, IOException, ParseException, AuthException {
+    private static JSONObject getJWKfromProvider(String providerUrl)
+            throws URISyntaxException, IOException, ParseException, AuthException {
         if (providerUrl == null) {
             throw new IllegalArgumentException("OpenID Connect Provider URI must be given!");
         }
@@ -96,7 +99,9 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
         logger.debug("Using Provider Metadata: {}", providerMetadata);
 
         try {
-            URL url = new URI(providerMetadata.getJWKSetURI().toString().replace("http", "https")).toURL();
+            URL url =
+                    new URI(providerMetadata.getJWKSetURI().toString().replace("http", "https"))
+                            .toURL();
             logger.debug("Using url {}", url);
             return getProviderRSAJWK(url.openStream());
         } catch (IOException e) {
@@ -128,9 +133,11 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
         return null;
     }
 
-    static OIDCProviderMetadata fetchMetadata(String providerUrl) throws URISyntaxException, IOException, ParseException {
+    static OIDCProviderMetadata fetchMetadata(String providerUrl)
+            throws URISyntaxException, IOException, ParseException {
         URI issuerURI = new URI(providerUrl);
-        URL providerConfigurationURL = issuerURI.resolve(".well-known/openid-configuration").toURL();
+        URL providerConfigurationURL =
+                issuerURI.resolve(".well-known/openid-configuration").toURL();
         InputStream stream = providerConfigurationURL.openStream();
         // Read all data from URL
         String providerInfo = null;
@@ -143,14 +150,17 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
     @Override
     public boolean login(String token, String password) throws AuthException {
         if (password != null && !password.isEmpty()) {
-            logger.error("JWT Login failed as a non-empty Password was given username (token): {}, password: {}", token, password);
+            logger.error(
+                    "JWT Login failed as a non-empty Password was given username (token): {}, password: {}",
+                    token,
+                    password);
             return false;
         }
         if (token == null || token.isEmpty()) {
             logger.error("JWT Login failed as a Username (token) was empty!");
             return false;
         }
-        //This line will throw an exception if it is not a signed JWS (as expected)
+        // This line will throw an exception if it is not a signed JWS (as expected)
         Claims claims;
         try {
             claims = validateToken(token);
@@ -176,8 +186,7 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
     }
 
     private Claims validateToken(String token) {
-        return Jwts
-                .parser()
+        return Jwts.parser()
                 // Basically ignore the Expiration Date, if there is any???
                 .setAllowedClockSkewSeconds(Long.MAX_VALUE / 1000)
                 // .setSigningKey(DatatypeConverter.parseBase64Binary(secret))
@@ -200,7 +209,8 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
     }
 
     private void throwUnsupportedOperationException() {
-        throw new UnsupportedOperationException("This operation is not supported for JWT Auth Provider!");
+        throw new UnsupportedOperationException(
+                "This operation is not supported for JWT Auth Provider!");
     }
 
     @Override
@@ -210,7 +220,9 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
 
     /**
      * So not with the token!
-     * @param token Usually the JWT but could also be just the name of the user ({@link #getUsername(String)}.
+     *
+     * @param token Usually the JWT but could also be just the name of the user ({@link
+     *     #getUsername(String)}.
      * @return true if the user is an admin
      */
     @Override
@@ -229,9 +241,12 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
             }
         }
         // Get available roles (from keycloack)
-        List<String> availableRoles = ((Map<String, List<String>>) claims.get("realm_access")).get("roles");
+        List<String> availableRoles =
+                ((Map<String, List<String>>) claims.get("realm_access")).get("roles");
         if (!availableRoles.contains(IOTDB_ADMIN_ROLE_NAME)) {
-            logger.warn("Given Token has no admin rights, is there a ROLE with name {} in 'realm_access' role set?", IOTDB_ADMIN_ROLE_NAME);
+            logger.warn(
+                    "Given Token has no admin rights, is there a ROLE with name {} in 'realm_access' role set?",
+                    IOTDB_ADMIN_ROLE_NAME);
             return false;
         }
         return true;
@@ -266,5 +281,4 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
     public void updateUserPassword(String username, String newPassword) throws AuthException {
         throwUnsupportedOperationException();
     }
-
 }

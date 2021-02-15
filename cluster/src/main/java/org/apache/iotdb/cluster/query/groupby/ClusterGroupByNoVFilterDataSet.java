@@ -36,24 +36,37 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class ClusterGroupByNoVFilterDataSet extends GroupByWithoutValueFilterDataSet {
 
-  private MetaGroupMember metaGroupMember;
+    private MetaGroupMember metaGroupMember;
 
-  public ClusterGroupByNoVFilterDataSet(QueryContext context,
-      GroupByTimePlan groupByPlan, MetaGroupMember metaGroupMember)
-      throws StorageEngineException, QueryProcessException {
-    initQueryDataSetFields(new ArrayList<>(groupByPlan.getDeduplicatedPaths()),
-        groupByPlan.getDeduplicatedDataTypes(), groupByPlan.isAscending());
-    initGroupByEngineDataSetFields(context, groupByPlan);
+    public ClusterGroupByNoVFilterDataSet(
+            QueryContext context, GroupByTimePlan groupByPlan, MetaGroupMember metaGroupMember)
+            throws StorageEngineException, QueryProcessException {
+        initQueryDataSetFields(
+                new ArrayList<>(groupByPlan.getDeduplicatedPaths()),
+                groupByPlan.getDeduplicatedDataTypes(),
+                groupByPlan.isAscending());
+        initGroupByEngineDataSetFields(context, groupByPlan);
 
-    this.metaGroupMember = metaGroupMember;
-    initGroupBy(context, groupByPlan);
-  }
+        this.metaGroupMember = metaGroupMember;
+        initGroupBy(context, groupByPlan);
+    }
 
-  @Override
-  protected GroupByExecutor getGroupByExecutor(PartialPath path,
-      Set<String> deviceMeasurements, TSDataType dataType, QueryContext context,
-      Filter timeFilter, TsFileFilter fileFilter, boolean ascending) {
-    return new MergeGroupByExecutor(path, deviceMeasurements, dataType, context, timeFilter,
-        metaGroupMember, ascending);
-  }
+    @Override
+    protected GroupByExecutor getGroupByExecutor(
+            PartialPath path,
+            Set<String> deviceMeasurements,
+            TSDataType dataType,
+            QueryContext context,
+            Filter timeFilter,
+            TsFileFilter fileFilter,
+            boolean ascending) {
+        return new MergeGroupByExecutor(
+                path,
+                deviceMeasurements,
+                dataType,
+                context,
+                timeFilter,
+                metaGroupMember,
+                ascending);
+    }
 }

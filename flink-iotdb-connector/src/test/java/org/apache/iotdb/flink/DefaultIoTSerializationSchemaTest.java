@@ -30,10 +30,11 @@ public class DefaultIoTSerializationSchemaTest {
     @Test
     public void serialize() {
         IoTDBOptions options = new IoTDBOptions();
-        options.setTimeseriesOptionList(Lists.newArrayList(new IoTDBOptions.TimeseriesOption("root.sg.D01.temperature")));
+        options.setTimeseriesOptionList(
+                Lists.newArrayList(new IoTDBOptions.TimeseriesOption("root.sg.D01.temperature")));
         DefaultIoTSerializationSchema serializationSchema = new DefaultIoTSerializationSchema();
 
-        Map<String,String> tuple = new HashMap();
+        Map<String, String> tuple = new HashMap();
         tuple.put("device", "root.sg.D01");
         tuple.put("timestamp", "1581861293000");
         tuple.put("measurements", "temperature");

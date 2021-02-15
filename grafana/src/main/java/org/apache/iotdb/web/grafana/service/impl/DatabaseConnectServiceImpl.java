@@ -30,22 +30,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatabaseConnectServiceImpl implements DatabaseConnectService {
 
-  @Autowired
-  BasicDao basicDao;
+    @Autowired BasicDao basicDao;
 
-  @Override
-  public int testConnection() {
-    return 0;
-  }
+    @Override
+    public int testConnection() {
+        return 0;
+    }
 
-  @Override
-  public List<TimeValues> querySeries(String s, Pair<ZonedDateTime, ZonedDateTime> timeRange) {
-    return basicDao.querySeries(s, timeRange);
-  }
+    @Override
+    public List<TimeValues> querySeries(String s, Pair<ZonedDateTime, ZonedDateTime> timeRange) {
+        return basicDao.querySeries(s, timeRange);
+    }
 
-  @Override
-  public List<String> getMetaData() {
-    return basicDao.getMetaData();
-  }
-
+    @Override
+    public List<String> getMetaData() {
+        return basicDao.getMetaData();
+    }
 }

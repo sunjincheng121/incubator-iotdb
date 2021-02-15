@@ -22,8 +22,8 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class MergeOperator extends RootOperator {
 
-  public MergeOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.MERGE;
-  }
+    public MergeOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.MERGE;
+    }
 }

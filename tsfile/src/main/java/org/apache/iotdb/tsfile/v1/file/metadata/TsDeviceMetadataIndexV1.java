@@ -24,55 +24,47 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class TsDeviceMetadataIndexV1 {
 
-  /**
-   * The offset of the TsDeviceMetadata.
-   */
-  private long offset;
-  /**
-   * The size of the TsDeviceMetadata in the disk.
-   */
-  private int len;
-  /**
-   * The start time of the device.
-   */
-  private long startTime;
-  /**
-   * The end time of the device.
-   */
-  private long endTime;
+    /** The offset of the TsDeviceMetadata. */
+    private long offset;
+    /** The size of the TsDeviceMetadata in the disk. */
+    private int len;
+    /** The start time of the device. */
+    private long startTime;
+    /** The end time of the device. */
+    private long endTime;
 
-  public TsDeviceMetadataIndexV1() {
-    //do nothing
-  }
+    public TsDeviceMetadataIndexV1() {
+        // do nothing
+    }
 
-  /**
-   * use buffer to get a TsDeviceMetadataIndex.
-   *
-   * @param buffer -determine the index's source
-   * @return -a TsDeviceMetadataIndex
-   */
-  public static TsDeviceMetadataIndexV1 deserializeFrom(ByteBuffer buffer) {
-    TsDeviceMetadataIndexV1 index = new TsDeviceMetadataIndexV1();
-    index.offset = ReadWriteIOUtils.readLong(buffer);
-    index.len = ReadWriteIOUtils.readInt(buffer);
-    index.startTime = ReadWriteIOUtils.readLong(buffer);
-    index.endTime = ReadWriteIOUtils.readLong(buffer);
-    return index;
-  }
+    /**
+     * use buffer to get a TsDeviceMetadataIndex.
+     *
+     * @param buffer -determine the index's source
+     * @return -a TsDeviceMetadataIndex
+     */
+    public static TsDeviceMetadataIndexV1 deserializeFrom(ByteBuffer buffer) {
+        TsDeviceMetadataIndexV1 index = new TsDeviceMetadataIndexV1();
+        index.offset = ReadWriteIOUtils.readLong(buffer);
+        index.len = ReadWriteIOUtils.readInt(buffer);
+        index.startTime = ReadWriteIOUtils.readLong(buffer);
+        index.endTime = ReadWriteIOUtils.readLong(buffer);
+        return index;
+    }
 
-  public long getOffset() {
-    return offset;
-  }
+    public long getOffset() {
+        return offset;
+    }
 
-  public int getLen() {
-    return len;
-  }
+    public int getLen() {
+        return len;
+    }
 
-  public long getStartTime() {
-    return startTime;
-  }
+    public long getStartTime() {
+        return startTime;
+    }
 
-  public long getEndTime() {
-    return endTime;
-  }
+    public long getEndTime() {
+        return endTime;
+    }
 }

@@ -22,26 +22,26 @@ import org.apache.iotdb.service.rpc.thrift.TSStatus;
 
 public class StatementExecutionException extends Exception {
 
-  private int statusCode;
+    private int statusCode;
 
-  public StatementExecutionException(TSStatus status) {
-    super(String.format("%d: %s", status.code, status.message));
-    this.statusCode = status.code;
-  }
+    public StatementExecutionException(TSStatus status) {
+        super(String.format("%d: %s", status.code, status.message));
+        this.statusCode = status.code;
+    }
 
-  public StatementExecutionException(String reason) {
-    super(reason);
-  }
+    public StatementExecutionException(String reason) {
+        super(reason);
+    }
 
-  public StatementExecutionException(Throwable cause) {
-    super(cause);
-  }
+    public StatementExecutionException(Throwable cause) {
+        super(cause);
+    }
 
-  public StatementExecutionException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public StatementExecutionException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-  public int getStatusCode() {
-    return statusCode;
-  }
+    public int getStatusCode() {
+        return statusCode;
+    }
 }

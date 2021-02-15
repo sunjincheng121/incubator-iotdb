@@ -26,28 +26,27 @@ import org.mockito.internal.util.reflection.Whitebox;
 
 public class MManagerWhiteBox {
 
-  public static MManager newMManager(String logFilePath) {
-    Constructor<MManager> constructor = getMManagerConstructor();
-    constructor.setAccessible(true);
-    try {
-      MManager manager = constructor.newInstance();
-      new File(logFilePath).getParentFile().mkdirs();
-      Whitebox.setInternalState(manager, "logFilePath", logFilePath);
-      manager.init();
-      return  manager;
-    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-      e.printStackTrace();
+    public static MManager newMManager(String logFilePath) {
+        Constructor<MManager> constructor = getMManagerConstructor();
+        constructor.setAccessible(true);
+        try {
+            MManager manager = constructor.newInstance();
+            new File(logFilePath).getParentFile().mkdirs();
+            Whitebox.setInternalState(manager, "logFilePath", logFilePath);
+            manager.init();
+            return manager;
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
-    return null;
-  }
 
-  private static Constructor<MManager> getMManagerConstructor() {
-      try {
-        return MManager.class.getDeclaredConstructor();
-      } catch (NoSuchMethodException e) {
-        e.printStackTrace();
-      }
-    return null;
-  }
-
+    private static Constructor<MManager> getMManagerConstructor() {
+        try {
+            return MManager.class.getDeclaredConstructor();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

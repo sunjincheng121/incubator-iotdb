@@ -25,45 +25,45 @@ import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.tsfile.fileSystem.FSType;
 
 public enum SystemFileFactory {
+    INSTANCE;
 
-  INSTANCE;
+    private static FSType fsType =
+            IoTDBDescriptor.getInstance().getConfig().getSystemFileStorageFs();
+    private static final String UNSUPPORT_FILE_SYSTEM = "Unsupported file system: ";
 
-  private static FSType fsType = IoTDBDescriptor.getInstance().getConfig().getSystemFileStorageFs();
-  private static final String UNSUPPORT_FILE_SYSTEM = "Unsupported file system: ";
-  public File getFile(String pathname) {
-    if (fsType.equals(FSType.HDFS)) {
-      throw new UnsupportedOperationException(UNSUPPORT_FILE_SYSTEM + fsType.name());
-      // return new HDFSFile(pathname);
-    } else {
-      return new File(pathname);
+    public File getFile(String pathname) {
+        if (fsType.equals(FSType.HDFS)) {
+            throw new UnsupportedOperationException(UNSUPPORT_FILE_SYSTEM + fsType.name());
+            // return new HDFSFile(pathname);
+        } else {
+            return new File(pathname);
+        }
     }
-  }
 
-  public File getFile(String parent, String child) {
-    if (fsType.equals(FSType.HDFS)) {
-      throw new UnsupportedOperationException(UNSUPPORT_FILE_SYSTEM + fsType.name());
-      // return new HDFSFile(parent, child);
-    } else {
-      return new File(parent, child);
+    public File getFile(String parent, String child) {
+        if (fsType.equals(FSType.HDFS)) {
+            throw new UnsupportedOperationException(UNSUPPORT_FILE_SYSTEM + fsType.name());
+            // return new HDFSFile(parent, child);
+        } else {
+            return new File(parent, child);
+        }
     }
-  }
 
-  public File getFile(File parent, String child) {
-    if (fsType.equals(FSType.HDFS)) {
-      throw new UnsupportedOperationException(UNSUPPORT_FILE_SYSTEM + fsType.name());
-      // return new HDFSFile(parent, child);
-    } else {
-      return new File(parent, child);
+    public File getFile(File parent, String child) {
+        if (fsType.equals(FSType.HDFS)) {
+            throw new UnsupportedOperationException(UNSUPPORT_FILE_SYSTEM + fsType.name());
+            // return new HDFSFile(parent, child);
+        } else {
+            return new File(parent, child);
+        }
     }
-  }
 
-  public File getFile(URI uri) {
-    if (fsType.equals(FSType.HDFS)) {
-      throw new UnsupportedOperationException(UNSUPPORT_FILE_SYSTEM + fsType.name());
-      // return new HDFSFile(uri);
-    } else {
-      return new File(uri);
+    public File getFile(URI uri) {
+        if (fsType.equals(FSType.HDFS)) {
+            throw new UnsupportedOperationException(UNSUPPORT_FILE_SYSTEM + fsType.name());
+            // return new HDFSFile(uri);
+        } else {
+            return new File(uri);
+        }
     }
-  }
-
 }

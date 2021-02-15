@@ -36,64 +36,64 @@ import org.junit.Test;
 
 public class LogParserTest {
 
-  private LogParser logParser = LogParser.getINSTANCE();
+    private LogParser logParser = LogParser.getINSTANCE();
 
-  @Test
-  public void testAddNodeLog() throws UnknownLogTypeException {
-    AddNodeLog log = new AddNodeLog();
-    log.setNewNode(TestUtils.getNode(5));
-    log.setCurrLogIndex(8);
-    log.setCurrLogTerm(8);
+    @Test
+    public void testAddNodeLog() throws UnknownLogTypeException {
+        AddNodeLog log = new AddNodeLog();
+        log.setNewNode(TestUtils.getNode(5));
+        log.setCurrLogIndex(8);
+        log.setCurrLogTerm(8);
 
-    ByteBuffer buffer = log.serialize();
-    Log serialized = logParser.parse(buffer);
-    assertEquals(log, serialized);
-  }
+        ByteBuffer buffer = log.serialize();
+        Log serialized = logParser.parse(buffer);
+        assertEquals(log, serialized);
+    }
 
-  @Test
-  public void testPhysicalPlanLog() throws UnknownLogTypeException, IllegalPathException {
-    PhysicalPlanLog log = new PhysicalPlanLog();
-    SetStorageGroupPlan setStorageGroupPlan =
-        new SetStorageGroupPlan(new PartialPath(TestUtils.getTestSg(5)));
-    log.setPlan(setStorageGroupPlan);
-    log.setCurrLogIndex(8);
-    log.setCurrLogTerm(8);
+    @Test
+    public void testPhysicalPlanLog() throws UnknownLogTypeException, IllegalPathException {
+        PhysicalPlanLog log = new PhysicalPlanLog();
+        SetStorageGroupPlan setStorageGroupPlan =
+                new SetStorageGroupPlan(new PartialPath(TestUtils.getTestSg(5)));
+        log.setPlan(setStorageGroupPlan);
+        log.setCurrLogIndex(8);
+        log.setCurrLogTerm(8);
 
-    ByteBuffer buffer = log.serialize();
-    Log serialized = logParser.parse(buffer);
-    assertEquals(log, serialized);
-  }
+        ByteBuffer buffer = log.serialize();
+        Log serialized = logParser.parse(buffer);
+        assertEquals(log, serialized);
+    }
 
-  @Test
-  public void testCloseFileLog() throws UnknownLogTypeException {
-    CloseFileLog log = new CloseFileLog(TestUtils.getTestSg(5), 0, false);
-    log.setCurrLogIndex(8);
-    log.setCurrLogTerm(8);
+    @Test
+    public void testCloseFileLog() throws UnknownLogTypeException {
+        CloseFileLog log = new CloseFileLog(TestUtils.getTestSg(5), 0, false);
+        log.setCurrLogIndex(8);
+        log.setCurrLogTerm(8);
 
-    ByteBuffer buffer = log.serialize();
-    Log serialized = logParser.parse(buffer);
-    assertEquals(log, serialized);
-  }
+        ByteBuffer buffer = log.serialize();
+        Log serialized = logParser.parse(buffer);
+        assertEquals(log, serialized);
+    }
 
-  @Test
-  public void testRemoveNodeLog() throws UnknownLogTypeException {
-    RemoveNodeLog log = new RemoveNodeLog();
-    log.setRemovedNode(TestUtils.getNode(0));
-    log.setCurrLogIndex(8);
-    log.setCurrLogTerm(8);
+    @Test
+    public void testRemoveNodeLog() throws UnknownLogTypeException {
+        RemoveNodeLog log = new RemoveNodeLog();
+        log.setRemovedNode(TestUtils.getNode(0));
+        log.setCurrLogIndex(8);
+        log.setCurrLogTerm(8);
 
-    ByteBuffer buffer = log.serialize();
-    Log serialized = logParser.parse(buffer);
-    assertEquals(log, serialized);
-  }
+        ByteBuffer buffer = log.serialize();
+        Log serialized = logParser.parse(buffer);
+        assertEquals(log, serialized);
+    }
 
-  @Test
-  public void testEmptyContentLog() throws UnknownLogTypeException {
-    EmptyContentLog log = new EmptyContentLog();
-    log.setCurrLogIndex(8);
-    log.setCurrLogTerm(8);
-    ByteBuffer byteBuffer = log.serialize();
-    Log serialized = logParser.parse(byteBuffer);
-    assertEquals(log, serialized);
-  }
+    @Test
+    public void testEmptyContentLog() throws UnknownLogTypeException {
+        EmptyContentLog log = new EmptyContentLog();
+        log.setCurrLogIndex(8);
+        log.setCurrLogTerm(8);
+        ByteBuffer byteBuffer = log.serialize();
+        Log serialized = logParser.parse(byteBuffer);
+        assertEquals(log, serialized);
+    }
 }

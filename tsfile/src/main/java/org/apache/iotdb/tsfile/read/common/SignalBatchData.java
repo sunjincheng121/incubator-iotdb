@@ -18,28 +18,26 @@
  */
 package org.apache.iotdb.tsfile.read.common;
 
-/**
- * It is an empty signal to notify the caller that there is no more batch data after it.
- */
+/** It is an empty signal to notify the caller that there is no more batch data after it. */
 public class SignalBatchData extends BatchData {
 
-  private static final long serialVersionUID = -4175548102820374070L;
+    private static final long serialVersionUID = -4175548102820374070L;
 
-  public static SignalBatchData getInstance() {
-    return InstanceHolder.instance;
-  }
-
-  private static class InstanceHolder {
-
-    private InstanceHolder() {
-      //allowed to do nothing
+    public static SignalBatchData getInstance() {
+        return InstanceHolder.instance;
     }
 
-    private static SignalBatchData instance = new SignalBatchData();
-  }
+    private static class InstanceHolder {
 
-  @Override
-  public boolean hasCurrent() {
-    throw new UnsupportedOperationException("hasCurrent is not supported for SignalBatchData");
-  }
+        private InstanceHolder() {
+            // allowed to do nothing
+        }
+
+        private static SignalBatchData instance = new SignalBatchData();
+    }
+
+    @Override
+    public boolean hasCurrent() {
+        throw new UnsupportedOperationException("hasCurrent is not supported for SignalBatchData");
+    }
 }

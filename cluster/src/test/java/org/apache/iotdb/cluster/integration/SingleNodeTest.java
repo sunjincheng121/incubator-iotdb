@@ -36,58 +36,64 @@ import org.junit.Test;
 
 public class SingleNodeTest extends BaseSingleNodeTest {
 
-  private Session session;
+    private Session session;
 
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    session = openSession();
-  }
-
-  @Override
-  @After
-  public void tearDown() throws Exception {
-    super.tearDown();
-    session.close();
-  }
-
-  @Test
-  public void testInsertRecordsWithIllegalPath() throws StatementExecutionException,
-      IoTDBConnectionException {
-    List<String> deviceIds = Arrays.asList("root..ln1", "root.sg.ln1", "root..ln1", "root.sg3.ln1");
-    List<Long> timestamps = Arrays.asList(3L, 3L, 3L, 3L);
-    List<String> measurements = Arrays.asList("dev1", "dev2", "dev3");
-    List<List<String>> allMeasurements = Arrays.asList(measurements, measurements, measurements,
-        measurements);
-    List<String> values = Arrays.asList("123", "333", "444");
-    List<List<String>> allValues = Arrays.asList(values, values, values,
-        values);
-    try {
-      session.insertRecords(deviceIds, timestamps, allMeasurements, allValues);
-      fail("Exception expected");
-    } catch (StatementExecutionException e) {
-      assertEquals("root..ln1 is not a legal path;root..ln1 is not a legal path;", e.getMessage());
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        session = openSession();
     }
 
-    List<String> legalDevices = Arrays.asList("root.sg.ln1", "root.sg3.ln1");
-    for (String legalDevice : legalDevices) {
-      for (String measurement : measurements) {
-        assertTrue(session.checkTimeseriesExists(legalDevice + IoTDBConstant.PATH_SEPARATOR + measurement));
-      }
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+        session.close();
     }
-  }
 
-  @Test
-  public void testDeleteNonExistTimeSeries()
-      throws StatementExecutionException, IoTDBConnectionException {
-    session.insertRecord("root.sg1.d1", 0, Arrays.asList("t1", "t2", "t3"), Arrays.asList("123",
-        "333", "444"));
-    session.deleteTimeseries(Arrays.asList("root.sg1.d1.t6", "root.sg1.d1.t2", "root.sg1.d1.t3"));
+    @Test
+    public void testInsertRecordsWithIllegalPath()
+            throws StatementExecutionException, IoTDBConnectionException {
+        List<String> deviceIds =
+                Arrays.asList("root..ln1", "root.sg.ln1", "root..ln1", "root.sg3.ln1");
+        List<Long> timestamps = Arrays.asList(3L, 3L, 3L, 3L);
+        List<String> measurements = Arrays.asList("dev1", "dev2", "dev3");
+        List<List<String>> allMeasurements =
+                Arrays.asList(measurements, measurements, measurements, measurements);
+        List<String> values = Arrays.asList("123", "333", "444");
+        List<List<String>> allValues = Arrays.asList(values, values, values, values);
+        try {
+            session.insertRecords(deviceIds, timestamps, allMeasurements, allValues);
+            fail("Exception expected");
+        } catch (StatementExecutionException e) {
+            assertEquals(
+                    "root..ln1 is not a legal path;root..ln1 is not a legal path;", e.getMessage());
+        }
 
-    assertTrue(session.checkTimeseriesExists("root.sg1.d1.t1"));
-    assertFalse(session.checkTimeseriesExists("root.sg1.d1.t2"));
-    assertFalse(session.checkTimeseriesExists("root.sg1.d1.t3"));
-  }
+        List<String> legalDevices = Arrays.asList("root.sg.ln1", "root.sg3.ln1");
+        for (String legalDevice : legalDevices) {
+            for (String measurement : measurements) {
+                assertTrue(
+                        session.checkTimeseriesExists(
+                                legalDevice + IoTDBConstant.PATH_SEPARATOR + measurement));
+            }
+        }
+    }
 
+    @Test
+    public void testDeleteNonExistTimeSeries()
+            throws StatementExecutionException, IoTDBConnectionException {
+        session.insertRecord(
+                "root.sg1.d1",
+                0,
+                Arrays.asList("t1", "t2", "t3"),
+                Arrays.asList("123", "333", "444"));
+        session.deleteTimeseries(
+                Arrays.asList("root.sg1.d1.t6", "root.sg1.d1.t2", "root.sg1.d1.t3"));
+
+        assertTrue(session.checkTimeseriesExists("root.sg1.d1.t1"));
+        assertFalse(session.checkTimeseriesExists("root.sg1.d1.t2"));
+        assertFalse(session.checkTimeseriesExists("root.sg1.d1.t3"));
+    }
 }

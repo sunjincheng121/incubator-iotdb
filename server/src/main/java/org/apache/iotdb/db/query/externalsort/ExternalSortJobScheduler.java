@@ -16,28 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- package org.apache.iotdb.db.query.externalsort;
+package org.apache.iotdb.db.query.externalsort;
 
+public class ExternalSortJobScheduler {
 
- public class ExternalSortJobScheduler {
+    private long queryId = 0;
 
-  private long queryId = 0;
+    private ExternalSortJobScheduler() {}
 
-  private ExternalSortJobScheduler() {
+    synchronized long genJobId() {
+        queryId++;
+        return queryId;
+    }
 
-  }
+    private static class ExternalSortJobSchedulerHelper {
 
-  synchronized long genJobId() {
-   queryId++;
-   return queryId;
-  }
+        private static final ExternalSortJobScheduler INSTANCE = new ExternalSortJobScheduler();
+    }
 
-  private static class ExternalSortJobSchedulerHelper {
-
-   private static final ExternalSortJobScheduler INSTANCE = new ExternalSortJobScheduler();
-  }
-
-  public static ExternalSortJobScheduler getInstance() {
-   return ExternalSortJobSchedulerHelper.INSTANCE;
-  }
- }
+    public static ExternalSortJobScheduler getInstance() {
+        return ExternalSortJobSchedulerHelper.INSTANCE;
+    }
+}

@@ -39,61 +39,61 @@ import org.junit.Test;
 
 public class HeartbeatHandlerTest {
 
-  private MetaGroupMember metaGroupMember;
-  private boolean catchUpFlag;
-  private long looseInconsistentNum = 5;
+    private MetaGroupMember metaGroupMember;
+    private boolean catchUpFlag;
+    private long looseInconsistentNum = 5;
 
-  @Before
-  public void setUp() {
-    metaGroupMember = new TestMetaGroupMember() {
-      @Override
-      public void catchUp(Node follower, long lastLogIdx) {
-        synchronized (metaGroupMember) {
-          catchUpFlag = true;
-          metaGroupMember.notifyAll();
-        }
-      }
-
-    };
-    metaGroupMember.initPeerMap();
-    metaGroupMember.setLogManager(new TestLogManager(1));
-  }
-
-  @After
-  public void tearDown() throws IOException {
-    metaGroupMember.closeLogManager();
-    metaGroupMember.stop();
-    EnvironmentUtils.cleanAllDir();
-  }
-
-  @Test
-  public void testComplete() {
-    HeartbeatHandler handler = new HeartbeatHandler(metaGroupMember, TestUtils.getNode(1));
-    HeartBeatResponse response = new HeartBeatResponse();
-    response.setTerm(Response.RESPONSE_AGREE);
-    response.setLastLogTerm(-2);
-    response.setFollower(new Node("192.168.0.6", 9003, 6, 40010, 55560));
-    catchUpFlag = false;
-    for (int i = 0; i < looseInconsistentNum; i++) {
-      handler.onComplete(response);
+    @Before
+    public void setUp() {
+        metaGroupMember =
+                new TestMetaGroupMember() {
+                    @Override
+                    public void catchUp(Node follower, long lastLogIdx) {
+                        synchronized (metaGroupMember) {
+                            catchUpFlag = true;
+                            metaGroupMember.notifyAll();
+                        }
+                    }
+                };
+        metaGroupMember.initPeerMap();
+        metaGroupMember.setLogManager(new TestLogManager(1));
     }
-    assertTrue(catchUpFlag);
-  }
 
-  @Test
-  public void testLeaderShipStale() {
-    HeartbeatHandler handler = new HeartbeatHandler(metaGroupMember, TestUtils.getNode(1));
-    HeartBeatResponse response = new HeartBeatResponse();
-    response.setTerm(10);
-    handler.onComplete(response);
-    assertEquals(10, metaGroupMember.getTerm().get());
-  }
+    @After
+    public void tearDown() throws IOException {
+        metaGroupMember.closeLogManager();
+        metaGroupMember.stop();
+        EnvironmentUtils.cleanAllDir();
+    }
 
-  @Test
-  public void testError() {
-    HeartbeatHandler handler = new HeartbeatHandler(metaGroupMember, TestUtils.getNode(1));
-    catchUpFlag = false;
-    handler.onError(new TestException());
-    assertFalse(catchUpFlag);
-  }
+    @Test
+    public void testComplete() {
+        HeartbeatHandler handler = new HeartbeatHandler(metaGroupMember, TestUtils.getNode(1));
+        HeartBeatResponse response = new HeartBeatResponse();
+        response.setTerm(Response.RESPONSE_AGREE);
+        response.setLastLogTerm(-2);
+        response.setFollower(new Node("192.168.0.6", 9003, 6, 40010, 55560));
+        catchUpFlag = false;
+        for (int i = 0; i < looseInconsistentNum; i++) {
+            handler.onComplete(response);
+        }
+        assertTrue(catchUpFlag);
+    }
+
+    @Test
+    public void testLeaderShipStale() {
+        HeartbeatHandler handler = new HeartbeatHandler(metaGroupMember, TestUtils.getNode(1));
+        HeartBeatResponse response = new HeartBeatResponse();
+        response.setTerm(10);
+        handler.onComplete(response);
+        assertEquals(10, metaGroupMember.getTerm().get());
+    }
+
+    @Test
+    public void testError() {
+        HeartbeatHandler handler = new HeartbeatHandler(metaGroupMember, TestUtils.getNode(1));
+        catchUpFlag = false;
+        handler.onError(new TestException());
+        assertFalse(catchUpFlag);
+    }
 }

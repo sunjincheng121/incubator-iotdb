@@ -20,29 +20,27 @@ package org.apache.iotdb.db.qp.logical.sys;
 
 import org.apache.iotdb.db.metadata.PartialPath;
 
-/**
- * CountOperator is used to count time-series and count nodes.
- */
-public class CountOperator extends ShowOperator{
-  private PartialPath path;
-  private int level;
+/** CountOperator is used to count time-series and count nodes. */
+public class CountOperator extends ShowOperator {
+    private PartialPath path;
+    private int level;
 
-  public CountOperator(int tokenIntType, PartialPath path){
-    super(tokenIntType);
-    this.path = path;
-  }
+    public CountOperator(int tokenIntType, PartialPath path) {
+        super(tokenIntType);
+        this.path = path;
+    }
 
-  public CountOperator(int tokenIntType, PartialPath path, int level){
-    super(tokenIntType);
-    this.path = path;
-    this.level = level;
-  }
+    public CountOperator(int tokenIntType, PartialPath path, int level) {
+        super(tokenIntType);
+        this.path = path;
+        this.level = level;
+    }
 
-  public PartialPath getPath() {
-    return this.path;
-  }
+    public PartialPath getPath() {
+        return this.path;
+    }
 
-  public int getLevel() {
-    return this.level;
-  }
+    public int getLevel() {
+        return this.level;
+    }
 }

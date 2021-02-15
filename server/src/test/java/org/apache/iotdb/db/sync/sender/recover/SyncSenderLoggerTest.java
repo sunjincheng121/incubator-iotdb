@@ -41,71 +41,78 @@ import org.junit.Test;
 
 public class SyncSenderLoggerTest {
 
-  private SyncSenderLogger senderLogger;
-  private SyncSenderConfig config = SyncSenderDescriptor.getInstance().getConfig();
-  private String dataDir;
+    private SyncSenderLogger senderLogger;
+    private SyncSenderConfig config = SyncSenderDescriptor.getInstance().getConfig();
+    private String dataDir;
 
-  @Before
-  public void setUp()
-      throws IOException, InterruptedException, StartupException, DiskSpaceInsufficientException {
-    EnvironmentUtils.envSetUp();
-    dataDir = new File(DirectoryManager.getInstance().getNextFolderForSequenceFile())
-        .getParentFile().getAbsolutePath();
-    config.update(dataDir);
-  }
-
-  @After
-  public void tearDown() throws InterruptedException, IOException, StorageEngineException {
-    EnvironmentUtils.cleanEnv();
-  }
-
-  @Test
-  public void testSyncSenderLogger() throws IOException {
-    senderLogger = new SyncSenderLogger(
-        new File(config.getSenderFolderPath(), SyncConstant.SYNC_LOG_NAME));
-    Set<String> deletedFileNames = new HashSet<>();
-    Set<String> deletedFileNamesTest = new HashSet<>();
-    senderLogger.startSyncDeletedFilesName();
-    for (int i = 0; i < 100; i++) {
-      senderLogger
-          .finishSyncDeletedFileName(new File(config.getSenderFolderPath(), "deleted" + i));
-      deletedFileNames
-          .add(new File(config.getSenderFolderPath(), "deleted" + i).getAbsolutePath());
+    @Before
+    public void setUp()
+            throws IOException, InterruptedException, StartupException,
+                    DiskSpaceInsufficientException {
+        EnvironmentUtils.envSetUp();
+        dataDir =
+                new File(DirectoryManager.getInstance().getNextFolderForSequenceFile())
+                        .getParentFile()
+                        .getAbsolutePath();
+        config.update(dataDir);
     }
-    Set<String> toBeSyncedFiles = new HashSet<>();
-    Set<String> toBeSyncedFilesTest = new HashSet<>();
-    senderLogger.startSyncTsFiles();
-    for (int i = 0; i < 100; i++) {
-      senderLogger
-          .finishSyncTsfile(new File(config.getSenderFolderPath(), "new" + i));
-      toBeSyncedFiles
-          .add(new File(config.getSenderFolderPath(), "new" + i).getAbsolutePath());
+
+    @After
+    public void tearDown() throws InterruptedException, IOException, StorageEngineException {
+        EnvironmentUtils.cleanEnv();
     }
-    senderLogger.close();
-    int count = 0;
-    int mode = 0;
-    try (BufferedReader br = new BufferedReader(
-        new FileReader(new File(config.getSenderFolderPath(), SyncConstant.SYNC_LOG_NAME)))) {
-      String line;
-      while ((line = br.readLine()) != null) {
-        count++;
-        if (line.equals(SyncSenderLogger.SYNC_DELETED_FILE_NAME_START)) {
-          mode = -1;
-        } else if (line.equals(SyncSenderLogger.SYNC_TSFILE_START)) {
-          mode = 1;
-        } else {
-          if (mode == -1) {
-            deletedFileNamesTest.add(line);
-          } else if (mode == 1) {
-            toBeSyncedFilesTest.add(line);
-          }
+
+    @Test
+    public void testSyncSenderLogger() throws IOException {
+        senderLogger =
+                new SyncSenderLogger(
+                        new File(config.getSenderFolderPath(), SyncConstant.SYNC_LOG_NAME));
+        Set<String> deletedFileNames = new HashSet<>();
+        Set<String> deletedFileNamesTest = new HashSet<>();
+        senderLogger.startSyncDeletedFilesName();
+        for (int i = 0; i < 100; i++) {
+            senderLogger.finishSyncDeletedFileName(
+                    new File(config.getSenderFolderPath(), "deleted" + i));
+            deletedFileNames.add(
+                    new File(config.getSenderFolderPath(), "deleted" + i).getAbsolutePath());
         }
-      }
+        Set<String> toBeSyncedFiles = new HashSet<>();
+        Set<String> toBeSyncedFilesTest = new HashSet<>();
+        senderLogger.startSyncTsFiles();
+        for (int i = 0; i < 100; i++) {
+            senderLogger.finishSyncTsfile(new File(config.getSenderFolderPath(), "new" + i));
+            toBeSyncedFiles.add(
+                    new File(config.getSenderFolderPath(), "new" + i).getAbsolutePath());
+        }
+        senderLogger.close();
+        int count = 0;
+        int mode = 0;
+        try (BufferedReader br =
+                new BufferedReader(
+                        new FileReader(
+                                new File(
+                                        config.getSenderFolderPath(),
+                                        SyncConstant.SYNC_LOG_NAME)))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                count++;
+                if (line.equals(SyncSenderLogger.SYNC_DELETED_FILE_NAME_START)) {
+                    mode = -1;
+                } else if (line.equals(SyncSenderLogger.SYNC_TSFILE_START)) {
+                    mode = 1;
+                } else {
+                    if (mode == -1) {
+                        deletedFileNamesTest.add(line);
+                    } else if (mode == 1) {
+                        toBeSyncedFilesTest.add(line);
+                    }
+                }
+            }
+        }
+        assertEquals(202, count);
+        assertEquals(deletedFileNames.size(), deletedFileNamesTest.size());
+        assertEquals(toBeSyncedFiles.size(), toBeSyncedFilesTest.size());
+        assertTrue(deletedFileNames.containsAll(deletedFileNamesTest));
+        assertTrue(toBeSyncedFiles.containsAll(toBeSyncedFilesTest));
     }
-    assertEquals(202, count);
-    assertEquals(deletedFileNames.size(), deletedFileNamesTest.size());
-    assertEquals(toBeSyncedFiles.size(), toBeSyncedFilesTest.size());
-    assertTrue(deletedFileNames.containsAll(deletedFileNamesTest));
-    assertTrue(toBeSyncedFiles.containsAll(toBeSyncedFilesTest));
-  }
 }

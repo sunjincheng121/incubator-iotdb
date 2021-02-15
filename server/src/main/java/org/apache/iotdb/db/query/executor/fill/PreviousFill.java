@@ -34,81 +34,93 @@ import org.apache.iotdb.tsfile.read.filter.factory.FilterFactory;
 
 public class PreviousFill extends IFill {
 
-  private PartialPath seriesPath;
-  private QueryContext context;
-  private long beforeRange;
-  private Set<String> allSensors;
-  private Filter timeFilter;
+    private PartialPath seriesPath;
+    private QueryContext context;
+    private long beforeRange;
+    private Set<String> allSensors;
+    private Filter timeFilter;
 
-  private boolean untilLast;
+    private boolean untilLast;
 
-  public PreviousFill(TSDataType dataType, long queryTime, long beforeRange) {
-    this(dataType, queryTime, beforeRange, false);
-  }
+    public PreviousFill(TSDataType dataType, long queryTime, long beforeRange) {
+        this(dataType, queryTime, beforeRange, false);
+    }
 
-  public PreviousFill(long beforeRange) {
-    this(beforeRange, false);
-  }
+    public PreviousFill(long beforeRange) {
+        this(beforeRange, false);
+    }
 
+    public PreviousFill(long beforeRange, boolean untilLast) {
+        this.beforeRange = beforeRange;
+        this.untilLast = untilLast;
+    }
 
-  public PreviousFill(long beforeRange, boolean untilLast) {
-    this.beforeRange = beforeRange;
-    this.untilLast = untilLast;
-  }
+    public PreviousFill(TSDataType dataType, long queryTime, long beforeRange, boolean untilLast) {
+        super(dataType, queryTime);
+        this.beforeRange = beforeRange;
+        this.untilLast = untilLast;
+    }
 
+    @Override
+    public IFill copy() {
+        return new PreviousFill(dataType, queryTime, beforeRange, untilLast);
+    }
 
-  public PreviousFill(TSDataType dataType, long queryTime, long beforeRange, boolean untilLast) {
-    super(dataType, queryTime);
-    this.beforeRange = beforeRange;
-    this.untilLast = untilLast;
-  }
+    @Override
+    void constructFilter() {
+        Filter lowerBound =
+                beforeRange == -1
+                        ? TimeFilter.gtEq(Long.MIN_VALUE)
+                        : TimeFilter.gtEq(queryTime - beforeRange);
+        // time in [queryTime - beforeRange, queryTime]
+        timeFilter = FilterFactory.and(lowerBound, TimeFilter.ltEq(queryTime));
+    }
 
-  @Override
-  public IFill copy() {
-    return new PreviousFill(dataType,  queryTime, beforeRange, untilLast);
-  }
+    public long getBeforeRange() {
+        return beforeRange;
+    }
 
-  @Override
-  void constructFilter() {
-    Filter lowerBound = beforeRange == -1 ? TimeFilter.gtEq(Long.MIN_VALUE)
-        : TimeFilter.gtEq(queryTime - beforeRange);
-    // time in [queryTime - beforeRange, queryTime]
-    timeFilter = FilterFactory.and(lowerBound, TimeFilter.ltEq(queryTime));
-  }
+    @Override
+    public void configureFill(
+            PartialPath path,
+            TSDataType dataType,
+            long queryTime,
+            Set<String> sensors,
+            QueryContext context) {
+        this.seriesPath = path;
+        this.dataType = dataType;
+        this.context = context;
+        this.queryTime = queryTime;
+        this.allSensors = sensors;
+        constructFilter();
+    }
 
-  public long getBeforeRange() {
-    return beforeRange;
-  }
+    @Override
+    public TimeValuePair getFillResult()
+            throws IOException, QueryProcessException, StorageEngineException {
+        QueryDataSource dataSource =
+                QueryResourceManager.getInstance()
+                        .getQueryDataSource(seriesPath, context, timeFilter);
+        // update filter by TTL
+        timeFilter = dataSource.updateFilterUsingTTL(timeFilter);
+        LastPointReader lastReader =
+                new LastPointReader(
+                        seriesPath,
+                        dataType,
+                        allSensors,
+                        context,
+                        dataSource,
+                        queryTime,
+                        timeFilter);
 
-  @Override
-  public void configureFill(
-      PartialPath path, TSDataType dataType, long queryTime, Set<String> sensors, QueryContext context) {
-    this.seriesPath = path;
-    this.dataType = dataType;
-    this.context = context;
-    this.queryTime = queryTime;
-    this.allSensors = sensors;
-    constructFilter();
-  }
+        return lastReader.readLastPoint();
+    }
 
-  @Override
-  public TimeValuePair getFillResult()
-      throws IOException, QueryProcessException, StorageEngineException {
-    QueryDataSource dataSource =
-        QueryResourceManager.getInstance().getQueryDataSource(seriesPath, context, timeFilter);
-    // update filter by TTL
-    timeFilter = dataSource.updateFilterUsingTTL(timeFilter);
-    LastPointReader lastReader = new LastPointReader(
-        seriesPath, dataType, allSensors, context, dataSource, queryTime, timeFilter);
+    public boolean isUntilLast() {
+        return untilLast;
+    }
 
-    return lastReader.readLastPoint();
-  }
-
-  public boolean isUntilLast() {
-    return untilLast;
-  }
-
-  public void setUntilLast(boolean untilLast) {
-    this.untilLast = untilLast;
-  }
+    public void setUntilLast(boolean untilLast) {
+        this.untilLast = untilLast;
+    }
 }

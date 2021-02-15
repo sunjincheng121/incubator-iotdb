@@ -28,67 +28,63 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.reader.IBatchReader;
 import org.apache.iotdb.tsfile.read.reader.chunk.ChunkReader;
 
-/**
- * Series reader is used to query one series of one tsfile.
- */
+/** Series reader is used to query one series of one tsfile. */
 public abstract class AbstractFileSeriesReader implements IBatchReader {
 
-  protected IChunkLoader chunkLoader;
-  protected List<ChunkMetadata> chunkMetadataList;
-  protected ChunkReader chunkReader;
-  private int chunkToRead;
+    protected IChunkLoader chunkLoader;
+    protected List<ChunkMetadata> chunkMetadataList;
+    protected ChunkReader chunkReader;
+    private int chunkToRead;
 
-  protected Filter filter;
+    protected Filter filter;
 
-  /**
-   * constructor of FileSeriesReader.
-   */
-  public AbstractFileSeriesReader(IChunkLoader chunkLoader, List<ChunkMetadata> chunkMetadataList,
-      Filter filter) {
-    this.chunkLoader = chunkLoader;
-    this.chunkMetadataList = chunkMetadataList;
-    this.filter = filter;
-    this.chunkToRead = 0;
-  }
-
-  @Override
-  public boolean hasNextBatch() throws IOException {
-
-    // current chunk has additional batch
-    if (chunkReader != null && chunkReader.hasNextSatisfiedPage()) {
-      return true;
+    /** constructor of FileSeriesReader. */
+    public AbstractFileSeriesReader(
+            IChunkLoader chunkLoader, List<ChunkMetadata> chunkMetadataList, Filter filter) {
+        this.chunkLoader = chunkLoader;
+        this.chunkMetadataList = chunkMetadataList;
+        this.filter = filter;
+        this.chunkToRead = 0;
     }
 
-    // current chunk does not have additional batch, init new chunk reader
-    while (chunkToRead < chunkMetadataList.size()) {
+    @Override
+    public boolean hasNextBatch() throws IOException {
 
-      ChunkMetadata chunkMetaData = nextChunkMeta();
-      if (chunkSatisfied(chunkMetaData)) {
-        // chunk metadata satisfy the condition
-        initChunkReader(chunkMetaData);
-
-        if (chunkReader.hasNextSatisfiedPage()) {
-          return true;
+        // current chunk has additional batch
+        if (chunkReader != null && chunkReader.hasNextSatisfiedPage()) {
+            return true;
         }
-      }
+
+        // current chunk does not have additional batch, init new chunk reader
+        while (chunkToRead < chunkMetadataList.size()) {
+
+            ChunkMetadata chunkMetaData = nextChunkMeta();
+            if (chunkSatisfied(chunkMetaData)) {
+                // chunk metadata satisfy the condition
+                initChunkReader(chunkMetaData);
+
+                if (chunkReader.hasNextSatisfiedPage()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
-    return false;
-  }
 
-  @Override
-  public BatchData nextBatch() throws IOException {
-    return chunkReader.nextPageData();
-  }
+    @Override
+    public BatchData nextBatch() throws IOException {
+        return chunkReader.nextPageData();
+    }
 
-  protected abstract void initChunkReader(ChunkMetadata chunkMetaData) throws IOException;
+    protected abstract void initChunkReader(ChunkMetadata chunkMetaData) throws IOException;
 
-  protected abstract boolean chunkSatisfied(ChunkMetadata chunkMetaData);
+    protected abstract boolean chunkSatisfied(ChunkMetadata chunkMetaData);
 
-  public void close() throws IOException {
-    chunkLoader.close();
-  }
+    public void close() throws IOException {
+        chunkLoader.close();
+    }
 
-  private ChunkMetadata nextChunkMeta() {
-    return chunkMetadataList.get(chunkToRead++);
-  }
+    private ChunkMetadata nextChunkMeta() {
+        return chunkMetadataList.get(chunkToRead++);
+    }
 }

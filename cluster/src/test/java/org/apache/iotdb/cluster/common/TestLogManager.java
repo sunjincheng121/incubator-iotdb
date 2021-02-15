@@ -26,19 +26,15 @@ import org.apache.iotdb.cluster.log.manage.serializable.SyncLogDequeSerializer;
 
 public class TestLogManager extends RaftLogManager {
 
-  public TestLogManager(int nodeIdentifier) {
-    super(new SyncLogDequeSerializer(nodeIdentifier), new TestLogApplier(), "Test");
-  }
+    public TestLogManager(int nodeIdentifier) {
+        super(new SyncLogDequeSerializer(nodeIdentifier), new TestLogApplier(), "Test");
+    }
 
-  @Override
-  public Snapshot getSnapshot(long minIndex) {
-    return null;
-  }
+    @Override
+    public Snapshot getSnapshot(long minIndex) {
+        return null;
+    }
 
-  @Override
-  public void takeSnapshot() throws IOException {
-
-  }
-
-
+    @Override
+    public void takeSnapshot() throws IOException {}
 }

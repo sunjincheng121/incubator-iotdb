@@ -24,5 +24,5 @@ import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
 
 public interface QueryExecutor {
 
-  QueryDataSet execute(QueryExpression queryExpression) throws IOException;
+    QueryDataSet execute(QueryExpression queryExpression) throws IOException;
 }

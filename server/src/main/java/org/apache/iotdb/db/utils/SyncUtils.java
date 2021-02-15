@@ -27,78 +27,73 @@ import org.apache.iotdb.db.sync.conf.SyncSenderDescriptor;
 
 public class SyncUtils {
 
-  private static final String IP_SEPARATOR = "\\.";
+    private static final String IP_SEPARATOR = "\\.";
 
-  private SyncUtils() {
-  }
+    private SyncUtils() {}
 
-  /**
-   * This method is to get a snapshot file seriesPath according to a tsfile seriesPath. Due to
-   * multiple directories, it's necessary to make a snapshot in the same disk. It's used by sync
-   * sender.
-   */
-  public static File getSnapshotFile(File file) {
-    String relativeFilePath = file.getParentFile().getName() + File.separator + file.getName();
-    String snapshotDir = SyncSenderDescriptor.getInstance().getConfig().getSnapshotPath();
-    if (!new File(snapshotDir).exists()) {
-      new File(snapshotDir).mkdirs();
-    }
-    return new File(snapshotDir, relativeFilePath);
-  }
-
-  /**
-   * Verify sending list is empty or not It's used by sync sender.
-   */
-  public static boolean isEmpty(Map<String, Map<Long, Set<File>>> sendingFileList) {
-    for (Entry<String, Map<Long, Set<File>>> entry: sendingFileList.entrySet()) {
-      for(Entry<Long, Set<File>> innerEntry: entry.getValue().entrySet()) {
-        if (!innerEntry.getValue().isEmpty()) {
-          return false;
+    /**
+     * This method is to get a snapshot file seriesPath according to a tsfile seriesPath. Due to
+     * multiple directories, it's necessary to make a snapshot in the same disk. It's used by sync
+     * sender.
+     */
+    public static File getSnapshotFile(File file) {
+        String relativeFilePath = file.getParentFile().getName() + File.separator + file.getName();
+        String snapshotDir = SyncSenderDescriptor.getInstance().getConfig().getSnapshotPath();
+        if (!new File(snapshotDir).exists()) {
+            new File(snapshotDir).mkdirs();
         }
-      }
+        return new File(snapshotDir, relativeFilePath);
     }
-    return true;
-  }
 
-  /**
-   * Verify IP address with IP white list which contains more than one IP segment. It's used by sync
-   * sender.
-   */
-  public static boolean verifyIPSegment(String ipWhiteList, String ipAddress) {
-    String[] ipSegments = ipWhiteList.split(",");
-    for (String IPsegment : ipSegments) {
-      int subnetMask = Integer.parseInt(IPsegment.substring(IPsegment.indexOf('/') + 1));
-      IPsegment = IPsegment.substring(0, IPsegment.indexOf('/'));
-      if (verifyIP(IPsegment, ipAddress, subnetMask)) {
+    /** Verify sending list is empty or not It's used by sync sender. */
+    public static boolean isEmpty(Map<String, Map<Long, Set<File>>> sendingFileList) {
+        for (Entry<String, Map<Long, Set<File>>> entry : sendingFileList.entrySet()) {
+            for (Entry<Long, Set<File>> innerEntry : entry.getValue().entrySet()) {
+                if (!innerEntry.getValue().isEmpty()) {
+                    return false;
+                }
+            }
+        }
         return true;
-      }
     }
-    return false;
-  }
 
-  /**
-   * Verify IP address with IP segment.
-   */
-  private static boolean verifyIP(String ipSegment, String ipAddress, int subnetMark) {
-    String ipSegmentBinary;
-    String ipAddressBinary;
-    String[] ipSplits = ipSegment.split(IP_SEPARATOR);
-    DecimalFormat df = new DecimalFormat("00000000");
-    StringBuilder ipSegmentBuilder = new StringBuilder();
-    for (String IPsplit : ipSplits) {
-      ipSegmentBuilder.append(df.format(
-          Integer.parseInt(Integer.toBinaryString(Integer.parseInt(IPsplit)))));
+    /**
+     * Verify IP address with IP white list which contains more than one IP segment. It's used by
+     * sync sender.
+     */
+    public static boolean verifyIPSegment(String ipWhiteList, String ipAddress) {
+        String[] ipSegments = ipWhiteList.split(",");
+        for (String IPsegment : ipSegments) {
+            int subnetMask = Integer.parseInt(IPsegment.substring(IPsegment.indexOf('/') + 1));
+            IPsegment = IPsegment.substring(0, IPsegment.indexOf('/'));
+            if (verifyIP(IPsegment, ipAddress, subnetMask)) {
+                return true;
+            }
+        }
+        return false;
     }
-    ipSegmentBinary = ipSegmentBuilder.toString();
-    ipSegmentBinary = ipSegmentBinary.substring(0, subnetMark);
-    ipSplits = ipAddress.split(IP_SEPARATOR);
-    StringBuilder ipAddressBuilder = new StringBuilder();
-    for (String IPsplit : ipSplits) {
-      ipAddressBuilder.append(df.format(
-          Integer.parseInt(Integer.toBinaryString(Integer.parseInt(IPsplit)))));
+
+    /** Verify IP address with IP segment. */
+    private static boolean verifyIP(String ipSegment, String ipAddress, int subnetMark) {
+        String ipSegmentBinary;
+        String ipAddressBinary;
+        String[] ipSplits = ipSegment.split(IP_SEPARATOR);
+        DecimalFormat df = new DecimalFormat("00000000");
+        StringBuilder ipSegmentBuilder = new StringBuilder();
+        for (String IPsplit : ipSplits) {
+            ipSegmentBuilder.append(
+                    df.format(Integer.parseInt(Integer.toBinaryString(Integer.parseInt(IPsplit)))));
+        }
+        ipSegmentBinary = ipSegmentBuilder.toString();
+        ipSegmentBinary = ipSegmentBinary.substring(0, subnetMark);
+        ipSplits = ipAddress.split(IP_SEPARATOR);
+        StringBuilder ipAddressBuilder = new StringBuilder();
+        for (String IPsplit : ipSplits) {
+            ipAddressBuilder.append(
+                    df.format(Integer.parseInt(Integer.toBinaryString(Integer.parseInt(IPsplit)))));
+        }
+        ipAddressBinary = ipAddressBuilder.toString();
+        ipAddressBinary = ipAddressBinary.substring(0, subnetMark);
+        return ipAddressBinary.equals(ipSegmentBinary);
     }
-    ipAddressBinary = ipAddressBuilder.toString();
-    ipAddressBinary = ipAddressBinary.substring(0, subnetMark);
-    return ipAddressBinary.equals(ipSegmentBinary);
-  }
 }

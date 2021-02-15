@@ -27,53 +27,53 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.filter.operator.AndFilter;
 
 public class QueryDataSource {
-  private PartialPath seriesPath;
-  private List<TsFileResource> seqResources;
-  private List<TsFileResource> unseqResources;
+    private PartialPath seriesPath;
+    private List<TsFileResource> seqResources;
+    private List<TsFileResource> unseqResources;
 
-  /**
-   * data older than currentTime - dataTTL should be ignored.
-   */
-  private long dataTTL = Long.MAX_VALUE;
+    /** data older than currentTime - dataTTL should be ignored. */
+    private long dataTTL = Long.MAX_VALUE;
 
-  public QueryDataSource(PartialPath seriesPath, List<TsFileResource> seqResources, List<TsFileResource> unseqResources) {
-    this.seriesPath = seriesPath;
-    this.seqResources = seqResources;
-    this.unseqResources = unseqResources;
-  }
-
-  public PartialPath getSeriesPath() {
-    return seriesPath;
-  }
-
-  public List<TsFileResource> getSeqResources() {
-    return seqResources;
-  }
-
-  public List<TsFileResource> getUnseqResources() {
-    return unseqResources;
-  }
-
-  public long getDataTTL() {
-    return dataTTL;
-  }
-
-  public void setDataTTL(long dataTTL) {
-    this.dataTTL = dataTTL;
-  }
-
-  /**
-   * @return an updated filter concerning TTL
-   */
-  public Filter updateFilterUsingTTL(Filter filter) {
-    if (dataTTL != Long.MAX_VALUE) {
-      if (filter != null) {
-        filter = new AndFilter(filter, TimeFilter.gtEq(System.currentTimeMillis() -
-            dataTTL));
-      } else {
-        filter = TimeFilter.gtEq(System.currentTimeMillis() - dataTTL);
-      }
+    public QueryDataSource(
+            PartialPath seriesPath,
+            List<TsFileResource> seqResources,
+            List<TsFileResource> unseqResources) {
+        this.seriesPath = seriesPath;
+        this.seqResources = seqResources;
+        this.unseqResources = unseqResources;
     }
-    return filter;
-  }
+
+    public PartialPath getSeriesPath() {
+        return seriesPath;
+    }
+
+    public List<TsFileResource> getSeqResources() {
+        return seqResources;
+    }
+
+    public List<TsFileResource> getUnseqResources() {
+        return unseqResources;
+    }
+
+    public long getDataTTL() {
+        return dataTTL;
+    }
+
+    public void setDataTTL(long dataTTL) {
+        this.dataTTL = dataTTL;
+    }
+
+    /** @return an updated filter concerning TTL */
+    public Filter updateFilterUsingTTL(Filter filter) {
+        if (dataTTL != Long.MAX_VALUE) {
+            if (filter != null) {
+                filter =
+                        new AndFilter(
+                                filter, TimeFilter.gtEq(System.currentTimeMillis() - dataTTL));
+            } else {
+                filter = TimeFilter.gtEq(System.currentTimeMillis() - dataTTL);
+            }
+        }
+        return filter;
+    }
 }

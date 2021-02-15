@@ -20,20 +20,19 @@ package org.apache.iotdb.db.monitor;
 
 public interface StatMonitorMBean {
 
-  long getGlobalTotalPointsNum();
+    long getGlobalTotalPointsNum();
 
-  long getGlobalReqSuccessNum();
+    long getGlobalReqSuccessNum();
 
-  long getGlobalReqFailNum();
+    long getGlobalReqFailNum();
 
-  long getStorageGroupTotalPointsNum(String storageGroupName);
+    long getStorageGroupTotalPointsNum(String storageGroupName);
 
-  String getSystemDirectory();
+    String getSystemDirectory();
 
-  long getDataSizeInByte();
+    long getDataSizeInByte();
 
-  boolean getWriteAheadLogStatus();
+    boolean getWriteAheadLogStatus();
 
-  boolean getEnableStatMonitor();
+    boolean getEnableStatMonitor();
 }
-

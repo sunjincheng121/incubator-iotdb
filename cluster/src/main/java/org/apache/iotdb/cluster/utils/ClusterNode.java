@@ -28,44 +28,50 @@ import org.apache.iotdb.cluster.rpc.thrift.Node;
  */
 public class ClusterNode extends Node {
 
-  public ClusterNode() {
-  }
+    public ClusterNode() {}
 
-  public ClusterNode(String ip, int metaPort, int nodeIdentifier, int dataPort, int clientPort) {
-    super(ip, metaPort, nodeIdentifier, dataPort, clientPort);
-  }
-
-  public ClusterNode(Node other) {
-    super(other);
-  }
-
-  @Override
-  public boolean equals(Object that) {
-    if (!(that instanceof ClusterNode)) {
-      return false;
+    public ClusterNode(String ip, int metaPort, int nodeIdentifier, int dataPort, int clientPort) {
+        super(ip, metaPort, nodeIdentifier, dataPort, clientPort);
     }
-    return equals(((ClusterNode) that));
-  }
 
-  public boolean equals(ClusterNode that) {
-    return Objects.equals(this.ip, that.ip) && this.dataPort == that.dataPort
-        && this.metaPort == that.metaPort && this.clientPort == that.clientPort;
-  }
+    public ClusterNode(Node other) {
+        super(other);
+    }
 
+    @Override
+    public boolean equals(Object that) {
+        if (!(that instanceof ClusterNode)) {
+            return false;
+        }
+        return equals(((ClusterNode) that));
+    }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(ip, metaPort, dataPort, clientPort);
-  }
+    public boolean equals(ClusterNode that) {
+        return Objects.equals(this.ip, that.ip)
+                && this.dataPort == that.dataPort
+                && this.metaPort == that.metaPort
+                && this.clientPort == that.clientPort;
+    }
 
-  @Override
-  public String toString() {
-    return "ClusterNode{"
-        + " ip='" + ip + '\''
-        + ", metaPort=" + metaPort
-        + ", nodeIdentifier=" + nodeIdentifier
-        + ", dataPort=" + dataPort
-        + ", clientPort=" + clientPort
-        + "}";
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hash(ip, metaPort, dataPort, clientPort);
+    }
+
+    @Override
+    public String toString() {
+        return "ClusterNode{"
+                + " ip='"
+                + ip
+                + '\''
+                + ", metaPort="
+                + metaPort
+                + ", nodeIdentifier="
+                + nodeIdentifier
+                + ", dataPort="
+                + dataPort
+                + ", clientPort="
+                + clientPort
+                + "}";
+    }
 }

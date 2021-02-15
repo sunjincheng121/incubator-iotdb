@@ -27,45 +27,51 @@ import org.junit.Test;
 
 public class MetaUtilsTest {
 
-  @Test
-  public void testSplitPathToNodes() throws IllegalPathException {
-    assertArrayEquals(Arrays.asList("root", "sg", "d1", "s1").toArray(),
-        MetaUtils.splitPathToDetachedPath("root.sg.d1.s1"));
+    @Test
+    public void testSplitPathToNodes() throws IllegalPathException {
+        assertArrayEquals(
+                Arrays.asList("root", "sg", "d1", "s1").toArray(),
+                MetaUtils.splitPathToDetachedPath("root.sg.d1.s1"));
 
-    assertArrayEquals(Arrays.asList("root", "sg", "d1", "\"s.1\"").toArray(),
-        MetaUtils.splitPathToDetachedPath("root.sg.d1.\"s.1\""));
+        assertArrayEquals(
+                Arrays.asList("root", "sg", "d1", "\"s.1\"").toArray(),
+                MetaUtils.splitPathToDetachedPath("root.sg.d1.\"s.1\""));
 
-    assertArrayEquals(Arrays.asList("root", "sg", "d1", "\"s\\\".1\"").toArray(),
-        MetaUtils.splitPathToDetachedPath("root.sg.d1.\"s\\\".1\""));
+        assertArrayEquals(
+                Arrays.asList("root", "sg", "d1", "\"s\\\".1\"").toArray(),
+                MetaUtils.splitPathToDetachedPath("root.sg.d1.\"s\\\".1\""));
 
-    assertArrayEquals(Arrays.asList("root", "\"s g\"", "d1", "\"s.1\"").toArray(),
-        MetaUtils.splitPathToDetachedPath("root.\"s g\".d1.\"s.1\""));
+        assertArrayEquals(
+                Arrays.asList("root", "\"s g\"", "d1", "\"s.1\"").toArray(),
+                MetaUtils.splitPathToDetachedPath("root.\"s g\".d1.\"s.1\""));
 
-    assertArrayEquals(Arrays.asList("root", "\"s g\"", "\"d_.1\"", "\"s.1.1\"").toArray(),
-        MetaUtils.splitPathToDetachedPath("root.\"s g\".\"d_.1\".\"s.1.1\""));
+        assertArrayEquals(
+                Arrays.asList("root", "\"s g\"", "\"d_.1\"", "\"s.1.1\"").toArray(),
+                MetaUtils.splitPathToDetachedPath("root.\"s g\".\"d_.1\".\"s.1.1\""));
 
-    assertArrayEquals(Arrays.asList("root", "1").toArray(), MetaUtils.splitPathToDetachedPath("root.1"));
+        assertArrayEquals(
+                Arrays.asList("root", "1").toArray(), MetaUtils.splitPathToDetachedPath("root.1"));
 
-    assertArrayEquals(Arrays.asList("root", "sg", "d1", "s", "1").toArray(),
-        MetaUtils.splitPathToDetachedPath("root.sg.d1.s.1"));
+        assertArrayEquals(
+                Arrays.asList("root", "sg", "d1", "s", "1").toArray(),
+                MetaUtils.splitPathToDetachedPath("root.sg.d1.s.1"));
 
-    try {
-      MetaUtils.splitPathToDetachedPath("root.sg.\"d.1\"\"s.1\"");
-    } catch (IllegalPathException e) {
-      Assert.assertEquals("root.sg.\"d.1\"\"s.1\" is not a legal path", e.getMessage());
+        try {
+            MetaUtils.splitPathToDetachedPath("root.sg.\"d.1\"\"s.1\"");
+        } catch (IllegalPathException e) {
+            Assert.assertEquals("root.sg.\"d.1\"\"s.1\" is not a legal path", e.getMessage());
+        }
+
+        try {
+            MetaUtils.splitPathToDetachedPath("root..a");
+        } catch (IllegalPathException e) {
+            Assert.assertEquals("root..a is not a legal path", e.getMessage());
+        }
+
+        try {
+            MetaUtils.splitPathToDetachedPath("root.sg.d1.'s1'");
+        } catch (IllegalPathException e) {
+            Assert.assertEquals("root.sg.d1.'s1' is not a legal path", e.getMessage());
+        }
     }
-
-    try {
-      MetaUtils.splitPathToDetachedPath("root..a");
-    } catch (IllegalPathException e) {
-      Assert.assertEquals("root..a is not a legal path", e.getMessage());
-    }
-
-    try {
-      MetaUtils.splitPathToDetachedPath("root.sg.d1.'s1'");
-    } catch (IllegalPathException e) {
-      Assert.assertEquals("root.sg.d1.'s1' is not a legal path", e.getMessage());
-    }
-  }
-
 }

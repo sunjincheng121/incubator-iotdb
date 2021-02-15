@@ -20,44 +20,45 @@
 package org.apache.iotdb.rpc;
 
 /**
- * Note that this class is mainly copied from class {@link org.apache.thrift.transport.AutoExpandingBufferWriteTransport}.
- * since that class does not support inheritance, so rewrite this class.
+ * Note that this class is mainly copied from class {@link
+ * org.apache.thrift.transport.AutoExpandingBufferWriteTransport}. since that class does not support
+ * inheritance, so rewrite this class.
  */
 public class AutoScalingBufferWriteTransport extends NonOpenTransport {
 
-  private final AutoResizingBuffer buf;
-  private int pos;
+    private final AutoResizingBuffer buf;
+    private int pos;
 
-  public AutoScalingBufferWriteTransport(int initialCapacity) {
-    this.buf = new AutoResizingBuffer(initialCapacity);
-    this.pos = 0;
-  }
+    public AutoScalingBufferWriteTransport(int initialCapacity) {
+        this.buf = new AutoResizingBuffer(initialCapacity);
+        this.pos = 0;
+    }
 
-  @Override
-  public int read(byte[] buf, int off, int len) {
-    throw new UnsupportedOperationException();
-  }
+    @Override
+    public int read(byte[] buf, int off, int len) {
+        throw new UnsupportedOperationException();
+    }
 
-  @Override
-  public void write(byte[] toWrite, int off, int len) {
-    buf.resizeIfNecessary(pos + len);
-    System.arraycopy(toWrite, off, buf.array(), pos, len);
-    pos += len;
-  }
+    @Override
+    public void write(byte[] toWrite, int off, int len) {
+        buf.resizeIfNecessary(pos + len);
+        System.arraycopy(toWrite, off, buf.array(), pos, len);
+        pos += len;
+    }
 
-  public int getPos() {
-    return pos;
-  }
+    public int getPos() {
+        return pos;
+    }
 
-  public void reset() {
-    pos = 0;
-  }
+    public void reset() {
+        pos = 0;
+    }
 
-  public void resizeIfNecessary(int size) {
-    buf.resizeIfNecessary(size);
-  }
+    public void resizeIfNecessary(int size) {
+        buf.resizeIfNecessary(size);
+    }
 
-  public AutoResizingBuffer getBuf() {
-    return buf;
-  }
+    public AutoResizingBuffer getBuf() {
+        return buf;
+    }
 }

@@ -20,17 +20,17 @@ package org.apache.iotdb.rpc;
 
 public class IoTDBConnectionException extends Exception {
 
-  private static final long serialVersionUID = -1268775292265203036L;
+    private static final long serialVersionUID = -1268775292265203036L;
 
-  public IoTDBConnectionException(String reason) {
-    super(reason);
-  }
+    public IoTDBConnectionException(String reason) {
+        super(reason);
+    }
 
-  public IoTDBConnectionException(Throwable cause) {
-    super(cause);
-  }
+    public IoTDBConnectionException(Throwable cause) {
+        super(cause);
+    }
 
-  public IoTDBConnectionException(String message, Throwable cause) {
-    super(message, cause);
-  }
+    public IoTDBConnectionException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

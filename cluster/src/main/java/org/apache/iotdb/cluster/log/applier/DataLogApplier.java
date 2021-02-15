@@ -41,74 +41,76 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * DataLogApplier applies logs like data insertion/deletion/update and timeseries creation to
- * IoTDB.
+ * DataLogApplier applies logs like data insertion/deletion/update and timeseries creation to IoTDB.
  */
 public class DataLogApplier extends BaseApplier {
 
-  private static final Logger logger = LoggerFactory.getLogger(DataLogApplier.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataLogApplier.class);
 
-  private DataGroupMember dataGroupMember;
+    private DataGroupMember dataGroupMember;
 
-  public DataLogApplier(MetaGroupMember metaGroupMember, DataGroupMember dataGroupMember) {
-    super(metaGroupMember);
-    this.dataGroupMember = dataGroupMember;
-  }
+    public DataLogApplier(MetaGroupMember metaGroupMember, DataGroupMember dataGroupMember) {
+        super(metaGroupMember);
+        this.dataGroupMember = dataGroupMember;
+    }
 
-  @Override
-  public void apply(Log log) {
-    logger.debug("DataMember [{}] start applying Log {}", dataGroupMember.getName(), log);
+    @Override
+    public void apply(Log log) {
+        logger.debug("DataMember [{}] start applying Log {}", dataGroupMember.getName(), log);
 
-    try {
-      if (log instanceof PhysicalPlanLog) {
-        PhysicalPlanLog physicalPlanLog = (PhysicalPlanLog) log;
-        PhysicalPlan plan = physicalPlanLog.getPlan();
-        if (plan instanceof InsertPlan) {
-          applyInsert((InsertPlan) plan);
-        } else {
-          applyPhysicalPlan(plan, dataGroupMember);
+        try {
+            if (log instanceof PhysicalPlanLog) {
+                PhysicalPlanLog physicalPlanLog = (PhysicalPlanLog) log;
+                PhysicalPlan plan = physicalPlanLog.getPlan();
+                if (plan instanceof InsertPlan) {
+                    applyInsert((InsertPlan) plan);
+                } else {
+                    applyPhysicalPlan(plan, dataGroupMember);
+                }
+            } else if (log instanceof CloseFileLog) {
+                CloseFileLog closeFileLog = ((CloseFileLog) log);
+                StorageEngine.getInstance()
+                        .closeStorageGroupProcessor(
+                                new PartialPath(closeFileLog.getStorageGroupName()),
+                                closeFileLog.getPartitionId(),
+                                closeFileLog.isSeq(),
+                                false);
+            } else {
+                logger.error("Unsupported log: {}", log);
+            }
+        } catch (Exception e) {
+            Throwable rootCause = IOUtils.getRootCause(e);
+            if (!(rootCause instanceof PathNotExistException)) {
+                logger.debug("Exception occurred when applying {}", log, e);
+            }
+            log.setException(e);
+        } finally {
+            log.setApplied(true);
         }
-      } else if (log instanceof CloseFileLog) {
-        CloseFileLog closeFileLog = ((CloseFileLog) log);
-        StorageEngine.getInstance()
-            .closeStorageGroupProcessor(new PartialPath(closeFileLog.getStorageGroupName()),
-                closeFileLog.getPartitionId(),
-                closeFileLog.isSeq(), false);
-      } else {
-        logger.error("Unsupported log: {}", log);
-      }
-    } catch (Exception e) {
-      Throwable rootCause = IOUtils.getRootCause(e);
-      if (!(rootCause instanceof PathNotExistException)) {
-        logger.debug("Exception occurred when applying {}", log, e);
-      }
-      log.setException(e);
-    } finally {
-      log.setApplied(true);
     }
-  }
 
-  private void applyInsert(InsertPlan plan)
-      throws StorageGroupNotSetException, QueryProcessException, StorageEngineException {
-    // check if the corresponding slot is being pulled
-    PartialPath sg;
-    long time = plan.getMinTime();
-    try {
-      sg = IoTDB.metaManager.getStorageGroupPath(plan.getDeviceId());
-    } catch (StorageGroupNotSetException e) {
-      // the sg may not exist because the node does not catch up with the leader, retry after
-      // synchronization
-      try {
-        metaGroupMember.syncLeaderWithConsistencyCheck(true);
-      } catch (CheckConsistencyException ce) {
-        throw new QueryProcessException(ce.getMessage());
-      }
-      sg = IoTDB.metaManager.getStorageGroupPath(plan.getDeviceId());
+    private void applyInsert(InsertPlan plan)
+            throws StorageGroupNotSetException, QueryProcessException, StorageEngineException {
+        // check if the corresponding slot is being pulled
+        PartialPath sg;
+        long time = plan.getMinTime();
+        try {
+            sg = IoTDB.metaManager.getStorageGroupPath(plan.getDeviceId());
+        } catch (StorageGroupNotSetException e) {
+            // the sg may not exist because the node does not catch up with the leader, retry after
+            // synchronization
+            try {
+                metaGroupMember.syncLeaderWithConsistencyCheck(true);
+            } catch (CheckConsistencyException ce) {
+                throw new QueryProcessException(ce.getMessage());
+            }
+            sg = IoTDB.metaManager.getStorageGroupPath(plan.getDeviceId());
+        }
+        int slotId =
+                SlotPartitionTable.getSlotStrategy()
+                        .calculateSlotByTime(sg.getFullPath(), time, ClusterConstant.SLOT_NUM);
+        // the slot may not be writable because it is pulling file versions, wait until it is done
+        dataGroupMember.getSlotManager().waitSlotForWrite(slotId);
+        applyPhysicalPlan(plan, dataGroupMember);
     }
-    int slotId = SlotPartitionTable.getSlotStrategy().calculateSlotByTime(sg.getFullPath(), time,
-        ClusterConstant.SLOT_NUM);
-    // the slot may not be writable because it is pulling file versions, wait until it is done
-    dataGroupMember.getSlotManager().waitSlotForWrite(slotId);
-    applyPhysicalPlan(plan, dataGroupMember);
-  }
 }

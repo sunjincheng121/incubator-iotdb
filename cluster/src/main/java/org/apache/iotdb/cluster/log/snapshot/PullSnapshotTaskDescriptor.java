@@ -31,92 +31,91 @@ import org.apache.iotdb.db.utils.SerializeUtils;
 
 /**
  * PullSnapshotTaskDescriptor describes a pull-snapshot-task with the slots to pull, the previous
- * owners and does this pulling require the provider to become read-only. So the task can be
- * resumed when system crashes.
+ * owners and does this pulling require the provider to become read-only. So the task can be resumed
+ * when system crashes.
  */
 public class PullSnapshotTaskDescriptor {
-  private PartitionGroup previousHolders;
-  private List<Integer> slots;
+    private PartitionGroup previousHolders;
+    private List<Integer> slots;
 
-  // set to true if the previous holder has been removed from the cluster.
-  // This will make the previous holder read-only so that different new
-  // replicas can pull the same snapshot.
-  private boolean requireReadOnly;
+    // set to true if the previous holder has been removed from the cluster.
+    // This will make the previous holder read-only so that different new
+    // replicas can pull the same snapshot.
+    private boolean requireReadOnly;
 
-  public PullSnapshotTaskDescriptor() {
-  }
+    public PullSnapshotTaskDescriptor() {}
 
-  public PullSnapshotTaskDescriptor(PartitionGroup previousOwners,
-      List<Integer> slots, boolean requireReadOnly) {
-    this.previousHolders = previousOwners;
-    this.slots = slots;
-    this.requireReadOnly = requireReadOnly;
-  }
-
-  public PartitionGroup getPreviousHolders() {
-    return previousHolders;
-  }
-
-  public List<Integer> getSlots() {
-    return slots;
-  }
-
-  public void setSlots(List<Integer> slots) {
-    this.slots = slots;
-  }
-
-  boolean isRequireReadOnly() {
-    return requireReadOnly;
-  }
-
-  public void serialize(DataOutputStream dataOutputStream) throws IOException {
-    dataOutputStream.writeInt(slots.size());
-    for (Integer slot : slots) {
-      dataOutputStream.writeInt(slot);
+    public PullSnapshotTaskDescriptor(
+            PartitionGroup previousOwners, List<Integer> slots, boolean requireReadOnly) {
+        this.previousHolders = previousOwners;
+        this.slots = slots;
+        this.requireReadOnly = requireReadOnly;
     }
 
-    dataOutputStream.writeInt(previousHolders.size());
-    for (Node previousHolder : previousHolders) {
-      SerializeUtils.serialize(previousHolder, dataOutputStream);
+    public PartitionGroup getPreviousHolders() {
+        return previousHolders;
     }
 
-    dataOutputStream.writeBoolean(requireReadOnly);
-  }
-
-  public void deserialize(DataInputStream dataInputStream) throws IOException {
-    int slotSize = dataInputStream.readInt();
-    slots = new ArrayList<>(slotSize);
-    for (int i = 0; i < slotSize; i++) {
-      slots.add(dataInputStream.readInt());
+    public List<Integer> getSlots() {
+        return slots;
     }
 
-    int holderSize = dataInputStream.readInt();
-    previousHolders = new PartitionGroup();
-    for (int i = 0; i < holderSize; i++) {
-      Node node = new Node();
-      SerializeUtils.deserialize(node, dataInputStream);
-      previousHolders.add(node);
+    public void setSlots(List<Integer> slots) {
+        this.slots = slots;
     }
 
-    requireReadOnly = dataInputStream.readBoolean();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    boolean isRequireReadOnly() {
+        return requireReadOnly;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    PullSnapshotTaskDescriptor that = (PullSnapshotTaskDescriptor) o;
-    return requireReadOnly == that.requireReadOnly &&
-        Objects.equals(previousHolders, that.previousHolders) &&
-        Objects.equals(slots, that.slots);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(previousHolders, slots, requireReadOnly);
-  }
+    public void serialize(DataOutputStream dataOutputStream) throws IOException {
+        dataOutputStream.writeInt(slots.size());
+        for (Integer slot : slots) {
+            dataOutputStream.writeInt(slot);
+        }
+
+        dataOutputStream.writeInt(previousHolders.size());
+        for (Node previousHolder : previousHolders) {
+            SerializeUtils.serialize(previousHolder, dataOutputStream);
+        }
+
+        dataOutputStream.writeBoolean(requireReadOnly);
+    }
+
+    public void deserialize(DataInputStream dataInputStream) throws IOException {
+        int slotSize = dataInputStream.readInt();
+        slots = new ArrayList<>(slotSize);
+        for (int i = 0; i < slotSize; i++) {
+            slots.add(dataInputStream.readInt());
+        }
+
+        int holderSize = dataInputStream.readInt();
+        previousHolders = new PartitionGroup();
+        for (int i = 0; i < holderSize; i++) {
+            Node node = new Node();
+            SerializeUtils.deserialize(node, dataInputStream);
+            previousHolders.add(node);
+        }
+
+        requireReadOnly = dataInputStream.readBoolean();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        PullSnapshotTaskDescriptor that = (PullSnapshotTaskDescriptor) o;
+        return requireReadOnly == that.requireReadOnly
+                && Objects.equals(previousHolders, that.previousHolders)
+                && Objects.equals(slots, that.slots);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(previousHolders, slots, requireReadOnly);
+    }
 }

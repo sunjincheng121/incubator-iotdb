@@ -30,113 +30,113 @@ import org.apache.thrift.EncodingUtils;
 
 public class GroupedLSBWatermarkEncoder implements WatermarkEncoder {
 
-  private String secretKey;
-  private String bitString;
-  private int markRate = 2;
-  private int groupNumber;
-  private int maxBitPosition = 5;
-  private int minBitPosition = 0;
+    private String secretKey;
+    private String bitString;
+    private int markRate = 2;
+    private int groupNumber;
+    private int maxBitPosition = 5;
+    private int minBitPosition = 0;
 
-  public GroupedLSBWatermarkEncoder(String secretKey, String bitString) {
-    this.secretKey = secretKey;
-    this.bitString = bitString;
-    this.groupNumber = bitString.length();
-  }
-
-  public GroupedLSBWatermarkEncoder(IoTDBConfig conf) {
-    this(conf.getWatermarkSecretKey(), conf.getWatermarkBitString());
-    this.markRate = conf.getWatermarkParamMarkRate();
-    this.maxBitPosition = conf.getWatermarkParamMaxRightBit();
-  }
-
-  public static int hashMod(String val, Integer base) {
-    MessageDigest md;
-    try {
-      md = MessageDigest.getInstance("MD5");
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException("ERROR: Cannot find MD5 algorithm!");
+    public GroupedLSBWatermarkEncoder(String secretKey, String bitString) {
+        this.secretKey = secretKey;
+        this.bitString = bitString;
+        this.groupNumber = bitString.length();
     }
-    md.update(val.getBytes());
-    BigInteger resultInteger = new BigInteger(1, md.digest());
-    return resultInteger.mod(new BigInteger(base.toString())).intValue();
-  }
 
-  public boolean needEncode(long timestamp) {
-    return hashMod(String.format("%s%d", secretKey, timestamp), markRate) == 0;
-  }
-
-  private int getGroupId(long timestamp) {
-    return hashMod(String.format("%d%s", timestamp, secretKey), groupNumber);
-  }
-
-  private int getBitPosition(long timestamp) {
-    if (maxBitPosition <= minBitPosition) {
-      throw new RuntimeException("Error: minBitPosition is bigger than maxBitPosition");
+    public GroupedLSBWatermarkEncoder(IoTDBConfig conf) {
+        this(conf.getWatermarkSecretKey(), conf.getWatermarkBitString());
+        this.markRate = conf.getWatermarkParamMarkRate();
+        this.maxBitPosition = conf.getWatermarkParamMaxRightBit();
     }
-    int range = maxBitPosition - minBitPosition;
-    return minBitPosition + hashMod(String.format("%s%d%s", secretKey, timestamp, secretKey),
-        range);
-  }
 
-  private boolean getBitValue(long timestamp) {
-    int groupId = getGroupId(timestamp);
-    int bitIndex = groupId % bitString.length();
-    return bitString.charAt(bitIndex) == '1';
-  }
-
-  public int encodeInt(int value, long timestamp) {
-    int targetBitPosition = getBitPosition(timestamp);
-    boolean targetBitValue = getBitValue(timestamp);
-    return EncodingUtils.setBit(value, targetBitPosition, targetBitValue);
-  }
-
-  public long encodeLong(long value, long timestamp) {
-    int targetBitPosition = getBitPosition(timestamp);
-    boolean targetBitValue = getBitValue(timestamp);
-    return EncodingUtils.setBit(value, targetBitPosition, targetBitValue);
-  }
-
-  public float encodeFloat(float value, long timestamp) {
-    int intBits = Float.floatToIntBits(value);
-    return Float.intBitsToFloat(encodeInt(intBits, timestamp));
-  }
-
-  public double encodeDouble(double value, long timestamp) {
-    long longBits = Double.doubleToLongBits(value);
-    return Double.longBitsToDouble(encodeLong(longBits, timestamp));
-  }
-
-  public RowRecord encodeRecord(RowRecord record) {
-    long timestamp = record.getTimestamp();
-    if (!needEncode(timestamp)) {
-      return record;
+    public static int hashMod(String val, Integer base) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("ERROR: Cannot find MD5 algorithm!");
+        }
+        md.update(val.getBytes());
+        BigInteger resultInteger = new BigInteger(1, md.digest());
+        return resultInteger.mod(new BigInteger(base.toString())).intValue();
     }
-    List<Field> fields = record.getFields();
-    for (Field field : fields) {
-      if (field == null || field.getDataType() == null) {
-        continue;
-      }
-      TSDataType dataType = field.getDataType();
-      switch (dataType) {
-        case INT32:
-          int originIntValue = field.getIntV();
-          field.setIntV(encodeInt(originIntValue, timestamp));
-          break;
-        case INT64:
-          long originLongValue = field.getLongV();
-          field.setLongV(encodeLong(originLongValue, timestamp));
-          break;
-        case FLOAT:
-          float originFloatValue = field.getFloatV();
-          field.setFloatV(encodeFloat(originFloatValue, timestamp));
-          break;
-        case DOUBLE:
-          double originDoubleValue = field.getDoubleV();
-          field.setDoubleV(encodeDouble(originDoubleValue, timestamp));
-          break;
-        default:
-      }
+
+    public boolean needEncode(long timestamp) {
+        return hashMod(String.format("%s%d", secretKey, timestamp), markRate) == 0;
     }
-    return record;
-  }
+
+    private int getGroupId(long timestamp) {
+        return hashMod(String.format("%d%s", timestamp, secretKey), groupNumber);
+    }
+
+    private int getBitPosition(long timestamp) {
+        if (maxBitPosition <= minBitPosition) {
+            throw new RuntimeException("Error: minBitPosition is bigger than maxBitPosition");
+        }
+        int range = maxBitPosition - minBitPosition;
+        return minBitPosition
+                + hashMod(String.format("%s%d%s", secretKey, timestamp, secretKey), range);
+    }
+
+    private boolean getBitValue(long timestamp) {
+        int groupId = getGroupId(timestamp);
+        int bitIndex = groupId % bitString.length();
+        return bitString.charAt(bitIndex) == '1';
+    }
+
+    public int encodeInt(int value, long timestamp) {
+        int targetBitPosition = getBitPosition(timestamp);
+        boolean targetBitValue = getBitValue(timestamp);
+        return EncodingUtils.setBit(value, targetBitPosition, targetBitValue);
+    }
+
+    public long encodeLong(long value, long timestamp) {
+        int targetBitPosition = getBitPosition(timestamp);
+        boolean targetBitValue = getBitValue(timestamp);
+        return EncodingUtils.setBit(value, targetBitPosition, targetBitValue);
+    }
+
+    public float encodeFloat(float value, long timestamp) {
+        int intBits = Float.floatToIntBits(value);
+        return Float.intBitsToFloat(encodeInt(intBits, timestamp));
+    }
+
+    public double encodeDouble(double value, long timestamp) {
+        long longBits = Double.doubleToLongBits(value);
+        return Double.longBitsToDouble(encodeLong(longBits, timestamp));
+    }
+
+    public RowRecord encodeRecord(RowRecord record) {
+        long timestamp = record.getTimestamp();
+        if (!needEncode(timestamp)) {
+            return record;
+        }
+        List<Field> fields = record.getFields();
+        for (Field field : fields) {
+            if (field == null || field.getDataType() == null) {
+                continue;
+            }
+            TSDataType dataType = field.getDataType();
+            switch (dataType) {
+                case INT32:
+                    int originIntValue = field.getIntV();
+                    field.setIntV(encodeInt(originIntValue, timestamp));
+                    break;
+                case INT64:
+                    long originLongValue = field.getLongV();
+                    field.setLongV(encodeLong(originLongValue, timestamp));
+                    break;
+                case FLOAT:
+                    float originFloatValue = field.getFloatV();
+                    field.setFloatV(encodeFloat(originFloatValue, timestamp));
+                    break;
+                case DOUBLE:
+                    double originDoubleValue = field.getDoubleV();
+                    field.setDoubleV(encodeDouble(originDoubleValue, timestamp));
+                    break;
+                default:
+            }
+        }
+        return record;
+    }
 }

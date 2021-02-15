@@ -27,31 +27,41 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class ShowPlan extends PhysicalPlan {
 
-  private ShowContentType showContentType;
+    private ShowContentType showContentType;
 
-  public ShowPlan(ShowContentType showContentType){
-    super(true);
-    this.showContentType = showContentType;
-    setOperatorType(OperatorType.SHOW);
-  }
+    public ShowPlan(ShowContentType showContentType) {
+        super(true);
+        this.showContentType = showContentType;
+        setOperatorType(OperatorType.SHOW);
+    }
 
-  @Override
-  public List<PartialPath> getPaths() {
-    return Collections.emptyList();
-  }
+    @Override
+    public List<PartialPath> getPaths() {
+        return Collections.emptyList();
+    }
 
-  public ShowContentType getShowContentType() {
-    return showContentType;
-  }
+    public ShowContentType getShowContentType() {
+        return showContentType;
+    }
 
-  @Override
-  public String toString() {
-    return String.format("%s %s", getOperatorType().toString(), showContentType);
-  }
+    @Override
+    public String toString() {
+        return String.format("%s %s", getOperatorType().toString(), showContentType);
+    }
 
-  public enum ShowContentType {
-    FLUSH_TASK_INFO, TTL, VERSION, TIMESERIES, STORAGE_GROUP, CHILD_PATH, DEVICES,
-    COUNT_TIMESERIES, COUNT_NODE_TIMESERIES, COUNT_NODES, MERGE_STATUS, COUNT_DEVICES, COUNT_STORAGE_GROUP
-  }
-
+    public enum ShowContentType {
+        FLUSH_TASK_INFO,
+        TTL,
+        VERSION,
+        TIMESERIES,
+        STORAGE_GROUP,
+        CHILD_PATH,
+        DEVICES,
+        COUNT_TIMESERIES,
+        COUNT_NODE_TIMESERIES,
+        COUNT_NODES,
+        MERGE_STATUS,
+        COUNT_DEVICES,
+        COUNT_STORAGE_GROUP
+    }
 }

@@ -40,241 +40,259 @@ import org.slf4j.LoggerFactory;
 
 public class FileGenerator {
 
-  private static final Logger LOG = LoggerFactory.getLogger(FileGenerator.class);
-  public static String outputDataFile = TestConstant.BASE_OUTPUT_PATH
-      .concat("perTestOutputData.tsfile");
-  public static Schema schema;
-  private static int ROW_COUNT = 1000;
-  private static TsFileWriter innerWriter;
-  private static String inputDataFile;
-  private static String errorOutputDataFile;
-  private static final TSFileConfig config = TSFileDescriptor.getInstance().getConfig();
+    private static final Logger LOG = LoggerFactory.getLogger(FileGenerator.class);
+    public static String outputDataFile =
+            TestConstant.BASE_OUTPUT_PATH.concat("perTestOutputData.tsfile");
+    public static Schema schema;
+    private static int ROW_COUNT = 1000;
+    private static TsFileWriter innerWriter;
+    private static String inputDataFile;
+    private static String errorOutputDataFile;
+    private static final TSFileConfig config = TSFileDescriptor.getInstance().getConfig();
 
-  public static void generateFile(int rowCount, int maxNumberOfPointsInPage) throws IOException {
-    ROW_COUNT = rowCount;
-    int oldMaxNumberOfPointsInPage = config.getMaxNumberOfPointsInPage();
-    config.setMaxNumberOfPointsInPage(maxNumberOfPointsInPage);
+    public static void generateFile(int rowCount, int maxNumberOfPointsInPage) throws IOException {
+        ROW_COUNT = rowCount;
+        int oldMaxNumberOfPointsInPage = config.getMaxNumberOfPointsInPage();
+        config.setMaxNumberOfPointsInPage(maxNumberOfPointsInPage);
 
-    prepare();
-    write();
-    config.setMaxNumberOfPointsInPage(oldMaxNumberOfPointsInPage);
-  }
-
-  public static void generateFile(int maxNumberOfPointsInPage, int deviceNum,
-      int measurementNum) throws IOException {
-    ROW_COUNT = 1;
-    int oldMaxNumberOfPointsInPage = config.getMaxNumberOfPointsInPage();
-    config.setMaxNumberOfPointsInPage(maxNumberOfPointsInPage);
-
-    prepare(deviceNum, measurementNum);
-    write();
-    config.setMaxNumberOfPointsInPage(oldMaxNumberOfPointsInPage);
-  }
-
-  public static void generateFile() throws IOException {
-    generateFile(1000, 10);
-  }
-
-  public static void prepare() throws IOException {
-    inputDataFile = TestConstant.BASE_OUTPUT_PATH.concat("perTestInputData");
-    errorOutputDataFile = TestConstant.BASE_OUTPUT_PATH.concat("perTestErrorOutputData.tsfile");
-    generateTestSchema();
-    generateSampleInputDataFile();
-  }
-
-  public static void prepare(int deviceNum, int measurementNum) throws IOException {
-    inputDataFile = TestConstant.BASE_OUTPUT_PATH.concat("perTestInputData");
-    errorOutputDataFile = TestConstant.BASE_OUTPUT_PATH.concat("perTestErrorOutputData.tsfile");
-    generateTestSchema(deviceNum, measurementNum);
-    generateSampleInputDataFile(deviceNum, measurementNum);
-  }
-
-  public static void after() {
-    File file = new File(inputDataFile);
-    if (file.exists()) {
-      file.delete();
+        prepare();
+        write();
+        config.setMaxNumberOfPointsInPage(oldMaxNumberOfPointsInPage);
     }
-    file = new File(outputDataFile);
-    if (file.exists()) {
-      file.delete();
-    }
-    file = new File(errorOutputDataFile);
-    if (file.exists()) {
-      file.delete();
-    }
-  }
 
-  static private void generateSampleInputDataFile() throws IOException {
-    File file = new File(inputDataFile);
-    if (file.exists()) {
-      file.delete();
-    }
-    file.getParentFile().mkdirs();
-    FileWriter fw = new FileWriter(file);
+    public static void generateFile(int maxNumberOfPointsInPage, int deviceNum, int measurementNum)
+            throws IOException {
+        ROW_COUNT = 1;
+        int oldMaxNumberOfPointsInPage = config.getMaxNumberOfPointsInPage();
+        config.setMaxNumberOfPointsInPage(maxNumberOfPointsInPage);
 
-    long startTime = 1480562618000L;
-    startTime = startTime - startTime % 1000;
-    for (int i = 0; i < ROW_COUNT; i++) {
-      // write d1
-      String d1 = "d1," + (startTime + i) + ",s1," + (i * 10 + 1) + ",s2," + (i * 10 + 2);
-      if (i % 20 < 10) {
-        // LOG.info("write null to d1:" + (startTime + i));
-        d1 = "d1," + (startTime + i) + ",s1,,s2," + (i * 10 + 2);
-      }
-      if (i % 5 == 0) {
-        d1 += ",s3," + (i * 10 + 3);
-      }
-      if (i % 8 == 0) {
-        d1 += ",s4," + "dog" + i;
-      }
-      if (i % 9 == 0) {
-        d1 += ",s5," + "false";
-      }
-      if (i % 10 == 0) {
-        d1 += ",s6," + ((int) (i / 9.0) * 100) / 100.0;
-      }
-      if (i % 11 == 0) {
-        d1 += ",s7," + ((int) (i / 10.0) * 100) / 100.0;
-      }
-      fw.write(d1 + "\r\n");
-
-      // write d2
-      String d2 = "d2," + (startTime + i) + ",s2," + (i * 10 + 2) + ",s3," + (i * 10 + 3);
-      if (i % 20 < 5) {
-        // LOG.info("write null to d2:" + (startTime + i));
-        d2 = "d2," + (startTime + i) + ",s2,,s3," + (i * 10 + 3);
-      }
-      if (i % 5 == 0) {
-        d2 += ",s1," + (i * 10 + 1);
-      }
-      if (i % 8 == 0) {
-        d2 += ",s4," + "dog" + i % 4;
-      }
-      fw.write(d2 + "\r\n");
+        prepare(deviceNum, measurementNum);
+        write();
+        config.setMaxNumberOfPointsInPage(oldMaxNumberOfPointsInPage);
     }
-    // write error
-    String d =
-        "d2,3," + (startTime + ROW_COUNT) + ",s2," + (ROW_COUNT * 10 + 2) + ",s3," + (ROW_COUNT * 10
-            + 3);
-    fw.write(d + "\r\n");
-    d = "d2," + (startTime + ROW_COUNT + 1) + ",2,s-1," + (ROW_COUNT * 10 + 2);
-    fw.write(d + "\r\n");
-    fw.close();
-  }
 
-  static private void generateSampleInputDataFile(int deviceNum, int measurementNum)
-      throws IOException {
-    File file = new File(inputDataFile);
-    if (file.exists()) {
-      Files.delete(file.toPath());
+    public static void generateFile() throws IOException {
+        generateFile(1000, 10);
     }
-    if (!file.getParentFile().mkdirs()) {
-      LOG.info("Failed to create file folder {}", file.getParentFile());
-    }
-    FileWriter fw = new FileWriter(file);
 
-    long startTime = 1480562618000L;
-    for (int i = 0; i < deviceNum; i++) {
-      for (int j = 0; j < measurementNum; j++) {
-        String d = "d" + i + "," + startTime + ",s" + j + "," + 1;
+    public static void prepare() throws IOException {
+        inputDataFile = TestConstant.BASE_OUTPUT_PATH.concat("perTestInputData");
+        errorOutputDataFile = TestConstant.BASE_OUTPUT_PATH.concat("perTestErrorOutputData.tsfile");
+        generateTestSchema();
+        generateSampleInputDataFile();
+    }
+
+    public static void prepare(int deviceNum, int measurementNum) throws IOException {
+        inputDataFile = TestConstant.BASE_OUTPUT_PATH.concat("perTestInputData");
+        errorOutputDataFile = TestConstant.BASE_OUTPUT_PATH.concat("perTestErrorOutputData.tsfile");
+        generateTestSchema(deviceNum, measurementNum);
+        generateSampleInputDataFile(deviceNum, measurementNum);
+    }
+
+    public static void after() {
+        File file = new File(inputDataFile);
+        if (file.exists()) {
+            file.delete();
+        }
+        file = new File(outputDataFile);
+        if (file.exists()) {
+            file.delete();
+        }
+        file = new File(errorOutputDataFile);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    private static void generateSampleInputDataFile() throws IOException {
+        File file = new File(inputDataFile);
+        if (file.exists()) {
+            file.delete();
+        }
+        file.getParentFile().mkdirs();
+        FileWriter fw = new FileWriter(file);
+
+        long startTime = 1480562618000L;
+        startTime = startTime - startTime % 1000;
+        for (int i = 0; i < ROW_COUNT; i++) {
+            // write d1
+            String d1 = "d1," + (startTime + i) + ",s1," + (i * 10 + 1) + ",s2," + (i * 10 + 2);
+            if (i % 20 < 10) {
+                // LOG.info("write null to d1:" + (startTime + i));
+                d1 = "d1," + (startTime + i) + ",s1,,s2," + (i * 10 + 2);
+            }
+            if (i % 5 == 0) {
+                d1 += ",s3," + (i * 10 + 3);
+            }
+            if (i % 8 == 0) {
+                d1 += ",s4," + "dog" + i;
+            }
+            if (i % 9 == 0) {
+                d1 += ",s5," + "false";
+            }
+            if (i % 10 == 0) {
+                d1 += ",s6," + ((int) (i / 9.0) * 100) / 100.0;
+            }
+            if (i % 11 == 0) {
+                d1 += ",s7," + ((int) (i / 10.0) * 100) / 100.0;
+            }
+            fw.write(d1 + "\r\n");
+
+            // write d2
+            String d2 = "d2," + (startTime + i) + ",s2," + (i * 10 + 2) + ",s3," + (i * 10 + 3);
+            if (i % 20 < 5) {
+                // LOG.info("write null to d2:" + (startTime + i));
+                d2 = "d2," + (startTime + i) + ",s2,,s3," + (i * 10 + 3);
+            }
+            if (i % 5 == 0) {
+                d2 += ",s1," + (i * 10 + 1);
+            }
+            if (i % 8 == 0) {
+                d2 += ",s4," + "dog" + i % 4;
+            }
+            fw.write(d2 + "\r\n");
+        }
+        // write error
+        String d =
+                "d2,3,"
+                        + (startTime + ROW_COUNT)
+                        + ",s2,"
+                        + (ROW_COUNT * 10 + 2)
+                        + ",s3,"
+                        + (ROW_COUNT * 10 + 3);
         fw.write(d + "\r\n");
-      }
-    }
-    fw.close();
-  }
-
-  static public void write() throws IOException {
-    File file = new File(outputDataFile);
-    File errorFile = new File(errorOutputDataFile);
-    if (file.exists()) {
-      file.delete();
-    }
-    if (errorFile.exists()) {
-      errorFile.delete();
+        d = "d2," + (startTime + ROW_COUNT + 1) + ",2,s-1," + (ROW_COUNT * 10 + 2);
+        fw.write(d + "\r\n");
+        fw.close();
     }
 
-    innerWriter = new TsFileWriter(file, schema, config);
+    private static void generateSampleInputDataFile(int deviceNum, int measurementNum)
+            throws IOException {
+        File file = new File(inputDataFile);
+        if (file.exists()) {
+            Files.delete(file.toPath());
+        }
+        if (!file.getParentFile().mkdirs()) {
+            LOG.info("Failed to create file folder {}", file.getParentFile());
+        }
+        FileWriter fw = new FileWriter(file);
 
-    // write
-    try {
-      writeToTsFile(schema);
-    } catch (WriteProcessException e) {
-      e.printStackTrace();
+        long startTime = 1480562618000L;
+        for (int i = 0; i < deviceNum; i++) {
+            for (int j = 0; j < measurementNum; j++) {
+                String d = "d" + i + "," + startTime + ",s" + j + "," + 1;
+                fw.write(d + "\r\n");
+            }
+        }
+        fw.close();
     }
-    LOG.info("write to file successfully!!");
-  }
 
-  private static void generateTestSchema() {
-    schema = new Schema();
-    schema.registerTimeseries(new Path("d1", "s1"),
-        new MeasurementSchema("s1", TSDataType.INT32,
-            TSEncoding.valueOf(config.getValueEncoder())));
-    schema.registerTimeseries(new Path("d1", "s2"),
-        new MeasurementSchema("s2", TSDataType.INT64,
-            TSEncoding.valueOf(config.getValueEncoder())));
-    schema.registerTimeseries(new Path("d1", "s3"),
-        new MeasurementSchema("s3", TSDataType.INT64,
-            TSEncoding.valueOf(config.getValueEncoder())));
-    schema.registerTimeseries(new Path("d1", "s4"),
-        new MeasurementSchema("s4", TSDataType.TEXT, TSEncoding.PLAIN));
-    schema.registerTimeseries(new Path("d1", "s5"),
-        new MeasurementSchema("s5", TSDataType.BOOLEAN, TSEncoding.PLAIN));
-    schema.registerTimeseries(new Path("d1", "s6"),
-        new MeasurementSchema("s6", TSDataType.FLOAT, TSEncoding.RLE));
-    schema.registerTimeseries(new Path("d1", "s7"),
-        new MeasurementSchema("s7", TSDataType.DOUBLE, TSEncoding.RLE));
-    schema.registerTimeseries(new Path("d2", "s1"),
-        new MeasurementSchema("s1", TSDataType.INT32,
-            TSEncoding.valueOf(config.getValueEncoder())));
-    schema.registerTimeseries(new Path("d2", "s2"),
-        new MeasurementSchema("s2", TSDataType.INT64,
-            TSEncoding.valueOf(config.getValueEncoder())));
-    schema.registerTimeseries(new Path("d2", "s3"),
-        new MeasurementSchema("s3", TSDataType.INT64,
-            TSEncoding.valueOf(config.getValueEncoder())));
-    schema.registerTimeseries(new Path("d2", "s4"),
-        new MeasurementSchema("s4", TSDataType.TEXT, TSEncoding.PLAIN));
-  }
+    public static void write() throws IOException {
+        File file = new File(outputDataFile);
+        File errorFile = new File(errorOutputDataFile);
+        if (file.exists()) {
+            file.delete();
+        }
+        if (errorFile.exists()) {
+            errorFile.delete();
+        }
 
-  private static void generateTestSchema(int deviceNum, int measurementNum) {
-    schema = new Schema();
-    for (int i = 0; i < deviceNum; i++) {
-      for (int j = 0; j < measurementNum; j++) {
-        schema.registerTimeseries(new Path("d" + i, "s" + j),
-            new MeasurementSchema("s" + j, TSDataType.INT32,
-                TSEncoding.valueOf(config.getValueEncoder())));
-      }
+        innerWriter = new TsFileWriter(file, schema, config);
+
+        // write
+        try {
+            writeToTsFile(schema);
+        } catch (WriteProcessException e) {
+            e.printStackTrace();
+        }
+        LOG.info("write to file successfully!!");
     }
-  }
 
-  private static void writeToTsFile(Schema schema) throws IOException, WriteProcessException {
-    Scanner in = getDataFile(inputDataFile);
-    long lineCount = 0;
-    long startTime = System.currentTimeMillis();
-    long endTime = System.currentTimeMillis();
-    assert in != null;
-    while (in.hasNextLine()) {
-      if (lineCount % 1000000 == 0) {
+    private static void generateTestSchema() {
+        schema = new Schema();
+        schema.registerTimeseries(
+                new Path("d1", "s1"),
+                new MeasurementSchema(
+                        "s1", TSDataType.INT32, TSEncoding.valueOf(config.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("d1", "s2"),
+                new MeasurementSchema(
+                        "s2", TSDataType.INT64, TSEncoding.valueOf(config.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("d1", "s3"),
+                new MeasurementSchema(
+                        "s3", TSDataType.INT64, TSEncoding.valueOf(config.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("d1", "s4"),
+                new MeasurementSchema("s4", TSDataType.TEXT, TSEncoding.PLAIN));
+        schema.registerTimeseries(
+                new Path("d1", "s5"),
+                new MeasurementSchema("s5", TSDataType.BOOLEAN, TSEncoding.PLAIN));
+        schema.registerTimeseries(
+                new Path("d1", "s6"),
+                new MeasurementSchema("s6", TSDataType.FLOAT, TSEncoding.RLE));
+        schema.registerTimeseries(
+                new Path("d1", "s7"),
+                new MeasurementSchema("s7", TSDataType.DOUBLE, TSEncoding.RLE));
+        schema.registerTimeseries(
+                new Path("d2", "s1"),
+                new MeasurementSchema(
+                        "s1", TSDataType.INT32, TSEncoding.valueOf(config.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("d2", "s2"),
+                new MeasurementSchema(
+                        "s2", TSDataType.INT64, TSEncoding.valueOf(config.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("d2", "s3"),
+                new MeasurementSchema(
+                        "s3", TSDataType.INT64, TSEncoding.valueOf(config.getValueEncoder())));
+        schema.registerTimeseries(
+                new Path("d2", "s4"),
+                new MeasurementSchema("s4", TSDataType.TEXT, TSEncoding.PLAIN));
+    }
+
+    private static void generateTestSchema(int deviceNum, int measurementNum) {
+        schema = new Schema();
+        for (int i = 0; i < deviceNum; i++) {
+            for (int j = 0; j < measurementNum; j++) {
+                schema.registerTimeseries(
+                        new Path("d" + i, "s" + j),
+                        new MeasurementSchema(
+                                "s" + j,
+                                TSDataType.INT32,
+                                TSEncoding.valueOf(config.getValueEncoder())));
+            }
+        }
+    }
+
+    private static void writeToTsFile(Schema schema) throws IOException, WriteProcessException {
+        Scanner in = getDataFile(inputDataFile);
+        long lineCount = 0;
+        long startTime = System.currentTimeMillis();
+        long endTime = System.currentTimeMillis();
+        assert in != null;
+        while (in.hasNextLine()) {
+            if (lineCount % 1000000 == 0) {
+                LOG.info("write line:{},use time:{}s", lineCount, (endTime - startTime) / 1000);
+            }
+            String str = in.nextLine();
+            TSRecord record = RecordUtils.parseSimpleTupleRecord(str, schema);
+            innerWriter.write(record);
+            lineCount++;
+        }
+        endTime = System.currentTimeMillis();
         LOG.info("write line:{},use time:{}s", lineCount, (endTime - startTime) / 1000);
-      }
-      String str = in.nextLine();
-      TSRecord record = RecordUtils.parseSimpleTupleRecord(str, schema);
-      innerWriter.write(record);
-      lineCount++;
+        innerWriter.close();
+        in.close();
     }
-    endTime = System.currentTimeMillis();
-    LOG.info("write line:{},use time:{}s", lineCount, (endTime - startTime) / 1000);
-    innerWriter.close();
-    in.close();
-  }
 
-  static private Scanner getDataFile(String path) {
-    File file = new File(path);
-    try {
-      return new Scanner(file);
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-      return null;
+    private static Scanner getDataFile(String path) {
+        File file = new File(path);
+        try {
+            return new Scanner(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
-  }
 }

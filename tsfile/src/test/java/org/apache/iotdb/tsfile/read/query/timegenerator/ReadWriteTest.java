@@ -51,130 +51,133 @@ import org.junit.Test;
 
 public class ReadWriteTest {
 
-  private final String TEMPLATE_NAME = "template";
-  private String tsfilePath = TestConstant.BASE_OUTPUT_PATH.concat("TestValueFilter.tsfile");
+    private final String TEMPLATE_NAME = "template";
+    private String tsfilePath = TestConstant.BASE_OUTPUT_PATH.concat("TestValueFilter.tsfile");
 
-  @Before
-  public void before() throws IOException, WriteProcessException {
-    writeFile(tsfilePath);
-  }
-
-  @After
-  public void after() {
-    File file = new File(tsfilePath);
-    if (file.exists()) {
-      file.delete();
-    }
-  }
-
-  @Test
-  public void testFilterAnd() throws IOException {
-    Filter timeFilter = FilterFactory.and(TimeFilter.gtEq(1L), TimeFilter.ltEq(8L));
-    IExpression timeExpression = new GlobalTimeExpression(timeFilter);
-
-    IExpression valueExpression = BinaryExpression
-        .and(new SingleSeriesExpression(new Path("d1", "s1"), ValueFilter.gt(1.0f)),
-            new SingleSeriesExpression(new Path("d1", "s2"), ValueFilter.lt(22)));
-
-    IExpression finalExpression = BinaryExpression.and(valueExpression, timeExpression);
-
-    QueryExpression queryExpression = QueryExpression.create().addSelectedPath(new Path("d1", "s1"))
-        .addSelectedPath(new Path("d1", "s2")).setExpression(finalExpression);
-
-    try (TsFileSequenceReader fileReader = new TsFileSequenceReader(tsfilePath)) {
-      ReadOnlyTsFile readOnlyTsFile = new ReadOnlyTsFile(fileReader);
-      QueryDataSet dataSet = readOnlyTsFile.query(queryExpression);
-      int i = 0;
-      String[] expected = new String[]{
-          "1\t1.2\t20",
-          "3\t1.4\t21",
-          "4\t1.2\t20",
-          "6\t7.2\t10",
-          "7\t6.2\t20"};
-      while (dataSet.hasNext()) {
-        Assert.assertEquals(expected[i], dataSet.next().toString());
-        i++;
-      }
-      Assert.assertEquals(5, i);
-    }
-  }
-
-
-
-  private void writeFile(String tsfilePath) throws IOException, WriteProcessException {
-    File f = new File(tsfilePath);
-    if (f.exists()) {
-      f.delete();
+    @Before
+    public void before() throws IOException, WriteProcessException {
+        writeFile(tsfilePath);
     }
 
-    Schema schema = new Schema();
-    schema.extendTemplate(TEMPLATE_NAME, new MeasurementSchema("s1", TSDataType.FLOAT, TSEncoding.RLE));
-    schema.extendTemplate(TEMPLATE_NAME, new MeasurementSchema("s2", TSDataType.INT32, TSEncoding.TS_2DIFF));
-    schema.extendTemplate(TEMPLATE_NAME, new MeasurementSchema("s3", TSDataType.INT32, TSEncoding.TS_2DIFF));
+    @After
+    public void after() {
+        File file = new File(tsfilePath);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
 
-    TsFileWriter tsFileWriter = new TsFileWriter(f, schema);
+    @Test
+    public void testFilterAnd() throws IOException {
+        Filter timeFilter = FilterFactory.and(TimeFilter.gtEq(1L), TimeFilter.ltEq(8L));
+        IExpression timeExpression = new GlobalTimeExpression(timeFilter);
 
-    // construct TSRecord
-    TSRecord tsRecord = new TSRecord(1, "d1");
-    DataPoint dPoint1 = new FloatDataPoint("s1", 1.2f);
-    DataPoint dPoint2 = new IntDataPoint("s2", 20);
-    tsRecord.addTuple(dPoint1);
-    tsRecord.addTuple(dPoint2);
+        IExpression valueExpression =
+                BinaryExpression.and(
+                        new SingleSeriesExpression(new Path("d1", "s1"), ValueFilter.gt(1.0f)),
+                        new SingleSeriesExpression(new Path("d1", "s2"), ValueFilter.lt(22)));
 
-    // write a TSRecord to TsFile
-    tsFileWriter.write(tsRecord);
+        IExpression finalExpression = BinaryExpression.and(valueExpression, timeExpression);
 
-    tsRecord = new TSRecord(2, "d1");
-    dPoint2 = new IntDataPoint("s2", 20);
-    DataPoint dPoint3 = new IntDataPoint("s3", 50);
-    tsRecord.addTuple(dPoint2);
-    tsRecord.addTuple(dPoint3);
-    tsFileWriter.write(tsRecord);
+        QueryExpression queryExpression =
+                QueryExpression.create()
+                        .addSelectedPath(new Path("d1", "s1"))
+                        .addSelectedPath(new Path("d1", "s2"))
+                        .setExpression(finalExpression);
 
-    tsRecord = new TSRecord(3, "d1");
-    dPoint1 = new FloatDataPoint("s1", 1.4f);
-    dPoint2 = new IntDataPoint("s2", 21);
-    tsRecord.addTuple(dPoint1);
-    tsRecord.addTuple(dPoint2);
-    tsFileWriter.write(tsRecord);
+        try (TsFileSequenceReader fileReader = new TsFileSequenceReader(tsfilePath)) {
+            ReadOnlyTsFile readOnlyTsFile = new ReadOnlyTsFile(fileReader);
+            QueryDataSet dataSet = readOnlyTsFile.query(queryExpression);
+            int i = 0;
+            String[] expected =
+                    new String[] {
+                        "1\t1.2\t20", "3\t1.4\t21", "4\t1.2\t20", "6\t7.2\t10", "7\t6.2\t20"
+                    };
+            while (dataSet.hasNext()) {
+                Assert.assertEquals(expected[i], dataSet.next().toString());
+                i++;
+            }
+            Assert.assertEquals(5, i);
+        }
+    }
 
-    tsRecord = new TSRecord(4, "d1");
-    dPoint1 = new FloatDataPoint("s1", 1.2f);
-    dPoint2 = new IntDataPoint("s2", 20);
-    dPoint3 = new IntDataPoint("s3", 51);
-    tsRecord.addTuple(dPoint1);
-    tsRecord.addTuple(dPoint2);
-    tsRecord.addTuple(dPoint3);
-    tsFileWriter.write(tsRecord);
+    private void writeFile(String tsfilePath) throws IOException, WriteProcessException {
+        File f = new File(tsfilePath);
+        if (f.exists()) {
+            f.delete();
+        }
 
-    tsRecord = new TSRecord(6, "d1");
-    dPoint1 = new FloatDataPoint("s1", 7.2f);
-    dPoint2 = new IntDataPoint("s2", 10);
-    dPoint3 = new IntDataPoint("s3", 11);
-    tsRecord.addTuple(dPoint1);
-    tsRecord.addTuple(dPoint2);
-    tsRecord.addTuple(dPoint3);
-    tsFileWriter.write(tsRecord);
+        Schema schema = new Schema();
+        schema.extendTemplate(
+                TEMPLATE_NAME, new MeasurementSchema("s1", TSDataType.FLOAT, TSEncoding.RLE));
+        schema.extendTemplate(
+                TEMPLATE_NAME, new MeasurementSchema("s2", TSDataType.INT32, TSEncoding.TS_2DIFF));
+        schema.extendTemplate(
+                TEMPLATE_NAME, new MeasurementSchema("s3", TSDataType.INT32, TSEncoding.TS_2DIFF));
 
-    tsRecord = new TSRecord(7, "d1");
-    dPoint1 = new FloatDataPoint("s1", 6.2f);
-    dPoint2 = new IntDataPoint("s2", 20);
-    dPoint3 = new IntDataPoint("s3", 21);
-    tsRecord.addTuple(dPoint1);
-    tsRecord.addTuple(dPoint2);
-    tsRecord.addTuple(dPoint3);
-    tsFileWriter.write(tsRecord);
+        TsFileWriter tsFileWriter = new TsFileWriter(f, schema);
 
-    tsRecord = new TSRecord(8, "d1");
-    dPoint1 = new FloatDataPoint("s1", 9.2f);
-    dPoint2 = new IntDataPoint("s2", 30);
-    dPoint3 = new IntDataPoint("s3", 31);
-    tsRecord.addTuple(dPoint1);
-    tsRecord.addTuple(dPoint2);
-    tsRecord.addTuple(dPoint3);
-    tsFileWriter.write(tsRecord);
+        // construct TSRecord
+        TSRecord tsRecord = new TSRecord(1, "d1");
+        DataPoint dPoint1 = new FloatDataPoint("s1", 1.2f);
+        DataPoint dPoint2 = new IntDataPoint("s2", 20);
+        tsRecord.addTuple(dPoint1);
+        tsRecord.addTuple(dPoint2);
 
-    // close TsFile
-    tsFileWriter.close();
-  }
+        // write a TSRecord to TsFile
+        tsFileWriter.write(tsRecord);
+
+        tsRecord = new TSRecord(2, "d1");
+        dPoint2 = new IntDataPoint("s2", 20);
+        DataPoint dPoint3 = new IntDataPoint("s3", 50);
+        tsRecord.addTuple(dPoint2);
+        tsRecord.addTuple(dPoint3);
+        tsFileWriter.write(tsRecord);
+
+        tsRecord = new TSRecord(3, "d1");
+        dPoint1 = new FloatDataPoint("s1", 1.4f);
+        dPoint2 = new IntDataPoint("s2", 21);
+        tsRecord.addTuple(dPoint1);
+        tsRecord.addTuple(dPoint2);
+        tsFileWriter.write(tsRecord);
+
+        tsRecord = new TSRecord(4, "d1");
+        dPoint1 = new FloatDataPoint("s1", 1.2f);
+        dPoint2 = new IntDataPoint("s2", 20);
+        dPoint3 = new IntDataPoint("s3", 51);
+        tsRecord.addTuple(dPoint1);
+        tsRecord.addTuple(dPoint2);
+        tsRecord.addTuple(dPoint3);
+        tsFileWriter.write(tsRecord);
+
+        tsRecord = new TSRecord(6, "d1");
+        dPoint1 = new FloatDataPoint("s1", 7.2f);
+        dPoint2 = new IntDataPoint("s2", 10);
+        dPoint3 = new IntDataPoint("s3", 11);
+        tsRecord.addTuple(dPoint1);
+        tsRecord.addTuple(dPoint2);
+        tsRecord.addTuple(dPoint3);
+        tsFileWriter.write(tsRecord);
+
+        tsRecord = new TSRecord(7, "d1");
+        dPoint1 = new FloatDataPoint("s1", 6.2f);
+        dPoint2 = new IntDataPoint("s2", 20);
+        dPoint3 = new IntDataPoint("s3", 21);
+        tsRecord.addTuple(dPoint1);
+        tsRecord.addTuple(dPoint2);
+        tsRecord.addTuple(dPoint3);
+        tsFileWriter.write(tsRecord);
+
+        tsRecord = new TSRecord(8, "d1");
+        dPoint1 = new FloatDataPoint("s1", 9.2f);
+        dPoint2 = new IntDataPoint("s2", 30);
+        dPoint3 = new IntDataPoint("s3", 31);
+        tsRecord.addTuple(dPoint1);
+        tsRecord.addTuple(dPoint2);
+        tsRecord.addTuple(dPoint3);
+        tsFileWriter.write(tsRecord);
+
+        // close TsFile
+        tsFileWriter.close();
+    }
 }

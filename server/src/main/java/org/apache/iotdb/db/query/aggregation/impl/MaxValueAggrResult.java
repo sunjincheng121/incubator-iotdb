@@ -31,84 +31,80 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public class MaxValueAggrResult extends AggregateResult {
 
-  public MaxValueAggrResult(TSDataType dataType) {
-    super(dataType, AggregationType.MAX_VALUE);
-    reset();
-  }
-
-  @Override
-  public Object getResult() {
-    return hasCandidateResult() ? getValue() : null;
-  }
-
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    Comparable<Object> maxVal = (Comparable<Object>) statistics.getMaxValue();
-    updateResult(maxVal);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage) throws IOException {
-    updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
-    Comparable<Object> maxVal = null;
-
-    while (dataInThisPage.hasCurrent()
-        && dataInThisPage.currentTime() < maxBound
-        && dataInThisPage.currentTime() >= minBound) {
-      if (maxVal == null || maxVal.compareTo(dataInThisPage.currentValue()) < 0) {
-        maxVal = (Comparable<Object>) dataInThisPage.currentValue();
-      }
-      dataInThisPage.next();
+    public MaxValueAggrResult(TSDataType dataType) {
+        super(dataType, AggregationType.MAX_VALUE);
+        reset();
     }
-    updateResult(maxVal);
-  }
 
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    Comparable<Object> maxVal = null;
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value == null) {
-        continue;
-      }
-      if (maxVal == null || maxVal.compareTo(value) < 0) {
-        maxVal = (Comparable<Object>) value;
-      }
+    @Override
+    public Object getResult() {
+        return hasCandidateResult() ? getValue() : null;
     }
-    updateResult(maxVal);
-  }
 
-  @Override
-  public boolean hasFinalResult() {
-    return false;
-  }
-
-  @Override
-  public void merge(AggregateResult another) {
-    this.updateResult((Comparable<Object>) another.getResult());
-  }
-
-  @Override
-  protected void deserializeSpecificFields(ByteBuffer buffer) {
-
-  }
-
-  @Override
-  protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
-
-  }
-
-  private void updateResult(Comparable<Object> maxVal) {
-    if (maxVal == null) {
-      return;
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        Comparable<Object> maxVal = (Comparable<Object>) statistics.getMaxValue();
+        updateResult(maxVal);
     }
-    if (!hasCandidateResult() || maxVal.compareTo(getValue()) > 0) {
-      setValue(maxVal);
+
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage) throws IOException {
+        updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
     }
-  }
+
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
+        Comparable<Object> maxVal = null;
+
+        while (dataInThisPage.hasCurrent()
+                && dataInThisPage.currentTime() < maxBound
+                && dataInThisPage.currentTime() >= minBound) {
+            if (maxVal == null || maxVal.compareTo(dataInThisPage.currentValue()) < 0) {
+                maxVal = (Comparable<Object>) dataInThisPage.currentValue();
+            }
+            dataInThisPage.next();
+        }
+        updateResult(maxVal);
+    }
+
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        Comparable<Object> maxVal = null;
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value == null) {
+                continue;
+            }
+            if (maxVal == null || maxVal.compareTo(value) < 0) {
+                maxVal = (Comparable<Object>) value;
+            }
+        }
+        updateResult(maxVal);
+    }
+
+    @Override
+    public boolean hasFinalResult() {
+        return false;
+    }
+
+    @Override
+    public void merge(AggregateResult another) {
+        this.updateResult((Comparable<Object>) another.getResult());
+    }
+
+    @Override
+    protected void deserializeSpecificFields(ByteBuffer buffer) {}
+
+    @Override
+    protected void serializeSpecificFields(OutputStream outputStream) throws IOException {}
+
+    private void updateResult(Comparable<Object> maxVal) {
+        if (maxVal == null) {
+            return;
+        }
+        if (!hasCandidateResult() || maxVal.compareTo(getValue()) > 0) {
+            setValue(maxVal);
+        }
+    }
 }

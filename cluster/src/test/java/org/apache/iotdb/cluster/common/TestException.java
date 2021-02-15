@@ -21,7 +21,7 @@ package org.apache.iotdb.cluster.common;
 
 public class TestException extends Exception {
 
-  public TestException() {
-    super("Don't worry, this exception is faked");
-  }
+    public TestException() {
+        super("Don't worry, this exception is faked");
+    }
 }

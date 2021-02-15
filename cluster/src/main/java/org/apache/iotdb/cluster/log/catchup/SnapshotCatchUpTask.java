@@ -44,110 +44,117 @@ import org.slf4j.LoggerFactory;
  */
 public class SnapshotCatchUpTask extends LogCatchUpTask implements Callable<Boolean> {
 
-  private static final Logger logger = LoggerFactory.getLogger(SnapshotCatchUpTask.class);
+    private static final Logger logger = LoggerFactory.getLogger(SnapshotCatchUpTask.class);
 
-  // sending a snapshot may take longer than normal communications
-  private static final long SEND_SNAPSHOT_WAIT_MS = ClusterDescriptor.getInstance().getConfig()
-      .getCatchUpTimeoutMS();
-  private Snapshot snapshot;
+    // sending a snapshot may take longer than normal communications
+    private static final long SEND_SNAPSHOT_WAIT_MS =
+            ClusterDescriptor.getInstance().getConfig().getCatchUpTimeoutMS();
+    private Snapshot snapshot;
 
-  SnapshotCatchUpTask(List<Log> logs, Snapshot snapshot, Node node, RaftMember raftMember) {
-    super(logs, node, raftMember);
-    this.snapshot = snapshot;
-  }
-
-  private void doSnapshotCatchUp()
-      throws TException, InterruptedException, LeaderUnknownException {
-    SendSnapshotRequest request = new SendSnapshotRequest();
-    if (raftMember.getHeader() != null) {
-      request.setHeader(raftMember.getHeader());
-    }
-    logger.info("Start to send snapshot to {}", node);
-    ByteBuffer data = snapshot.serialize();
-    if (logger.isInfoEnabled()) {
-      logger.info("Do snapshot catch up with size {}", data.array().length);
-    }
-    request.setSnapshotBytes(data);
-
-    synchronized (raftMember.getTerm()) {
-      // make sure this node is still a leader
-      if (raftMember.getCharacter() != NodeCharacter.LEADER) {
-        throw new LeaderUnknownException(raftMember.getAllNodes());
-      }
+    SnapshotCatchUpTask(List<Log> logs, Snapshot snapshot, Node node, RaftMember raftMember) {
+        super(logs, node, raftMember);
+        this.snapshot = snapshot;
     }
 
-    if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
-      abort = !sendSnapshotAsync(request);
-    } else {
-      abort = !sendSnapshotSync(request);
-    }
-  }
+    private void doSnapshotCatchUp()
+            throws TException, InterruptedException, LeaderUnknownException {
+        SendSnapshotRequest request = new SendSnapshotRequest();
+        if (raftMember.getHeader() != null) {
+            request.setHeader(raftMember.getHeader());
+        }
+        logger.info("Start to send snapshot to {}", node);
+        ByteBuffer data = snapshot.serialize();
+        if (logger.isInfoEnabled()) {
+            logger.info("Do snapshot catch up with size {}", data.array().length);
+        }
+        request.setSnapshotBytes(data);
 
-  @SuppressWarnings("java:S2274") // enable timeout
-  private boolean sendSnapshotAsync(SendSnapshotRequest request)
-      throws TException, InterruptedException {
-    AtomicBoolean succeed = new AtomicBoolean(false);
-    SnapshotCatchUpHandler handler = new SnapshotCatchUpHandler(succeed, node, snapshot);
-    AsyncClient client = raftMember.getAsyncClient(node);
-    if (client == null) {
-      logger.info("{}: client null for node {}", raftMember.getThisNode(), node);
-      abort = true;
-      return false;
+        synchronized (raftMember.getTerm()) {
+            // make sure this node is still a leader
+            if (raftMember.getCharacter() != NodeCharacter.LEADER) {
+                throw new LeaderUnknownException(raftMember.getAllNodes());
+            }
+        }
+
+        if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
+            abort = !sendSnapshotAsync(request);
+        } else {
+            abort = !sendSnapshotSync(request);
+        }
     }
 
-    logger.info("{}: the snapshot request size={}", raftMember.getName(),
-        request.getSnapshotBytes().length);
-    synchronized (succeed) {
-      client.sendSnapshot(request, handler);
-      raftMember.getLastCatchUpResponseTime().put(node, System.currentTimeMillis());
-      succeed.wait(SEND_SNAPSHOT_WAIT_MS);
-    }
-    if (logger.isInfoEnabled()) {
-      logger.info("send snapshot to node {} success {}", raftMember.getThisNode(), succeed.get());
-    }
-    return succeed.get();
-  }
+    @SuppressWarnings("java:S2274") // enable timeout
+    private boolean sendSnapshotAsync(SendSnapshotRequest request)
+            throws TException, InterruptedException {
+        AtomicBoolean succeed = new AtomicBoolean(false);
+        SnapshotCatchUpHandler handler = new SnapshotCatchUpHandler(succeed, node, snapshot);
+        AsyncClient client = raftMember.getAsyncClient(node);
+        if (client == null) {
+            logger.info("{}: client null for node {}", raftMember.getThisNode(), node);
+            abort = true;
+            return false;
+        }
 
-  private boolean sendSnapshotSync(SendSnapshotRequest request) throws TException {
-    logger.info("{}: sending a snapshot request size={} to {}", raftMember.getName(),
-        request.getSnapshotBytes().length, node);
-    Client client = raftMember.getSyncClient(node);
-    if (client == null) {
-      return false;
+        logger.info(
+                "{}: the snapshot request size={}",
+                raftMember.getName(),
+                request.getSnapshotBytes().length);
+        synchronized (succeed) {
+            client.sendSnapshot(request, handler);
+            raftMember.getLastCatchUpResponseTime().put(node, System.currentTimeMillis());
+            succeed.wait(SEND_SNAPSHOT_WAIT_MS);
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "send snapshot to node {} success {}", raftMember.getThisNode(), succeed.get());
+        }
+        return succeed.get();
     }
-    try {
-      try {
-        client.sendSnapshot(request);
-        logger.info("{}: snapshot is sent to {}", raftMember.getName(), node);
-        return true;
-      } catch (TException e) {
-        client.getInputProtocol().getTransport().close();
-        throw e;
-      }
-    } finally {
-      ClientUtils.putBackSyncClient(client);
-    }
-  }
 
-  @Override
-  public Boolean call() throws InterruptedException, TException, LeaderUnknownException {
-    doSnapshotCatchUp();
-    if (abort) {
-      logger.warn("{}: Snapshot catch up {} failed", raftMember.getName(), node);
-      raftMember.getLastCatchUpResponseTime().remove(node);
-      return false;
+    private boolean sendSnapshotSync(SendSnapshotRequest request) throws TException {
+        logger.info(
+                "{}: sending a snapshot request size={} to {}",
+                raftMember.getName(),
+                request.getSnapshotBytes().length,
+                node);
+        Client client = raftMember.getSyncClient(node);
+        if (client == null) {
+            return false;
+        }
+        try {
+            try {
+                client.sendSnapshot(request);
+                logger.info("{}: snapshot is sent to {}", raftMember.getName(), node);
+                return true;
+            } catch (TException e) {
+                client.getInputProtocol().getTransport().close();
+                throw e;
+            }
+        } finally {
+            ClientUtils.putBackSyncClient(client);
+        }
     }
-    logger
-        .info("{}: Snapshot catch up {} finished, begin to catch up log", raftMember.getName(),
-            node);
-    doLogCatchUp();
-    if (!abort) {
-      logger.info("{}: Catch up {} finished", raftMember.getName(), node);
-    } else {
-      logger.warn("{}: Log catch up {} failed", raftMember.getName(), node);
+
+    @Override
+    public Boolean call() throws InterruptedException, TException, LeaderUnknownException {
+        doSnapshotCatchUp();
+        if (abort) {
+            logger.warn("{}: Snapshot catch up {} failed", raftMember.getName(), node);
+            raftMember.getLastCatchUpResponseTime().remove(node);
+            return false;
+        }
+        logger.info(
+                "{}: Snapshot catch up {} finished, begin to catch up log",
+                raftMember.getName(),
+                node);
+        doLogCatchUp();
+        if (!abort) {
+            logger.info("{}: Catch up {} finished", raftMember.getName(), node);
+        } else {
+            logger.warn("{}: Log catch up {} failed", raftMember.getName(), node);
+        }
+        // the next catch up is enabled
+        raftMember.getLastCatchUpResponseTime().remove(node);
+        return !abort;
     }
-    // the next catch up is enabled
-    raftMember.getLastCatchUpResponseTime().remove(node);
-    return !abort;
-  }
 }

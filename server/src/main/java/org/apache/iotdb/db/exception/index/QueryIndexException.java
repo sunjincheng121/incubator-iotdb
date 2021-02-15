@@ -17,14 +17,13 @@
  */
 package org.apache.iotdb.db.exception.index;
 
-
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 
 public class QueryIndexException extends QueryProcessException {
 
-  private static final long serialVersionUID = 9019233783504576296L;
+    private static final long serialVersionUID = 9019233783504576296L;
 
-  public QueryIndexException(String message, int errorCode) {
-    super(message, errorCode);
-  }
+    public QueryIndexException(String message, int errorCode) {
+        super(message, errorCode);
+    }
 }

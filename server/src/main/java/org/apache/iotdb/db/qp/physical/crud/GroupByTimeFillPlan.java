@@ -25,18 +25,18 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 
 public class GroupByTimeFillPlan extends GroupByTimePlan {
 
-  private Map<TSDataType, IFill> fillTypes;
+    private Map<TSDataType, IFill> fillTypes;
 
-  public GroupByTimeFillPlan() {
-    super();
-    setOperatorType(Operator.OperatorType.GROUP_BY_FILL);
-  }
+    public GroupByTimeFillPlan() {
+        super();
+        setOperatorType(Operator.OperatorType.GROUP_BY_FILL);
+    }
 
-  public Map<TSDataType, IFill> getFillType() {
-    return fillTypes;
-  }
+    public Map<TSDataType, IFill> getFillType() {
+        return fillTypes;
+    }
 
-  public void setFillType(Map<TSDataType, IFill> fillTypes) {
-    this.fillTypes = fillTypes;
-  }
+    public void setFillType(Map<TSDataType, IFill> fillTypes) {
+        this.fillTypes = fillTypes;
+    }
 }

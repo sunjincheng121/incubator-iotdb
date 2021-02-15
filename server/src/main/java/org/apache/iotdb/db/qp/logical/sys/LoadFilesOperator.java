@@ -24,28 +24,27 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class LoadFilesOperator extends RootOperator {
 
-  private File file;
-  private boolean autoCreateSchema;
-  private int sgLevel;
+    private File file;
+    private boolean autoCreateSchema;
+    private int sgLevel;
 
-  public LoadFilesOperator(File file, boolean autoCreateSchema, int sgLevel) {
-    super(SQLConstant.TOK_LOAD_FILES);
-    this.file = file;
-    this.autoCreateSchema = autoCreateSchema;
-    this.sgLevel = sgLevel;
-    this.operatorType = OperatorType.LOAD_FILES;
-  }
+    public LoadFilesOperator(File file, boolean autoCreateSchema, int sgLevel) {
+        super(SQLConstant.TOK_LOAD_FILES);
+        this.file = file;
+        this.autoCreateSchema = autoCreateSchema;
+        this.sgLevel = sgLevel;
+        this.operatorType = OperatorType.LOAD_FILES;
+    }
 
+    public File getFile() {
+        return file;
+    }
 
-  public File getFile() {
-    return file;
-  }
+    public boolean isAutoCreateSchema() {
+        return autoCreateSchema;
+    }
 
-  public boolean isAutoCreateSchema() {
-    return autoCreateSchema;
-  }
-
-  public int getSgLevel() {
-    return sgLevel;
-  }
+    public int getSgLevel() {
+        return sgLevel;
+    }
 }

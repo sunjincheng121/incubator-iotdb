@@ -22,66 +22,63 @@ import org.apache.iotdb.db.exception.index.UnsupportedIndexTypeException;
 import org.apache.iotdb.tsfile.exception.NotImplementedException;
 
 public enum IndexType {
+    NO_INDEX,
+    RTREE_PAA,
+    ELB_INDEX,
+    KV_INDEX;
 
-  NO_INDEX,
-  RTREE_PAA,
-  ELB_INDEX,
-  KV_INDEX
-  ;
-
-  /**
-   * judge the index type.
-   *
-   * @param i an integer used to determine index type
-   * @return index type
-   */
-  public static IndexType deserialize(short i) {
-    switch (i) {
-      case 0:
-        return NO_INDEX;
-      case 1:
-        return RTREE_PAA;
-      case 2:
-        return ELB_INDEX;
-      case 3:
-        return KV_INDEX;
-      default:
-        throw new NotImplementedException("Given index is not implemented");
+    /**
+     * judge the index type.
+     *
+     * @param i an integer used to determine index type
+     * @return index type
+     */
+    public static IndexType deserialize(short i) {
+        switch (i) {
+            case 0:
+                return NO_INDEX;
+            case 1:
+                return RTREE_PAA;
+            case 2:
+                return ELB_INDEX;
+            case 3:
+                return KV_INDEX;
+            default:
+                throw new NotImplementedException("Given index is not implemented");
+        }
     }
-  }
 
-  public static int getSerializedSize() {
-    return Short.BYTES;
-  }
-
-  /**
-   * judge the index deserialize type.
-   *
-   * @return the integer used to determine index type
-   */
-  public short serialize() {
-    switch (this) {
-      case NO_INDEX:
-        return 0;
-      case RTREE_PAA:
-        return 1;
-      case ELB_INDEX:
-        return 2;
-      case KV_INDEX:
-        return 3;
-      default:
-        throw new NotImplementedException("Given index is not implemented");
+    public static int getSerializedSize() {
+        return Short.BYTES;
     }
-  }
 
-  public static IndexType getIndexType(String indexTypeString)
-      throws UnsupportedIndexTypeException {
-    String normalized = indexTypeString.toUpperCase();
-    try {
-      return IndexType.valueOf(normalized);
-    } catch (IllegalArgumentException e) {
-      throw new UnsupportedIndexTypeException(indexTypeString);
-
+    /**
+     * judge the index deserialize type.
+     *
+     * @return the integer used to determine index type
+     */
+    public short serialize() {
+        switch (this) {
+            case NO_INDEX:
+                return 0;
+            case RTREE_PAA:
+                return 1;
+            case ELB_INDEX:
+                return 2;
+            case KV_INDEX:
+                return 3;
+            default:
+                throw new NotImplementedException("Given index is not implemented");
+        }
     }
-  }
+
+    public static IndexType getIndexType(String indexTypeString)
+            throws UnsupportedIndexTypeException {
+        String normalized = indexTypeString.toUpperCase();
+        try {
+            return IndexType.valueOf(normalized);
+        } catch (IllegalArgumentException e) {
+            throw new UnsupportedIndexTypeException(indexTypeString);
+        }
+    }
 }

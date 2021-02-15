@@ -54,212 +54,216 @@ import org.apache.iotdb.tsfile.write.writer.RestorableTsFileIOWriter;
  */
 public class MergeResource {
 
-  private List<TsFileResource> seqFiles;
-  private List<TsFileResource> unseqFiles;
+    private List<TsFileResource> seqFiles;
+    private List<TsFileResource> unseqFiles;
 
-  private Map<TsFileResource, TsFileSequenceReader> fileReaderCache = new HashMap<>();
-  private Map<TsFileResource, RestorableTsFileIOWriter> fileWriterCache = new HashMap<>();
-  private Map<TsFileResource, List<Modification>> modificationCache = new HashMap<>();
-  private Map<PartialPath, MeasurementSchema> measurementSchemaMap = new HashMap<>(); //is this too waste?
-  private Map<MeasurementSchema, IChunkWriter> chunkWriterCache = new ConcurrentHashMap<>();
+    private Map<TsFileResource, TsFileSequenceReader> fileReaderCache = new HashMap<>();
+    private Map<TsFileResource, RestorableTsFileIOWriter> fileWriterCache = new HashMap<>();
+    private Map<TsFileResource, List<Modification>> modificationCache = new HashMap<>();
+    private Map<PartialPath, MeasurementSchema> measurementSchemaMap =
+            new HashMap<>(); // is this too waste?
+    private Map<MeasurementSchema, IChunkWriter> chunkWriterCache = new ConcurrentHashMap<>();
 
-  private long timeLowerBound = Long.MIN_VALUE;
+    private long timeLowerBound = Long.MIN_VALUE;
 
-  private boolean cacheDeviceMeta = false;
+    private boolean cacheDeviceMeta = false;
 
-  public MergeResource(List<TsFileResource> seqFiles, List<TsFileResource> unseqFiles) {
-    this.seqFiles = seqFiles.stream().filter(this::filterResource)
-        .collect(Collectors.toList());
-    this.unseqFiles = unseqFiles.stream().filter(this::filterResource)
-        .collect(Collectors.toList());
-  }
-
-  private boolean filterResource(TsFileResource res) {
-    return res.getTsFile().exists() && !res.isDeleted() && res.stillLives(timeLowerBound);
-  }
-
-  public MergeResource(Collection<TsFileResource> seqFiles, List<TsFileResource> unseqFiles,
-      long timeLowerBound) {
-    this.timeLowerBound = timeLowerBound;
-    this.seqFiles =
-        seqFiles.stream().filter(this::filterResource).collect(Collectors.toList());
-    this.unseqFiles =
-        unseqFiles.stream().filter(this::filterResource).collect(Collectors.toList());
-  }
-
-  public void clear() throws IOException {
-    for (TsFileSequenceReader sequenceReader : fileReaderCache.values()) {
-      sequenceReader.close();
-    }
-    for (RestorableTsFileIOWriter writer : fileWriterCache.values()) {
-      writer.close();
+    public MergeResource(List<TsFileResource> seqFiles, List<TsFileResource> unseqFiles) {
+        this.seqFiles = seqFiles.stream().filter(this::filterResource).collect(Collectors.toList());
+        this.unseqFiles =
+                unseqFiles.stream().filter(this::filterResource).collect(Collectors.toList());
     }
 
-    fileReaderCache.clear();
-    fileWriterCache.clear();
-    modificationCache.clear();
-    measurementSchemaMap.clear();
-    chunkWriterCache.clear();
-  }
-
-  public MeasurementSchema getSchema(PartialPath path) {
-    return measurementSchemaMap.get(path);
-  }
-
-  /**
-   * Construct a new or get an existing RestorableTsFileIOWriter of a merge temp file for a SeqFile.
-   * The path of the merge temp file will be the seqFile's + ".merge".
-   *
-   * @return A RestorableTsFileIOWriter of a merge temp file for a SeqFile.
-   */
-  public RestorableTsFileIOWriter getMergeFileWriter(TsFileResource resource) throws IOException {
-    RestorableTsFileIOWriter writer = fileWriterCache.get(resource);
-    if (writer == null) {
-      writer = new RestorableTsFileIOWriter(FSFactoryProducer.getFSFactory()
-          .getFile(resource.getTsFilePath() + MERGE_SUFFIX));
-      fileWriterCache.put(resource, writer);
+    private boolean filterResource(TsFileResource res) {
+        return res.getTsFile().exists() && !res.isDeleted() && res.stillLives(timeLowerBound);
     }
-    return writer;
-  }
 
-  /**
-   * Query ChunkMetadata of a timeseries from the given TsFile (seq or unseq). The ChunkMetadata is
-   * not cached since it is usually huge.
-   *
-   * @param path name of the time series
-   */
-  public List<ChunkMetadata> queryChunkMetadata(PartialPath path, TsFileResource seqFile)
-      throws IOException {
-    TsFileSequenceReader sequenceReader = getFileReader(seqFile);
-    return sequenceReader.getChunkMetadataList(path);
-  }
-
-  /**
-   * Construct the a new or get an existing TsFileSequenceReader of a TsFile.
-   *
-   * @return a TsFileSequenceReader
-   */
-  public TsFileSequenceReader getFileReader(TsFileResource tsFileResource) throws IOException {
-    TsFileSequenceReader reader = fileReaderCache.get(tsFileResource);
-    if (reader == null) {
-      reader = new TsFileSequenceReader(tsFileResource.getTsFilePath(), true, cacheDeviceMeta);
-      fileReaderCache.put(tsFileResource, reader);
+    public MergeResource(
+            Collection<TsFileResource> seqFiles,
+            List<TsFileResource> unseqFiles,
+            long timeLowerBound) {
+        this.timeLowerBound = timeLowerBound;
+        this.seqFiles = seqFiles.stream().filter(this::filterResource).collect(Collectors.toList());
+        this.unseqFiles =
+                unseqFiles.stream().filter(this::filterResource).collect(Collectors.toList());
     }
-    return reader;
-  }
 
-  /**
-   * Construct UnseqResourceMergeReaders of for each timeseries over all seqFiles. The readers are
-   * not cached since the method is only called once for each timeseries.
-   *
-   * @param paths names of the timeseries
-   * @return an array of UnseqResourceMergeReaders each corresponding to a timeseries in paths
-   */
-  public IPointReader[] getUnseqReaders(List<PartialPath> paths) throws IOException {
-    List<Chunk>[] pathChunks = MergeUtils.collectUnseqChunks(paths, unseqFiles, this);
-    IPointReader[] ret = new IPointReader[paths.size()];
-    for (int i = 0; i < paths.size(); i++) {
-      TSDataType dataType = getSchema(paths.get(i)).getType();
-      ret[i] = new CachedUnseqResourceMergeReader(pathChunks[i], dataType);
+    public void clear() throws IOException {
+        for (TsFileSequenceReader sequenceReader : fileReaderCache.values()) {
+            sequenceReader.close();
+        }
+        for (RestorableTsFileIOWriter writer : fileWriterCache.values()) {
+            writer.close();
+        }
+
+        fileReaderCache.clear();
+        fileWriterCache.clear();
+        modificationCache.clear();
+        measurementSchemaMap.clear();
+        chunkWriterCache.clear();
     }
-    return ret;
-  }
 
-  /**
-   * Construct the a new or get an existing ChunkWriter of a measurement. Different timeseries of
-   * the same measurement and data type shares the same instance.
-   */
-  public IChunkWriter getChunkWriter(MeasurementSchema measurementSchema) {
-    return chunkWriterCache.computeIfAbsent(measurementSchema, ChunkWriterImpl::new);
-  }
-
-  /**
-   * Get the modifications of a timeseries in the ModificationFile of a TsFile.
-   *
-   * @param path name of the time series
-   */
-  public List<Modification> getModifications(TsFileResource tsFileResource, PartialPath path) {
-    // copy from TsFileResource so queries are not affected
-    List<Modification> modifications = modificationCache.computeIfAbsent(tsFileResource,
-        resource -> new LinkedList<>(resource.getModFile().getModifications()));
-    List<Modification> pathModifications = new ArrayList<>();
-    Iterator<Modification> modificationIterator = modifications.iterator();
-    while (modificationIterator.hasNext()) {
-      Modification modification = modificationIterator.next();
-      if (modification.getPath().matchFullPath(path)) {
-        pathModifications.add(modification);
-      }
+    public MeasurementSchema getSchema(PartialPath path) {
+        return measurementSchemaMap.get(path);
     }
-    return pathModifications;
-  }
 
-  /**
-   * Remove and close the writer of the merge temp file of a SeqFile. The merge temp file is also
-   * deleted.
-   *
-   * @param tsFileResource the SeqFile
-   */
-  public void removeFileAndWriter(TsFileResource tsFileResource) throws IOException {
-    RestorableTsFileIOWriter newFileWriter = fileWriterCache.remove(tsFileResource);
-    if (newFileWriter != null) {
-      newFileWriter.close();
-      newFileWriter.getFile().delete();
+    /**
+     * Construct a new or get an existing RestorableTsFileIOWriter of a merge temp file for a
+     * SeqFile. The path of the merge temp file will be the seqFile's + ".merge".
+     *
+     * @return A RestorableTsFileIOWriter of a merge temp file for a SeqFile.
+     */
+    public RestorableTsFileIOWriter getMergeFileWriter(TsFileResource resource) throws IOException {
+        RestorableTsFileIOWriter writer = fileWriterCache.get(resource);
+        if (writer == null) {
+            writer =
+                    new RestorableTsFileIOWriter(
+                            FSFactoryProducer.getFSFactory()
+                                    .getFile(resource.getTsFilePath() + MERGE_SUFFIX));
+            fileWriterCache.put(resource, writer);
+        }
+        return writer;
     }
-  }
 
-  /**
-   * Remove and close the reader of the TsFile. The TsFile is NOT deleted.
-   *
-   * @param resource the SeqFile
-   */
-  public void removeFileReader(TsFileResource resource) throws IOException {
-    TsFileSequenceReader sequenceReader = fileReaderCache.remove(resource);
-    if (sequenceReader != null) {
-      sequenceReader.close();
+    /**
+     * Query ChunkMetadata of a timeseries from the given TsFile (seq or unseq). The ChunkMetadata
+     * is not cached since it is usually huge.
+     *
+     * @param path name of the time series
+     */
+    public List<ChunkMetadata> queryChunkMetadata(PartialPath path, TsFileResource seqFile)
+            throws IOException {
+        TsFileSequenceReader sequenceReader = getFileReader(seqFile);
+        return sequenceReader.getChunkMetadataList(path);
     }
-  }
 
-  public List<TsFileResource> getSeqFiles() {
-    return seqFiles;
-  }
-
-  public void setSeqFiles(List<TsFileResource> seqFiles) {
-    this.seqFiles = seqFiles;
-  }
-
-  public List<TsFileResource> getUnseqFiles() {
-    return unseqFiles;
-  }
-
-  public void setUnseqFiles(
-      List<TsFileResource> unseqFiles) {
-    this.unseqFiles = unseqFiles;
-  }
-
-  public void removeOutdatedSeqReaders() throws IOException {
-    Iterator<Entry<TsFileResource, TsFileSequenceReader>> entryIterator =
-        fileReaderCache.entrySet().iterator();
-    while (entryIterator.hasNext()) {
-      Entry<TsFileResource, TsFileSequenceReader> entry = entryIterator.next();
-      TsFileResource tsFile = entry.getKey();
-      if (!seqFiles.contains(tsFile)) {
-        TsFileSequenceReader reader = entry.getValue();
-        reader.close();
-        entryIterator.remove();
-      }
+    /**
+     * Construct the a new or get an existing TsFileSequenceReader of a TsFile.
+     *
+     * @return a TsFileSequenceReader
+     */
+    public TsFileSequenceReader getFileReader(TsFileResource tsFileResource) throws IOException {
+        TsFileSequenceReader reader = fileReaderCache.get(tsFileResource);
+        if (reader == null) {
+            reader =
+                    new TsFileSequenceReader(tsFileResource.getTsFilePath(), true, cacheDeviceMeta);
+            fileReaderCache.put(tsFileResource, reader);
+        }
+        return reader;
     }
-  }
 
-  public void setCacheDeviceMeta(boolean cacheDeviceMeta) {
-    this.cacheDeviceMeta = cacheDeviceMeta;
-  }
+    /**
+     * Construct UnseqResourceMergeReaders of for each timeseries over all seqFiles. The readers are
+     * not cached since the method is only called once for each timeseries.
+     *
+     * @param paths names of the timeseries
+     * @return an array of UnseqResourceMergeReaders each corresponding to a timeseries in paths
+     */
+    public IPointReader[] getUnseqReaders(List<PartialPath> paths) throws IOException {
+        List<Chunk>[] pathChunks = MergeUtils.collectUnseqChunks(paths, unseqFiles, this);
+        IPointReader[] ret = new IPointReader[paths.size()];
+        for (int i = 0; i < paths.size(); i++) {
+            TSDataType dataType = getSchema(paths.get(i)).getType();
+            ret[i] = new CachedUnseqResourceMergeReader(pathChunks[i], dataType);
+        }
+        return ret;
+    }
 
-  public void setMeasurementSchemaMap(Map<PartialPath, MeasurementSchema> measurementSchemaMap) {
-    this.measurementSchemaMap = measurementSchemaMap;
-  }
+    /**
+     * Construct the a new or get an existing ChunkWriter of a measurement. Different timeseries of
+     * the same measurement and data type shares the same instance.
+     */
+    public IChunkWriter getChunkWriter(MeasurementSchema measurementSchema) {
+        return chunkWriterCache.computeIfAbsent(measurementSchema, ChunkWriterImpl::new);
+    }
 
-  public void clearChunkWriterCache() {
-    this.chunkWriterCache.clear();
-  }
+    /**
+     * Get the modifications of a timeseries in the ModificationFile of a TsFile.
+     *
+     * @param path name of the time series
+     */
+    public List<Modification> getModifications(TsFileResource tsFileResource, PartialPath path) {
+        // copy from TsFileResource so queries are not affected
+        List<Modification> modifications =
+                modificationCache.computeIfAbsent(
+                        tsFileResource,
+                        resource -> new LinkedList<>(resource.getModFile().getModifications()));
+        List<Modification> pathModifications = new ArrayList<>();
+        Iterator<Modification> modificationIterator = modifications.iterator();
+        while (modificationIterator.hasNext()) {
+            Modification modification = modificationIterator.next();
+            if (modification.getPath().matchFullPath(path)) {
+                pathModifications.add(modification);
+            }
+        }
+        return pathModifications;
+    }
 
+    /**
+     * Remove and close the writer of the merge temp file of a SeqFile. The merge temp file is also
+     * deleted.
+     *
+     * @param tsFileResource the SeqFile
+     */
+    public void removeFileAndWriter(TsFileResource tsFileResource) throws IOException {
+        RestorableTsFileIOWriter newFileWriter = fileWriterCache.remove(tsFileResource);
+        if (newFileWriter != null) {
+            newFileWriter.close();
+            newFileWriter.getFile().delete();
+        }
+    }
+
+    /**
+     * Remove and close the reader of the TsFile. The TsFile is NOT deleted.
+     *
+     * @param resource the SeqFile
+     */
+    public void removeFileReader(TsFileResource resource) throws IOException {
+        TsFileSequenceReader sequenceReader = fileReaderCache.remove(resource);
+        if (sequenceReader != null) {
+            sequenceReader.close();
+        }
+    }
+
+    public List<TsFileResource> getSeqFiles() {
+        return seqFiles;
+    }
+
+    public void setSeqFiles(List<TsFileResource> seqFiles) {
+        this.seqFiles = seqFiles;
+    }
+
+    public List<TsFileResource> getUnseqFiles() {
+        return unseqFiles;
+    }
+
+    public void setUnseqFiles(List<TsFileResource> unseqFiles) {
+        this.unseqFiles = unseqFiles;
+    }
+
+    public void removeOutdatedSeqReaders() throws IOException {
+        Iterator<Entry<TsFileResource, TsFileSequenceReader>> entryIterator =
+                fileReaderCache.entrySet().iterator();
+        while (entryIterator.hasNext()) {
+            Entry<TsFileResource, TsFileSequenceReader> entry = entryIterator.next();
+            TsFileResource tsFile = entry.getKey();
+            if (!seqFiles.contains(tsFile)) {
+                TsFileSequenceReader reader = entry.getValue();
+                reader.close();
+                entryIterator.remove();
+            }
+        }
+    }
+
+    public void setCacheDeviceMeta(boolean cacheDeviceMeta) {
+        this.cacheDeviceMeta = cacheDeviceMeta;
+    }
+
+    public void setMeasurementSchemaMap(Map<PartialPath, MeasurementSchema> measurementSchemaMap) {
+        this.measurementSchemaMap = measurementSchemaMap;
+    }
+
+    public void clearChunkWriterCache() {
+        this.chunkWriterCache.clear();
+    }
 }

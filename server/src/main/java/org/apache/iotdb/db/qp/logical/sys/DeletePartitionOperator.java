@@ -25,27 +25,27 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class DeletePartitionOperator extends RootOperator {
 
-  private PartialPath storageGroupName;
-  private Set<Long> partitionIds;
+    private PartialPath storageGroupName;
+    private Set<Long> partitionIds;
 
-  public DeletePartitionOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.DELETE_PARTITION;
-  }
+    public DeletePartitionOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.DELETE_PARTITION;
+    }
 
-  public void setStorageGroupName(PartialPath storageGroupName) {
-    this.storageGroupName = storageGroupName;
-  }
+    public void setStorageGroupName(PartialPath storageGroupName) {
+        this.storageGroupName = storageGroupName;
+    }
 
-  public void setPartitionIds(Set<Long> partitionIds) {
-    this.partitionIds = partitionIds;
-  }
+    public void setPartitionIds(Set<Long> partitionIds) {
+        this.partitionIds = partitionIds;
+    }
 
-  public PartialPath getStorageGroupName() {
-    return storageGroupName;
-  }
+    public PartialPath getStorageGroupName() {
+        return storageGroupName;
+    }
 
-  public Set<Long> getPartitionId() {
-    return partitionIds;
-  }
+    public Set<Long> getPartitionId() {
+        return partitionIds;
+    }
 }

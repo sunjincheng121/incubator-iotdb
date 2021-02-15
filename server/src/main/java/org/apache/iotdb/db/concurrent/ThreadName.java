@@ -19,39 +19,39 @@
 package org.apache.iotdb.db.concurrent;
 
 public enum ThreadName {
-  METRICS_SERVICE("Metrics-ServerServiceImpl"),
-  RPC_SERVICE("RPC-ServerServiceImpl"),
-  RPC_CLIENT("RPC-Client"),
-  MERGE_SERVICE("Merge-ServerServiceImpl"),
-  CLOSE_MERGE_SERVICE("Close-Merge-ServerServiceImpl"),
-  CLOSE_MERGE_DAEMON("Close-Merge-Daemon-Thread"),
-  CLOSE_DAEMON("Close-Daemon-Thread"),
-  MERGE_DAEMON("Merge-Daemon-Thread"),
-  MEMORY_MONITOR("IoTDB-MemMonitor-Thread"),
-  MEMORY_STATISTICS("IoTDB-MemStatistic-Thread"),
-  FLUSH_PARTIAL_POLICY("IoTDB-FlushPartialPolicy-Thread"),
-  FORCE_FLUSH_ALL_POLICY("IoTDB-ForceFlushAllPolicy-Thread"),
-  STAT_MONITOR("StatMonitor-ServerServiceImpl"),
-  FLUSH_SERVICE("Flush-ServerServiceImpl"),
-  FLUSH_SUB_TASK_SERVICE("Flush-SubTask-ServerServiceImpl"),
-  COMPACTION_SERVICE("Compaction-ServerServiceImpl"),
-  WAL_DAEMON("IoTDB-MultiFileLogNodeManager-Sync-Thread"),
-  WAL_FORCE_DAEMON("IoTDB-MultiFileLogNodeManager-Force-Thread"),
-  INDEX_SERVICE("Index-ServerServiceImpl"),
-  SYNC_CLIENT("Sync-Client"),
-  SYNC_SERVER("Sync-Server"),
-  SYNC_MONITOR("Sync-Monitor"),
-  LOAD_TSFILE("Load TsFile"),
-  TIME_COST_STATISTIC("TIME_COST_STATISTIC"),
-  QUERY_SERVICE("Query-ServerServiceImpl");
+    METRICS_SERVICE("Metrics-ServerServiceImpl"),
+    RPC_SERVICE("RPC-ServerServiceImpl"),
+    RPC_CLIENT("RPC-Client"),
+    MERGE_SERVICE("Merge-ServerServiceImpl"),
+    CLOSE_MERGE_SERVICE("Close-Merge-ServerServiceImpl"),
+    CLOSE_MERGE_DAEMON("Close-Merge-Daemon-Thread"),
+    CLOSE_DAEMON("Close-Daemon-Thread"),
+    MERGE_DAEMON("Merge-Daemon-Thread"),
+    MEMORY_MONITOR("IoTDB-MemMonitor-Thread"),
+    MEMORY_STATISTICS("IoTDB-MemStatistic-Thread"),
+    FLUSH_PARTIAL_POLICY("IoTDB-FlushPartialPolicy-Thread"),
+    FORCE_FLUSH_ALL_POLICY("IoTDB-ForceFlushAllPolicy-Thread"),
+    STAT_MONITOR("StatMonitor-ServerServiceImpl"),
+    FLUSH_SERVICE("Flush-ServerServiceImpl"),
+    FLUSH_SUB_TASK_SERVICE("Flush-SubTask-ServerServiceImpl"),
+    COMPACTION_SERVICE("Compaction-ServerServiceImpl"),
+    WAL_DAEMON("IoTDB-MultiFileLogNodeManager-Sync-Thread"),
+    WAL_FORCE_DAEMON("IoTDB-MultiFileLogNodeManager-Force-Thread"),
+    INDEX_SERVICE("Index-ServerServiceImpl"),
+    SYNC_CLIENT("Sync-Client"),
+    SYNC_SERVER("Sync-Server"),
+    SYNC_MONITOR("Sync-Monitor"),
+    LOAD_TSFILE("Load TsFile"),
+    TIME_COST_STATISTIC("TIME_COST_STATISTIC"),
+    QUERY_SERVICE("Query-ServerServiceImpl");
 
-  private String name;
+    private String name;
 
-  ThreadName(String name) {
-    this.name = name;
-  }
+    ThreadName(String name) {
+        this.name = name;
+    }
 
-  public String getName() {
-    return name;
-  }
+    public String getName() {
+        return name;
+    }
 }

@@ -22,16 +22,18 @@ import org.apache.iotdb.rpc.TSStatusCode;
 
 public class SyncDeviceOwnerConflictException extends IoTDBException {
 
-  private static final long serialVersionUID = -5037926672199248044L;
+    private static final long serialVersionUID = -5037926672199248044L;
 
-  public SyncDeviceOwnerConflictException(String message) {
-    super(message, TSStatusCode.SYNC_DEVICE_OWNER_CONFLICT_ERROR.getStatusCode());
-  }
+    public SyncDeviceOwnerConflictException(String message) {
+        super(message, TSStatusCode.SYNC_DEVICE_OWNER_CONFLICT_ERROR.getStatusCode());
+    }
 
-  public SyncDeviceOwnerConflictException(String device, String correctOwner,
-      String conflictOwner) {
-    super(String
-        .format("Device: [%s], correct owner: [%s], conflict owner: [%s]", device, correctOwner,
-            conflictOwner), TSStatusCode.SYNC_DEVICE_OWNER_CONFLICT_ERROR.getStatusCode());
-  }
+    public SyncDeviceOwnerConflictException(
+            String device, String correctOwner, String conflictOwner) {
+        super(
+                String.format(
+                        "Device: [%s], correct owner: [%s], conflict owner: [%s]",
+                        device, correctOwner, conflictOwner),
+                TSStatusCode.SYNC_DEVICE_OWNER_CONFLICT_ERROR.getStatusCode());
+    }
 }

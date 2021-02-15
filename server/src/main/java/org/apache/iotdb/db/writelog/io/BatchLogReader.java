@@ -33,50 +33,51 @@ import org.slf4j.LoggerFactory;
  * BatchedLogReader reads logs from a binary batch of log in the format of ByteBuffer. The
  * ByteBuffer must be readable.
  */
-public class BatchLogReader implements ILogReader{
+public class BatchLogReader implements ILogReader {
 
-  private static Logger logger = LoggerFactory.getLogger(BatchLogReader.class);
+    private static Logger logger = LoggerFactory.getLogger(BatchLogReader.class);
 
-  private Iterator<PhysicalPlan> planIterator;
+    private Iterator<PhysicalPlan> planIterator;
 
-  private boolean fileCorrupted = false;
+    private boolean fileCorrupted = false;
 
-  BatchLogReader(ByteBuffer buffer) {
-    List<PhysicalPlan> logs = readLogs(buffer);
-    this.planIterator = logs.iterator();
-  }
-
-  private List<PhysicalPlan> readLogs(ByteBuffer buffer) {
-    List<PhysicalPlan> plans = new ArrayList<>();
-    while (buffer.position() != buffer.limit()) {
-      try {
-        plans.add(PhysicalPlan.Factory.create(buffer));
-      } catch (IOException | IllegalPathException e) {
-        logger.error("Cannot deserialize PhysicalPlans from ByteBuffer, ignore remaining logs", e);
-        fileCorrupted = true;
-        break;
-      }
+    BatchLogReader(ByteBuffer buffer) {
+        List<PhysicalPlan> logs = readLogs(buffer);
+        this.planIterator = logs.iterator();
     }
-    return plans;
-  }
 
+    private List<PhysicalPlan> readLogs(ByteBuffer buffer) {
+        List<PhysicalPlan> plans = new ArrayList<>();
+        while (buffer.position() != buffer.limit()) {
+            try {
+                plans.add(PhysicalPlan.Factory.create(buffer));
+            } catch (IOException | IllegalPathException e) {
+                logger.error(
+                        "Cannot deserialize PhysicalPlans from ByteBuffer, ignore remaining logs",
+                        e);
+                fileCorrupted = true;
+                break;
+            }
+        }
+        return plans;
+    }
 
-  @Override
-  public void close() {
-    // nothing to be closed
-  }
+    @Override
+    public void close() {
+        // nothing to be closed
+    }
 
-  @Override
-  public boolean hasNext() {
-    return planIterator.hasNext();
-  }
+    @Override
+    public boolean hasNext() {
+        return planIterator.hasNext();
+    }
 
-  @Override
-  public PhysicalPlan next() {
-    return planIterator.next();
-  }
+    @Override
+    public PhysicalPlan next() {
+        return planIterator.next();
+    }
 
-  public boolean isFileCorrupted() {
-    return fileCorrupted;
-  }
+    public boolean isFileCorrupted() {
+        return fileCorrupted;
+    }
 }

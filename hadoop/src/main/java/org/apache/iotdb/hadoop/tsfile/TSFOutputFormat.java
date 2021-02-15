@@ -18,6 +18,8 @@
  */
 package org.apache.iotdb.hadoop.tsfile;
 
+import java.io.IOException;
+import java.util.Objects;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -28,30 +30,29 @@ import org.apache.iotdb.tsfile.write.schema.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Objects;
-
 public class TSFOutputFormat extends FileOutputFormat<NullWritable, HDFSTSRecord> {
 
-  private static final Logger logger = LoggerFactory.getLogger(TSFOutputFormat.class);
-  private static final String extension = "";
-  private static Schema schema;
+    private static final Logger logger = LoggerFactory.getLogger(TSFOutputFormat.class);
+    private static final String extension = "";
+    private static Schema schema;
 
-  public static Schema getSchema() {
-    return schema;
-  }
+    public static Schema getSchema() {
+        return schema;
+    }
 
-  public static void setSchema(Schema schema) {
-    TSFOutputFormat.schema = schema;
-  }
+    public static void setSchema(Schema schema) {
+        TSFOutputFormat.schema = schema;
+    }
 
-  @Override
-  public RecordWriter<NullWritable, HDFSTSRecord> getRecordWriter(TaskAttemptContext job)
-      throws IOException {
+    @Override
+    public RecordWriter<NullWritable, HDFSTSRecord> getRecordWriter(TaskAttemptContext job)
+            throws IOException {
 
-    Path outputPath = getDefaultWorkFile(job, extension);
-    logger.info("The task attempt id is {}, the output path is {}", job.getTaskAttemptID(),
-        outputPath);
-    return new TSFRecordWriter(job, outputPath, Objects.requireNonNull(schema));
-  }
+        Path outputPath = getDefaultWorkFile(job, extension);
+        logger.info(
+                "The task attempt id is {}, the output path is {}",
+                job.getTaskAttemptID(),
+                outputPath);
+        return new TSFRecordWriter(job, outputPath, Objects.requireNonNull(schema));
+    }
 }

@@ -34,34 +34,35 @@ import org.junit.Test;
 
 public class IoTDBTracingTest {
 
-  @BeforeClass
-  public static void setUp(){
-    EnvironmentUtils.closeStatMonitor();
-    EnvironmentUtils.envSetUp();
-  }
-
-  @AfterClass
-  public static void tearDown() throws Exception {
-    EnvironmentUtils.cleanEnv();
-  }
-
-  @Test
-  public void tracingTest() throws ClassNotFoundException {
-    Class.forName(Config.JDBC_DRIVER_NAME);
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
-        Statement statement = connection.createStatement()) {
-      IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
-      Assert.assertEquals(false, config.isEnablePerformanceTracing());
-
-      statement.execute("tracing on");
-      Assert.assertEquals(true, config.isEnablePerformanceTracing());
-
-      statement.execute("tracing off");
-      Assert.assertEquals(false, config.isEnablePerformanceTracing());
-    } catch (Exception e) {
-      e.printStackTrace();
-      fail(e.getMessage());
+    @BeforeClass
+    public static void setUp() {
+        EnvironmentUtils.closeStatMonitor();
+        EnvironmentUtils.envSetUp();
     }
-  }
+
+    @AfterClass
+    public static void tearDown() throws Exception {
+        EnvironmentUtils.cleanEnv();
+    }
+
+    @Test
+    public void tracingTest() throws ClassNotFoundException {
+        Class.forName(Config.JDBC_DRIVER_NAME);
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+                Statement statement = connection.createStatement()) {
+            IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
+            Assert.assertEquals(false, config.isEnablePerformanceTracing());
+
+            statement.execute("tracing on");
+            Assert.assertEquals(true, config.isEnablePerformanceTracing());
+
+            statement.execute("tracing off");
+            Assert.assertEquals(false, config.isEnablePerformanceTracing());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 }

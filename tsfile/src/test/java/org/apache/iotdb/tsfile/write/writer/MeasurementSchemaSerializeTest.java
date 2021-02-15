@@ -31,25 +31,25 @@ import org.junit.Test;
 
 public class MeasurementSchemaSerializeTest {
 
-  @Test
-  public void deserializeFromByteBufferTest() throws IOException {
-    MeasurementSchema standard = new MeasurementSchema("sensor_1",
-        TSDataType.FLOAT, TSEncoding.RLE);
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    standard.serializeTo(outputStream);
-    ByteBuffer byteBuffer = ByteBuffer.wrap(outputStream.toByteArray());
-    MeasurementSchema measurementSchema = MeasurementSchema.deserializeFrom(byteBuffer);
-    assertEquals(standard, measurementSchema);
-  }
+    @Test
+    public void deserializeFromByteBufferTest() throws IOException {
+        MeasurementSchema standard =
+                new MeasurementSchema("sensor_1", TSDataType.FLOAT, TSEncoding.RLE);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        standard.serializeTo(outputStream);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(outputStream.toByteArray());
+        MeasurementSchema measurementSchema = MeasurementSchema.deserializeFrom(byteBuffer);
+        assertEquals(standard, measurementSchema);
+    }
 
-  @Test
-  public void deserializeFromInputStreamTest() throws IOException {
-    MeasurementSchema standard = new MeasurementSchema("sensor_1",
-        TSDataType.FLOAT, TSEncoding.RLE);
-    ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-    standard.serializeTo(byteBuffer);
-    ByteArrayInputStream inputStream = new ByteArrayInputStream(byteBuffer.array());
-    MeasurementSchema measurementSchema = MeasurementSchema.deserializeFrom(inputStream);
-    assertEquals(standard, measurementSchema);
-  }
+    @Test
+    public void deserializeFromInputStreamTest() throws IOException {
+        MeasurementSchema standard =
+                new MeasurementSchema("sensor_1", TSDataType.FLOAT, TSEncoding.RLE);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+        standard.serializeTo(byteBuffer);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(byteBuffer.array());
+        MeasurementSchema measurementSchema = MeasurementSchema.deserializeFrom(inputStream);
+        assertEquals(standard, measurementSchema);
+    }
 }

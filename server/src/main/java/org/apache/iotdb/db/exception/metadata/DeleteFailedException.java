@@ -24,15 +24,16 @@ import org.apache.iotdb.rpc.TSStatusCode;
 
 public class DeleteFailedException extends MetadataException {
 
-  private String name;
+    private String name;
 
-  public DeleteFailedException(String name) {
-    super(String.format("Node [%s] is being used. Deletion failed.", name),
-            TSStatusCode.NODE_DELETE_FAILED_ERROR.getStatusCode());
-    this.name = name;
-  }
+    public DeleteFailedException(String name) {
+        super(
+                String.format("Node [%s] is being used. Deletion failed.", name),
+                TSStatusCode.NODE_DELETE_FAILED_ERROR.getStatusCode());
+        this.name = name;
+    }
 
-  public String getName() {
-    return name;
-  }
+    public String getName() {
+        return name;
+    }
 }

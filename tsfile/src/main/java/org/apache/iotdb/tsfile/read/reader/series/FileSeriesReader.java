@@ -27,25 +27,24 @@ import org.apache.iotdb.tsfile.read.filter.basic.Filter;
 import org.apache.iotdb.tsfile.read.reader.chunk.ChunkReader;
 
 /**
- * Series reader is used to query one series of one TsFile,
- * and this reader has a filter operating on the same series.
+ * Series reader is used to query one series of one TsFile, and this reader has a filter operating
+ * on the same series.
  */
 public class FileSeriesReader extends AbstractFileSeriesReader {
 
-  public FileSeriesReader(IChunkLoader chunkLoader,
-      List<ChunkMetadata> chunkMetadataList, Filter filter) {
-    super(chunkLoader, chunkMetadataList, filter);
-  }
+    public FileSeriesReader(
+            IChunkLoader chunkLoader, List<ChunkMetadata> chunkMetadataList, Filter filter) {
+        super(chunkLoader, chunkMetadataList, filter);
+    }
 
-  @Override
-  protected void initChunkReader(ChunkMetadata chunkMetaData) throws IOException {
-    Chunk chunk = chunkLoader.loadChunk(chunkMetaData);
-    this.chunkReader = new ChunkReader(chunk, filter);
-  }
+    @Override
+    protected void initChunkReader(ChunkMetadata chunkMetaData) throws IOException {
+        Chunk chunk = chunkLoader.loadChunk(chunkMetaData);
+        this.chunkReader = new ChunkReader(chunk, filter);
+    }
 
-  @Override
-  protected boolean chunkSatisfied(ChunkMetadata chunkMetaData) {
-    return filter == null || filter.satisfy(chunkMetaData.getStatistics());
-  }
-
+    @Override
+    protected boolean chunkSatisfied(ChunkMetadata chunkMetaData) {
+        return filter == null || filter.satisfy(chunkMetaData.getStatistics());
+    }
 }

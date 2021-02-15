@@ -25,10 +25,9 @@ import org.apache.iotdb.web.grafana.bean.TimeValues;
 
 public interface DatabaseConnectService {
 
-  int testConnection();
+    int testConnection();
 
-  List<TimeValues> querySeries(String s, Pair<ZonedDateTime, ZonedDateTime> timeRange);
+    List<TimeValues> querySeries(String s, Pair<ZonedDateTime, ZonedDateTime> timeRange);
 
-  List<String> getMetaData();
-
+    List<String> getMetaData();
 }

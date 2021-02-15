@@ -22,38 +22,36 @@ package org.apache.iotdb.tsfile.read.reader.series;
 import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
 import org.apache.iotdb.tsfile.read.common.BatchData;
 
-/**
- * this is for those series which has no data points
- */
+/** this is for those series which has no data points */
 public class EmptyFileSeriesReader extends AbstractFileSeriesReader {
-  BatchData data = new BatchData();
+    BatchData data = new BatchData();
 
-  public EmptyFileSeriesReader() {
-    super(null, null, null);
-  }
+    public EmptyFileSeriesReader() {
+        super(null, null, null);
+    }
 
-  @Override
-  protected void initChunkReader(ChunkMetadata chunkMetaData) {
-    //do nothing
-  }
+    @Override
+    protected void initChunkReader(ChunkMetadata chunkMetaData) {
+        // do nothing
+    }
 
-  @Override
-  protected boolean chunkSatisfied(ChunkMetadata chunkMetaData) {
-    return false;
-  }
+    @Override
+    protected boolean chunkSatisfied(ChunkMetadata chunkMetaData) {
+        return false;
+    }
 
-  @Override
-  public boolean hasNextBatch() {
-    return false;
-  }
+    @Override
+    public boolean hasNextBatch() {
+        return false;
+    }
 
-  @Override
-  public BatchData nextBatch() {
-    return data;
-  }
+    @Override
+    public BatchData nextBatch() {
+        return data;
+    }
 
-  @Override
-  public void close() {
-    data = null;
-  }
+    @Override
+    public void close() {
+        data = null;
+    }
 }

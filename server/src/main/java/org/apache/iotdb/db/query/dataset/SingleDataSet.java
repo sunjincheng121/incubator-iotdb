@@ -28,25 +28,25 @@ import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
 
 public class SingleDataSet extends QueryDataSet {
 
-  private RowRecord record;
-  private int i = 0;
+    private RowRecord record;
+    private int i = 0;
 
-  public SingleDataSet(List<PartialPath> paths, List<TSDataType> dataTypes) {
-    super(new ArrayList<>(paths), dataTypes);
-  }
+    public SingleDataSet(List<PartialPath> paths, List<TSDataType> dataTypes) {
+        super(new ArrayList<>(paths), dataTypes);
+    }
 
-  public void setRecord(RowRecord record) {
-    this.record = record;
-  }
+    public void setRecord(RowRecord record) {
+        this.record = record;
+    }
 
-  @Override
-  public boolean hasNextWithoutConstraint() throws IOException {
-    return i == 0;
-  }
+    @Override
+    public boolean hasNextWithoutConstraint() throws IOException {
+        return i == 0;
+    }
 
-  @Override
-  public RowRecord nextWithoutConstraint() throws IOException {
-    i++;
-    return record;
-  }
+    @Override
+    public RowRecord nextWithoutConstraint() throws IOException {
+        i++;
+        return record;
+    }
 }

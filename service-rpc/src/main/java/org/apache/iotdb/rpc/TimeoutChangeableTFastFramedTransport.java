@@ -24,32 +24,33 @@ import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportFactory;
 
-public class TimeoutChangeableTFastFramedTransport extends TElasticFramedTransport implements TimeoutChangeableTransport {
+public class TimeoutChangeableTFastFramedTransport extends TElasticFramedTransport
+        implements TimeoutChangeableTransport {
 
-  private TSocket underlyingSocket;
+    private TSocket underlyingSocket;
 
-  public TimeoutChangeableTFastFramedTransport(TSocket underlying) {
-    super(underlying);
-    this.underlyingSocket = underlying;
-  }
-
-  public void setTimeout(int timeout) {
-    underlyingSocket.setTimeout(timeout);
-  }
-
-  public int getTimeOut() throws SocketException {
-    return underlyingSocket.getSocket().getSoTimeout();
-  }
-
-  public static class Factory extends TTransportFactory {
-
-    @Override
-    public TTransport getTransport(TTransport trans) {
-      if (trans instanceof TSocket) {
-        return new TimeoutChangeableTFastFramedTransport((TSocket) trans);
-      } else {
-        return new TElasticFramedTransport(trans);
-      }
+    public TimeoutChangeableTFastFramedTransport(TSocket underlying) {
+        super(underlying);
+        this.underlyingSocket = underlying;
     }
-  }
+
+    public void setTimeout(int timeout) {
+        underlyingSocket.setTimeout(timeout);
+    }
+
+    public int getTimeOut() throws SocketException {
+        return underlyingSocket.getSocket().getSoTimeout();
+    }
+
+    public static class Factory extends TTransportFactory {
+
+        @Override
+        public TTransport getTransport(TTransport trans) {
+            if (trans instanceof TSocket) {
+                return new TimeoutChangeableTFastFramedTransport((TSocket) trans);
+            } else {
+                return new TElasticFramedTransport(trans);
+            }
+        }
+    }
 }

@@ -21,32 +21,32 @@ package org.apache.iotdb.db.qp.physical.sys;
 import org.apache.iotdb.db.metadata.PartialPath;
 
 /**
- * CountPlan is used to count time-series and count nodes.
- * COUNT_TIMESERIES if  using "COUNT TIMESERIES <Path>" and only this command supports wildcard.
- * COUNT_NODE_TIMESERIES if using "COUNT TIMESERIES <Path> GROUP BY LEVEL=<INTEGER>"
- * COUNT_NODE if using "COUNT NODES <Path> LEVEL=<INTEGER>"
+ * CountPlan is used to count time-series and count nodes. COUNT_TIMESERIES if using "COUNT
+ * TIMESERIES <Path>" and only this command supports wildcard. COUNT_NODE_TIMESERIES if using "COUNT
+ * TIMESERIES <Path> GROUP BY LEVEL=<INTEGER>" COUNT_NODE if using "COUNT NODES <Path>
+ * LEVEL=<INTEGER>"
  */
 public class CountPlan extends ShowPlan {
 
-  private PartialPath path;
-  private int level;
+    private PartialPath path;
+    private int level;
 
-  public CountPlan(ShowContentType showContentType, PartialPath path) {
-    super(showContentType);
-    this.path = path;
-  }
+    public CountPlan(ShowContentType showContentType, PartialPath path) {
+        super(showContentType);
+        this.path = path;
+    }
 
-  public CountPlan(ShowContentType showContentType, PartialPath path, int level) {
-    super(showContentType);
-    this.path = path;
-    this.level = level;
-  }
+    public CountPlan(ShowContentType showContentType, PartialPath path, int level) {
+        super(showContentType);
+        this.path = path;
+        this.level = level;
+    }
 
-  public int getLevel() {
-    return level;
-  }
+    public int getLevel() {
+        return level;
+    }
 
-  public PartialPath getPath() {
-    return path;
-  }
+    public PartialPath getPath() {
+        return path;
+    }
 }

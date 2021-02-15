@@ -27,29 +27,29 @@ import org.apache.iotdb.rpc.TSStatusCode;
  */
 public class MetadataException extends IoTDBException {
 
-  private static final long serialVersionUID = 3415275599091623570L;
+    private static final long serialVersionUID = 3415275599091623570L;
 
-  public MetadataException(Throwable cause) {
-    super(cause, TSStatusCode.METADATA_ERROR.getStatusCode());
-  }
+    public MetadataException(Throwable cause) {
+        super(cause, TSStatusCode.METADATA_ERROR.getStatusCode());
+    }
 
-  public MetadataException(Throwable cause, int errorCode) {
-    super(cause, errorCode);
-  }
+    public MetadataException(Throwable cause, int errorCode) {
+        super(cause, errorCode);
+    }
 
-  public MetadataException(String msg) {
-    super(msg, TSStatusCode.METADATA_ERROR.getStatusCode());
-  }
+    public MetadataException(String msg) {
+        super(msg, TSStatusCode.METADATA_ERROR.getStatusCode());
+    }
 
-  public MetadataException(String message, Throwable cause) {
-    super(message + cause.getMessage(), TSStatusCode.METADATA_ERROR.getStatusCode());
-  }
+    public MetadataException(String message, Throwable cause) {
+        super(message + cause.getMessage(), TSStatusCode.METADATA_ERROR.getStatusCode());
+    }
 
-  public MetadataException(IoTDBException exception) {
-    super(exception.getMessage(), exception.getErrorCode());
-  }
+    public MetadataException(IoTDBException exception) {
+        super(exception.getMessage(), exception.getErrorCode());
+    }
 
-  public MetadataException(String message, int errorCode) {
-    super(message, errorCode);
-  }
+    public MetadataException(String message, int errorCode) {
+        super(message, errorCode);
+    }
 }

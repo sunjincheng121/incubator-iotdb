@@ -21,7 +21,7 @@ package org.apache.iotdb.cluster.exception;
 
 public class GetEntriesWrongParametersException extends Exception {
 
-  public GetEntriesWrongParametersException(long low, long high) {
-    super(String.format("invalid getEntries: parameter: %d >= %d", low, high));
-  }
+    public GetEntriesWrongParametersException(long low, long high) {
+        super(String.format("invalid getEntries: parameter: %d >= %d", low, high));
+    }
 }

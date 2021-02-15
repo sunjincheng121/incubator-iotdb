@@ -27,58 +27,64 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class OperateFilePlan extends PhysicalPlan {
 
-  private File file;
-  private File targetDir;
-  private boolean autoCreateSchema;
-  private int sgLevel;
+    private File file;
+    private File targetDir;
+    private boolean autoCreateSchema;
+    private int sgLevel;
 
-  public OperateFilePlan(File file, OperatorType operatorType) {
-    super(false, operatorType);
-    this.file = file;
-  }
+    public OperateFilePlan(File file, OperatorType operatorType) {
+        super(false, operatorType);
+        this.file = file;
+    }
 
-  public OperateFilePlan(File file, OperatorType operatorType, boolean autoCreateSchema, int sgLevel) {
-    super(false, operatorType);
-    this.file = file;
-    this.autoCreateSchema = autoCreateSchema;
-    this.sgLevel = sgLevel;
-  }
+    public OperateFilePlan(
+            File file, OperatorType operatorType, boolean autoCreateSchema, int sgLevel) {
+        super(false, operatorType);
+        this.file = file;
+        this.autoCreateSchema = autoCreateSchema;
+        this.sgLevel = sgLevel;
+    }
 
-  public OperateFilePlan(File file, File targetDir, OperatorType operatorType) {
-    super(false, operatorType);
-    this.file = file;
-    this.targetDir = targetDir;
-  }
+    public OperateFilePlan(File file, File targetDir, OperatorType operatorType) {
+        super(false, operatorType);
+        this.file = file;
+        this.targetDir = targetDir;
+    }
 
-  @Override
-  public List<PartialPath> getPaths() {
-    return Collections.emptyList();
-  }
+    @Override
+    public List<PartialPath> getPaths() {
+        return Collections.emptyList();
+    }
 
-  public File getFile() {
-    return file;
-  }
+    public File getFile() {
+        return file;
+    }
 
-  public File getTargetDir() {
-    return targetDir;
-  }
+    public File getTargetDir() {
+        return targetDir;
+    }
 
-  public boolean isAutoCreateSchema() {
-    return autoCreateSchema;
-  }
+    public boolean isAutoCreateSchema() {
+        return autoCreateSchema;
+    }
 
-  public int getSgLevel() {
-    return sgLevel;
-  }
+    public int getSgLevel() {
+        return sgLevel;
+    }
 
-  @Override
-  public String toString() {
-    return "OperateFilePlan{" +
-        "file=" + file +
-        ", targetDir=" + targetDir +
-        ", autoCreateSchema=" + autoCreateSchema +
-        ", sgLevel=" + sgLevel +
-        ", operatorType=" + getOperatorType() +
-        '}';
-  }
+    @Override
+    public String toString() {
+        return "OperateFilePlan{"
+                + "file="
+                + file
+                + ", targetDir="
+                + targetDir
+                + ", autoCreateSchema="
+                + autoCreateSchema
+                + ", sgLevel="
+                + sgLevel
+                + ", operatorType="
+                + getOperatorType()
+                + '}';
+    }
 }

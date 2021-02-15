@@ -37,37 +37,40 @@ import org.slf4j.LoggerFactory;
 
 public class TsFileWriteToHDFS {
 
-  private static TSFileConfig config = TSFileDescriptor.getInstance().getConfig();
-  private static final Logger logger = LoggerFactory.getLogger(TsFileWriteToHDFS.class);
+    private static TSFileConfig config = TSFileDescriptor.getInstance().getConfig();
+    private static final Logger logger = LoggerFactory.getLogger(TsFileWriteToHDFS.class);
 
-  public static void main(String[] args) {
-    config.setTSFileStorageFs(FSType.HDFS);
+    public static void main(String[] args) {
+        config.setTSFileStorageFs(FSType.HDFS);
 
-    String path = "hdfs://localhost:9000/test.tsfile";
-    File f = FSFactoryProducer.getFSFactory().getFile(path);
-    try (TsFileWriter tsFileWriter = new TsFileWriter(f)) {
-      tsFileWriter.registerTimeseries(new Path(Constant.DEVICE_1, Constant.SENSOR_1),
-          new MeasurementSchema(Constant.SENSOR_1, TSDataType.INT64, TSEncoding.RLE));
-      tsFileWriter.registerTimeseries(new Path(Constant.DEVICE_1, Constant.SENSOR_2),
-          new MeasurementSchema(Constant.SENSOR_2, TSDataType.INT64, TSEncoding.RLE));
-      tsFileWriter.registerTimeseries(new Path(Constant.DEVICE_1, Constant.SENSOR_3),
-          new MeasurementSchema(Constant.SENSOR_3, TSDataType.INT64, TSEncoding.RLE));
+        String path = "hdfs://localhost:9000/test.tsfile";
+        File f = FSFactoryProducer.getFSFactory().getFile(path);
+        try (TsFileWriter tsFileWriter = new TsFileWriter(f)) {
+            tsFileWriter.registerTimeseries(
+                    new Path(Constant.DEVICE_1, Constant.SENSOR_1),
+                    new MeasurementSchema(Constant.SENSOR_1, TSDataType.INT64, TSEncoding.RLE));
+            tsFileWriter.registerTimeseries(
+                    new Path(Constant.DEVICE_1, Constant.SENSOR_2),
+                    new MeasurementSchema(Constant.SENSOR_2, TSDataType.INT64, TSEncoding.RLE));
+            tsFileWriter.registerTimeseries(
+                    new Path(Constant.DEVICE_1, Constant.SENSOR_3),
+                    new MeasurementSchema(Constant.SENSOR_3, TSDataType.INT64, TSEncoding.RLE));
 
-      // construct TSRecord
-      for (int i = 0; i < 100; i++) {
-        TSRecord tsRecord = new TSRecord(i, Constant.DEVICE_1);
-        DataPoint dPoint1 = new LongDataPoint(Constant.SENSOR_1, i);
-        DataPoint dPoint2 = new LongDataPoint(Constant.SENSOR_2, i);
-        DataPoint dPoint3 = new LongDataPoint(Constant.SENSOR_3, i);
-        tsRecord.addTuple(dPoint1);
-        tsRecord.addTuple(dPoint2);
-        tsRecord.addTuple(dPoint3);
+            // construct TSRecord
+            for (int i = 0; i < 100; i++) {
+                TSRecord tsRecord = new TSRecord(i, Constant.DEVICE_1);
+                DataPoint dPoint1 = new LongDataPoint(Constant.SENSOR_1, i);
+                DataPoint dPoint2 = new LongDataPoint(Constant.SENSOR_2, i);
+                DataPoint dPoint3 = new LongDataPoint(Constant.SENSOR_3, i);
+                tsRecord.addTuple(dPoint1);
+                tsRecord.addTuple(dPoint2);
+                tsRecord.addTuple(dPoint3);
 
-        // write TSRecord
-        tsFileWriter.write(tsRecord);
-      }
-    } catch (Exception e) {
-      logger.error("Failed to write TsFile on HDFS. {}", e.getMessage());
+                // write TSRecord
+                tsFileWriter.write(tsRecord);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to write TsFile on HDFS. {}", e.getMessage());
+        }
     }
-  }
 }

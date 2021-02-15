@@ -23,54 +23,72 @@ import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
 
 public class MathUtils {
 
-  private MathUtils() {
-    throw new IllegalStateException("Utility class");
-  }
-  /**
-   * @param data data should be less than Long.MAX_VALUE. otherwise Math.round() will return wrong
-   * value.
-   */
-  public static float roundWithGivenPrecision(float data, int size) {
-    if (size == 0) {
-      return Math.round(data);
+    private MathUtils() {
+        throw new IllegalStateException("Utility class");
     }
-    return Math.round(data)
-        + Math.round(((data - Math.round(data)) *  Math.pow(10, size)))
-        / (float) Math.pow(10, size);
-  }
+    /**
+     * @param data data should be less than Long.MAX_VALUE. otherwise Math.round() will return wrong
+     *     value.
+     */
+    public static float roundWithGivenPrecision(float data, int size) {
+        if (size == 0) {
+            return Math.round(data);
+        }
+        return Math.round(data)
+                + Math.round(((data - Math.round(data)) * Math.pow(10, size)))
+                        / (float) Math.pow(10, size);
+    }
 
-  public static float roundWithGivenPrecision(float data) {
-    if (TSFileDescriptor.getInstance().getConfig().getFloatPrecision() == 0) {
-      return Math.round(data);
+    public static float roundWithGivenPrecision(float data) {
+        if (TSFileDescriptor.getInstance().getConfig().getFloatPrecision() == 0) {
+            return Math.round(data);
+        }
+        return Math.round(data)
+                + Math.round(
+                                ((data - Math.round(data))
+                                        * (float)
+                                                Math.pow(
+                                                        10,
+                                                        TSFileDescriptor.getInstance()
+                                                                .getConfig()
+                                                                .getFloatPrecision())))
+                        / (float)
+                                Math.pow(
+                                        10,
+                                        TSFileDescriptor.getInstance()
+                                                .getConfig()
+                                                .getFloatPrecision());
     }
-    return Math.round(data)
-        + Math.round(((data - Math.round(data)) * (float) Math.pow(10, TSFileDescriptor.getInstance().getConfig().getFloatPrecision())))
-        / (float) Math.pow(10,  TSFileDescriptor.getInstance().getConfig().getFloatPrecision());
-  }
 
-  /**
-   * @param data data should be less than Long.MAX_VALUE. otherwise Math.round() will return wrong
-   * value.
-   */
-  public static double roundWithGivenPrecision(double data, int size) {
-    if (size == 0) {
-      return Math.round(data);
+    /**
+     * @param data data should be less than Long.MAX_VALUE. otherwise Math.round() will return wrong
+     *     value.
+     */
+    public static double roundWithGivenPrecision(double data, int size) {
+        if (size == 0) {
+            return Math.round(data);
+        }
+        return Math.round(data)
+                + Math.round(((data - Math.round(data)) * Math.pow(10, size))) / Math.pow(10, size);
     }
-    return Math.round(data)
-        + Math.round(((data - Math.round(data)) * Math.pow(10, size)))
-        / Math.pow(10, size);
-  }
 
-  /**
-   * @param data data should be less than Long.MAX_VALUE. otherwise Math.round() will return wrong
-   * value.
-   */
-  public static double roundWithGivenPrecision(double data) {
-    if (TSFileDescriptor.getInstance().getConfig().getFloatPrecision() == 0) {
-      return Math.round(data);
+    /**
+     * @param data data should be less than Long.MAX_VALUE. otherwise Math.round() will return wrong
+     *     value.
+     */
+    public static double roundWithGivenPrecision(double data) {
+        if (TSFileDescriptor.getInstance().getConfig().getFloatPrecision() == 0) {
+            return Math.round(data);
+        }
+        return Math.round(data)
+                + Math.round(
+                                ((data - Math.round(data))
+                                        * Math.pow(
+                                                10,
+                                                TSFileDescriptor.getInstance()
+                                                        .getConfig()
+                                                        .getFloatPrecision())))
+                        / Math.pow(
+                                10, TSFileDescriptor.getInstance().getConfig().getFloatPrecision());
     }
-    return Math.round(data)
-        + Math.round(((data - Math.round(data)) * Math.pow(10, TSFileDescriptor.getInstance().getConfig().getFloatPrecision())))
-        / Math.pow(10, TSFileDescriptor.getInstance().getConfig().getFloatPrecision());
-  }
 }

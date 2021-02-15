@@ -37,65 +37,67 @@ import org.apache.thrift.TException;
 
 public interface IPlanExecutor {
 
-  /**
-   * process query plan of qp layer, construct queryDataSet.
-   *
-   * @param queryPlan QueryPlan
-   * @return QueryDataSet
-   */
-  QueryDataSet processQuery(PhysicalPlan queryPlan, QueryContext context)
-      throws IOException, StorageEngineException,
-      QueryFilterOptimizationException, QueryProcessException, MetadataException, SQLException, TException, InterruptedException;
+    /**
+     * process query plan of qp layer, construct queryDataSet.
+     *
+     * @param queryPlan QueryPlan
+     * @return QueryDataSet
+     */
+    QueryDataSet processQuery(PhysicalPlan queryPlan, QueryContext context)
+            throws IOException, StorageEngineException, QueryFilterOptimizationException,
+                    QueryProcessException, MetadataException, SQLException, TException,
+                    InterruptedException;
 
-  /**
-   * Process Non-Query Physical plan, including insert/update/delete operation of
-   * data/metadata/Privilege
-   *
-   * @param plan Physical Non-Query Plan
-   */
-  boolean processNonQuery(PhysicalPlan plan)
-      throws QueryProcessException, StorageGroupNotSetException, StorageEngineException;
+    /**
+     * Process Non-Query Physical plan, including insert/update/delete operation of
+     * data/metadata/Privilege
+     *
+     * @param plan Physical Non-Query Plan
+     */
+    boolean processNonQuery(PhysicalPlan plan)
+            throws QueryProcessException, StorageGroupNotSetException, StorageEngineException;
 
-  /**
-   * execute update command and return whether the operator is successful.
-   *
-   * @param path      : update series seriesPath
-   * @param startTime start time in update command
-   * @param endTime   end time in update command
-   * @param value     - in type of string
-   */
-  void update(PartialPath path, long startTime, long endTime, String value)
-      throws QueryProcessException;
+    /**
+     * execute update command and return whether the operator is successful.
+     *
+     * @param path : update series seriesPath
+     * @param startTime start time in update command
+     * @param endTime end time in update command
+     * @param value - in type of string
+     */
+    void update(PartialPath path, long startTime, long endTime, String value)
+            throws QueryProcessException;
 
-  /**
-   * execute delete command and return whether the operator is successful.
-   *
-   * @param deletePlan physical delete plan
-   */
-  void delete(DeletePlan deletePlan) throws QueryProcessException;
+    /**
+     * execute delete command and return whether the operator is successful.
+     *
+     * @param deletePlan physical delete plan
+     */
+    void delete(DeletePlan deletePlan) throws QueryProcessException;
 
-  /**
-   * execute delete command and return whether the operator is successful.
-   *
-   * @param path       : delete series seriesPath
-   * @param startTime start time in delete command
-   * @param endTime end time in delete command
-   * @param planIndex index of the deletion plan
-   */
-  void delete(PartialPath path, long startTime, long endTime, long planIndex) throws QueryProcessException;
+    /**
+     * execute delete command and return whether the operator is successful.
+     *
+     * @param path : delete series seriesPath
+     * @param startTime start time in delete command
+     * @param endTime end time in delete command
+     * @param planIndex index of the deletion plan
+     */
+    void delete(PartialPath path, long startTime, long endTime, long planIndex)
+            throws QueryProcessException;
 
-  /**
-   * execute insert command and return whether the operator is successful.
-   *
-   * @param insertRowPlan physical insert plan
-   */
-  void insert(InsertRowPlan insertRowPlan) throws QueryProcessException;
+    /**
+     * execute insert command and return whether the operator is successful.
+     *
+     * @param insertRowPlan physical insert plan
+     */
+    void insert(InsertRowPlan insertRowPlan) throws QueryProcessException;
 
-  /**
-   * execute batch insert plan
-   *
-   * @return result of each row
-   * @throws BatchProcessException when some of the rows failed
-   */
-  void insertTablet(InsertTabletPlan insertTabletPlan) throws QueryProcessException;
+    /**
+     * execute batch insert plan
+     *
+     * @return result of each row
+     * @throws BatchProcessException when some of the rows failed
+     */
+    void insertTablet(InsertTabletPlan insertTabletPlan) throws QueryProcessException;
 }

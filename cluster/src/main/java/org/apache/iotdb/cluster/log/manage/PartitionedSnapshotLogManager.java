@@ -47,54 +47,64 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class PartitionedSnapshotLogManager<T extends Snapshot> extends RaftLogManager {
 
-  private static final Logger logger = LoggerFactory.getLogger(PartitionedSnapshotLogManager.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(PartitionedSnapshotLogManager.class);
 
-  Map<Integer, T> slotSnapshots = new HashMap<>();
-  private SnapshotFactory<T> factory;
-  Map<Integer, Collection<TimeseriesSchema>> slotTimeseries = new HashMap<>();
-  long snapshotLastLogIndex;
-  long snapshotLastLogTerm;
-  PartitionTable partitionTable;
-  Node thisNode;
-  DataGroupMember dataGroupMember;
+    Map<Integer, T> slotSnapshots = new HashMap<>();
+    private SnapshotFactory<T> factory;
+    Map<Integer, Collection<TimeseriesSchema>> slotTimeseries = new HashMap<>();
+    long snapshotLastLogIndex;
+    long snapshotLastLogTerm;
+    PartitionTable partitionTable;
+    Node thisNode;
+    DataGroupMember dataGroupMember;
 
-
-  protected PartitionedSnapshotLogManager(LogApplier logApplier, PartitionTable partitionTable,
-      Node header, Node thisNode, SnapshotFactory<T> factory, DataGroupMember dataGroupMember) {
-    super(new SyncLogDequeSerializer(header.nodeIdentifier), logApplier, header.toString());
-    this.partitionTable = partitionTable;
-    this.factory = factory;
-    this.thisNode = thisNode;
-    this.dataGroupMember = dataGroupMember;
-  }
-
-  @Override
-  public Snapshot getSnapshot(long minIndex) {
-    // copy snapshots
-    synchronized (slotSnapshots) {
-      PartitionedSnapshot<T> partitionedSnapshot = new PartitionedSnapshot<>(factory);
-      for (Entry<Integer, T> entry : slotSnapshots.entrySet()) {
-        partitionedSnapshot.putSnapshot(entry.getKey(), entry.getValue());
-      }
-      partitionedSnapshot.setLastLogIndex(snapshotLastLogIndex);
-      partitionedSnapshot.setLastLogTerm(snapshotLastLogTerm);
-      partitionedSnapshot.truncateBefore(minIndex);
-      return partitionedSnapshot;
+    protected PartitionedSnapshotLogManager(
+            LogApplier logApplier,
+            PartitionTable partitionTable,
+            Node header,
+            Node thisNode,
+            SnapshotFactory<T> factory,
+            DataGroupMember dataGroupMember) {
+        super(new SyncLogDequeSerializer(header.nodeIdentifier), logApplier, header.toString());
+        this.partitionTable = partitionTable;
+        this.factory = factory;
+        this.thisNode = thisNode;
+        this.dataGroupMember = dataGroupMember;
     }
-  }
 
-  void collectTimeseriesSchemas() {
-    slotTimeseries.clear();
-    List<StorageGroupMNode> allSgNodes = IoTDB.metaManager.getAllStorageGroupNodes();
-    for (MNode sgNode : allSgNodes) {
-      String storageGroupName = sgNode.getFullPath();
-      int slot = SlotPartitionTable.getSlotStrategy().calculateSlotByTime(storageGroupName, 0,
-          ((SlotPartitionTable) partitionTable).getTotalSlotNumbers());
-
-      Collection<TimeseriesSchema> schemas = slotTimeseries.computeIfAbsent(slot,
-          s -> new HashSet<>());
-      IoTDB.metaManager.collectTimeseriesSchema(sgNode, schemas);
-      logger.debug("{}: {} timeseries are snapshot in slot {}", getName(), schemas.size(), slot);
+    @Override
+    public Snapshot getSnapshot(long minIndex) {
+        // copy snapshots
+        synchronized (slotSnapshots) {
+            PartitionedSnapshot<T> partitionedSnapshot = new PartitionedSnapshot<>(factory);
+            for (Entry<Integer, T> entry : slotSnapshots.entrySet()) {
+                partitionedSnapshot.putSnapshot(entry.getKey(), entry.getValue());
+            }
+            partitionedSnapshot.setLastLogIndex(snapshotLastLogIndex);
+            partitionedSnapshot.setLastLogTerm(snapshotLastLogTerm);
+            partitionedSnapshot.truncateBefore(minIndex);
+            return partitionedSnapshot;
+        }
     }
-  }
+
+    void collectTimeseriesSchemas() {
+        slotTimeseries.clear();
+        List<StorageGroupMNode> allSgNodes = IoTDB.metaManager.getAllStorageGroupNodes();
+        for (MNode sgNode : allSgNodes) {
+            String storageGroupName = sgNode.getFullPath();
+            int slot =
+                    SlotPartitionTable.getSlotStrategy()
+                            .calculateSlotByTime(
+                                    storageGroupName,
+                                    0,
+                                    ((SlotPartitionTable) partitionTable).getTotalSlotNumbers());
+
+            Collection<TimeseriesSchema> schemas =
+                    slotTimeseries.computeIfAbsent(slot, s -> new HashSet<>());
+            IoTDB.metaManager.collectTimeseriesSchema(sgNode, schemas);
+            logger.debug(
+                    "{}: {} timeseries are snapshot in slot {}", getName(), schemas.size(), slot);
+        }
+    }
 }

@@ -19,14 +19,13 @@
 
 package org.apache.iotdb.cluster.log.logtypes;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 import org.apache.iotdb.cluster.log.Log;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.nio.ByteBuffer;
 import org.apache.iotdb.db.utils.SerializeUtils;
 
 public class RemoveNodeLog extends Log {

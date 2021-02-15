@@ -36,45 +36,51 @@ import org.apache.thrift.transport.TTransportException;
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class SyncMetaClient extends Client {
 
-  Node node;
-  SyncClientPool pool;
+    Node node;
+    SyncClientPool pool;
 
-  SyncMetaClient(TProtocol prot) {
-    super(prot);
-  }
-
-  public SyncMetaClient(TProtocolFactory protocolFactory, Node node, SyncClientPool pool)
-      throws TTransportException {
-    super(protocolFactory.getProtocol(RpcTransportFactory.INSTANCE.getTransport(
-        new TSocket(node.getIp(), node.getMetaPort(), RaftServer.getConnectionTimeoutInMS()))));
-    this.node = node;
-    this.pool = pool;
-    getInputProtocol().getTransport().open();
-  }
-
-  public void putBack() {
-    if (pool != null) {
-      pool.putClient(node, this);
-    } else {
-      getInputProtocol().getTransport().close();
-    }
-  }
-
-  public static class FactorySync implements SyncClientFactory {
-
-    private TProtocolFactory protocolFactory;
-
-    public FactorySync(TProtocolFactory protocolFactory) {
-      this.protocolFactory = protocolFactory;
+    SyncMetaClient(TProtocol prot) {
+        super(prot);
     }
 
-    @Override
-    public SyncMetaClient getSyncClient(Node node, SyncClientPool pool) throws TTransportException {
-      return new SyncMetaClient(protocolFactory, node, pool);
+    public SyncMetaClient(TProtocolFactory protocolFactory, Node node, SyncClientPool pool)
+            throws TTransportException {
+        super(
+                protocolFactory.getProtocol(
+                        RpcTransportFactory.INSTANCE.getTransport(
+                                new TSocket(
+                                        node.getIp(),
+                                        node.getMetaPort(),
+                                        RaftServer.getConnectionTimeoutInMS()))));
+        this.node = node;
+        this.pool = pool;
+        getInputProtocol().getTransport().open();
     }
-  }
 
-  public Node getNode() {
-    return node;
-  }
+    public void putBack() {
+        if (pool != null) {
+            pool.putClient(node, this);
+        } else {
+            getInputProtocol().getTransport().close();
+        }
+    }
+
+    public static class FactorySync implements SyncClientFactory {
+
+        private TProtocolFactory protocolFactory;
+
+        public FactorySync(TProtocolFactory protocolFactory) {
+            this.protocolFactory = protocolFactory;
+        }
+
+        @Override
+        public SyncMetaClient getSyncClient(Node node, SyncClientPool pool)
+                throws TTransportException {
+            return new SyncMetaClient(protocolFactory, node, pool);
+        }
+    }
+
+    public Node getNode() {
+        return node;
+    }
 }

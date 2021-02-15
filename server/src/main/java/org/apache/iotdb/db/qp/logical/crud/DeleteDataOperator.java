@@ -20,32 +20,30 @@ package org.apache.iotdb.db.qp.logical.crud;
 
 import org.apache.iotdb.db.qp.logical.Operator;
 
-/**
- * this class extends {@code RootOperator} and process delete statement.
- */
+/** this class extends {@code RootOperator} and process delete statement. */
 public class DeleteDataOperator extends SFWOperator {
 
-  private long startTime;
-  private long endTime;
+    private long startTime;
+    private long endTime;
 
-  public DeleteDataOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = Operator.OperatorType.DELETE;
-  }
+    public DeleteDataOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = Operator.OperatorType.DELETE;
+    }
 
-  public long getStartTime() {
-    return startTime;
-  }
+    public long getStartTime() {
+        return startTime;
+    }
 
-  public void setStartTime(long time) {
-    this.startTime = time;
-  }
+    public void setStartTime(long time) {
+        this.startTime = time;
+    }
 
-  public long getEndTime() {
-    return endTime;
-  }
+    public long getEndTime() {
+        return endTime;
+    }
 
-  public void setEndTime(long time) {
-    this.endTime = time;
-  }
+    public void setEndTime(long time) {
+        this.endTime = time;
+    }
 }

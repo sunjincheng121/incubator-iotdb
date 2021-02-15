@@ -23,14 +23,14 @@ import org.apache.iotdb.db.metadata.PartialPath;
 
 public class ShowChildPathsOperator extends ShowOperator {
 
-  private PartialPath path;
+    private PartialPath path;
 
-  public ShowChildPathsOperator(int tokenIntType, PartialPath path) {
-    super(tokenIntType);
-    this.path = path;
-  }
+    public ShowChildPathsOperator(int tokenIntType, PartialPath path) {
+        super(tokenIntType);
+        this.path = path;
+    }
 
-  public PartialPath getPath() {
-    return path;
-  }
+    public PartialPath getPath() {
+        return path;
+    }
 }

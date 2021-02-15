@@ -23,41 +23,41 @@ import org.apache.iotdb.tsfile.common.cache.Accountable;
 
 public class AccountableString implements Accountable {
 
-  private final String string;
-  private long ramSize;
+    private final String string;
+    private long ramSize;
 
-  public AccountableString(String string) {
-    this.string = string;
-  }
-
-  public String getString() {
-    return string;
-  }
-
-  @Override
-  public void setRamSize(long size) {
-    this.ramSize = size;
-  }
-
-  @Override
-  public long getRamSize() {
-    return ramSize;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public AccountableString(String string) {
+        this.string = string;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    AccountableString that = (AccountableString) o;
-    return Objects.equals(string, that.string);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(string);
-  }
+    public String getString() {
+        return string;
+    }
+
+    @Override
+    public void setRamSize(long size) {
+        this.ramSize = size;
+    }
+
+    @Override
+    public long getRamSize() {
+        return ramSize;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AccountableString that = (AccountableString) o;
+        return Objects.equals(string, that.string);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(string);
+    }
 }

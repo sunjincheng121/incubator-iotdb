@@ -22,25 +22,24 @@ import com.google.common.base.Throwables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public abstract class WrappedRunnable implements Runnable {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(WrappedRunnable.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WrappedRunnable.class);
 
-  public final void run() {
-    try {
-      runMayThrow();
-    } catch (Exception e) {
-      LOGGER.error(e.getMessage(), e);
-      throw propagate(e);
+    public final void run() {
+        try {
+            runMayThrow();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw propagate(e);
+        }
     }
-  }
 
-  abstract public void runMayThrow() throws Exception;
+    public abstract void runMayThrow() throws Exception;
 
-  @SuppressWarnings("squid:S112")
-  private static RuntimeException propagate(Throwable throwable) {
-    Throwables.throwIfUnchecked(throwable);
-    throw new RuntimeException(throwable);
-  }
+    @SuppressWarnings("squid:S112")
+    private static RuntimeException propagate(Throwable throwable) {
+        Throwables.throwIfUnchecked(throwable);
+        throw new RuntimeException(throwable);
+    }
 }

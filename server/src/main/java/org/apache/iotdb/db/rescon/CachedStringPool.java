@@ -23,21 +23,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CachedStringPool {
 
-  private Map<String, String> cachedPool = new ConcurrentHashMap<>();
+    private Map<String, String> cachedPool = new ConcurrentHashMap<>();
 
-  public Map<String, String> getCachedPool() {
-    return cachedPool;
-  }
-
-  public static CachedStringPool getInstance() {
-    return CachedStringPool.InstanceHolder.INSTANCE;
-  }
-
-  private static class InstanceHolder {
-
-    private static final CachedStringPool INSTANCE = new CachedStringPool();
-
-    private InstanceHolder() {
+    public Map<String, String> getCachedPool() {
+        return cachedPool;
     }
-  }
+
+    public static CachedStringPool getInstance() {
+        return CachedStringPool.InstanceHolder.INSTANCE;
+    }
+
+    private static class InstanceHolder {
+
+        private static final CachedStringPool INSTANCE = new CachedStringPool();
+
+        private InstanceHolder() {}
+    }
 }

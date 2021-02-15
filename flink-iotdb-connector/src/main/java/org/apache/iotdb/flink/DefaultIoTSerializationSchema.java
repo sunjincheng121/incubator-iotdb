@@ -29,99 +29,99 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
  */
 public class DefaultIoTSerializationSchema implements IoTSerializationSchema<Map<String, String>> {
 
-  private String fieldDevice = "device";
-  private String fieldTimestamp = "timestamp";
-  private String fieldMeasurements = "measurements";
-  private String fieldValues = "values";
-  private String fieldTypes = "types";
-  private String separator = ",";
+    private String fieldDevice = "device";
+    private String fieldTimestamp = "timestamp";
+    private String fieldMeasurements = "measurements";
+    private String fieldValues = "values";
+    private String fieldTypes = "types";
+    private String separator = ",";
 
-  @Override
-  public Event serialize(Map<String, String> tuple) {
-    if (tuple == null) {
-      return null;
+    @Override
+    public Event serialize(Map<String, String> tuple) {
+        if (tuple == null) {
+            return null;
+        }
+
+        String device = tuple.get(fieldDevice);
+
+        String ts = tuple.get(fieldTimestamp);
+        Long timestamp = ts == null ? System.currentTimeMillis() : Long.parseLong(ts);
+
+        List<String> measurements = null;
+        if (tuple.get(fieldMeasurements) != null) {
+            measurements = Arrays.asList(tuple.get(fieldMeasurements).split(separator));
+        }
+
+        List<TSDataType> types = new ArrayList<>();
+        for (String type : tuple.get(fieldTypes).split(separator)) {
+            types.add(TSDataType.valueOf(type));
+        }
+
+        List<Object> values = new ArrayList<>();
+        String[] valuesStr = tuple.get(fieldValues).split(separator);
+        for (int i = 0; i < valuesStr.length; i++) {
+            switch (types.get(i)) {
+                case INT64:
+                    values.add(Long.parseLong(valuesStr[i]));
+                    break;
+                case DOUBLE:
+                    values.add(Double.parseDouble(valuesStr[i]));
+                    break;
+                case INT32:
+                    values.add(Integer.parseInt(valuesStr[i]));
+                    break;
+                case TEXT:
+                    values.add(valuesStr[i]);
+                    break;
+                case FLOAT:
+                    values.add(Float.parseFloat(valuesStr[i]));
+                    break;
+                case BOOLEAN:
+                    values.add(Boolean.parseBoolean(valuesStr[i]));
+                    break;
+            }
+        }
+
+        return new Event(device, timestamp, measurements, types, values);
     }
 
-    String device = tuple.get(fieldDevice);
-
-    String ts = tuple.get(fieldTimestamp);
-    Long timestamp = ts == null ? System.currentTimeMillis() : Long.parseLong(ts);
-
-    List<String> measurements = null;
-    if (tuple.get(fieldMeasurements) != null) {
-      measurements = Arrays.asList(tuple.get(fieldMeasurements).split(separator));
+    public String getFieldDevice() {
+        return fieldDevice;
     }
 
-    List<TSDataType> types = new ArrayList<>();
-    for (String type : tuple.get(fieldTypes).split(separator)) {
-      types.add(TSDataType.valueOf(type));
+    public void setFieldDevice(String fieldDevice) {
+        this.fieldDevice = fieldDevice;
     }
 
-    List<Object> values = new ArrayList<>();
-    String[] valuesStr = tuple.get(fieldValues).split(separator);
-    for (int i = 0; i < valuesStr.length; i++) {
-      switch (types.get(i)) {
-        case INT64:
-          values.add(Long.parseLong(valuesStr[i]));
-          break;
-        case DOUBLE:
-          values.add(Double.parseDouble(valuesStr[i]));
-          break;
-        case INT32:
-          values.add(Integer.parseInt(valuesStr[i]));
-          break;
-        case TEXT:
-          values.add(valuesStr[i]);
-          break;
-        case FLOAT:
-          values.add(Float.parseFloat(valuesStr[i]));
-          break;
-        case BOOLEAN:
-          values.add(Boolean.parseBoolean(valuesStr[i]));
-          break;
-      }
+    public String getFieldTimestamp() {
+        return fieldTimestamp;
     }
 
-    return new Event(device, timestamp, measurements, types, values);
-  }
+    public void setFieldTimestamp(String fieldTimestamp) {
+        this.fieldTimestamp = fieldTimestamp;
+    }
 
-  public String getFieldDevice() {
-    return fieldDevice;
-  }
+    public String getFieldMeasurements() {
+        return fieldMeasurements;
+    }
 
-  public void setFieldDevice(String fieldDevice) {
-    this.fieldDevice = fieldDevice;
-  }
+    public void setFieldMeasurements(String fieldMeasurements) {
+        this.fieldMeasurements = fieldMeasurements;
+    }
 
-  public String getFieldTimestamp() {
-    return fieldTimestamp;
-  }
+    public String getFieldValues() {
+        return fieldValues;
+    }
 
-  public void setFieldTimestamp(String fieldTimestamp) {
-    this.fieldTimestamp = fieldTimestamp;
-  }
+    public void setFieldValues(String fieldValues) {
+        this.fieldValues = fieldValues;
+    }
 
-  public String getFieldMeasurements() {
-    return fieldMeasurements;
-  }
+    public String getSeparator() {
+        return separator;
+    }
 
-  public void setFieldMeasurements(String fieldMeasurements) {
-    this.fieldMeasurements = fieldMeasurements;
-  }
-
-  public String getFieldValues() {
-    return fieldValues;
-  }
-
-  public void setFieldValues(String fieldValues) {
-    this.fieldValues = fieldValues;
-  }
-
-  public String getSeparator() {
-    return separator;
-  }
-
-  public void setSeparator(String separator) {
-    this.separator = separator;
-  }
+    public void setSeparator(String separator) {
+        this.separator = separator;
+    }
 }

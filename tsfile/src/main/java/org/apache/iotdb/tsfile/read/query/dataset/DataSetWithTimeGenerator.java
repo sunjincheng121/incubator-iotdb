@@ -32,53 +32,56 @@ import org.apache.iotdb.tsfile.read.reader.series.FileSeriesReaderByTimestamp;
  */
 public class DataSetWithTimeGenerator extends QueryDataSet {
 
-  private TimeGenerator timeGenerator;
-  private List<FileSeriesReaderByTimestamp> readers;
-  private List<Boolean> cached;
+    private TimeGenerator timeGenerator;
+    private List<FileSeriesReaderByTimestamp> readers;
+    private List<Boolean> cached;
 
-  /**
-   * constructor of DataSetWithTimeGenerator.
-   *
-   * @param paths paths in List structure
-   * @param cached cached boolean in List(boolean) structure
-   * @param dataTypes TSDataTypes in List structure
-   * @param timeGenerator TimeGenerator object
-   * @param readers readers in List(FileSeriesReaderByTimestamp) structure
-   */
-  public DataSetWithTimeGenerator(List<Path> paths, List<Boolean> cached,
-      List<TSDataType> dataTypes,
-      TimeGenerator timeGenerator, List<FileSeriesReaderByTimestamp> readers) {
-    super(paths, dataTypes);
-    this.cached = cached;
-    this.timeGenerator = timeGenerator;
-    this.readers = readers;
-  }
-
-  @Override
-  protected boolean hasNextWithoutConstraint() throws IOException {
-    return timeGenerator.hasNext();
-  }
-
-  @Override
-  protected RowRecord nextWithoutConstraint() throws IOException {
-    long timestamp = timeGenerator.next();
-    RowRecord rowRecord = new RowRecord(timestamp);
-
-    for (int i = 0; i < paths.size(); i++) {
-
-      // get value from readers in time generator
-      if (cached.get(i)) {
-        Object value = timeGenerator.getValue(paths.get(i), timestamp);
-        rowRecord.addField(value, dataTypes.get(i));
-        continue;
-      }
-
-      // get value from series reader without filter
-      FileSeriesReaderByTimestamp fileSeriesReaderByTimestamp = readers.get(i);
-      Object value = fileSeriesReaderByTimestamp.getValueInTimestamp(timestamp);
-      rowRecord.addField(value, dataTypes.get(i));
+    /**
+     * constructor of DataSetWithTimeGenerator.
+     *
+     * @param paths paths in List structure
+     * @param cached cached boolean in List(boolean) structure
+     * @param dataTypes TSDataTypes in List structure
+     * @param timeGenerator TimeGenerator object
+     * @param readers readers in List(FileSeriesReaderByTimestamp) structure
+     */
+    public DataSetWithTimeGenerator(
+            List<Path> paths,
+            List<Boolean> cached,
+            List<TSDataType> dataTypes,
+            TimeGenerator timeGenerator,
+            List<FileSeriesReaderByTimestamp> readers) {
+        super(paths, dataTypes);
+        this.cached = cached;
+        this.timeGenerator = timeGenerator;
+        this.readers = readers;
     }
 
-    return rowRecord;
-  }
+    @Override
+    protected boolean hasNextWithoutConstraint() throws IOException {
+        return timeGenerator.hasNext();
+    }
+
+    @Override
+    protected RowRecord nextWithoutConstraint() throws IOException {
+        long timestamp = timeGenerator.next();
+        RowRecord rowRecord = new RowRecord(timestamp);
+
+        for (int i = 0; i < paths.size(); i++) {
+
+            // get value from readers in time generator
+            if (cached.get(i)) {
+                Object value = timeGenerator.getValue(paths.get(i), timestamp);
+                rowRecord.addField(value, dataTypes.get(i));
+                continue;
+            }
+
+            // get value from series reader without filter
+            FileSeriesReaderByTimestamp fileSeriesReaderByTimestamp = readers.get(i);
+            Object value = fileSeriesReaderByTimestamp.getValueInTimestamp(timestamp);
+            rowRecord.addField(value, dataTypes.get(i));
+        }
+
+        return rowRecord;
+    }
 }

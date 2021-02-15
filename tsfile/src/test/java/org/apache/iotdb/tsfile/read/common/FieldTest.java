@@ -23,10 +23,9 @@ import org.junit.Test;
 
 public class FieldTest {
 
-  @Test(expected = NullFieldException.class)
-  public void construct() {
-    Field field = new Field(null);
-    field.getIntV();
-  }
-
+    @Test(expected = NullFieldException.class)
+    public void construct() {
+        Field field = new Field(null);
+        field.getIntV();
+    }
 }

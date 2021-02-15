@@ -24,20 +24,19 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
 
 public class DataAuthOperator extends RootOperator {
 
-  private final List<String> users;
+    private final List<String> users;
 
-  public DataAuthOperator(int tokenIntType, List<String> users) {
-    super(tokenIntType);
-    if (tokenIntType == SQLConstant.TOK_GRANT_WATERMARK_EMBEDDING) {
-      operatorType = OperatorType.GRANT_WATERMARK_EMBEDDING;
-    } else {
-      operatorType = OperatorType.REVOKE_WATERMARK_EMBEDDING;
+    public DataAuthOperator(int tokenIntType, List<String> users) {
+        super(tokenIntType);
+        if (tokenIntType == SQLConstant.TOK_GRANT_WATERMARK_EMBEDDING) {
+            operatorType = OperatorType.GRANT_WATERMARK_EMBEDDING;
+        } else {
+            operatorType = OperatorType.REVOKE_WATERMARK_EMBEDDING;
+        }
+        this.users = users;
     }
-    this.users = users;
-  }
 
-  public List<String> getUsers() {
-    return users;
-  }
-
+    public List<String> getUsers() {
+        return users;
+    }
 }

@@ -19,115 +19,114 @@
 package org.apache.iotdb.tsfile.read.expression.impl;
 
 import java.io.Serializable;
-
 import org.apache.iotdb.tsfile.read.expression.ExpressionType;
 import org.apache.iotdb.tsfile.read.expression.IBinaryExpression;
 import org.apache.iotdb.tsfile.read.expression.IExpression;
 
 public abstract class BinaryExpression implements IBinaryExpression, Serializable {
 
-  private static final long serialVersionUID = -711801318534904452L;
+    private static final long serialVersionUID = -711801318534904452L;
 
-  public static AndExpression and(IExpression left, IExpression right) {
-    return new AndExpression(left, right);
-  }
+    public static AndExpression and(IExpression left, IExpression right) {
+        return new AndExpression(left, right);
+    }
 
-  public static OrExpression or(IExpression left, IExpression right) {
-    return new OrExpression(left, right);
-  }
-
-  @Override
-  public abstract IExpression clone();
-
-  protected static class AndExpression extends BinaryExpression {
-
-    public IExpression left;
-    public IExpression right;
-
-    public AndExpression(IExpression left, IExpression right) {
-      this.left = left;
-      this.right = right;
+    public static OrExpression or(IExpression left, IExpression right) {
+        return new OrExpression(left, right);
     }
 
     @Override
-    public IExpression getLeft() {
-      return left;
+    public abstract IExpression clone();
+
+    protected static class AndExpression extends BinaryExpression {
+
+        public IExpression left;
+        public IExpression right;
+
+        public AndExpression(IExpression left, IExpression right) {
+            this.left = left;
+            this.right = right;
+        }
+
+        @Override
+        public IExpression getLeft() {
+            return left;
+        }
+
+        @Override
+        public IExpression getRight() {
+            return right;
+        }
+
+        @Override
+        public void setLeft(IExpression leftExpression) {
+            this.left = leftExpression;
+        }
+
+        @Override
+        public void setRight(IExpression rightExpression) {
+            this.right = rightExpression;
+        }
+
+        @Override
+        public ExpressionType getType() {
+            return ExpressionType.AND;
+        }
+
+        @Override
+        public IExpression clone() {
+            return new AndExpression(left.clone(), right.clone());
+        }
+
+        @Override
+        public String toString() {
+            return "[" + left + " && " + right + "]";
+        }
     }
 
-    @Override
-    public IExpression getRight() {
-      return right;
+    protected static class OrExpression extends BinaryExpression {
+
+        public IExpression left;
+        public IExpression right;
+
+        public OrExpression(IExpression left, IExpression right) {
+            this.left = left;
+            this.right = right;
+        }
+
+        @Override
+        public IExpression getLeft() {
+            return left;
+        }
+
+        @Override
+        public IExpression getRight() {
+            return right;
+        }
+
+        @Override
+        public void setLeft(IExpression leftExpression) {
+            this.left = leftExpression;
+        }
+
+        @Override
+        public void setRight(IExpression rightExpression) {
+            this.right = rightExpression;
+        }
+
+        @Override
+        public ExpressionType getType() {
+            return ExpressionType.OR;
+        }
+
+        @Override
+        public IExpression clone() {
+            return new OrExpression(left.clone(), right.clone());
+        }
+
+        @Override
+        public String toString() {
+            return "[" + left + " || " + right + "]";
+        }
     }
-
-    @Override
-    public void setLeft(IExpression leftExpression) {
-      this.left = leftExpression;
-    }
-
-    @Override
-    public void setRight(IExpression rightExpression) {
-      this.right = rightExpression;
-    }
-
-    @Override
-    public ExpressionType getType() {
-      return ExpressionType.AND;
-    }
-
-    @Override
-    public IExpression clone() {
-      return new AndExpression(left.clone(), right.clone());
-    }
-
-    @Override
-    public String toString() {
-      return "[" + left + " && " + right + "]";
-    }
-  }
-
-  protected static class OrExpression extends BinaryExpression {
-
-    public IExpression left;
-    public IExpression right;
-
-    public OrExpression(IExpression left, IExpression right) {
-      this.left = left;
-      this.right = right;
-    }
-
-    @Override
-    public IExpression getLeft() {
-      return left;
-    }
-
-    @Override
-    public IExpression getRight() {
-      return right;
-    }
-
-    @Override
-    public void setLeft(IExpression leftExpression) {
-      this.left = leftExpression;
-    }
-
-    @Override
-    public void setRight(IExpression rightExpression) {
-      this.right = rightExpression;
-    }
-
-    @Override
-    public ExpressionType getType() {
-      return ExpressionType.OR;
-    }
-
-    @Override
-    public IExpression clone() {
-      return new OrExpression(left.clone(), right.clone());
-    }
-
-    @Override
-    public String toString() {
-      return "[" + left + " || " + right + "]";
-    }
-  }
 }

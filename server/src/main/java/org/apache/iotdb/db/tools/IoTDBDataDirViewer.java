@@ -35,122 +35,131 @@ import org.apache.iotdb.tsfile.fileSystem.FSFactoryProducer;
 
 public class IoTDBDataDirViewer {
 
-  public static void main(String[] args) throws IOException {
-    String[] data_dir;
-    String outFile = "IoTDB_data_dir_overview.txt";
-    if (args.length == 0) {
-      String path = "data/data";
-      data_dir = path.split(","); //multiple data dirs separated by comma
-    } else if (args.length == 1) {
-      data_dir = args[0].split(",");
-    } else if (args.length == 2) {
-      data_dir = args[0].split(",");
-      outFile = args[1];
-    } else {
-      throw new IOException("Invalid parameters. Please check the user guide.");
-    }
-    System.out.println("output save path:" + outFile);
-    System.out.println("data dir num:" + data_dir.length);
-    try (PrintWriter pw = new PrintWriter(new FileWriter(outFile))) {
-      for (String dir : data_dir) {
-        File dirFile = FSFactoryProducer.getFSFactory().getFile(dir);
-        File[] seqAndUnseqDirs = dirFile.listFiles();
-        if (seqAndUnseqDirs == null || seqAndUnseqDirs.length != 2) {
-          throw new IOException(
-              "Irregular data dir structure.There should be a sequence and unsequence directory "
-                  + "under the data directory " + dirFile.getName());
+    public static void main(String[] args) throws IOException {
+        String[] data_dir;
+        String outFile = "IoTDB_data_dir_overview.txt";
+        if (args.length == 0) {
+            String path = "data/data";
+            data_dir = path.split(","); // multiple data dirs separated by comma
+        } else if (args.length == 1) {
+            data_dir = args[0].split(",");
+        } else if (args.length == 2) {
+            data_dir = args[0].split(",");
+            outFile = args[1];
+        } else {
+            throw new IOException("Invalid parameters. Please check the user guide.");
         }
-        List<File> fileList = Arrays.asList(seqAndUnseqDirs);
+        System.out.println("output save path:" + outFile);
+        System.out.println("data dir num:" + data_dir.length);
+        try (PrintWriter pw = new PrintWriter(new FileWriter(outFile))) {
+            for (String dir : data_dir) {
+                File dirFile = FSFactoryProducer.getFSFactory().getFile(dir);
+                File[] seqAndUnseqDirs = dirFile.listFiles();
+                if (seqAndUnseqDirs == null || seqAndUnseqDirs.length != 2) {
+                    throw new IOException(
+                            "Irregular data dir structure.There should be a sequence and unsequence directory "
+                                    + "under the data directory "
+                                    + dirFile.getName());
+                }
+                List<File> fileList = Arrays.asList(seqAndUnseqDirs);
+                fileList.sort((Comparator.comparing(File::getName)));
+                if (!seqAndUnseqDirs[0].getName().equals("sequence")
+                        || !seqAndUnseqDirs[1].getName().equals("unsequence")) {
+                    throw new IOException(
+                            "Irregular data dir structure.There should be a sequence and unsequence directory "
+                                    + "under the data directory "
+                                    + dirFile.getName());
+                }
+
+                printlnBoth(pw, "|==============================================================");
+                printlnBoth(pw, "|" + dir);
+                printlnBoth(pw, "|--sequence");
+                printFilesInSeqOrUnseqDir(seqAndUnseqDirs[0], pw);
+                printlnBoth(pw, "|--unsequence");
+                printFilesInSeqOrUnseqDir(seqAndUnseqDirs[1], pw);
+            }
+            printlnBoth(pw, "|==============================================================");
+        }
+    }
+
+    private static void printFilesInSeqOrUnseqDir(File seqOrUnseqDir, PrintWriter pw)
+            throws IOException {
+        File[] storageGroupDirs = seqOrUnseqDir.listFiles();
+        if (storageGroupDirs == null) {
+            throw new IOException(
+                    "Irregular data dir structure.There should be storage group directories under "
+                            + "the sequence/unsequence directory "
+                            + seqOrUnseqDir.getName());
+        }
+        List<File> fileList = Arrays.asList(storageGroupDirs);
         fileList.sort((Comparator.comparing(File::getName)));
-        if (!seqAndUnseqDirs[0].getName().equals("sequence") || !seqAndUnseqDirs[1].getName()
-            .equals("unsequence")) {
-          throw new IOException(
-              "Irregular data dir structure.There should be a sequence and unsequence directory "
-                  + "under the data directory " + dirFile.getName());
+        for (File storageGroup : storageGroupDirs) {
+            printlnBoth(pw, "|  |--" + storageGroup.getName());
+            printFilesInStorageGroupDir(storageGroup, pw);
         }
+    }
 
-        printlnBoth(pw, "|==============================================================");
-        printlnBoth(pw, "|" + dir);
-        printlnBoth(pw, "|--sequence");
-        printFilesInSeqOrUnseqDir(seqAndUnseqDirs[0], pw);
-        printlnBoth(pw, "|--unsequence");
-        printFilesInSeqOrUnseqDir(seqAndUnseqDirs[1], pw);
-      }
-      printlnBoth(pw, "|==============================================================");
+    private static void printFilesInStorageGroupDir(File storageGroup, PrintWriter pw)
+            throws IOException {
+        File[] files = storageGroup.listFiles();
+        if (files == null) {
+            throw new IOException(
+                    "Irregular data dir structure.There should be timeInterval directories under "
+                            + "the storage group directory "
+                            + storageGroup.getName());
+        }
+        List<File> fileList = Arrays.asList(files);
+        fileList.sort((Comparator.comparing(File::getName)));
+        for (File file : files) {
+            printlnBoth(pw, "|  |  |--" + file.getName());
+            printFilesInTimeInterval(file, pw);
+        }
     }
-  }
 
-  private static void printFilesInSeqOrUnseqDir(File seqOrUnseqDir, PrintWriter pw)
-      throws IOException {
-    File[] storageGroupDirs = seqOrUnseqDir.listFiles();
-    if (storageGroupDirs == null) {
-      throw new IOException(
-          "Irregular data dir structure.There should be storage group directories under "
-              + "the sequence/unsequence directory " + seqOrUnseqDir.getName());
-    }
-    List<File> fileList = Arrays.asList(storageGroupDirs);
-    fileList.sort((Comparator.comparing(File::getName)));
-    for (File storageGroup : storageGroupDirs) {
-      printlnBoth(pw, "|  |--" + storageGroup.getName());
-      printFilesInStorageGroupDir(storageGroup, pw);
-    }
-  }
+    private static void printFilesInTimeInterval(File timeInterval, PrintWriter pw)
+            throws IOException {
+        File[] files = timeInterval.listFiles();
+        if (files == null) {
+            throw new IOException(
+                    "Irregular data dir structure.There should be tsfiles under "
+                            + "the timeInterval directories directory "
+                            + timeInterval.getName());
+        }
+        List<File> fileList = Arrays.asList(files);
+        fileList.sort((Comparator.comparing(File::getName)));
+        for (File file : files) {
+            printlnBoth(pw, "|  |  |  |--" + file.getName());
 
-  private static void printFilesInStorageGroupDir(File storageGroup, PrintWriter pw)
-      throws IOException {
-    File[] files = storageGroup.listFiles();
-    if (files == null) {
-      throw new IOException(
-          "Irregular data dir structure.There should be timeInterval directories under "
-              + "the storage group directory " + storageGroup.getName());
+            // To print the content if it is a tsfile.resource
+            if (file.getName().endsWith(".tsfile.resource")) {
+                printResource(file.getAbsolutePath(), pw);
+            }
+        }
     }
-    List<File> fileList = Arrays.asList(files);
-    fileList.sort((Comparator.comparing(File::getName)));
-    for (File file : files) {
-      printlnBoth(pw, "|  |  |--" + file.getName());
-      printFilesInTimeInterval(file, pw);
-    }
-  }
 
-  private static void printFilesInTimeInterval(File timeInterval, PrintWriter pw)
-      throws IOException {
-    File[] files = timeInterval.listFiles();
-    if (files == null) {
-      throw new IOException(
-          "Irregular data dir structure.There should be tsfiles under "
-              + "the timeInterval directories directory " + timeInterval.getName());
+    private static void printResource(String filename, PrintWriter pw) throws IOException {
+        filename = filename.substring(0, filename.length() - 9);
+        TsFileResource resource = new TsFileResource(SystemFileFactory.INSTANCE.getFile(filename));
+        resource.deserialize();
+        // sort device strings
+        SortedSet<String> keys = new TreeSet<>(resource.getDeviceToIndexMap().keySet());
+        for (String device : keys) {
+            printlnBoth(
+                    pw,
+                    String.format(
+                            "|  |  |  |  |--device %s, start time %d (%s), end time %d (%s)",
+                            device,
+                            resource.getStartTime(device),
+                            DatetimeUtils.convertMillsecondToZonedDateTime(
+                                    resource.getStartTime(device)),
+                            resource.getEndTime(device),
+                            DatetimeUtils.convertMillsecondToZonedDateTime(
+                                    resource.getEndTime(device))));
+        }
     }
-    List<File> fileList = Arrays.asList(files);
-    fileList.sort((Comparator.comparing(File::getName)));
-    for (File file : files) {
-      printlnBoth(pw, "|  |  |  |--" + file.getName());
 
-      // To print the content if it is a tsfile.resource
-      if (file.getName().endsWith(".tsfile.resource")) {
-        printResource(file.getAbsolutePath(), pw);
-      }
+    private static void printlnBoth(PrintWriter pw, String str) {
+        System.out.println(str);
+        pw.println(str);
     }
-  }
-
-  private static void printResource(String filename, PrintWriter pw)
-      throws IOException {
-    filename = filename.substring(0, filename.length() - 9);
-    TsFileResource resource = new TsFileResource(SystemFileFactory.INSTANCE.getFile(filename));
-    resource.deserialize();
-    // sort device strings
-    SortedSet<String> keys = new TreeSet<>(resource.getDeviceToIndexMap().keySet());
-    for (String device : keys) {
-      printlnBoth(pw,
-          String.format("|  |  |  |  |--device %s, start time %d (%s), end time %d (%s)", device,
-              resource.getStartTime(device), DatetimeUtils
-                  .convertMillsecondToZonedDateTime(resource.getStartTime(device)),
-              resource.getEndTime(device), DatetimeUtils
-                  .convertMillsecondToZonedDateTime(resource.getEndTime(device))));
-    }
-  }
-
-  private static void printlnBoth(PrintWriter pw, String str) {
-    System.out.println(str);
-    pw.println(str);
-  }
 }

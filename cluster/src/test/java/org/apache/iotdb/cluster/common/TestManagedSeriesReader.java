@@ -26,66 +26,65 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public class TestManagedSeriesReader implements ManagedSeriesReader, IReaderByTimestamp {
 
-  private BatchData batchData;
-  private boolean batchUsed = false;
-  private boolean managedByQueryManager = false;
-  private boolean hasRemaining = false;
+    private BatchData batchData;
+    private boolean batchUsed = false;
+    private boolean managedByQueryManager = false;
+    private boolean hasRemaining = false;
 
-  public TestManagedSeriesReader(BatchData batchData) {
-    this.batchData = batchData;
-  }
-
-  @Override
-  public boolean isManagedByQueryManager() {
-    return managedByQueryManager;
-  }
-
-  @Override
-  public void setManagedByQueryManager(boolean managedByQueryManager) {
-    this.managedByQueryManager = managedByQueryManager;
-  }
-
-  @Override
-  public boolean hasRemaining() {
-    return hasRemaining;
-  }
-
-  @Override
-  public void setHasRemaining(boolean hasRemaining) {
-    this.hasRemaining = hasRemaining;
-  }
-
-  @Override
-  public Object getValueInTimestamp(long timestamp) {
-    while (batchData.hasCurrent()) {
-      long currTime = batchData.currentTime();
-      if (currTime == timestamp) {
-        return batchData.currentValue();
-      } else if (currTime > timestamp) {
-        break;
-      }
-      batchData.next();
+    public TestManagedSeriesReader(BatchData batchData) {
+        this.batchData = batchData;
     }
-    return null;
-  }
 
-
-  @Override
-  public boolean hasNextBatch() {
-    return !batchUsed;
-  }
-
-  @Override
-  public BatchData nextBatch() {
-    if (batchUsed) {
-      throw new NoSuchElementException();
+    @Override
+    public boolean isManagedByQueryManager() {
+        return managedByQueryManager;
     }
-    batchUsed = true;
-    return batchData;
-  }
 
-  @Override
-  public void close() {
-    // nothing to be done
-  }
+    @Override
+    public void setManagedByQueryManager(boolean managedByQueryManager) {
+        this.managedByQueryManager = managedByQueryManager;
+    }
+
+    @Override
+    public boolean hasRemaining() {
+        return hasRemaining;
+    }
+
+    @Override
+    public void setHasRemaining(boolean hasRemaining) {
+        this.hasRemaining = hasRemaining;
+    }
+
+    @Override
+    public Object getValueInTimestamp(long timestamp) {
+        while (batchData.hasCurrent()) {
+            long currTime = batchData.currentTime();
+            if (currTime == timestamp) {
+                return batchData.currentValue();
+            } else if (currTime > timestamp) {
+                break;
+            }
+            batchData.next();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean hasNextBatch() {
+        return !batchUsed;
+    }
+
+    @Override
+    public BatchData nextBatch() {
+        if (batchUsed) {
+            throw new NoSuchElementException();
+        }
+        batchUsed = true;
+        return batchData;
+    }
+
+    @Override
+    public void close() {
+        // nothing to be done
+    }
 }

@@ -32,19 +32,22 @@ import org.apache.thrift.transport.TNonblockingSocket;
 
 public class TestAsyncClientFactory extends AsyncClientFactory {
 
-  private TProtocolFactory protocolFactory;
-  private TAsyncClientManager clientManager;
+    private TProtocolFactory protocolFactory;
+    private TAsyncClientManager clientManager;
 
-  private AtomicInteger clientSerialNum = new AtomicInteger();
+    private AtomicInteger clientSerialNum = new AtomicInteger();
 
-  public TestAsyncClientFactory() throws IOException {
-    protocolFactory = new Factory();
-    clientManager = new TAsyncClientManager();
-  }
+    public TestAsyncClientFactory() throws IOException {
+        protocolFactory = new Factory();
+        clientManager = new TAsyncClientManager();
+    }
 
-  @Override
-  public AsyncClient getAsyncClient(Node node, AsyncClientPool pool) throws IOException {
-    return new TestAsyncClient(protocolFactory, clientManager, new TNonblockingSocket(node.getIp(),
-        node.getMetaPort()), clientSerialNum.getAndIncrement());
-  }
+    @Override
+    public AsyncClient getAsyncClient(Node node, AsyncClientPool pool) throws IOException {
+        return new TestAsyncClient(
+                protocolFactory,
+                clientManager,
+                new TNonblockingSocket(node.getIp(), node.getMetaPort()),
+                clientSerialNum.getAndIncrement());
+    }
 }

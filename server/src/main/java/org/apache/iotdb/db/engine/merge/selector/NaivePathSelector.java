@@ -25,28 +25,30 @@ import org.apache.iotdb.db.metadata.PartialPath;
 
 public class NaivePathSelector implements IMergePathSelector {
 
-  private List<PartialPath> paths;
-  private int idx;
-  private int maxSeriesNum;
+    private List<PartialPath> paths;
+    private int idx;
+    private int maxSeriesNum;
 
-  public NaivePathSelector(List<PartialPath> paths, int maxSeriesNum) {
-    this.paths = paths;
-    this.maxSeriesNum = maxSeriesNum;
-  }
-
-  @Override
-  public boolean hasNext() {
-    return idx < paths.size();
-  }
-
-  @Override
-  public List<PartialPath> next() {
-    if (!hasNext()) {
-      throw new NoSuchElementException();
+    public NaivePathSelector(List<PartialPath> paths, int maxSeriesNum) {
+        this.paths = paths;
+        this.maxSeriesNum = maxSeriesNum;
     }
-    List<PartialPath> ret = idx + maxSeriesNum <= paths.size() ? paths.subList(idx, idx + maxSeriesNum) :
-        paths.subList(idx, paths.size());
-    idx += maxSeriesNum;
-    return ret;
-  }
+
+    @Override
+    public boolean hasNext() {
+        return idx < paths.size();
+    }
+
+    @Override
+    public List<PartialPath> next() {
+        if (!hasNext()) {
+            throw new NoSuchElementException();
+        }
+        List<PartialPath> ret =
+                idx + maxSeriesNum <= paths.size()
+                        ? paths.subList(idx, idx + maxSeriesNum)
+                        : paths.subList(idx, paths.size());
+        idx += maxSeriesNum;
+        return ret;
+    }
 }

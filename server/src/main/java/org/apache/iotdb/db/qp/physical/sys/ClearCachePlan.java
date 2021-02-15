@@ -26,12 +26,12 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class ClearCachePlan extends PhysicalPlan {
 
-  public ClearCachePlan() {
-    super(false, OperatorType.CLEAR_CACHE);
-  }
+    public ClearCachePlan() {
+        super(false, OperatorType.CLEAR_CACHE);
+    }
 
-  @Override
-  public List<PartialPath> getPaths() {
-    return Collections.emptyList();
-  }
+    @Override
+    public List<PartialPath> getPaths() {
+        return Collections.emptyList();
+    }
 }

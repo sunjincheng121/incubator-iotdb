@@ -21,7 +21,6 @@ package org.apache.iotdb.tsfile.read.controller;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.iotdb.tsfile.exception.write.NoMeasurementException;
 import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
 import org.apache.iotdb.tsfile.file.metadata.TsFileMetadata;
@@ -31,40 +30,38 @@ import org.apache.iotdb.tsfile.read.common.TimeRange;
 
 public interface IMetadataQuerier {
 
-  List<ChunkMetadata> getChunkMetaDataList(Path path) throws IOException;
+    List<ChunkMetadata> getChunkMetaDataList(Path path) throws IOException;
 
-  Map<Path, List<ChunkMetadata>> getChunkMetaDataMap(List<Path> paths) throws IOException;
+    Map<Path, List<ChunkMetadata>> getChunkMetaDataMap(List<Path> paths) throws IOException;
 
-  TsFileMetadata getWholeFileMetadata();
+    TsFileMetadata getWholeFileMetadata();
 
-  /**
-   * this will load all chunk metadata of given paths into cache.
-   *
-   * <p>
-   * call this method before calling getChunkMetaDataList() will accelerate the reading of chunk
-   * metadata, which will only read TsMetaData once
-   */
-  void loadChunkMetaDatas(List<Path> paths) throws IOException;
+    /**
+     * this will load all chunk metadata of given paths into cache.
+     *
+     * <p>call this method before calling getChunkMetaDataList() will accelerate the reading of
+     * chunk metadata, which will only read TsMetaData once
+     */
+    void loadChunkMetaDatas(List<Path> paths) throws IOException;
 
-  /**
-   * @return the corresponding data type.
-   * @throws NoMeasurementException if the measurement not exists.
-   */
-  TSDataType getDataType(Path path) throws NoMeasurementException, IOException;
+    /**
+     * @return the corresponding data type.
+     * @throws NoMeasurementException if the measurement not exists.
+     */
+    TSDataType getDataType(Path path) throws NoMeasurementException, IOException;
 
-  /**
-   * Convert the space partition constraint to the time partition constraint.
-   *
-   * @param paths selected paths in a query expression
-   * @param spacePartitionStartPos the start position of the space partition
-   * @param spacePartitionEndPos the end position of the space partition
-   * @return the converted time partition constraint
-   */
-  List<TimeRange> convertSpace2TimePartition(List<Path> paths, long spacePartitionStartPos,
-      long spacePartitionEndPos) throws IOException;
+    /**
+     * Convert the space partition constraint to the time partition constraint.
+     *
+     * @param paths selected paths in a query expression
+     * @param spacePartitionStartPos the start position of the space partition
+     * @param spacePartitionEndPos the end position of the space partition
+     * @return the converted time partition constraint
+     */
+    List<TimeRange> convertSpace2TimePartition(
+            List<Path> paths, long spacePartitionStartPos, long spacePartitionEndPos)
+            throws IOException;
 
-  /**
-   * clear caches (if used) to release memory.
-   */
-  void clear();
+    /** clear caches (if used) to release memory. */
+    void clear();
 }

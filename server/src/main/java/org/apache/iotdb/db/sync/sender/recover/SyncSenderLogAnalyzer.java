@@ -33,96 +33,98 @@ import org.slf4j.LoggerFactory;
 
 public class SyncSenderLogAnalyzer implements ISyncSenderLogAnalyzer {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SyncSenderLogAnalyzer.class);
-  private String senderPath;
-  private File currentLocalFile;
-  private File lastLocalFile;
-  private File syncLogFile;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SyncSenderLogAnalyzer.class);
+    private String senderPath;
+    private File currentLocalFile;
+    private File lastLocalFile;
+    private File syncLogFile;
 
-  public SyncSenderLogAnalyzer(String senderPath) {
-    this.senderPath = senderPath;
-    this.currentLocalFile = new File(senderPath, SyncConstant.CURRENT_LOCAL_FILE_NAME);
-    this.lastLocalFile = new File(senderPath, SyncConstant.LAST_LOCAL_FILE_NAME);
-    this.syncLogFile = new File(senderPath, SyncConstant.SYNC_LOG_NAME);
-  }
+    public SyncSenderLogAnalyzer(String senderPath) {
+        this.senderPath = senderPath;
+        this.currentLocalFile = new File(senderPath, SyncConstant.CURRENT_LOCAL_FILE_NAME);
+        this.lastLocalFile = new File(senderPath, SyncConstant.LAST_LOCAL_FILE_NAME);
+        this.syncLogFile = new File(senderPath, SyncConstant.SYNC_LOG_NAME);
+    }
 
-  @Override
-  public void recover() throws IOException {
-    if (currentLocalFile.exists() && !lastLocalFile.exists()) {
-      FileUtils.moveFile(currentLocalFile, lastLocalFile);
-    } else {
-      Set<String> lastLocalFiles = new HashSet<>();
-      Set<String> deletedFiles = new HashSet<>();
-      Set<String> newFiles = new HashSet<>();
-      loadLastLocalFiles(lastLocalFiles);
-      loadLogger(deletedFiles, newFiles);
-      lastLocalFiles.removeAll(deletedFiles);
-      lastLocalFiles.addAll(newFiles);
-      updateLastLocalFile(lastLocalFiles);
-    }
-    FileUtils.deleteDirectory(new File(senderPath, SyncConstant.DATA_SNAPSHOT_NAME));
-    syncLogFile.delete();
-  }
-
-  @Override
-  public void loadLastLocalFiles(Set<String> lastLocalFiles) {
-    if (!lastLocalFile.exists()) {
-      LOGGER.info("last local file {} doesn't exist.", lastLocalFile.getAbsolutePath());
-      return;
-    }
-    try (BufferedReader br = new BufferedReader(new FileReader(lastLocalFile))) {
-      String line;
-      while ((line = br.readLine()) != null) {
-        lastLocalFiles.add(line);
-      }
-    } catch (IOException e) {
-      LOGGER
-          .error("Can not load last local file list from file {}", lastLocalFile.getAbsoluteFile(),
-              e);
-    }
-  }
-
-  @Override
-  public void loadLogger(Set<String> deletedFiles, Set<String> newFiles) {
-    if (!syncLogFile.exists()) {
-      LOGGER.info("log file {} doesn't exist.", syncLogFile.getAbsolutePath());
-      return;
-    }
-    try (BufferedReader br = new BufferedReader(new FileReader(syncLogFile))) {
-      String line;
-      int mode = 0;
-      while ((line = br.readLine()) != null) {
-        if (line.equals(SyncSenderLogger.SYNC_DELETED_FILE_NAME_START)) {
-          mode = -1;
-        } else if (line.equals(SyncSenderLogger.SYNC_TSFILE_START)) {
-          mode = 1;
+    @Override
+    public void recover() throws IOException {
+        if (currentLocalFile.exists() && !lastLocalFile.exists()) {
+            FileUtils.moveFile(currentLocalFile, lastLocalFile);
         } else {
-          if (mode == -1) {
-            deletedFiles.add(line);
-          } else if (mode == 1) {
-            newFiles.add(line);
-          }
+            Set<String> lastLocalFiles = new HashSet<>();
+            Set<String> deletedFiles = new HashSet<>();
+            Set<String> newFiles = new HashSet<>();
+            loadLastLocalFiles(lastLocalFiles);
+            loadLogger(deletedFiles, newFiles);
+            lastLocalFiles.removeAll(deletedFiles);
+            lastLocalFiles.addAll(newFiles);
+            updateLastLocalFile(lastLocalFiles);
         }
-      }
-    } catch (IOException e) {
-      LOGGER
-          .error("Can not load last local file list from file {}", lastLocalFile.getAbsoluteFile(),
-              e);
+        FileUtils.deleteDirectory(new File(senderPath, SyncConstant.DATA_SNAPSHOT_NAME));
+        syncLogFile.delete();
     }
-  }
 
-  @Override
-  public void updateLastLocalFile(Set<String> currentLocalFiles) throws IOException {
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(currentLocalFile))) {
-      for (String line : currentLocalFiles) {
-        bw.write(line);
-        bw.newLine();
-      }
-      bw.flush();
-    } catch (IOException e) {
-      LOGGER.error("Can not clear sync log {}", syncLogFile.getAbsoluteFile(), e);
+    @Override
+    public void loadLastLocalFiles(Set<String> lastLocalFiles) {
+        if (!lastLocalFile.exists()) {
+            LOGGER.info("last local file {} doesn't exist.", lastLocalFile.getAbsolutePath());
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(lastLocalFile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                lastLocalFiles.add(line);
+            }
+        } catch (IOException e) {
+            LOGGER.error(
+                    "Can not load last local file list from file {}",
+                    lastLocalFile.getAbsoluteFile(),
+                    e);
+        }
     }
-    lastLocalFile.delete();
-    FileUtils.moveFile(currentLocalFile, lastLocalFile);
-  }
+
+    @Override
+    public void loadLogger(Set<String> deletedFiles, Set<String> newFiles) {
+        if (!syncLogFile.exists()) {
+            LOGGER.info("log file {} doesn't exist.", syncLogFile.getAbsolutePath());
+            return;
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(syncLogFile))) {
+            String line;
+            int mode = 0;
+            while ((line = br.readLine()) != null) {
+                if (line.equals(SyncSenderLogger.SYNC_DELETED_FILE_NAME_START)) {
+                    mode = -1;
+                } else if (line.equals(SyncSenderLogger.SYNC_TSFILE_START)) {
+                    mode = 1;
+                } else {
+                    if (mode == -1) {
+                        deletedFiles.add(line);
+                    } else if (mode == 1) {
+                        newFiles.add(line);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error(
+                    "Can not load last local file list from file {}",
+                    lastLocalFile.getAbsoluteFile(),
+                    e);
+        }
+    }
+
+    @Override
+    public void updateLastLocalFile(Set<String> currentLocalFiles) throws IOException {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(currentLocalFile))) {
+            for (String line : currentLocalFiles) {
+                bw.write(line);
+                bw.newLine();
+            }
+            bw.flush();
+        } catch (IOException e) {
+            LOGGER.error("Can not clear sync log {}", syncLogFile.getAbsoluteFile(), e);
+        }
+        lastLocalFile.delete();
+        FileUtils.moveFile(currentLocalFile, lastLocalFile);
+    }
 }

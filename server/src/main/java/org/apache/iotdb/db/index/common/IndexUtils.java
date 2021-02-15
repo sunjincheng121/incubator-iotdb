@@ -19,18 +19,17 @@ package org.apache.iotdb.db.index.common;
 
 public class IndexUtils {
 
-  public static String removeQuotation(String v) {
-    int start = 0;
-    int end = v.length();
-    if (v.startsWith("\'") || v.startsWith("\"")) {
-      start = 1;
+    public static String removeQuotation(String v) {
+        int start = 0;
+        int end = v.length();
+        if (v.startsWith("\'") || v.startsWith("\"")) {
+            start = 1;
+        }
+        if (v.endsWith("\'") || v.endsWith("\"")) {
+            end = v.length() - 1;
+        }
+        return v.substring(start, end);
     }
-    if (v.endsWith("\'") || v.endsWith("\"")) {
-      end = v.length() - 1;
-    }
-    return v.substring(start, end);
-  }
 
-  private IndexUtils() {
-  }
+    private IndexUtils() {}
 }

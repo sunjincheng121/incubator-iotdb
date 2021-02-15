@@ -21,10 +21,10 @@ package org.apache.iotdb.db.writelog.recover;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.iotdb.db.conf.IoTDBConstant;
 import org.apache.iotdb.db.constant.TestConstant;
@@ -58,137 +58,173 @@ import org.junit.Test;
 
 public class RecoverResourceFromReaderTest {
 
-  private File tsF;
-  private TsFileWriter writer;
-  private WriteLogNode node;
-  private String logNodePrefix = TestConstant.OUTPUT_DATA_DIR.concat("testNode/0");
-  private Schema schema;
-  private TsFileResource resource;
-  private VersionController versionController = new VersionController() {
-    private int i;
+    private File tsF;
+    private TsFileWriter writer;
+    private WriteLogNode node;
+    private String logNodePrefix = TestConstant.OUTPUT_DATA_DIR.concat("testNode/0");
+    private Schema schema;
+    private TsFileResource resource;
+    private VersionController versionController =
+            new VersionController() {
+                private int i;
 
-    @Override
-    public long nextVersion() {
-      return ++i;
-    }
+                @Override
+                public long nextVersion() {
+                    return ++i;
+                }
 
-    @Override
-    public long currVersion() {
-      return i;
-    }
-  };
+                @Override
+                public long currVersion() {
+                    return i;
+                }
+            };
 
-  @Before
-  public void setup() throws IOException, WriteProcessException, MetadataException {
-    EnvironmentUtils.envSetUp();
-    tsF = SystemFileFactory.INSTANCE.getFile(logNodePrefix, "1-1-1.tsfile");
-    tsF.getParentFile().mkdirs();
+    @Before
+    public void setup() throws IOException, WriteProcessException, MetadataException {
+        EnvironmentUtils.envSetUp();
+        tsF = SystemFileFactory.INSTANCE.getFile(logNodePrefix, "1-1-1.tsfile");
+        tsF.getParentFile().mkdirs();
 
-    schema = new Schema();
-    for (int i = 0; i < 10; i++) {
-      for (int j = 0; j < 10; j++) {
-        PartialPath path = new PartialPath("root.sg.device" + i + IoTDBConstant.PATH_SEPARATOR + "sensor" + j);
-        MeasurementSchema measurementSchema = new MeasurementSchema("sensor" + j, TSDataType.INT64,
-            TSEncoding.PLAIN);
-        schema.registerTimeseries(path.toTSFilePath(), measurementSchema);
-        IoTDB.metaManager.createTimeseries(path, measurementSchema.getType(),
-            measurementSchema.getEncodingType(), measurementSchema.getCompressor(),
-            measurementSchema.getProps());
-      }
-    }
-    schema.registerTimeseries(new Path(("root.sg.device99"), ("sensor4")),
-        new MeasurementSchema("sensor4", TSDataType.INT64, TSEncoding.PLAIN));
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.sg.device99.sensor4"), TSDataType.INT64, TSEncoding.PLAIN,
-            TSFileDescriptor.getInstance().getConfig().getCompressor(), Collections.emptyMap());
-    schema.registerTimeseries(new Path(("root.sg.device99"), ("sensor2")),
-        new MeasurementSchema("sensor2", TSDataType.INT64, TSEncoding.PLAIN));
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.sg.device99.sensor2"), TSDataType.INT64, TSEncoding.PLAIN,
-            TSFileDescriptor.getInstance().getConfig().getCompressor(), Collections.emptyMap());
-    schema.registerTimeseries(new Path(("root.sg.device99"), ("sensor1")),
-        new MeasurementSchema("sensor1", TSDataType.INT64, TSEncoding.PLAIN));
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.sg.device99.sensor1"), TSDataType.INT64, TSEncoding.PLAIN,
-            TSFileDescriptor.getInstance().getConfig().getCompressor(), Collections.emptyMap());
-    writer = new TsFileWriter(tsF, schema);
-
-    TSRecord tsRecord = new TSRecord(100, "root.sg.device99");
-    tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.INT64, "sensor4", String.valueOf(0)));
-    writer.write(tsRecord);
-    tsRecord = new TSRecord(2, "root.sg.device99");
-    tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.INT64, "sensor1", String.valueOf(0)));
-    writer.write(tsRecord);
-
-    for (int i = 0; i < 10; i++) {
-      for (int j = 0; j < 10; j++) {
-        tsRecord = new TSRecord(i, "root.sg.device" + j);
-        for (int k = 0; k < 10; k++) {
-          tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.INT64, "sensor" + k,
-              String.valueOf(k)));
+        schema = new Schema();
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                PartialPath path =
+                        new PartialPath(
+                                "root.sg.device" + i + IoTDBConstant.PATH_SEPARATOR + "sensor" + j);
+                MeasurementSchema measurementSchema =
+                        new MeasurementSchema("sensor" + j, TSDataType.INT64, TSEncoding.PLAIN);
+                schema.registerTimeseries(path.toTSFilePath(), measurementSchema);
+                IoTDB.metaManager.createTimeseries(
+                        path,
+                        measurementSchema.getType(),
+                        measurementSchema.getEncodingType(),
+                        measurementSchema.getCompressor(),
+                        measurementSchema.getProps());
+            }
         }
+        schema.registerTimeseries(
+                new Path(("root.sg.device99"), ("sensor4")),
+                new MeasurementSchema("sensor4", TSDataType.INT64, TSEncoding.PLAIN));
+        IoTDB.metaManager.createTimeseries(
+                new PartialPath("root.sg.device99.sensor4"),
+                TSDataType.INT64,
+                TSEncoding.PLAIN,
+                TSFileDescriptor.getInstance().getConfig().getCompressor(),
+                Collections.emptyMap());
+        schema.registerTimeseries(
+                new Path(("root.sg.device99"), ("sensor2")),
+                new MeasurementSchema("sensor2", TSDataType.INT64, TSEncoding.PLAIN));
+        IoTDB.metaManager.createTimeseries(
+                new PartialPath("root.sg.device99.sensor2"),
+                TSDataType.INT64,
+                TSEncoding.PLAIN,
+                TSFileDescriptor.getInstance().getConfig().getCompressor(),
+                Collections.emptyMap());
+        schema.registerTimeseries(
+                new Path(("root.sg.device99"), ("sensor1")),
+                new MeasurementSchema("sensor1", TSDataType.INT64, TSEncoding.PLAIN));
+        IoTDB.metaManager.createTimeseries(
+                new PartialPath("root.sg.device99.sensor1"),
+                TSDataType.INT64,
+                TSEncoding.PLAIN,
+                TSFileDescriptor.getInstance().getConfig().getCompressor(),
+                Collections.emptyMap());
+        writer = new TsFileWriter(tsF, schema);
+
+        TSRecord tsRecord = new TSRecord(100, "root.sg.device99");
+        tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.INT64, "sensor4", String.valueOf(0)));
         writer.write(tsRecord);
-      }
-    }
+        tsRecord = new TSRecord(2, "root.sg.device99");
+        tsRecord.addTuple(DataPoint.getDataPoint(TSDataType.INT64, "sensor1", String.valueOf(0)));
+        writer.write(tsRecord);
 
-    writer.flushAllChunkGroups();
-    writer.getIOWriter().close();
-
-    node = MultiFileLogNodeManager.getInstance().getNode(logNodePrefix + tsF.getName());
-    for (int i = 0; i < 10; i++) {
-      for (int j = 0; j < 10; j++) {
-        String[] measurements = new String[10];
-        String[] values = new String[10];
-        TSDataType[] types = new TSDataType[10];
-        for (int k = 0; k < 10; k++) {
-          measurements[k] = "sensor" + k;
-          types[k] = TSDataType.INT64;
-          values[k] = String.valueOf(k + 10);
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                tsRecord = new TSRecord(i, "root.sg.device" + j);
+                for (int k = 0; k < 10; k++) {
+                    tsRecord.addTuple(
+                            DataPoint.getDataPoint(
+                                    TSDataType.INT64, "sensor" + k, String.valueOf(k)));
+                }
+                writer.write(tsRecord);
+            }
         }
-        InsertRowPlan insertRowPlan = new InsertRowPlan(new PartialPath("root.sg.device" + j), i, measurements,
-            types, values);
+
+        writer.flushAllChunkGroups();
+        writer.getIOWriter().close();
+
+        node = MultiFileLogNodeManager.getInstance().getNode(logNodePrefix + tsF.getName());
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                String[] measurements = new String[10];
+                String[] values = new String[10];
+                TSDataType[] types = new TSDataType[10];
+                for (int k = 0; k < 10; k++) {
+                    measurements[k] = "sensor" + k;
+                    types[k] = TSDataType.INT64;
+                    values[k] = String.valueOf(k + 10);
+                }
+                InsertRowPlan insertRowPlan =
+                        new InsertRowPlan(
+                                new PartialPath("root.sg.device" + j),
+                                i,
+                                measurements,
+                                types,
+                                values);
+                node.write(insertRowPlan);
+            }
+            node.notifyStartFlush();
+        }
+        InsertRowPlan insertRowPlan =
+                new InsertRowPlan(
+                        new PartialPath("root.sg.device99"),
+                        1,
+                        new String[] {"sensor4"},
+                        new TSDataType[] {TSDataType.INT64},
+                        new String[] {"4"});
         node.write(insertRowPlan);
-      }
-      node.notifyStartFlush();
-    }
-    InsertRowPlan insertRowPlan = new InsertRowPlan(new PartialPath("root.sg.device99"), 1, new String[]{"sensor4"},
-        new TSDataType[]{TSDataType.INT64}, new String[]{"4"});
-    node.write(insertRowPlan);
-    insertRowPlan = new InsertRowPlan(new PartialPath("root.sg.device99"), 300, new String[]{"sensor2"},
-        new TSDataType[]{TSDataType.INT64}, new String[]{"2"});
-    node.write(insertRowPlan);
-    node.close();
+        insertRowPlan =
+                new InsertRowPlan(
+                        new PartialPath("root.sg.device99"),
+                        300,
+                        new String[] {"sensor2"},
+                        new TSDataType[] {TSDataType.INT64},
+                        new String[] {"2"});
+        node.write(insertRowPlan);
+        node.close();
 
-    resource = new TsFileResource(tsF);
-  }
-
-  @After
-  public void tearDown() throws IOException, StorageEngineException {
-    EnvironmentUtils.cleanEnv();
-    FileUtils.deleteDirectory(tsF.getParentFile());
-    resource.close();
-    node.delete();
-  }
-
-  @Test
-  public void testResourceRecovery() throws StorageGroupProcessorException, IOException {
-    // write a broken resourceFile
-    File resourceFile = FSFactoryProducer.getFSFactory()
-        .getFile(resource.getTsFile() + TsFileResource.RESOURCE_SUFFIX);
-    FileUtils.deleteQuietly(resourceFile);
-    try (OutputStream outputStream = FSFactoryProducer.getFSFactory()
-        .getBufferedOutputStream(resourceFile.getPath())) {
-      ReadWriteIOUtils.write(123, outputStream);
+        resource = new TsFileResource(tsF);
     }
 
-    TsFileRecoverPerformer performer = new TsFileRecoverPerformer(logNodePrefix, versionController,
-        resource, false, false);
-    performer.recover(true).close();
-    assertEquals(1, resource.getStartTime("root.sg.device99"));
-    assertEquals(300, resource.getEndTime("root.sg.device99"));
-    for (int i = 0; i < 10; i++) {
-      assertEquals(0, resource.getStartTime("root.sg.device" + i));
-      assertEquals(9, resource.getEndTime("root.sg.device" + i));
+    @After
+    public void tearDown() throws IOException, StorageEngineException {
+        EnvironmentUtils.cleanEnv();
+        FileUtils.deleteDirectory(tsF.getParentFile());
+        resource.close();
+        node.delete();
     }
-  }
+
+    @Test
+    public void testResourceRecovery() throws StorageGroupProcessorException, IOException {
+        // write a broken resourceFile
+        File resourceFile =
+                FSFactoryProducer.getFSFactory()
+                        .getFile(resource.getTsFile() + TsFileResource.RESOURCE_SUFFIX);
+        FileUtils.deleteQuietly(resourceFile);
+        try (OutputStream outputStream =
+                FSFactoryProducer.getFSFactory().getBufferedOutputStream(resourceFile.getPath())) {
+            ReadWriteIOUtils.write(123, outputStream);
+        }
+
+        TsFileRecoverPerformer performer =
+                new TsFileRecoverPerformer(
+                        logNodePrefix, versionController, resource, false, false);
+        performer.recover(true).close();
+        assertEquals(1, resource.getStartTime("root.sg.device99"));
+        assertEquals(300, resource.getEndTime("root.sg.device99"));
+        for (int i = 0; i < 10; i++) {
+            assertEquals(0, resource.getStartTime("root.sg.device" + i));
+            assertEquals(9, resource.getEndTime("root.sg.device" + i));
+        }
+    }
 }

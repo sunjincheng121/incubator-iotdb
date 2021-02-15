@@ -31,80 +31,79 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public class MinTimeAggrResult extends AggregateResult {
 
-  public MinTimeAggrResult() {
-    super(TSDataType.INT64, AggregationType.MIN_TIME);
-    reset();
-  }
-
-  @Override
-  public Long getResult() {
-    return hasCandidateResult() ? getLongValue() : null;
-  }
-
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    if (hasFinalResult()) {
-      return;
+    public MinTimeAggrResult() {
+        super(TSDataType.INT64, AggregationType.MIN_TIME);
+        reset();
     }
-    long time = statistics.getStartTime();
-    setValue(time);
-  }
 
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage) {
-    updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
-    if (hasFinalResult()) {
-      return;
+    @Override
+    public Long getResult() {
+        return hasCandidateResult() ? getLongValue() : null;
     }
-    if (dataInThisPage.hasCurrent()
-        && dataInThisPage.currentTime() < maxBound
-        && dataInThisPage.currentTime() >= minBound) {
-      setLongValue(dataInThisPage.currentTime());
+
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        if (hasFinalResult()) {
+            return;
+        }
+        long time = statistics.getStartTime();
+        setValue(time);
     }
-  }
 
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    if (hasFinalResult()) {
-      return;
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage) {
+        updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
     }
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value != null) {
-        setLongValue(timestamps[i]);
-        return;
-      }
+
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
+        if (hasFinalResult()) {
+            return;
+        }
+        if (dataInThisPage.hasCurrent()
+                && dataInThisPage.currentTime() < maxBound
+                && dataInThisPage.currentTime() >= minBound) {
+            setLongValue(dataInThisPage.currentTime());
+        }
     }
-  }
 
-  @Override
-  public boolean hasFinalResult() {
-    return hasCandidateResult;
-  }
-
-  @Override
-  public void merge(AggregateResult another) {
-    MinTimeAggrResult anotherMinTime = (MinTimeAggrResult) another;
-    if (!hasCandidateResult() && anotherMinTime.hasCandidateResult()) {
-      setLongValue(anotherMinTime.getResult());
-      return;
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        if (hasFinalResult()) {
+            return;
+        }
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value != null) {
+                setLongValue(timestamps[i]);
+                return;
+            }
+        }
     }
-    if (hasCandidateResult() && anotherMinTime.hasCandidateResult() && getResult() > anotherMinTime.getResult()) {
-      setLongValue(anotherMinTime.getResult());
+
+    @Override
+    public boolean hasFinalResult() {
+        return hasCandidateResult;
     }
-  }
 
-  @Override
-  protected void deserializeSpecificFields(ByteBuffer buffer) {
-  }
+    @Override
+    public void merge(AggregateResult another) {
+        MinTimeAggrResult anotherMinTime = (MinTimeAggrResult) another;
+        if (!hasCandidateResult() && anotherMinTime.hasCandidateResult()) {
+            setLongValue(anotherMinTime.getResult());
+            return;
+        }
+        if (hasCandidateResult()
+                && anotherMinTime.hasCandidateResult()
+                && getResult() > anotherMinTime.getResult()) {
+            setLongValue(anotherMinTime.getResult());
+        }
+    }
 
-  @Override
-  protected void serializeSpecificFields(OutputStream outputStream) {
-  }
+    @Override
+    protected void deserializeSpecificFields(ByteBuffer buffer) {}
 
+    @Override
+    protected void serializeSpecificFields(OutputStream outputStream) {}
 }

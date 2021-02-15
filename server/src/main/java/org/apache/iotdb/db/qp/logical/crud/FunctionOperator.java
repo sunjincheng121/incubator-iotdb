@@ -22,32 +22,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class presents series condition which is general(e.g. numerical comparison)
- * or defined by user. Function is used
- * for bottom operator.<br>
+ * This class presents series condition which is general(e.g. numerical comparison) or defined by
+ * user. Function is used for bottom operator.<br>
  * FunctionOperator has a {@code seriesPath}, and other filter condition.
  */
-
 public class FunctionOperator extends FilterOperator {
 
-  private static final Logger logger = LoggerFactory.getLogger(FunctionOperator.class);
+    private static final Logger logger = LoggerFactory.getLogger(FunctionOperator.class);
 
-  public FunctionOperator(int tokenIntType) {
-    super(tokenIntType);
-    operatorType = OperatorType.FUNC;
-  }
+    public FunctionOperator(int tokenIntType) {
+        super(tokenIntType);
+        operatorType = OperatorType.FUNC;
+    }
 
-  /**
-   * reverse func.
-   */
-  public void reverseFunc() {
-    // Implemented by subclass
-  }
+    /** reverse func. */
+    public void reverseFunc() {
+        // Implemented by subclass
+    }
 
-  @Override
-  public boolean addChildOperator(FilterOperator op) {
-    logger.error("cannot add child to leaf FilterOperator, now it's FunctionOperator");
-    return false;
-  }
-
+    @Override
+    public boolean addChildOperator(FilterOperator op) {
+        logger.error("cannot add child to leaf FilterOperator, now it's FunctionOperator");
+        return false;
+    }
 }

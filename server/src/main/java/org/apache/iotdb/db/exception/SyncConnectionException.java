@@ -22,17 +22,17 @@ import org.apache.iotdb.rpc.TSStatusCode;
 
 public class SyncConnectionException extends IoTDBException {
 
-  private static final long serialVersionUID = -6661904365503849681L;
+    private static final long serialVersionUID = -6661904365503849681L;
 
-  public SyncConnectionException(String message) {
-    super(message, TSStatusCode.SYNC_CONNECTION_EXCEPTION.getStatusCode());
-  }
+    public SyncConnectionException(String message) {
+        super(message, TSStatusCode.SYNC_CONNECTION_EXCEPTION.getStatusCode());
+    }
 
-  public SyncConnectionException(String message, Throwable cause) {
-    super(message + cause.getMessage(), TSStatusCode.SYNC_CONNECTION_EXCEPTION.getStatusCode());
-  }
+    public SyncConnectionException(String message, Throwable cause) {
+        super(message + cause.getMessage(), TSStatusCode.SYNC_CONNECTION_EXCEPTION.getStatusCode());
+    }
 
-  public SyncConnectionException(Throwable cause) {
-    super(cause.getMessage(), TSStatusCode.SYNC_CONNECTION_EXCEPTION.getStatusCode());
-  }
+    public SyncConnectionException(Throwable cause) {
+        super(cause.getMessage(), TSStatusCode.SYNC_CONNECTION_EXCEPTION.getStatusCode());
+    }
 }

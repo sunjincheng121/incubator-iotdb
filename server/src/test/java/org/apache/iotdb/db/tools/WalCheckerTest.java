@@ -39,125 +39,128 @@ import org.junit.Test;
 
 public class WalCheckerTest {
 
-  @Test
-  public void testNoDir() {
-    WalChecker checker = new WalChecker("no such dir");
-    boolean caught = false;
-    try {
-      checker.doCheck();
-    } catch (SystemCheckException e) {
-      caught = true;
-    }
-    assertTrue(caught);
-  }
-
-  @Test
-  public void testEmpty() throws IOException, SystemCheckException {
-    File tempRoot = new File(TestConstant.BASE_OUTPUT_PATH.concat("root"));
-    tempRoot.mkdir();
-
-    try {
-      WalChecker checker = new WalChecker(tempRoot.getAbsolutePath());
-      assertTrue(checker.doCheck().isEmpty());
-    } finally {
-      FileUtils.deleteDirectory(tempRoot);
-    }
-  }
-
-  @Test
-  public void testNormalCheck() throws IOException, SystemCheckException, IllegalPathException {
-    File tempRoot = new File(TestConstant.BASE_OUTPUT_PATH.concat("root"));
-    tempRoot.mkdir();
-
-    try {
-      for (int i = 0; i < 5; i++) {
-        File subDir = new File(tempRoot, "storage_group" + i);
-        subDir.mkdir();
-        LogWriter logWriter = new LogWriter(subDir.getPath() + File.separator
-            + WAL_FILE_NAME);
-
-        ByteBuffer binaryPlans = ByteBuffer.allocate(64 * 1024);
-        String deviceId = "device1";
-        String[] measurements = new String[]{"s1", "s2", "s3"};
-        TSDataType[] types = new TSDataType[]{TSDataType.INT64, TSDataType.INT64, TSDataType.INT64};
-        String[] values = new String[]{"5", "6", "7"};
-        for (int j = 0; j < 10; j++) {
-          new InsertRowPlan(new PartialPath(deviceId), j, measurements, types, values).serialize(binaryPlans);
-        }
-        binaryPlans.flip();
-        logWriter.write(binaryPlans);
-        logWriter.force();
-
-        logWriter.close();
-      }
-
-      WalChecker checker = new WalChecker(tempRoot.getAbsolutePath());
-      assertTrue(checker.doCheck().isEmpty());
-    } finally {
-      FileUtils.deleteDirectory(tempRoot);
-    }
-  }
-
-  @Test
-  public void testAbnormalCheck() throws IOException, SystemCheckException, IllegalPathException {
-    File tempRoot = new File(TestConstant.BASE_OUTPUT_PATH.concat("root"));
-    tempRoot.mkdir();
-
-    try {
-      for (int i = 0; i < 5; i++) {
-        File subDir = new File(tempRoot, "storage_group" + i);
-        subDir.mkdir();
-        LogWriter logWriter = new LogWriter(subDir.getPath() + File.separator
-            + WAL_FILE_NAME);
-
-        ByteBuffer binaryPlans = ByteBuffer.allocate(64 * 1024);
-        String deviceId = "device1";
-        String[] measurements = new String[]{"s1", "s2", "s3"};
-        TSDataType[] types = new TSDataType[]{TSDataType.INT64, TSDataType.INT64, TSDataType.INT64};
-        String[] values = new String[]{"5", "6", "7"};
-        for (int j = 0; j < 10; j++) {
-          new InsertRowPlan(new PartialPath(deviceId), j, measurements, types, values).serialize(binaryPlans);
-        }
-        if (i > 2) {
-          binaryPlans.put("not a wal".getBytes());
-        }
-        logWriter.write(binaryPlans);
-        logWriter.force();
-
-        logWriter.close();
-      }
-
-      WalChecker checker = new WalChecker(tempRoot.getAbsolutePath());
-      assertEquals(2, checker.doCheck().size());
-    } finally {
-      FileUtils.deleteDirectory(tempRoot);
-    }
-
-  }
-
-  @Test
-  public void testOneDamagedCheck() throws IOException, SystemCheckException {
-    File tempRoot = new File(TestConstant.BASE_OUTPUT_PATH.concat("root"));
-    tempRoot.mkdir();
-
-    try {
-      for (int i = 0; i < 5; i++) {
-        File subDir = new File(tempRoot, "storage_group" + i);
-        subDir.mkdir();
-
-        FileOutputStream fileOutputStream = new FileOutputStream(new File(subDir, WAL_FILE_NAME));
+    @Test
+    public void testNoDir() {
+        WalChecker checker = new WalChecker("no such dir");
+        boolean caught = false;
         try {
-          fileOutputStream.write(i);
-        } finally {
-          fileOutputStream.close();
+            checker.doCheck();
+        } catch (SystemCheckException e) {
+            caught = true;
         }
-      }
-
-      WalChecker checker = new WalChecker(tempRoot.getAbsolutePath());
-      assertEquals(5, checker.doCheck().size());
-    } finally {
-      FileUtils.deleteDirectory(tempRoot);
+        assertTrue(caught);
     }
 
-  }
+    @Test
+    public void testEmpty() throws IOException, SystemCheckException {
+        File tempRoot = new File(TestConstant.BASE_OUTPUT_PATH.concat("root"));
+        tempRoot.mkdir();
+
+        try {
+            WalChecker checker = new WalChecker(tempRoot.getAbsolutePath());
+            assertTrue(checker.doCheck().isEmpty());
+        } finally {
+            FileUtils.deleteDirectory(tempRoot);
+        }
+    }
+
+    @Test
+    public void testNormalCheck() throws IOException, SystemCheckException, IllegalPathException {
+        File tempRoot = new File(TestConstant.BASE_OUTPUT_PATH.concat("root"));
+        tempRoot.mkdir();
+
+        try {
+            for (int i = 0; i < 5; i++) {
+                File subDir = new File(tempRoot, "storage_group" + i);
+                subDir.mkdir();
+                LogWriter logWriter =
+                        new LogWriter(subDir.getPath() + File.separator + WAL_FILE_NAME);
+
+                ByteBuffer binaryPlans = ByteBuffer.allocate(64 * 1024);
+                String deviceId = "device1";
+                String[] measurements = new String[] {"s1", "s2", "s3"};
+                TSDataType[] types =
+                        new TSDataType[] {TSDataType.INT64, TSDataType.INT64, TSDataType.INT64};
+                String[] values = new String[] {"5", "6", "7"};
+                for (int j = 0; j < 10; j++) {
+                    new InsertRowPlan(new PartialPath(deviceId), j, measurements, types, values)
+                            .serialize(binaryPlans);
+                }
+                binaryPlans.flip();
+                logWriter.write(binaryPlans);
+                logWriter.force();
+
+                logWriter.close();
+            }
+
+            WalChecker checker = new WalChecker(tempRoot.getAbsolutePath());
+            assertTrue(checker.doCheck().isEmpty());
+        } finally {
+            FileUtils.deleteDirectory(tempRoot);
+        }
+    }
+
+    @Test
+    public void testAbnormalCheck() throws IOException, SystemCheckException, IllegalPathException {
+        File tempRoot = new File(TestConstant.BASE_OUTPUT_PATH.concat("root"));
+        tempRoot.mkdir();
+
+        try {
+            for (int i = 0; i < 5; i++) {
+                File subDir = new File(tempRoot, "storage_group" + i);
+                subDir.mkdir();
+                LogWriter logWriter =
+                        new LogWriter(subDir.getPath() + File.separator + WAL_FILE_NAME);
+
+                ByteBuffer binaryPlans = ByteBuffer.allocate(64 * 1024);
+                String deviceId = "device1";
+                String[] measurements = new String[] {"s1", "s2", "s3"};
+                TSDataType[] types =
+                        new TSDataType[] {TSDataType.INT64, TSDataType.INT64, TSDataType.INT64};
+                String[] values = new String[] {"5", "6", "7"};
+                for (int j = 0; j < 10; j++) {
+                    new InsertRowPlan(new PartialPath(deviceId), j, measurements, types, values)
+                            .serialize(binaryPlans);
+                }
+                if (i > 2) {
+                    binaryPlans.put("not a wal".getBytes());
+                }
+                logWriter.write(binaryPlans);
+                logWriter.force();
+
+                logWriter.close();
+            }
+
+            WalChecker checker = new WalChecker(tempRoot.getAbsolutePath());
+            assertEquals(2, checker.doCheck().size());
+        } finally {
+            FileUtils.deleteDirectory(tempRoot);
+        }
+    }
+
+    @Test
+    public void testOneDamagedCheck() throws IOException, SystemCheckException {
+        File tempRoot = new File(TestConstant.BASE_OUTPUT_PATH.concat("root"));
+        tempRoot.mkdir();
+
+        try {
+            for (int i = 0; i < 5; i++) {
+                File subDir = new File(tempRoot, "storage_group" + i);
+                subDir.mkdir();
+
+                FileOutputStream fileOutputStream =
+                        new FileOutputStream(new File(subDir, WAL_FILE_NAME));
+                try {
+                    fileOutputStream.write(i);
+                } finally {
+                    fileOutputStream.close();
+                }
+            }
+
+            WalChecker checker = new WalChecker(tempRoot.getAbsolutePath());
+            assertEquals(5, checker.doCheck().size());
+        } finally {
+            FileUtils.deleteDirectory(tempRoot);
+        }
+    }
 }

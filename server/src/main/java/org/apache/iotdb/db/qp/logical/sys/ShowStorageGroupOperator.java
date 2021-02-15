@@ -23,14 +23,14 @@ import org.apache.iotdb.db.metadata.PartialPath;
 
 public class ShowStorageGroupOperator extends ShowOperator {
 
-  private PartialPath path;
+    private PartialPath path;
 
-  public ShowStorageGroupOperator(int tokenIntType, PartialPath path) {
-    super(tokenIntType);
-    this.path = path;
-  }
+    public ShowStorageGroupOperator(int tokenIntType, PartialPath path) {
+        super(tokenIntType);
+        this.path = path;
+    }
 
-  public PartialPath getPath() {
-    return path;
-  }
+    public PartialPath getPath() {
+        return path;
+    }
 }

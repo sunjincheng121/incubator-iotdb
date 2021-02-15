@@ -25,7 +25,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.iotdb.db.conf.IoTDBConstant;
@@ -53,131 +52,178 @@ import org.junit.Test;
 
 public class MergeOverLapTest extends MergeTest {
 
-  private File tempSGDir;
+    private File tempSGDir;
 
-  @Before
-  public void setUp()
-      throws IOException, WriteProcessException, MetadataException {
-    ptNum = 1000;
-    super.setUp();
-    tempSGDir = new File(TestConstant.BASE_OUTPUT_PATH.concat("tempSG"));
-    tempSGDir.mkdirs();
-  }
-
-  @After
-  public void tearDown() throws IOException, StorageEngineException {
-    super.tearDown();
-    FileUtils.deleteDirectory(tempSGDir);
-  }
-
-  @Override
-  void prepareFiles(int seqFileNum, int unseqFileNum) throws IOException, WriteProcessException {
-    for (int i = 0; i < seqFileNum; i++) {
-      File file = new File(TestConstant.BASE_OUTPUT_PATH.concat(
-          i + "seq" + IoTDBConstant.FILE_NAME_SEPARATOR + i + IoTDBConstant.FILE_NAME_SEPARATOR
-              + i + IoTDBConstant.FILE_NAME_SEPARATOR + 0
-              + ".tsfile"));
-      TsFileResource tsFileResource = new TsFileResource(file);
-      tsFileResource.setClosed(true);
-      tsFileResource.setMinPlanIndex(i);
-      tsFileResource.setMaxPlanIndex(i);
-      seqResources.add(tsFileResource);
-      prepareFile(tsFileResource, i * ptNum, ptNum, 0);
+    @Before
+    public void setUp() throws IOException, WriteProcessException, MetadataException {
+        ptNum = 1000;
+        super.setUp();
+        tempSGDir = new File(TestConstant.BASE_OUTPUT_PATH.concat("tempSG"));
+        tempSGDir.mkdirs();
     }
-    for (int i = 0; i < unseqFileNum; i++) {
-      File file = new File(TestConstant.BASE_OUTPUT_PATH.concat(
-          i + "unseq" + IoTDBConstant.FILE_NAME_SEPARATOR + i
-              + IoTDBConstant.FILE_NAME_SEPARATOR
-              + i + IoTDBConstant.FILE_NAME_SEPARATOR + 0
-              + ".tsfile"));
-      TsFileResource tsFileResource = new TsFileResource(file);
-      tsFileResource.setClosed(true);
-      tsFileResource.setMaxPlanIndex(i + seqFileNum);
-      tsFileResource.setMinPlanIndex(i + seqFileNum);
-      unseqResources.add(tsFileResource);
-      prepareUnseqFile(tsFileResource, i * ptNum, ptNum * (i + 1) / unseqFileNum, 10000);
-    }
-    File file = new File(TestConstant.BASE_OUTPUT_PATH.concat(
-        unseqFileNum + "unseq" + IoTDBConstant.FILE_NAME_SEPARATOR + unseqFileNum
-            + IoTDBConstant.FILE_NAME_SEPARATOR + unseqFileNum
-            + IoTDBConstant.FILE_NAME_SEPARATOR + 0
-            + ".tsfile"));
-    TsFileResource tsFileResource = new TsFileResource(file);
-    tsFileResource.setClosed(true);
-    tsFileResource.setMinPlanIndex(seqFileNum + unseqFileNum);
-    tsFileResource.setMaxPlanIndex(seqFileNum + unseqFileNum);
-    unseqResources.add(tsFileResource);
-    prepareUnseqFile(tsFileResource, 0, ptNum * unseqFileNum, 20000);
-  }
 
-  private void prepareUnseqFile(TsFileResource tsFileResource, long timeOffset, long ptNum,
-      long valueOffset)
-      throws IOException, WriteProcessException {
-    TsFileWriter fileWriter = new TsFileWriter(tsFileResource.getTsFile());
-    for (String deviceId : deviceIds) {
-      for (MeasurementSchema measurementSchema : measurementSchemas) {
-        fileWriter.registerTimeseries(
-            new Path(deviceId, measurementSchema.getMeasurementId()), measurementSchema);
-      }
+    @After
+    public void tearDown() throws IOException, StorageEngineException {
+        super.tearDown();
+        FileUtils.deleteDirectory(tempSGDir);
     }
-    for (long i = timeOffset; i < timeOffset + ptNum; i++) {
-      for (int j = 0; j < deviceNum; j++) {
-        TSRecord record = new TSRecord(i, deviceIds[j]);
-        for (int k = 0; k < measurementNum; k++) {
-          record.addTuple(DataPoint.getDataPoint(measurementSchemas[k].getType(),
-              measurementSchemas[k].getMeasurementId(), String.valueOf(i + valueOffset)));
+
+    @Override
+    void prepareFiles(int seqFileNum, int unseqFileNum) throws IOException, WriteProcessException {
+        for (int i = 0; i < seqFileNum; i++) {
+            File file =
+                    new File(
+                            TestConstant.BASE_OUTPUT_PATH.concat(
+                                    i
+                                            + "seq"
+                                            + IoTDBConstant.FILE_NAME_SEPARATOR
+                                            + i
+                                            + IoTDBConstant.FILE_NAME_SEPARATOR
+                                            + i
+                                            + IoTDBConstant.FILE_NAME_SEPARATOR
+                                            + 0
+                                            + ".tsfile"));
+            TsFileResource tsFileResource = new TsFileResource(file);
+            tsFileResource.setClosed(true);
+            tsFileResource.setMinPlanIndex(i);
+            tsFileResource.setMaxPlanIndex(i);
+            seqResources.add(tsFileResource);
+            prepareFile(tsFileResource, i * ptNum, ptNum, 0);
         }
-        fileWriter.write(record);
-        tsFileResource.updateStartTime(deviceIds[j], i);
-        tsFileResource.updateEndTime(deviceIds[j], i);
-      }
-      // insert overlapping tuples
-      if ((i + 1) % 100 == 0) {
-        for (int j = 0; j < deviceNum; j++) {
-          TSRecord record = new TSRecord(i, deviceIds[j]);
-          for (int k = 0; k < measurementNum; k++) {
-            record.addTuple(DataPoint.getDataPoint(measurementSchemas[k].getType(),
-                measurementSchemas[k].getMeasurementId(), String.valueOf(i + valueOffset)));
-          }
-          fileWriter.write(record);
-          tsFileResource.updateStartTime(deviceIds[j], i);
-          tsFileResource.updateEndTime(deviceIds[j], i);
+        for (int i = 0; i < unseqFileNum; i++) {
+            File file =
+                    new File(
+                            TestConstant.BASE_OUTPUT_PATH.concat(
+                                    i
+                                            + "unseq"
+                                            + IoTDBConstant.FILE_NAME_SEPARATOR
+                                            + i
+                                            + IoTDBConstant.FILE_NAME_SEPARATOR
+                                            + i
+                                            + IoTDBConstant.FILE_NAME_SEPARATOR
+                                            + 0
+                                            + ".tsfile"));
+            TsFileResource tsFileResource = new TsFileResource(file);
+            tsFileResource.setClosed(true);
+            tsFileResource.setMaxPlanIndex(i + seqFileNum);
+            tsFileResource.setMinPlanIndex(i + seqFileNum);
+            unseqResources.add(tsFileResource);
+            prepareUnseqFile(tsFileResource, i * ptNum, ptNum * (i + 1) / unseqFileNum, 10000);
         }
-      }
-      if ((i + 1) % flushInterval == 0) {
-        fileWriter.flushAllChunkGroups();
-      }
+        File file =
+                new File(
+                        TestConstant.BASE_OUTPUT_PATH.concat(
+                                unseqFileNum
+                                        + "unseq"
+                                        + IoTDBConstant.FILE_NAME_SEPARATOR
+                                        + unseqFileNum
+                                        + IoTDBConstant.FILE_NAME_SEPARATOR
+                                        + unseqFileNum
+                                        + IoTDBConstant.FILE_NAME_SEPARATOR
+                                        + 0
+                                        + ".tsfile"));
+        TsFileResource tsFileResource = new TsFileResource(file);
+        tsFileResource.setClosed(true);
+        tsFileResource.setMinPlanIndex(seqFileNum + unseqFileNum);
+        tsFileResource.setMaxPlanIndex(seqFileNum + unseqFileNum);
+        unseqResources.add(tsFileResource);
+        prepareUnseqFile(tsFileResource, 0, ptNum * unseqFileNum, 20000);
     }
-    fileWriter.close();
-  }
 
-  @Test
-  public void testFullMerge() throws Exception {
-    MergeTask mergeTask =
-        new MergeTask(new MergeResource(seqResources, unseqResources), tempSGDir.getPath(),
-            (k, v, l) -> {
-            }, "test",
-            true, 1, MERGE_TEST_SG);
-    mergeTask.call();
-
-    QueryContext context = new QueryContext();
-    PartialPath path = new PartialPath(deviceIds[0] + TsFileConstant.PATH_SEPARATOR + measurementSchemas[0].getMeasurementId());
-    List<TsFileResource> resources = new ArrayList<>();
-    resources.add(seqResources.get(0));
-    IBatchReader tsFilesReader = new SeriesRawDataBatchReader(path, measurementSchemas[0].getType(), context,
-        resources, new ArrayList<>(), null, null, true);
-    int cnt = 0;
-    try {
-      while (tsFilesReader.hasNextBatch()) {
-        BatchData batchData = tsFilesReader.nextBatch();
-        for (int i = 0; i < batchData.length(); i++) {
-          cnt++;
-          assertEquals(batchData.getTimeByIndex(i) + 20000.0, batchData.getDoubleByIndex(i), 0.001);
+    private void prepareUnseqFile(
+            TsFileResource tsFileResource, long timeOffset, long ptNum, long valueOffset)
+            throws IOException, WriteProcessException {
+        TsFileWriter fileWriter = new TsFileWriter(tsFileResource.getTsFile());
+        for (String deviceId : deviceIds) {
+            for (MeasurementSchema measurementSchema : measurementSchemas) {
+                fileWriter.registerTimeseries(
+                        new Path(deviceId, measurementSchema.getMeasurementId()),
+                        measurementSchema);
+            }
         }
-      }
-      assertEquals(1000, cnt);
-    } finally {
-      tsFilesReader.close();
+        for (long i = timeOffset; i < timeOffset + ptNum; i++) {
+            for (int j = 0; j < deviceNum; j++) {
+                TSRecord record = new TSRecord(i, deviceIds[j]);
+                for (int k = 0; k < measurementNum; k++) {
+                    record.addTuple(
+                            DataPoint.getDataPoint(
+                                    measurementSchemas[k].getType(),
+                                    measurementSchemas[k].getMeasurementId(),
+                                    String.valueOf(i + valueOffset)));
+                }
+                fileWriter.write(record);
+                tsFileResource.updateStartTime(deviceIds[j], i);
+                tsFileResource.updateEndTime(deviceIds[j], i);
+            }
+            // insert overlapping tuples
+            if ((i + 1) % 100 == 0) {
+                for (int j = 0; j < deviceNum; j++) {
+                    TSRecord record = new TSRecord(i, deviceIds[j]);
+                    for (int k = 0; k < measurementNum; k++) {
+                        record.addTuple(
+                                DataPoint.getDataPoint(
+                                        measurementSchemas[k].getType(),
+                                        measurementSchemas[k].getMeasurementId(),
+                                        String.valueOf(i + valueOffset)));
+                    }
+                    fileWriter.write(record);
+                    tsFileResource.updateStartTime(deviceIds[j], i);
+                    tsFileResource.updateEndTime(deviceIds[j], i);
+                }
+            }
+            if ((i + 1) % flushInterval == 0) {
+                fileWriter.flushAllChunkGroups();
+            }
+        }
+        fileWriter.close();
     }
-  }
+
+    @Test
+    public void testFullMerge() throws Exception {
+        MergeTask mergeTask =
+                new MergeTask(
+                        new MergeResource(seqResources, unseqResources),
+                        tempSGDir.getPath(),
+                        (k, v, l) -> {},
+                        "test",
+                        true,
+                        1,
+                        MERGE_TEST_SG);
+        mergeTask.call();
+
+        QueryContext context = new QueryContext();
+        PartialPath path =
+                new PartialPath(
+                        deviceIds[0]
+                                + TsFileConstant.PATH_SEPARATOR
+                                + measurementSchemas[0].getMeasurementId());
+        List<TsFileResource> resources = new ArrayList<>();
+        resources.add(seqResources.get(0));
+        IBatchReader tsFilesReader =
+                new SeriesRawDataBatchReader(
+                        path,
+                        measurementSchemas[0].getType(),
+                        context,
+                        resources,
+                        new ArrayList<>(),
+                        null,
+                        null,
+                        true);
+        int cnt = 0;
+        try {
+            while (tsFilesReader.hasNextBatch()) {
+                BatchData batchData = tsFilesReader.nextBatch();
+                for (int i = 0; i < batchData.length(); i++) {
+                    cnt++;
+                    assertEquals(
+                            batchData.getTimeByIndex(i) + 20000.0,
+                            batchData.getDoubleByIndex(i),
+                            0.001);
+                }
+            }
+            assertEquals(1000, cnt);
+        } finally {
+            tsFilesReader.close();
+        }
+    }
 }

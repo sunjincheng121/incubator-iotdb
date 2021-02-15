@@ -23,28 +23,28 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class RpcStat {
 
-  private RpcStat() {
-    // pure static class
-  }
+    private RpcStat() {
+        // pure static class
+    }
 
-  static final AtomicLong writeBytes = new AtomicLong();
-  static final AtomicLong writeCompressedBytes = new AtomicLong();
-  static final AtomicLong readBytes = new AtomicLong();
-  static final AtomicLong readCompressedBytes = new AtomicLong();
+    static final AtomicLong writeBytes = new AtomicLong();
+    static final AtomicLong writeCompressedBytes = new AtomicLong();
+    static final AtomicLong readBytes = new AtomicLong();
+    static final AtomicLong readCompressedBytes = new AtomicLong();
 
-  public static long getReadBytes() {
-    return readBytes.get();
-  }
+    public static long getReadBytes() {
+        return readBytes.get();
+    }
 
-  public static long getReadCompressedBytes() {
-    return readCompressedBytes.get();
-  }
+    public static long getReadCompressedBytes() {
+        return readCompressedBytes.get();
+    }
 
-  public static long getWriteBytes() {
-    return writeBytes.get();
-  }
+    public static long getWriteBytes() {
+        return writeBytes.get();
+    }
 
-  public static long getWriteCompressedBytes() {
-    return writeCompressedBytes.get();
-  }
+    public static long getWriteCompressedBytes() {
+        return writeCompressedBytes.get();
+    }
 }

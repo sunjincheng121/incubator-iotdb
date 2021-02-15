@@ -18,68 +18,67 @@
  */
 package org.apache.iotdb.tsfile.file.metadata.statistics;
 
-import org.apache.iotdb.tsfile.utils.Binary;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import org.apache.iotdb.tsfile.utils.Binary;
+import org.junit.Test;
+
 public class StringStatisticsTest {
 
-  @Test
-  public void testUpdate() {
-    Statistics<Binary> binaryStats = new BinaryStatistics();
-    binaryStats.updateStats(new Binary("aaa"));
-    assertFalse(binaryStats.isEmpty());
-    binaryStats.updateStats(new Binary("bbb"));
-    assertFalse(binaryStats.isEmpty());
-    assertEquals("aaa", binaryStats.getFirstValue().getStringValue());
-    assertEquals("bbb", binaryStats.getLastValue().getStringValue());
-  }
+    @Test
+    public void testUpdate() {
+        Statistics<Binary> binaryStats = new BinaryStatistics();
+        binaryStats.updateStats(new Binary("aaa"));
+        assertFalse(binaryStats.isEmpty());
+        binaryStats.updateStats(new Binary("bbb"));
+        assertFalse(binaryStats.isEmpty());
+        assertEquals("aaa", binaryStats.getFirstValue().getStringValue());
+        assertEquals("bbb", binaryStats.getLastValue().getStringValue());
+    }
 
-  @Test
-  public void testMerge() {
-    Statistics<Binary> stringStats1 = new BinaryStatistics();
-    stringStats1.setStartTime(0);
-    stringStats1.setEndTime(2);
-    Statistics<Binary> stringStats2 = new BinaryStatistics();
-    stringStats2.setStartTime(3);
-    stringStats2.setEndTime(5);
+    @Test
+    public void testMerge() {
+        Statistics<Binary> stringStats1 = new BinaryStatistics();
+        stringStats1.setStartTime(0);
+        stringStats1.setEndTime(2);
+        Statistics<Binary> stringStats2 = new BinaryStatistics();
+        stringStats2.setStartTime(3);
+        stringStats2.setEndTime(5);
 
-    stringStats1.updateStats(new Binary("aaa"));
-    stringStats1.updateStats(new Binary("ccc"));
+        stringStats1.updateStats(new Binary("aaa"));
+        stringStats1.updateStats(new Binary("ccc"));
 
-    stringStats2.updateStats(new Binary("ddd"));
+        stringStats2.updateStats(new Binary("ddd"));
 
-    Statistics<Binary> stringStats3 = new BinaryStatistics();
-    stringStats3.mergeStatistics(stringStats1);
-    assertFalse(stringStats3.isEmpty());
-    assertEquals("aaa", stringStats3.getFirstValue().getStringValue());
-    assertEquals("ccc", stringStats3.getLastValue().getStringValue());
+        Statistics<Binary> stringStats3 = new BinaryStatistics();
+        stringStats3.mergeStatistics(stringStats1);
+        assertFalse(stringStats3.isEmpty());
+        assertEquals("aaa", stringStats3.getFirstValue().getStringValue());
+        assertEquals("ccc", stringStats3.getLastValue().getStringValue());
 
-    stringStats3.mergeStatistics(stringStats2);
-    assertEquals("aaa", stringStats3.getFirstValue().getStringValue());
-    assertEquals("ddd", stringStats3.getLastValue().getStringValue());
+        stringStats3.mergeStatistics(stringStats2);
+        assertEquals("aaa", stringStats3.getFirstValue().getStringValue());
+        assertEquals("ddd", stringStats3.getLastValue().getStringValue());
 
-    Statistics<Binary> stringStats4 = new BinaryStatistics();
-    stringStats4.setStartTime(0);
-    stringStats4.setEndTime(5);
-    Statistics<Binary> stringStats5 = new BinaryStatistics();
-    stringStats5.setStartTime(1);
-    stringStats5.setEndTime(4);
+        Statistics<Binary> stringStats4 = new BinaryStatistics();
+        stringStats4.setStartTime(0);
+        stringStats4.setEndTime(5);
+        Statistics<Binary> stringStats5 = new BinaryStatistics();
+        stringStats5.setStartTime(1);
+        stringStats5.setEndTime(4);
 
-    stringStats4.updateStats(new Binary("eee"));
-    stringStats4.updateStats(new Binary("fff"));
+        stringStats4.updateStats(new Binary("eee"));
+        stringStats4.updateStats(new Binary("fff"));
 
-    stringStats5.updateStats(new Binary("ggg"));
+        stringStats5.updateStats(new Binary("ggg"));
 
-    stringStats3.mergeStatistics(stringStats4);
-    assertEquals("eee", stringStats3.getFirstValue().getStringValue());
-    assertEquals("fff", stringStats3.getLastValue().getStringValue());
+        stringStats3.mergeStatistics(stringStats4);
+        assertEquals("eee", stringStats3.getFirstValue().getStringValue());
+        assertEquals("fff", stringStats3.getLastValue().getStringValue());
 
-    stringStats3.mergeStatistics(stringStats5);
-    assertEquals("eee", stringStats3.getFirstValue().getStringValue());
-    assertEquals("fff", stringStats3.getLastValue().getStringValue());
-
-  }
+        stringStats3.mergeStatistics(stringStats5);
+        assertEquals("eee", stringStats3.getFirstValue().getStringValue());
+        assertEquals("fff", stringStats3.getLastValue().getStringValue());
+    }
 }

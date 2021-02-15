@@ -27,48 +27,46 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class LoadDataPlan extends PhysicalPlan {
 
-  private final String inputFilePath;
-  private final String measureType;
+    private final String inputFilePath;
+    private final String measureType;
 
-  /**
-   * Constructor of LoadDataPlan.
-   */
-  public LoadDataPlan(String inputFilePath, String measureType) {
-    super(false, Operator.OperatorType.LOADDATA);
-    this.inputFilePath = inputFilePath;
-    this.measureType = measureType;
-  }
-
-  @Override
-  public List<PartialPath> getPaths() {
-    return measureType != null ?
-        Collections.singletonList(new PartialPath(new String[]{measureType}))
-        : Collections.emptyList();
-  }
-
-  public String getInputFilePath() {
-    return inputFilePath;
-  }
-
-  public String getMeasureType() {
-    return measureType;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    /** Constructor of LoadDataPlan. */
+    public LoadDataPlan(String inputFilePath, String measureType) {
+        super(false, Operator.OperatorType.LOADDATA);
+        this.inputFilePath = inputFilePath;
+        this.measureType = measureType;
     }
-    if (!(o instanceof LoadDataPlan)) {
-      return false;
-    }
-    LoadDataPlan that = (LoadDataPlan) o;
-    return Objects.equals(getInputFilePath(), that.getInputFilePath()) &&
-        Objects.equals(getMeasureType(), that.getMeasureType());
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(getInputFilePath(), getMeasureType());
-  }
+    @Override
+    public List<PartialPath> getPaths() {
+        return measureType != null
+                ? Collections.singletonList(new PartialPath(new String[] {measureType}))
+                : Collections.emptyList();
+    }
+
+    public String getInputFilePath() {
+        return inputFilePath;
+    }
+
+    public String getMeasureType() {
+        return measureType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof LoadDataPlan)) {
+            return false;
+        }
+        LoadDataPlan that = (LoadDataPlan) o;
+        return Objects.equals(getInputFilePath(), that.getInputFilePath())
+                && Objects.equals(getMeasureType(), that.getMeasureType());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getInputFilePath(), getMeasureType());
+    }
 }

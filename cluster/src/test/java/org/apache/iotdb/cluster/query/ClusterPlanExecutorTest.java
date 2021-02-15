@@ -37,47 +37,50 @@ import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ClusterPlanExecutorTest extends BaseQueryTest{
+public class ClusterPlanExecutorTest extends BaseQueryTest {
 
-  private ClusterPlanExecutor queryExecutor;
+    private ClusterPlanExecutor queryExecutor;
 
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    queryExecutor = new ClusterPlanExecutor(testMetaMember);
-  }
-
-  @Test
-  public void testQuery()
-      throws QueryProcessException, QueryFilterOptimizationException, StorageEngineException, IOException,
-      MetadataException {
-    RawDataQueryPlan queryPlan = new RawDataQueryPlan();
-    queryPlan.setDeduplicatedPaths(pathList);
-    queryPlan.setDeduplicatedDataTypes(dataTypes);
-    queryPlan.setPaths(pathList);
-    queryPlan.setDataTypes(dataTypes);
-    QueryContext context =
-        new RemoteQueryContext(QueryResourceManager.getInstance().assignQueryId(true, 1024, -1));
-
-    QueryDataSet dataSet = queryExecutor.processQuery(queryPlan, context);
-    checkSequentialDataset(dataSet, 0, 20);
-  }
-
-  @Test
-  public void testMatchPaths() throws MetadataException {
-    List<PartialPath> allMatchedPaths = queryExecutor.getPathsName(new PartialPath("root.*.s0"));
-    allMatchedPaths.sort(null);
-    for (int i = 0; i < allMatchedPaths.size(); i++) {
-      assertEquals(pathList.get(i), allMatchedPaths.get(i));
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        queryExecutor = new ClusterPlanExecutor(testMetaMember);
     }
-  }
 
-  @Test
-  public void testGetAllStorageGroupNodes() {
-    List<StorageGroupMNode> allStorageGroupNodes = queryExecutor.getAllStorageGroupNodes();
-    for (int i = 0; i < allStorageGroupNodes.size(); i++) {
-      assertEquals(IoTDB.metaManager.getAllStorageGroupNodes().get(i).getFullPath(),
-          allStorageGroupNodes.get(i).getFullPath());
+    @Test
+    public void testQuery()
+            throws QueryProcessException, QueryFilterOptimizationException, StorageEngineException,
+                    IOException, MetadataException {
+        RawDataQueryPlan queryPlan = new RawDataQueryPlan();
+        queryPlan.setDeduplicatedPaths(pathList);
+        queryPlan.setDeduplicatedDataTypes(dataTypes);
+        queryPlan.setPaths(pathList);
+        queryPlan.setDataTypes(dataTypes);
+        QueryContext context =
+                new RemoteQueryContext(
+                        QueryResourceManager.getInstance().assignQueryId(true, 1024, -1));
+
+        QueryDataSet dataSet = queryExecutor.processQuery(queryPlan, context);
+        checkSequentialDataset(dataSet, 0, 20);
     }
-  }
+
+    @Test
+    public void testMatchPaths() throws MetadataException {
+        List<PartialPath> allMatchedPaths =
+                queryExecutor.getPathsName(new PartialPath("root.*.s0"));
+        allMatchedPaths.sort(null);
+        for (int i = 0; i < allMatchedPaths.size(); i++) {
+            assertEquals(pathList.get(i), allMatchedPaths.get(i));
+        }
+    }
+
+    @Test
+    public void testGetAllStorageGroupNodes() {
+        List<StorageGroupMNode> allStorageGroupNodes = queryExecutor.getAllStorageGroupNodes();
+        for (int i = 0; i < allStorageGroupNodes.size(); i++) {
+            assertEquals(
+                    IoTDB.metaManager.getAllStorageGroupNodes().get(i).getFullPath(),
+                    allStorageGroupNodes.get(i).getFullPath());
+        }
+    }
 }

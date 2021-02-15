@@ -45,59 +45,70 @@ import org.slf4j.LoggerFactory;
 
 public class ClusterDataQueryExecutor extends RawDataQueryExecutor {
 
-  private static final Logger logger = LoggerFactory.getLogger(ClusterDataQueryExecutor.class);
-  private MetaGroupMember metaGroupMember;
-  private ClusterReaderFactory readerFactory;
+    private static final Logger logger = LoggerFactory.getLogger(ClusterDataQueryExecutor.class);
+    private MetaGroupMember metaGroupMember;
+    private ClusterReaderFactory readerFactory;
 
-  ClusterDataQueryExecutor(RawDataQueryPlan plan, MetaGroupMember metaGroupMember) {
-    super(plan);
-    this.metaGroupMember = metaGroupMember;
-    this.readerFactory = new ClusterReaderFactory(metaGroupMember);
-  }
-
-  @Override
-  protected List<ManagedSeriesReader> initManagedSeriesReader(QueryContext context)
-      throws StorageEngineException {
-    Filter timeFilter = null;
-    if (queryPlan.getExpression() != null) {
-      timeFilter = ((GlobalTimeExpression) queryPlan.getExpression()).getFilter();
+    ClusterDataQueryExecutor(RawDataQueryPlan plan, MetaGroupMember metaGroupMember) {
+        super(plan);
+        this.metaGroupMember = metaGroupMember;
+        this.readerFactory = new ClusterReaderFactory(metaGroupMember);
     }
 
-    List<ManagedSeriesReader> readersOfSelectedSeries = new ArrayList<>();
-    for (int i = 0; i < queryPlan.getDeduplicatedPaths().size(); i++) {
-      PartialPath path = queryPlan.getDeduplicatedPaths().get(i);
-      TSDataType dataType = queryPlan.getDeduplicatedDataTypes().get(i);
+    @Override
+    protected List<ManagedSeriesReader> initManagedSeriesReader(QueryContext context)
+            throws StorageEngineException {
+        Filter timeFilter = null;
+        if (queryPlan.getExpression() != null) {
+            timeFilter = ((GlobalTimeExpression) queryPlan.getExpression()).getFilter();
+        }
 
-      ManagedSeriesReader reader;
-      try {
-        reader = readerFactory.getSeriesReader(path,
-            queryPlan.getAllMeasurementsInDevice(path.getDevice()), dataType, timeFilter,
-            null, context, queryPlan.isAscending());
-      } catch (EmptyIntervalException e) {
-        logger.info(e.getMessage());
-        return Collections.emptyList();
-      }
+        List<ManagedSeriesReader> readersOfSelectedSeries = new ArrayList<>();
+        for (int i = 0; i < queryPlan.getDeduplicatedPaths().size(); i++) {
+            PartialPath path = queryPlan.getDeduplicatedPaths().get(i);
+            TSDataType dataType = queryPlan.getDeduplicatedDataTypes().get(i);
 
-      readersOfSelectedSeries.add(reader);
+            ManagedSeriesReader reader;
+            try {
+                reader =
+                        readerFactory.getSeriesReader(
+                                path,
+                                queryPlan.getAllMeasurementsInDevice(path.getDevice()),
+                                dataType,
+                                timeFilter,
+                                null,
+                                context,
+                                queryPlan.isAscending());
+            } catch (EmptyIntervalException e) {
+                logger.info(e.getMessage());
+                return Collections.emptyList();
+            }
+
+            readersOfSelectedSeries.add(reader);
+        }
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "Initialized {} readers for {}", readersOfSelectedSeries.size(), queryPlan);
+        }
+        return readersOfSelectedSeries;
     }
-    if (logger.isDebugEnabled()) {
-      logger.debug("Initialized {} readers for {}", readersOfSelectedSeries.size(), queryPlan);
+
+    @Override
+    protected IReaderByTimestamp getReaderByTimestamp(
+            PartialPath path,
+            Set<String> deviceMeasurements,
+            TSDataType dataType,
+            QueryContext context)
+            throws StorageEngineException, QueryProcessException {
+        return readerFactory.getReaderByTimestamp(
+                path, deviceMeasurements, dataType, context, queryPlan.isAscending());
     }
-    return readersOfSelectedSeries;
-  }
 
-  @Override
-  protected IReaderByTimestamp getReaderByTimestamp(PartialPath path,
-      Set<String> deviceMeasurements, TSDataType dataType,
-      QueryContext context)
-      throws StorageEngineException, QueryProcessException {
-    return readerFactory.getReaderByTimestamp(path, deviceMeasurements, dataType, context,
-        queryPlan.isAscending());
-  }
-
-  @Override
-  protected TimeGenerator getTimeGenerator(IExpression queryExpression,
-      QueryContext context, RawDataQueryPlan rawDataQueryPlan) throws StorageEngineException {
-    return new ClusterTimeGenerator(queryExpression, context, metaGroupMember, rawDataQueryPlan);
-  }
+    @Override
+    protected TimeGenerator getTimeGenerator(
+            IExpression queryExpression, QueryContext context, RawDataQueryPlan rawDataQueryPlan)
+            throws StorageEngineException {
+        return new ClusterTimeGenerator(
+                queryExpression, context, metaGroupMember, rawDataQueryPlan);
+    }
 }

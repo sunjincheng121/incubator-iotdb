@@ -37,61 +37,61 @@ import org.slf4j.LoggerFactory;
 
 public class GroupByTimeDataSet extends QueryDataSet {
 
-  private static final Logger logger = LoggerFactory
-    .getLogger(GroupByTimeDataSet.class);
+    private static final Logger logger = LoggerFactory.getLogger(GroupByTimeDataSet.class);
 
-  private List<RowRecord> records = new ArrayList<>();
-  private int index = 0;
+    private List<RowRecord> records = new ArrayList<>();
+    private int index = 0;
 
-  protected long queryId;
-  private GroupByTimePlan groupByTimePlan;
-  private QueryContext context;
+    protected long queryId;
+    private GroupByTimePlan groupByTimePlan;
+    private QueryContext context;
 
-  public GroupByTimeDataSet(QueryContext context, GroupByTimePlan plan, GroupByEngineDataSet dataSet)
-    throws QueryProcessException, IOException {
-    this.queryId = context.getQueryId();
-    this.paths = new ArrayList<>(plan.getDeduplicatedPaths());
-    this.dataTypes = plan.getDeduplicatedDataTypes();
-    this.groupByTimePlan = plan;
-    this.context = context;
+    public GroupByTimeDataSet(
+            QueryContext context, GroupByTimePlan plan, GroupByEngineDataSet dataSet)
+            throws QueryProcessException, IOException {
+        this.queryId = context.getQueryId();
+        this.paths = new ArrayList<>(plan.getDeduplicatedPaths());
+        this.dataTypes = plan.getDeduplicatedDataTypes();
+        this.groupByTimePlan = plan;
+        this.context = context;
 
-    if (logger.isDebugEnabled()) {
-      logger.debug("paths " + this.paths + " level:" + plan.getLevel());
+        if (logger.isDebugEnabled()) {
+            logger.debug("paths " + this.paths + " level:" + plan.getLevel());
+        }
+
+        Map<Integer, String> pathIndex = new HashMap<>();
+        Map<String, AggregateResult> finalPaths = FilePathUtils.getPathByLevel(plan, pathIndex);
+
+        // get all records from GroupByDataSet, then we merge every record
+        if (logger.isDebugEnabled()) {
+            logger.debug("only group by level, paths:" + groupByTimePlan.getPaths());
+        }
+        while (dataSet != null && dataSet.hasNextWithoutConstraint()) {
+            RowRecord rawRecord = dataSet.nextWithoutConstraint();
+            RowRecord curRecord = new RowRecord(rawRecord.getTimestamp());
+            List<AggregateResult> mergedAggResults =
+                    FilePathUtils.mergeRecordByPath(plan, rawRecord, finalPaths, pathIndex);
+            for (AggregateResult resultData : mergedAggResults) {
+                TSDataType dataType = resultData.getResultDataType();
+                curRecord.addField(resultData.getResult(), dataType);
+            }
+            records.add(curRecord);
+        }
+
+        this.dataTypes = new ArrayList<>();
+        this.paths = new ArrayList<>();
+        for (int i = 0; i < finalPaths.size(); i++) {
+            this.dataTypes.add(TSDataType.INT64);
+        }
     }
 
-    Map<Integer, String> pathIndex = new HashMap<>();
-    Map<String, AggregateResult> finalPaths = FilePathUtils.getPathByLevel(plan, pathIndex);
-
-    // get all records from GroupByDataSet, then we merge every record
-    if (logger.isDebugEnabled()) {
-      logger.debug("only group by level, paths:" + groupByTimePlan.getPaths());
-    }
-    while (dataSet != null && dataSet.hasNextWithoutConstraint()) {
-      RowRecord rawRecord = dataSet.nextWithoutConstraint();
-      RowRecord curRecord = new RowRecord(rawRecord.getTimestamp());
-      List<AggregateResult> mergedAggResults = FilePathUtils.mergeRecordByPath(
-              plan, rawRecord, finalPaths, pathIndex);
-      for (AggregateResult resultData : mergedAggResults) {
-        TSDataType dataType = resultData.getResultDataType();
-        curRecord.addField(resultData.getResult(), dataType);
-      }
-      records.add(curRecord);
+    @Override
+    protected boolean hasNextWithoutConstraint() throws IOException {
+        return index < records.size();
     }
 
-    this.dataTypes = new ArrayList<>();
-    this.paths = new ArrayList<>();
-    for (int i = 0; i < finalPaths.size(); i++) {
-      this.dataTypes.add(TSDataType.INT64);
+    @Override
+    protected RowRecord nextWithoutConstraint() {
+        return records.get(index++);
     }
-  }
-
-  @Override
-  protected boolean hasNextWithoutConstraint() throws IOException {
-    return index < records.size();
-  }
-
-  @Override
-  protected RowRecord nextWithoutConstraint() {
-    return records.get(index++);
-  }
 }

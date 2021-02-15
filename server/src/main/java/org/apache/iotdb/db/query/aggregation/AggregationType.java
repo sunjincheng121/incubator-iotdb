@@ -25,76 +25,82 @@ import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.BytesUtils;
 
 public enum AggregationType {
+    COUNT,
+    AVG,
+    SUM,
+    FIRST_VALUE,
+    LAST_VALUE,
+    MAX_TIME,
+    MIN_TIME,
+    MAX_VALUE,
+    MIN_VALUE;
 
-  COUNT, AVG, SUM, FIRST_VALUE, LAST_VALUE, MAX_TIME, MIN_TIME, MAX_VALUE, MIN_VALUE;
-
-  /**
-   * give an integer to return a data type.
-   *
-   * @return -enum type
-   */
-  public static AggregationType deserialize(ByteBuffer byteBuffer) {
-    short i = byteBuffer.getShort();
-    switch (i) {
-      case 0:
-        return COUNT;
-      case 1:
-        return AVG;
-      case 2:
-        return SUM;
-      case 3:
-        return FIRST_VALUE;
-      case 4:
-        return LAST_VALUE;
-      case 5:
-        return MAX_TIME;
-      case 6:
-        return MIN_TIME;
-      case 7:
-        return MAX_VALUE;
-      case 8:
-        return MIN_VALUE;
-      default:
-        throw new IllegalArgumentException("Invalid Aggregation Type: " + i);
-    }
-  }
-
-  public void serializeTo(OutputStream outputStream) throws IOException {
-    short i;
-    switch (this) {
-      case COUNT:
-        i = 0;
-        break;
-      case AVG:
-        i = 1;
-        break;
-      case SUM:
-        i = 2;
-        break;
-      case FIRST_VALUE:
-        i = 3;
-        break;
-      case LAST_VALUE:
-        i = 4;
-        break;
-      case MAX_TIME:
-        i = 5;
-        break;
-      case MIN_TIME:
-        i = 6;
-        break;
-      case MAX_VALUE:
-        i = 7;
-        break;
-      case MIN_VALUE:
-        i = 8;
-        break;
-      default:
-        throw new IllegalArgumentException("Invalid Aggregation Type: " + this.name());
+    /**
+     * give an integer to return a data type.
+     *
+     * @return -enum type
+     */
+    public static AggregationType deserialize(ByteBuffer byteBuffer) {
+        short i = byteBuffer.getShort();
+        switch (i) {
+            case 0:
+                return COUNT;
+            case 1:
+                return AVG;
+            case 2:
+                return SUM;
+            case 3:
+                return FIRST_VALUE;
+            case 4:
+                return LAST_VALUE;
+            case 5:
+                return MAX_TIME;
+            case 6:
+                return MIN_TIME;
+            case 7:
+                return MAX_VALUE;
+            case 8:
+                return MIN_VALUE;
+            default:
+                throw new IllegalArgumentException("Invalid Aggregation Type: " + i);
+        }
     }
 
-    byte[] bytes = BytesUtils.shortToBytes(i);
-    outputStream.write(bytes);
-  }
+    public void serializeTo(OutputStream outputStream) throws IOException {
+        short i;
+        switch (this) {
+            case COUNT:
+                i = 0;
+                break;
+            case AVG:
+                i = 1;
+                break;
+            case SUM:
+                i = 2;
+                break;
+            case FIRST_VALUE:
+                i = 3;
+                break;
+            case LAST_VALUE:
+                i = 4;
+                break;
+            case MAX_TIME:
+                i = 5;
+                break;
+            case MIN_TIME:
+                i = 6;
+                break;
+            case MAX_VALUE:
+                i = 7;
+                break;
+            case MIN_VALUE:
+                i = 8;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid Aggregation Type: " + this.name());
+        }
 
+        byte[] bytes = BytesUtils.shortToBytes(i);
+        outputStream.write(bytes);
+    }
 }

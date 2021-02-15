@@ -18,32 +18,30 @@
  */
 package org.apache.iotdb.web.grafana.bean;
 
-/**
- * Created by dell on 2017/7/18.
- */
+/** Created by dell on 2017/7/18. */
 public class TimeValues {
 
-  private long time;
-  private Object value;
+    private long time;
+    private Object value;
 
-  @Override
-  public String toString() {
-    return "TimeValues{" + "time=" + time + ", values=" + value + '}';
-  }
+    @Override
+    public String toString() {
+        return "TimeValues{" + "time=" + time + ", values=" + value + '}';
+    }
 
-  public long getTime() {
-    return time;
-  }
+    public long getTime() {
+        return time;
+    }
 
-  public void setTime(long time) {
-    this.time = time;
-  }
+    public void setTime(long time) {
+        this.time = time;
+    }
 
-  public Object getValue() {
-    return value;
-  }
+    public Object getValue() {
+        return value;
+    }
 
-  public void setValue(Object value) {
-    this.value = value;
-  }
+    public void setValue(Object value) {
+        this.value = value;
+    }
 }

@@ -22,47 +22,46 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * This class is not thread safe.
- */
+/** This class is not thread safe. */
 public abstract class LRUCache<K, T> implements Cache<K, T> {
 
-  protected Map<K, T> cache;
+    protected Map<K, T> cache;
 
-  public LRUCache(int cacheSize) {
-    this.cache = new LinkedHashMap<K, T>(cacheSize, 0.75f, true) {
-      @Override
-      protected boolean removeEldestEntry(Map.Entry eldest) {
-        return size() > cacheSize;
-      }
-    };
-  }
-
-  @Override
-  public synchronized T get(K key) throws IOException {
-    if (cache.containsKey(key)) {
-      return cache.get(key);
-    } else {
-      T value = loadObjectByKey(key);
-      if (value != null) {
-        cache.put(key, value);
-      }
-      return value;
+    public LRUCache(int cacheSize) {
+        this.cache =
+                new LinkedHashMap<K, T>(cacheSize, 0.75f, true) {
+                    @Override
+                    protected boolean removeEldestEntry(Map.Entry eldest) {
+                        return size() > cacheSize;
+                    }
+                };
     }
-  }
 
-  @Override
-  public synchronized void clear() {
-    cache.clear();
-  }
+    @Override
+    public synchronized T get(K key) throws IOException {
+        if (cache.containsKey(key)) {
+            return cache.get(key);
+        } else {
+            T value = loadObjectByKey(key);
+            if (value != null) {
+                cache.put(key, value);
+            }
+            return value;
+        }
+    }
 
-  public synchronized void put(K key, T value) {
-    cache.put(key, value);
-  }
+    @Override
+    public synchronized void clear() {
+        cache.clear();
+    }
 
-  protected abstract T loadObjectByKey(K key) throws IOException;
+    public synchronized void put(K key, T value) {
+        cache.put(key, value);
+    }
 
-  public synchronized void removeItem(K key) {
-    cache.remove(key);
-  }
+    protected abstract T loadObjectByKey(K key) throws IOException;
+
+    public synchronized void removeItem(K key) {
+        cache.remove(key);
+    }
 }

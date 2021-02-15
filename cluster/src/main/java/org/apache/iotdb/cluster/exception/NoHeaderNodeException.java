@@ -20,12 +20,12 @@
 package org.apache.iotdb.cluster.exception;
 
 /**
- * Raised when a DataClusterServer receives a request without a header node indicating which
- * group it belongs to.
+ * Raised when a DataClusterServer receives a request without a header node indicating which group
+ * it belongs to.
  */
 public class NoHeaderNodeException extends Exception {
 
-  public NoHeaderNodeException() {
-    super("Header Node is required in data group communication!");
-  }
+    public NoHeaderNodeException() {
+        super("Header Node is required in data group communication!");
+    }
 }

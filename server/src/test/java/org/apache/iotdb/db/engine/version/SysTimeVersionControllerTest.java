@@ -19,26 +19,26 @@
 
 package org.apache.iotdb.db.engine.version;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
 
 public class SysTimeVersionControllerTest {
 
-  @Test
-  public void test() {
-    VersionController versionController = SysTimeVersionController.INSTANCE;
-    long diff = versionController.currVersion() - System.currentTimeMillis();
-    // to aovid the test failure on a poor machine, we bear 200ms difference here.
-    assertTrue(diff >= -200 && diff <= 200);
-    diff = versionController.nextVersion();
-    try {
-      Thread.sleep(200);
-      diff -= System.currentTimeMillis();
-      assertTrue(diff >= -1000 && diff <= -200);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      //do nothing
+    @Test
+    public void test() {
+        VersionController versionController = SysTimeVersionController.INSTANCE;
+        long diff = versionController.currVersion() - System.currentTimeMillis();
+        // to aovid the test failure on a poor machine, we bear 200ms difference here.
+        assertTrue(diff >= -200 && diff <= 200);
+        diff = versionController.nextVersion();
+        try {
+            Thread.sleep(200);
+            diff -= System.currentTimeMillis();
+            assertTrue(diff >= -1000 && diff <= -200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            // do nothing
+        }
     }
-  }
 }

@@ -26,19 +26,19 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class TracingPlan extends PhysicalPlan {
 
-  private boolean isTracingOn;
+    private boolean isTracingOn;
 
-  public TracingPlan(boolean isTracingOn) {
-    super(false, OperatorType.TRACING);
-    this.isTracingOn = isTracingOn;
-  }
+    public TracingPlan(boolean isTracingOn) {
+        super(false, OperatorType.TRACING);
+        this.isTracingOn = isTracingOn;
+    }
 
-  @Override
-  public List<PartialPath> getPaths() {
-    return Collections.emptyList();
-  }
+    @Override
+    public List<PartialPath> getPaths() {
+        return Collections.emptyList();
+    }
 
-  public boolean isTracingOn() {
-    return isTracingOn;
-  }
+    public boolean isTracingOn() {
+        return isTracingOn;
+    }
 }

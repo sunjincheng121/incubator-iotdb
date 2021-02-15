@@ -35,74 +35,77 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PulsarConsumer {
-  private static final String SERVICE_URL = "pulsar://localhost:6650";
-  // Specify the number of consumers
-  private static final int CONSUMER_NUM = 3;
-  private List<Consumer<?>> consumerList;
-  private static final String CREATE_SG_TEMPLATE = "SET STORAGE GROUP TO %s";
-  private static final String CREATE_TIMESERIES_TEMPLATE = "CREATE TIMESERIES %s WITH DATATYPE=TEXT, ENCODING=PLAIN";
-  private static final Logger logger = LoggerFactory.getLogger(PulsarConsumer.class);
-  protected static final String[] ALL_TIMESERIES = {
-      "root.vehicle.device1.sensor1",
-      "root.vehicle.device1.sensor2",
-      "root.vehicle.device2.sensor1",
-      "root.vehicle.device2.sensor2",
-      "root.vehicle.device3.sensor1",
-      "root.vehicle.device3.sensor2",
-  };
+    private static final String SERVICE_URL = "pulsar://localhost:6650";
+    // Specify the number of consumers
+    private static final int CONSUMER_NUM = 3;
+    private List<Consumer<?>> consumerList;
+    private static final String CREATE_SG_TEMPLATE = "SET STORAGE GROUP TO %s";
+    private static final String CREATE_TIMESERIES_TEMPLATE =
+            "CREATE TIMESERIES %s WITH DATATYPE=TEXT, ENCODING=PLAIN";
+    private static final Logger logger = LoggerFactory.getLogger(PulsarConsumer.class);
+    protected static final String[] ALL_TIMESERIES = {
+        "root.vehicle.device1.sensor1",
+        "root.vehicle.device1.sensor2",
+        "root.vehicle.device2.sensor1",
+        "root.vehicle.device2.sensor2",
+        "root.vehicle.device3.sensor1",
+        "root.vehicle.device3.sensor2",
+    };
 
-  public PulsarConsumer(List<Consumer<?>> consumerList) {
-    this.consumerList = consumerList;
-  }
-
-  public void consumeInParallel() throws ClassNotFoundException {
-    ExecutorService executor = Executors.newFixedThreadPool(CONSUMER_NUM);
-    for (int i = 0; i < consumerList.size(); i++) {
-      PulsarConsumerThread consumerExecutor = new PulsarConsumerThread(consumerList.get(i));
-      executor.submit(consumerExecutor);
+    public PulsarConsumer(List<Consumer<?>> consumerList) {
+        this.consumerList = consumerList;
     }
-  }
 
-  @SuppressWarnings("squid:S2068")
-  private static void prepareSchema() {
-    try {
-      Class.forName("org.apache.iotdb.jdbc.IoTDBDriver");
-      try (Connection connection = DriverManager
-          .getConnection(Constant.IOTDB_CONNECTION_URL, Constant.IOTDB_CONNECTION_USER,
-              Constant.IOTDB_CONNECTION_PASSWORD);
-           Statement statement = connection.createStatement()) {
-
-        statement.execute(String.format(CREATE_SG_TEMPLATE, Constant.STORAGE_GROUP));
-
-        for (String timeseries : ALL_TIMESERIES) {
-          statement.addBatch(String.format(CREATE_TIMESERIES_TEMPLATE, timeseries));
+    public void consumeInParallel() throws ClassNotFoundException {
+        ExecutorService executor = Executors.newFixedThreadPool(CONSUMER_NUM);
+        for (int i = 0; i < consumerList.size(); i++) {
+            PulsarConsumerThread consumerExecutor = new PulsarConsumerThread(consumerList.get(i));
+            executor.submit(consumerExecutor);
         }
-        statement.executeBatch();
-        statement.clearBatch();
-      }
-    } catch (ClassNotFoundException | SQLException e) {
-      logger.error(e.getMessage());
     }
-  }
 
-  public static void main(String[] args) throws PulsarClientException, ClassNotFoundException {
-    PulsarClient client = PulsarClient.builder()
-        .serviceUrl(SERVICE_URL)
-        .build();
+    @SuppressWarnings("squid:S2068")
+    private static void prepareSchema() {
+        try {
+            Class.forName("org.apache.iotdb.jdbc.IoTDBDriver");
+            try (Connection connection =
+                            DriverManager.getConnection(
+                                    Constant.IOTDB_CONNECTION_URL,
+                                    Constant.IOTDB_CONNECTION_USER,
+                                    Constant.IOTDB_CONNECTION_PASSWORD);
+                    Statement statement = connection.createStatement()) {
 
-    List<Consumer<?>> consumerList = new ArrayList<>();
-    for (int i = 0; i < CONSUMER_NUM; i++) {
-      // In shared subscription mode, multiple consumers can attach to the same subscription
-      // and message are delivered in a round robin distribution across consumers.
-      Consumer<byte[]> consumer = client.newConsumer()
-          .topic(Constant.TOPIC_NAME)
-          .subscriptionName("shared-subscription")
-          .subscriptionType(SubscriptionType.Key_Shared).keySharedPolicy(KeySharedPolicy.autoSplitHashRange())
-          .subscribe();
-      consumerList.add(consumer);
+                statement.execute(String.format(CREATE_SG_TEMPLATE, Constant.STORAGE_GROUP));
+
+                for (String timeseries : ALL_TIMESERIES) {
+                    statement.addBatch(String.format(CREATE_TIMESERIES_TEMPLATE, timeseries));
+                }
+                statement.executeBatch();
+                statement.clearBatch();
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            logger.error(e.getMessage());
+        }
     }
-    PulsarConsumer pulsarConsumer = new PulsarConsumer(consumerList);
-    prepareSchema();
-    pulsarConsumer.consumeInParallel();
-  }
+
+    public static void main(String[] args) throws PulsarClientException, ClassNotFoundException {
+        PulsarClient client = PulsarClient.builder().serviceUrl(SERVICE_URL).build();
+
+        List<Consumer<?>> consumerList = new ArrayList<>();
+        for (int i = 0; i < CONSUMER_NUM; i++) {
+            // In shared subscription mode, multiple consumers can attach to the same subscription
+            // and message are delivered in a round robin distribution across consumers.
+            Consumer<byte[]> consumer =
+                    client.newConsumer()
+                            .topic(Constant.TOPIC_NAME)
+                            .subscriptionName("shared-subscription")
+                            .subscriptionType(SubscriptionType.Key_Shared)
+                            .keySharedPolicy(KeySharedPolicy.autoSplitHashRange())
+                            .subscribe();
+            consumerList.add(consumer);
+        }
+        PulsarConsumer pulsarConsumer = new PulsarConsumer(consumerList);
+        prepareSchema();
+        pulsarConsumer.consumeInParallel();
+    }
 }

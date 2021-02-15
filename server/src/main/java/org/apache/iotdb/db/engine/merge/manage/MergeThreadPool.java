@@ -32,17 +32,22 @@ import org.apache.iotdb.db.engine.merge.task.MergeTask;
 
 public class MergeThreadPool extends ThreadPoolExecutor {
 
-  public MergeThreadPool(int corePoolSize, ThreadFactory threadFactory) {
-    super(corePoolSize, corePoolSize, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-        threadFactory);
-  }
-
-  @Override
-  protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
-    if (callable instanceof MergeTask) {
-      return (RunnableFuture<T>) new MainMergeFuture((MergeTask) callable);
-    } else {
-      return (RunnableFuture<T>) new SubMergeFuture((MergeChunkHeapTask) callable);
+    public MergeThreadPool(int corePoolSize, ThreadFactory threadFactory) {
+        super(
+                corePoolSize,
+                corePoolSize,
+                0,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                threadFactory);
     }
-  }
+
+    @Override
+    protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
+        if (callable instanceof MergeTask) {
+            return (RunnableFuture<T>) new MainMergeFuture((MergeTask) callable);
+        } else {
+            return (RunnableFuture<T>) new SubMergeFuture((MergeChunkHeapTask) callable);
+        }
+    }
 }

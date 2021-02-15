@@ -26,8 +26,8 @@ import org.apache.iotdb.tsfile.write.record.datapoint.DataPoint;
 public class TestConstant {
 
     public static final String BASE_OUTPUT_PATH = "target".concat(File.separator);
-    public static final String OUTPUT_DATA_DIR = BASE_OUTPUT_PATH.concat("data")
-        .concat(File.separator);
+    public static final String OUTPUT_DATA_DIR =
+            BASE_OUTPUT_PATH.concat("data").concat(File.separator);
 
     public static final String d0 = "root.vehicle.d0";
     public static final String s0 = "s0";
@@ -39,21 +39,21 @@ public class TestConstant {
     public static final String d1 = "root.vehicle.d1";
     public static final String TIMESTAMP_STR = "Time";
     public static boolean testFlag = true;
-    public static String[] stringValue = new String[]{"A", "B", "C", "D", "E"};
-    public static String[] booleanValue = new String[]{"true", "false"};
+    public static String[] stringValue = new String[] {"A", "B", "C", "D", "E"};
+    public static String[] booleanValue = new String[] {"true", "false"};
 
-    public static String[] create_sql = new String[]{"SET STORAGE GROUP TO root.vehicle",
-
-        "CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32, ENCODING=RLE",
-        "CREATE TIMESERIES root.vehicle.d0.s1 WITH DATATYPE=INT64, ENCODING=RLE",
-        "CREATE TIMESERIES root.vehicle.d0.s2 WITH DATATYPE=FLOAT, ENCODING=RLE",
-        "CREATE TIMESERIES root.vehicle.d0.s3 WITH DATATYPE=TEXT, ENCODING=PLAIN",
-        "CREATE TIMESERIES root.vehicle.d0.s4 WITH DATATYPE=BOOLEAN, ENCODING=PLAIN",
-        "CREATE TIMESERIES root.vehicle.d0.s5 WITH DATATYPE=DOUBLE, ENCODING=RLE",
-        "CREATE TIMESERIES root.vehicle.d1.s0 WITH DATATYPE=INT32, ENCODING=RLE",
-        "CREATE TIMESERIES root.vehicle.d1.s1 WITH DATATYPE=INT64, ENCODING=RLE",
-
-    };
+    public static String[] create_sql =
+            new String[] {
+                "SET STORAGE GROUP TO root.vehicle",
+                "CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32, ENCODING=RLE",
+                "CREATE TIMESERIES root.vehicle.d0.s1 WITH DATATYPE=INT64, ENCODING=RLE",
+                "CREATE TIMESERIES root.vehicle.d0.s2 WITH DATATYPE=FLOAT, ENCODING=RLE",
+                "CREATE TIMESERIES root.vehicle.d0.s3 WITH DATATYPE=TEXT, ENCODING=PLAIN",
+                "CREATE TIMESERIES root.vehicle.d0.s4 WITH DATATYPE=BOOLEAN, ENCODING=PLAIN",
+                "CREATE TIMESERIES root.vehicle.d0.s5 WITH DATATYPE=DOUBLE, ENCODING=RLE",
+                "CREATE TIMESERIES root.vehicle.d1.s0 WITH DATATYPE=INT32, ENCODING=RLE",
+                "CREATE TIMESERIES root.vehicle.d1.s1 WITH DATATYPE=INT64, ENCODING=RLE",
+            };
 
     public static String insertTemplate = "insert into %s(timestamp%s) values(%d%s)";
 
@@ -100,7 +100,7 @@ public class TestConstant {
             measurements.append(",").append(dataPoint.getMeasurementId());
             values.append(",").append(dataPoint.getValue());
         }
-        return String
-            .format(insertTemplate, record.deviceId, measurements.toString(), record.time, values);
+        return String.format(
+                insertTemplate, record.deviceId, measurements.toString(), record.time, values);
     }
 }

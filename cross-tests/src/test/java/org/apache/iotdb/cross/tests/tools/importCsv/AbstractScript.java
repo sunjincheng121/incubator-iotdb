@@ -31,62 +31,69 @@ import java.util.Properties;
 
 public abstract class AbstractScript {
 
-  protected void testOutput(ProcessBuilder builder, String[] output) throws IOException {
-    builder.redirectErrorStream(true);
-    Process p = builder.start();
-    BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-    String line;
-    List<String> actualOutput = new ArrayList<>();
-    while (true) {
-      line = r.readLine();
-      if (line == null) {
-        break;
-      } else {
-        actualOutput.add(line);
-      }
+    protected void testOutput(ProcessBuilder builder, String[] output) throws IOException {
+        builder.redirectErrorStream(true);
+        Process p = builder.start();
+        BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String line;
+        List<String> actualOutput = new ArrayList<>();
+        while (true) {
+            line = r.readLine();
+            if (line == null) {
+                break;
+            } else {
+                actualOutput.add(line);
+            }
+        }
+        r.close();
+        p.destroy();
+
+        System.out.println("should contains:");
+        for (String s : output) {
+            System.out.println(s);
+        }
+
+        System.out.println("actualOutput:");
+        for (String out : actualOutput) {
+            System.out.println(out);
+        }
+
+        assertTrue(actualOutput.get(actualOutput.size() - 1).contains(output[output.length - 1]));
     }
-    r.close();
-    p.destroy();
 
+    protected String getCliPath() {
+        // This is usually always set by the JVM
 
-    System.out.println("should contains:");
-    for (String s : output) {
-      System.out.println(s);
+        File userDir = new File(System.getProperty("user.dir"));
+        if (!userDir.exists()) {
+            throw new RuntimeException("user.dir " + userDir.getAbsolutePath() + " doesn't exist.");
+        }
+        File target =
+                new File(
+                        userDir.getParent() + File.separator + "cli",
+                        "target"
+                                + File.separator
+                                + "maven"
+                                + "-archiver"
+                                + File.separator
+                                + "pom"
+                                + ".properties");
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileReader(target));
+        } catch (IOException e) {
+            return "target" + File.separator + "iotdb-cli-";
+        }
+        return new File(
+                        userDir.getParent() + File.separator + "cli",
+                        String.format(
+                                "target" + File.separator + "%s-%s",
+                                properties.getProperty("artifactId"),
+                                properties.getProperty("version")))
+                .getAbsolutePath();
     }
 
-    System.out.println("actualOutput:");
-    for (String out : actualOutput) {
-      System.out.println(out);
-    }
+    protected abstract void testOnWindows() throws IOException;
 
-    assertTrue(actualOutput.get(actualOutput.size() - 1).contains(output[output.length - 1]));
-  }
-
-  protected String getCliPath() {
-    // This is usually always set by the JVM
-
-    File userDir = new File(System.getProperty("user.dir"));
-    if(!userDir.exists()) {
-      throw new RuntimeException("user.dir " + userDir.getAbsolutePath() + " doesn't exist.");
-    }
-    File target = new File(userDir.getParent() + File.separator + "cli",
-        "target" + File.separator + "maven"
-            + "-archiver"
-            + File.separator + "pom"
-            + ".properties");
-    Properties properties = new Properties();
-    try {
-      properties.load(new FileReader(target));
-    } catch (IOException e) {
-      return "target" + File.separator + "iotdb-cli-";
-    }
-    return new File(userDir.getParent() + File.separator + "cli",
-        String.format("target" + File.separator +
-                "%s-%s",
-            properties.getProperty("artifactId"), properties.getProperty("version"))).getAbsolutePath();
-  }
-
-  protected abstract void testOnWindows() throws IOException;
-
-  protected abstract void testOnUnix() throws IOException;
+    protected abstract void testOnUnix() throws IOException;
 }

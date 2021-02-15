@@ -21,47 +21,49 @@ package org.apache.iotdb.flink;
 import java.util.List;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 
-/**
- * Event serializes the device/sensor related data, such as time, measurements etc.
- */
+/** Event serializes the device/sensor related data, such as time, measurements etc. */
 public class Event {
 
-  private String device;
-  private Long timestamp;
-  private List<String> measurements;
-  private List<TSDataType> types;
-  private List<Object> values;
+    private String device;
+    private Long timestamp;
+    private List<String> measurements;
+    private List<TSDataType> types;
+    private List<Object> values;
 
-  public Event(String device, Long timestamp, List<String> measurements, List<TSDataType> types,
-      List<Object> values) {
-    this.device = device;
-    this.timestamp = timestamp;
-    this.measurements = measurements;
-    this.types = types;
-    this.values = values;
-  }
+    public Event(
+            String device,
+            Long timestamp,
+            List<String> measurements,
+            List<TSDataType> types,
+            List<Object> values) {
+        this.device = device;
+        this.timestamp = timestamp;
+        this.measurements = measurements;
+        this.types = types;
+        this.values = values;
+    }
 
-  public List<TSDataType> getTypes() {
-    return types;
-  }
+    public List<TSDataType> getTypes() {
+        return types;
+    }
 
-  public void setTypes(List<TSDataType> types) {
-    this.types = types;
-  }
+    public void setTypes(List<TSDataType> types) {
+        this.types = types;
+    }
 
-  public String getDevice() {
-    return device;
-  }
+    public String getDevice() {
+        return device;
+    }
 
-  public Long getTimestamp() {
-    return timestamp;
-  }
+    public Long getTimestamp() {
+        return timestamp;
+    }
 
-  public List<String> getMeasurements() {
-    return measurements;
-  }
+    public List<String> getMeasurements() {
+        return measurements;
+    }
 
-  public List<Object> getValues() {
-    return values;
-  }
+    public List<Object> getValues() {
+        return values;
+    }
 }

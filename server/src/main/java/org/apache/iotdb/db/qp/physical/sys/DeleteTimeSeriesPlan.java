@@ -30,59 +30,59 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class DeleteTimeSeriesPlan extends PhysicalPlan {
 
-  private List<PartialPath> deletePathList;
+    private List<PartialPath> deletePathList;
 
-  public DeleteTimeSeriesPlan(List<PartialPath> deletePathList) {
-    super(false, Operator.OperatorType.DELETE_TIMESERIES);
-    this.deletePathList = deletePathList;
-  }
-
-  public DeleteTimeSeriesPlan() {
-    super(false, Operator.OperatorType.DELETE_TIMESERIES);
-  }
-
-  @Override
-  public List<PartialPath> getPaths() {
-    return deletePathList;
-  }
-
-  @Override
-  public void serialize(DataOutputStream stream) throws IOException {
-    int type = PhysicalPlanType.DELETE_TIMESERIES.ordinal();
-    stream.writeByte((byte) type);
-    stream.writeInt(deletePathList.size());
-    for (PartialPath path : deletePathList) {
-      putString(stream, path.getFullPath());
+    public DeleteTimeSeriesPlan(List<PartialPath> deletePathList) {
+        super(false, Operator.OperatorType.DELETE_TIMESERIES);
+        this.deletePathList = deletePathList;
     }
 
-    stream.writeLong(index);
-  }
-
-  @Override
-  public void serialize(ByteBuffer buffer) {
-    int type = PhysicalPlanType.DELETE_TIMESERIES.ordinal();
-    buffer.put((byte) type);
-    buffer.putInt(deletePathList.size());
-    for (PartialPath path : deletePathList) {
-      putString(buffer, path.getFullPath());
+    public DeleteTimeSeriesPlan() {
+        super(false, Operator.OperatorType.DELETE_TIMESERIES);
     }
 
-    buffer.putLong(index);
-  }
-
-  @Override
-  public void deserialize(ByteBuffer buffer) throws IllegalPathException {
-    int pathNumber = buffer.getInt();
-    deletePathList = new ArrayList<>();
-    for (int i = 0; i < pathNumber; i++) {
-      deletePathList.add(new PartialPath(readString(buffer)));
+    @Override
+    public List<PartialPath> getPaths() {
+        return deletePathList;
     }
 
-    this.index = buffer.getLong();
-  }
+    @Override
+    public void serialize(DataOutputStream stream) throws IOException {
+        int type = PhysicalPlanType.DELETE_TIMESERIES.ordinal();
+        stream.writeByte((byte) type);
+        stream.writeInt(deletePathList.size());
+        for (PartialPath path : deletePathList) {
+            putString(stream, path.getFullPath());
+        }
 
-  @Override
-  public void setPaths(List<PartialPath> fullPaths) {
-    this.deletePathList = fullPaths;
-  }
+        stream.writeLong(index);
+    }
+
+    @Override
+    public void serialize(ByteBuffer buffer) {
+        int type = PhysicalPlanType.DELETE_TIMESERIES.ordinal();
+        buffer.put((byte) type);
+        buffer.putInt(deletePathList.size());
+        for (PartialPath path : deletePathList) {
+            putString(buffer, path.getFullPath());
+        }
+
+        buffer.putLong(index);
+    }
+
+    @Override
+    public void deserialize(ByteBuffer buffer) throws IllegalPathException {
+        int pathNumber = buffer.getInt();
+        deletePathList = new ArrayList<>();
+        for (int i = 0; i < pathNumber; i++) {
+            deletePathList.add(new PartialPath(readString(buffer)));
+        }
+
+        this.index = buffer.getLong();
+    }
+
+    @Override
+    public void setPaths(List<PartialPath> fullPaths) {
+        this.deletePathList = fullPaths;
+    }
 }

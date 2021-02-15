@@ -24,22 +24,22 @@ import org.apache.iotdb.db.engine.memtable.IMemTable;
 
 public interface FlushListener {
 
-  void onFlushStart(IMemTable memTable) throws IOException;
+    void onFlushStart(IMemTable memTable) throws IOException;
 
-  void onFlushEnd(IMemTable memTable);
+    void onFlushEnd(IMemTable memTable);
 
-  class EmptyListener implements FlushListener {
+    class EmptyListener implements FlushListener {
 
-    public static final EmptyListener INSTANCE = new EmptyListener();
+        public static final EmptyListener INSTANCE = new EmptyListener();
 
-    @Override
-    public void onFlushStart(IMemTable memTable) {
-      // do nothing
+        @Override
+        public void onFlushStart(IMemTable memTable) {
+            // do nothing
+        }
+
+        @Override
+        public void onFlushEnd(IMemTable memTable) {
+            // do nothing
+        }
     }
-
-    @Override
-    public void onFlushEnd(IMemTable memTable) {
-      // do nothing
-    }
-  }
 }

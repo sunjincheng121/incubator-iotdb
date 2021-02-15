@@ -20,8 +20,8 @@
 package org.apache.iotdb.db.engine.merge.selector;
 
 public enum MergeFileStrategy {
-  MAX_SERIES_NUM,
-  MAX_FILE_NUM,
-  // TODO: HOW?
-  TRADE_OFF,
+    MAX_SERIES_NUM,
+    MAX_FILE_NUM,
+    // TODO: HOW?
+    TRADE_OFF,
 }

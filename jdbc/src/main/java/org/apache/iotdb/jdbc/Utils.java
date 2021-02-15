@@ -22,46 +22,43 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Utils to convert between thrift format and TsFile format.
- */
+/** Utils to convert between thrift format and TsFile format. */
 public class Utils {
 
-  static final Pattern URL_PATTERN = Pattern.compile("([^:]+):([0-9]{1,5})/?");
+    static final Pattern URL_PATTERN = Pattern.compile("([^:]+):([0-9]{1,5})/?");
 
-  /**
-   * Parse JDBC connection URL The only supported format of the URL is:
-   * jdbc:iotdb://localhost:6667/.
-   */
-  static IoTDBConnectionParams parseUrl(String url, Properties info)
-      throws IoTDBURLException {
-    IoTDBConnectionParams params = new IoTDBConnectionParams(url);
-    if (url.trim().equalsIgnoreCase(Config.IOTDB_URL_PREFIX)) {
-      return params;
-    }
-    boolean isUrlLegal = false;
-    Matcher matcher = null;
-    if (url.startsWith(Config.IOTDB_URL_PREFIX)) {
-      String subURL = url.substring(Config.IOTDB_URL_PREFIX.length());
-      matcher = URL_PATTERN.matcher(subURL);
-      if (matcher.matches()) {
-        isUrlLegal = true;
-      }
-    }
-    if (!isUrlLegal) {
-      throw new IoTDBURLException("Error url format, url should be jdbc:iotdb://anything:port/ or jdbc:iotdb://anything:port");
-    }
-    params.setHost(matcher.group(1));
-    params.setPort(Integer.parseInt(matcher.group(2)));
+    /**
+     * Parse JDBC connection URL The only supported format of the URL is:
+     * jdbc:iotdb://localhost:6667/.
+     */
+    static IoTDBConnectionParams parseUrl(String url, Properties info) throws IoTDBURLException {
+        IoTDBConnectionParams params = new IoTDBConnectionParams(url);
+        if (url.trim().equalsIgnoreCase(Config.IOTDB_URL_PREFIX)) {
+            return params;
+        }
+        boolean isUrlLegal = false;
+        Matcher matcher = null;
+        if (url.startsWith(Config.IOTDB_URL_PREFIX)) {
+            String subURL = url.substring(Config.IOTDB_URL_PREFIX.length());
+            matcher = URL_PATTERN.matcher(subURL);
+            if (matcher.matches()) {
+                isUrlLegal = true;
+            }
+        }
+        if (!isUrlLegal) {
+            throw new IoTDBURLException(
+                    "Error url format, url should be jdbc:iotdb://anything:port/ or jdbc:iotdb://anything:port");
+        }
+        params.setHost(matcher.group(1));
+        params.setPort(Integer.parseInt(matcher.group(2)));
 
-    if (info.containsKey(Config.AUTH_USER)) {
-      params.setUsername(info.getProperty(Config.AUTH_USER));
-    }
-    if (info.containsKey(Config.AUTH_PASSWORD)) {
-      params.setPassword(info.getProperty(Config.AUTH_PASSWORD));
-    }
+        if (info.containsKey(Config.AUTH_USER)) {
+            params.setUsername(info.getProperty(Config.AUTH_USER));
+        }
+        if (info.containsKey(Config.AUTH_PASSWORD)) {
+            params.setPassword(info.getProperty(Config.AUTH_PASSWORD));
+        }
 
-    return params;
-  }
-  
+        return params;
+    }
 }

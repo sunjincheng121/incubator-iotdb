@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.iotdb.cluster.server.heartbeat;
 
 import java.net.InetSocketAddress;
@@ -35,48 +34,48 @@ import org.apache.thrift.transport.TTransportException;
 
 public class DataHeartbeatServer extends HeartbeatServer {
 
-  private DataClusterServer dataClusterServer;
+    private DataClusterServer dataClusterServer;
 
-  /**
-   * Do not use this method for initialization
-   */
-  private DataHeartbeatServer() {
-  }
+    /** Do not use this method for initialization */
+    private DataHeartbeatServer() {}
 
-  public DataHeartbeatServer(Node thisNode, DataClusterServer dataClusterServer) {
-    super(thisNode);
-    this.dataClusterServer = dataClusterServer;
-  }
-
-
-  @Override
-  TProcessor getProcessor() {
-    if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
-      return new AsyncProcessor<>(dataClusterServer);
-    } else {
-      return new Processor<>(dataClusterServer);
+    public DataHeartbeatServer(Node thisNode, DataClusterServer dataClusterServer) {
+        super(thisNode);
+        this.dataClusterServer = dataClusterServer;
     }
-  }
 
-  @Override
-  TServerTransport getHeartbeatServerSocket() throws TTransportException {
-    if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
-      return new TNonblockingServerSocket(new InetSocketAddress(config.getClusterRpcIp(),
-          thisNode.getDataPort() + ClusterUtils.DATA_HEARTBEAT_PORT_OFFSET),
-          getConnectionTimeoutInMS());
-    } else {
-      return new TServerSocket(new InetSocketAddress(config.getClusterRpcIp(),
-          thisNode.getDataPort() + ClusterUtils.DATA_HEARTBEAT_PORT_OFFSET));
+    @Override
+    TProcessor getProcessor() {
+        if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
+            return new AsyncProcessor<>(dataClusterServer);
+        } else {
+            return new Processor<>(dataClusterServer);
+        }
     }
-  }
 
-  @Override
-  String getClientThreadPrefix() {
-    return "DataHeartbeatClientThread-";
-  }
+    @Override
+    TServerTransport getHeartbeatServerSocket() throws TTransportException {
+        if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
+            return new TNonblockingServerSocket(
+                    new InetSocketAddress(
+                            config.getClusterRpcIp(),
+                            thisNode.getDataPort() + ClusterUtils.DATA_HEARTBEAT_PORT_OFFSET),
+                    getConnectionTimeoutInMS());
+        } else {
+            return new TServerSocket(
+                    new InetSocketAddress(
+                            config.getClusterRpcIp(),
+                            thisNode.getDataPort() + ClusterUtils.DATA_HEARTBEAT_PORT_OFFSET));
+        }
+    }
 
-  @Override
-  String getServerClientName() {
-    return "DataHeartbeatServerThread-";
-  }
+    @Override
+    String getClientThreadPrefix() {
+        return "DataHeartbeatClientThread-";
+    }
+
+    @Override
+    String getServerClientName() {
+        return "DataHeartbeatServerThread-";
+    }
 }

@@ -25,26 +25,25 @@ import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
 public class MultiSourceExternalSortJobPart extends ExternalSortJobPart {
 
-  private String tmpFilePath;
-  private List<ExternalSortJobPart> source;
-  private long queryId;
+    private String tmpFilePath;
+    private List<ExternalSortJobPart> source;
+    private long queryId;
 
-  public MultiSourceExternalSortJobPart(long queryId, String tmpFilePath,
-      List<ExternalSortJobPart> source) {
-    super(ExternalSortJobPartType.MULTIPLE_SOURCE);
-    this.source = source;
-    this.tmpFilePath = tmpFilePath;
-    this.queryId = queryId;
-  }
-
-
-  @Override
-  public IPointReader executeForIPointReader() throws IOException {
-    List<IPointReader> prioritySeriesReaders = new ArrayList<>();
-    for (ExternalSortJobPart part : source) {
-      prioritySeriesReaders.add(part.executeForIPointReader());
+    public MultiSourceExternalSortJobPart(
+            long queryId, String tmpFilePath, List<ExternalSortJobPart> source) {
+        super(ExternalSortJobPartType.MULTIPLE_SOURCE);
+        this.source = source;
+        this.tmpFilePath = tmpFilePath;
+        this.queryId = queryId;
     }
-    LineMerger merger = new LineMerger(queryId, tmpFilePath);
-    return merger.merge(prioritySeriesReaders);
-  }
+
+    @Override
+    public IPointReader executeForIPointReader() throws IOException {
+        List<IPointReader> prioritySeriesReaders = new ArrayList<>();
+        for (ExternalSortJobPart part : source) {
+            prioritySeriesReaders.add(part.executeForIPointReader());
+        }
+        LineMerger merger = new LineMerger(queryId, tmpFilePath);
+        return merger.merge(prioritySeriesReaders);
+    }
 }

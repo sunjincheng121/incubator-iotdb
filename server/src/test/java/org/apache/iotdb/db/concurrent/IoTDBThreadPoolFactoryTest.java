@@ -36,184 +36,182 @@ import org.junit.Test;
 
 public class IoTDBThreadPoolFactoryTest {
 
-  private final String POOL_NAME = "test";
-  private AtomicInteger count;
-  private CountDownLatch latch;
+    private final String POOL_NAME = "test";
+    private AtomicInteger count;
+    private CountDownLatch latch;
 
-  @Before
-  public void setUp() throws Exception {
-    count = new AtomicInteger(0);
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
-
-  @Test
-  public void testNewFixedThreadPool() throws InterruptedException, ExecutionException {
-    String reason = "(can be ignored in Tests) NewFixedThreadPool";
-    Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
-    int threadCount = 4;
-    latch = new CountDownLatch(threadCount);
-    ExecutorService exec = IoTDBThreadPoolFactory
-        .newFixedThreadPool(threadCount / 2, POOL_NAME, handler);
-    for (int i = 0; i < threadCount; i++) {
-      Runnable task = new TestThread(reason);
-      exec.execute(task);
-    }
-    try {
-      latch.await();
-      assertEquals(count.get(), threadCount);
-    } catch (InterruptedException E) {
-      fail();
-    }
-  }
-
-  @Test
-  public void testNewSingleThreadExecutor() throws InterruptedException {
-    String reason = "(can be ignored in Tests)NewSingleThreadExecutor";
-    Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
-    int threadCount = 2;
-    latch = new CountDownLatch(threadCount);
-    ExecutorService exec = IoTDBThreadPoolFactory.newSingleThreadExecutor(POOL_NAME, handler);
-    for (int i = 0; i < threadCount; i++) {
-      Runnable task = new TestThread(reason);
-      exec.execute(task);
-    }
-    try {
-      latch.await();
-      assertEquals(count.get(), threadCount);
-    } catch (InterruptedException E) {
-      fail();
-    }
-  }
-
-  @Test
-  public void testNewCachedThreadPool() throws InterruptedException {
-    String reason = "(can be ignored in Tests) NewCachedThreadPool";
-    Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
-    int threadCount = 4;
-    latch = new CountDownLatch(threadCount);
-    ExecutorService exec = IoTDBThreadPoolFactory.newCachedThreadPool(POOL_NAME, handler);
-    for (int i = 0; i < threadCount; i++) {
-      Runnable task = new TestThread(reason);
-      exec.execute(task);
-    }
-    try {
-      latch.await();
-      assertEquals(count.get(), threadCount);
-    } catch (InterruptedException E) {
-      fail();
-    }
-  }
-
-  @Test
-  public void testNewSingleThreadScheduledExecutor() throws InterruptedException {
-    String reason = "(can be ignored in Tests) NewSingleThreadScheduledExecutor";
-    Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
-    int threadCount = 2;
-    latch = new CountDownLatch(threadCount);
-    ScheduledExecutorService exec = IoTDBThreadPoolFactory
-        .newSingleThreadScheduledExecutor(POOL_NAME, handler);
-    for (int i = 0; i < threadCount; i++) {
-      Runnable task = new TestThread(reason);
-      ScheduledFuture<?> future = exec.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
-      try {
-        future.get();
-      } catch (ExecutionException e) {
-        assertEquals(reason, e.getCause().getMessage());
-        count.addAndGet(1);
-        latch.countDown();
-      }
-    }
-    try {
-      latch.await();
-      assertEquals(count.get(), threadCount);
-    } catch (InterruptedException E) {
-      fail();
-    }
-  }
-
-  @Test
-  public void testNewScheduledThreadPool() throws InterruptedException {
-    String reason = "(can be ignored in Tests) NewScheduledThreadPool";
-    Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
-    int threadCount = 4;
-    latch = new CountDownLatch(threadCount);
-    ScheduledExecutorService exec = IoTDBThreadPoolFactory
-        .newScheduledThreadPool(threadCount / 2, POOL_NAME, handler);
-    for (int i = 0; i < threadCount; i++) {
-      Runnable task = new TestThread(reason);
-      ScheduledFuture<?> future = exec.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
-      try {
-        future.get();
-      } catch (ExecutionException e) {
-        assertEquals(reason, e.getCause().getMessage());
-        count.addAndGet(1);
-        latch.countDown();
-      }
-    }
-    try {
-      latch.await();
-      assertEquals(count.get(), threadCount);
-    } catch (InterruptedException E) {
-      fail();
-    }
-  }
-
-  @Test
-  public void testCreateJDBCClientThreadPool() throws InterruptedException {
-    String reason = "(can be ignored in Tests) CreateJDBCClientThreadPool";
-    TThreadPoolServer.Args args = new Args(null);
-    args.maxWorkerThreads = 4;
-    args.minWorkerThreads = 2;
-    args.stopTimeoutVal = 10;
-    args.stopTimeoutUnit = TimeUnit.SECONDS;
-    Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
-    int threadCount = 4;
-    latch = new CountDownLatch(threadCount);
-    ExecutorService exec = IoTDBThreadPoolFactory
-        .createThriftRpcClientThreadPool(args, POOL_NAME, handler);
-    for (int i = 0; i < threadCount; i++) {
-      Runnable task = new TestThread(reason);
-      exec.execute(task);
-    }
-    try {
-      latch.await();
-      assertEquals(count.get(), threadCount);
-    } catch (InterruptedException E) {
-      fail();
-    }
-  }
-
-  class TestExceptionHandler implements Thread.UncaughtExceptionHandler {
-
-    private String name;
-
-    public TestExceptionHandler(String name) {
-      this.name = name;
+    @Before
+    public void setUp() throws Exception {
+        count = new AtomicInteger(0);
     }
 
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-      assertEquals(name, e.getMessage());
-      count.addAndGet(1);
-      latch.countDown();
+    @After
+    public void tearDown() throws Exception {}
+
+    @Test
+    public void testNewFixedThreadPool() throws InterruptedException, ExecutionException {
+        String reason = "(can be ignored in Tests) NewFixedThreadPool";
+        Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
+        int threadCount = 4;
+        latch = new CountDownLatch(threadCount);
+        ExecutorService exec =
+                IoTDBThreadPoolFactory.newFixedThreadPool(threadCount / 2, POOL_NAME, handler);
+        for (int i = 0; i < threadCount; i++) {
+            Runnable task = new TestThread(reason);
+            exec.execute(task);
+        }
+        try {
+            latch.await();
+            assertEquals(count.get(), threadCount);
+        } catch (InterruptedException E) {
+            fail();
+        }
     }
-  }
 
-  class TestThread extends WrappedRunnable {
-
-    private String name;
-
-    public TestThread(String name) {
-      this.name = name;
+    @Test
+    public void testNewSingleThreadExecutor() throws InterruptedException {
+        String reason = "(can be ignored in Tests)NewSingleThreadExecutor";
+        Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
+        int threadCount = 2;
+        latch = new CountDownLatch(threadCount);
+        ExecutorService exec = IoTDBThreadPoolFactory.newSingleThreadExecutor(POOL_NAME, handler);
+        for (int i = 0; i < threadCount; i++) {
+            Runnable task = new TestThread(reason);
+            exec.execute(task);
+        }
+        try {
+            latch.await();
+            assertEquals(count.get(), threadCount);
+        } catch (InterruptedException E) {
+            fail();
+        }
     }
 
-    @Override
-    public void runMayThrow() {
-      throw new RuntimeException(name);
+    @Test
+    public void testNewCachedThreadPool() throws InterruptedException {
+        String reason = "(can be ignored in Tests) NewCachedThreadPool";
+        Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
+        int threadCount = 4;
+        latch = new CountDownLatch(threadCount);
+        ExecutorService exec = IoTDBThreadPoolFactory.newCachedThreadPool(POOL_NAME, handler);
+        for (int i = 0; i < threadCount; i++) {
+            Runnable task = new TestThread(reason);
+            exec.execute(task);
+        }
+        try {
+            latch.await();
+            assertEquals(count.get(), threadCount);
+        } catch (InterruptedException E) {
+            fail();
+        }
     }
 
-  }
+    @Test
+    public void testNewSingleThreadScheduledExecutor() throws InterruptedException {
+        String reason = "(can be ignored in Tests) NewSingleThreadScheduledExecutor";
+        Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
+        int threadCount = 2;
+        latch = new CountDownLatch(threadCount);
+        ScheduledExecutorService exec =
+                IoTDBThreadPoolFactory.newSingleThreadScheduledExecutor(POOL_NAME, handler);
+        for (int i = 0; i < threadCount; i++) {
+            Runnable task = new TestThread(reason);
+            ScheduledFuture<?> future = exec.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
+            try {
+                future.get();
+            } catch (ExecutionException e) {
+                assertEquals(reason, e.getCause().getMessage());
+                count.addAndGet(1);
+                latch.countDown();
+            }
+        }
+        try {
+            latch.await();
+            assertEquals(count.get(), threadCount);
+        } catch (InterruptedException E) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testNewScheduledThreadPool() throws InterruptedException {
+        String reason = "(can be ignored in Tests) NewScheduledThreadPool";
+        Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
+        int threadCount = 4;
+        latch = new CountDownLatch(threadCount);
+        ScheduledExecutorService exec =
+                IoTDBThreadPoolFactory.newScheduledThreadPool(threadCount / 2, POOL_NAME, handler);
+        for (int i = 0; i < threadCount; i++) {
+            Runnable task = new TestThread(reason);
+            ScheduledFuture<?> future = exec.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
+            try {
+                future.get();
+            } catch (ExecutionException e) {
+                assertEquals(reason, e.getCause().getMessage());
+                count.addAndGet(1);
+                latch.countDown();
+            }
+        }
+        try {
+            latch.await();
+            assertEquals(count.get(), threadCount);
+        } catch (InterruptedException E) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testCreateJDBCClientThreadPool() throws InterruptedException {
+        String reason = "(can be ignored in Tests) CreateJDBCClientThreadPool";
+        TThreadPoolServer.Args args = new Args(null);
+        args.maxWorkerThreads = 4;
+        args.minWorkerThreads = 2;
+        args.stopTimeoutVal = 10;
+        args.stopTimeoutUnit = TimeUnit.SECONDS;
+        Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
+        int threadCount = 4;
+        latch = new CountDownLatch(threadCount);
+        ExecutorService exec =
+                IoTDBThreadPoolFactory.createThriftRpcClientThreadPool(args, POOL_NAME, handler);
+        for (int i = 0; i < threadCount; i++) {
+            Runnable task = new TestThread(reason);
+            exec.execute(task);
+        }
+        try {
+            latch.await();
+            assertEquals(count.get(), threadCount);
+        } catch (InterruptedException E) {
+            fail();
+        }
+    }
+
+    class TestExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+        private String name;
+
+        public TestExceptionHandler(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public void uncaughtException(Thread t, Throwable e) {
+            assertEquals(name, e.getMessage());
+            count.addAndGet(1);
+            latch.countDown();
+        }
+    }
+
+    class TestThread extends WrappedRunnable {
+
+        private String name;
+
+        public TestThread(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public void runMayThrow() {
+            throw new RuntimeException(name);
+        }
+    }
 }

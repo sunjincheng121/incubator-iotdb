@@ -34,149 +34,150 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class CreateIndexPlan extends PhysicalPlan {
 
-  protected List<PartialPath> paths;
-  private Map<String, String> props;
-  private long time;
-  private IndexType indexType;
+    protected List<PartialPath> paths;
+    private Map<String, String> props;
+    private long time;
+    private IndexType indexType;
 
-  public CreateIndexPlan(){
-    super(false, OperatorType.CREATE_INDEX);
-    canBeSplit = false;
-  }
-
-  public CreateIndexPlan(List<PartialPath> paths, Map<String, String> props, long startTime,
-      IndexType indexType) {
-    super(false, OperatorType.CREATE_INDEX);
-    this.paths = paths;
-    this.props = props;
-    time = startTime;
-    this.indexType = indexType;
-    canBeSplit = false;
-  }
-
-  public long getTime() {
-    return time;
-  }
-
-  public void setTime(long time) {
-    this.time = time;
-  }
-
-  public IndexType getIndexType() {
-    return indexType;
-  }
-
-  public void setIndexType(IndexType indexType) {
-    this.indexType = indexType;
-  }
-
-  public Map<String, String> getProps() {
-    return props;
-  }
-
-  public void setProps(Map<String, String> props) {
-    this.props = props;
-  }
-
-  @Override
-  public void setPaths(List<PartialPath> paths) {
-    this.paths = paths;
-  }
-
-  @Override
-  public List<PartialPath> getPaths() {
-    return paths;
-  }
-
-
-  @Override
-  public void serialize(DataOutputStream stream) throws IOException {
-    stream.writeByte((byte) PhysicalPlanType.CREATE_INDEX.ordinal());
-
-    stream.write((byte) indexType.serialize());
-    stream.writeLong(time);
-    stream.writeInt(paths.size());
-    for (PartialPath path : paths) {
-      putString(stream, path.getFullPath());
+    public CreateIndexPlan() {
+        super(false, OperatorType.CREATE_INDEX);
+        canBeSplit = false;
     }
 
-    // props
-    if (props != null && !props.isEmpty()) {
-      stream.write(1);
-      ReadWriteIOUtils.write(props, stream);
-    } else {
-      stream.write(0);
+    public CreateIndexPlan(
+            List<PartialPath> paths,
+            Map<String, String> props,
+            long startTime,
+            IndexType indexType) {
+        super(false, OperatorType.CREATE_INDEX);
+        this.paths = paths;
+        this.props = props;
+        time = startTime;
+        this.indexType = indexType;
+        canBeSplit = false;
     }
 
-    stream.writeLong(index);
-  }
-
-  @Override
-  public void serialize(ByteBuffer buffer) {
-    int type = PhysicalPlanType.CREATE_INDEX.ordinal();
-    buffer.put((byte) type);
-    buffer.put((byte) indexType.serialize());
-    buffer.putLong(time);
-    buffer.putInt(paths.size());
-    for (PartialPath path : paths) {
-      putString(buffer, path.getFullPath());
+    public long getTime() {
+        return time;
     }
 
-    // props
-    if (props != null && !props.isEmpty()) {
-      buffer.put((byte) 1);
-      ReadWriteIOUtils.write(props, buffer);
-    } else {
-      buffer.put((byte) 0);
+    public void setTime(long time) {
+        this.time = time;
     }
 
-    buffer.putLong(index);
-  }
-
-  @Override
-  public void deserialize(ByteBuffer buffer) throws IllegalPathException {
-    indexType = IndexType.deserialize(buffer.get());
-    time = buffer.getLong();
-
-    int pathNum = buffer.getInt();
-    paths = new ArrayList<>();
-    for (int i = 0; i < pathNum; i++) {
-      paths.add(new PartialPath(readString(buffer)));
+    public IndexType getIndexType() {
+        return indexType;
     }
 
-    // props
-    if (buffer.get() == 1) {
-      props = ReadWriteIOUtils.readMap(buffer);
+    public void setIndexType(IndexType indexType) {
+        this.indexType = indexType;
     }
 
-    this.index = buffer.getLong();
-  }
-
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public Map<String, String> getProps() {
+        return props;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public void setProps(Map<String, String> props) {
+        this.props = props;
     }
-    CreateIndexPlan that = (CreateIndexPlan) o;
-    return Objects.equals(paths, that.paths)
-        && Objects.equals(props, that.props)
-        && time == that.time
-        && Objects.equals(indexType, that.indexType);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(paths, props, time, indexType);
-  }
+    @Override
+    public void setPaths(List<PartialPath> paths) {
+        this.paths = paths;
+    }
 
-  @Override
-  public String toString() {
-    return String.format("paths: %s, index type: %s, start time: %s, props: %s",
-        paths, indexType, time, props);
-  }
+    @Override
+    public List<PartialPath> getPaths() {
+        return paths;
+    }
 
+    @Override
+    public void serialize(DataOutputStream stream) throws IOException {
+        stream.writeByte((byte) PhysicalPlanType.CREATE_INDEX.ordinal());
+
+        stream.write((byte) indexType.serialize());
+        stream.writeLong(time);
+        stream.writeInt(paths.size());
+        for (PartialPath path : paths) {
+            putString(stream, path.getFullPath());
+        }
+
+        // props
+        if (props != null && !props.isEmpty()) {
+            stream.write(1);
+            ReadWriteIOUtils.write(props, stream);
+        } else {
+            stream.write(0);
+        }
+
+        stream.writeLong(index);
+    }
+
+    @Override
+    public void serialize(ByteBuffer buffer) {
+        int type = PhysicalPlanType.CREATE_INDEX.ordinal();
+        buffer.put((byte) type);
+        buffer.put((byte) indexType.serialize());
+        buffer.putLong(time);
+        buffer.putInt(paths.size());
+        for (PartialPath path : paths) {
+            putString(buffer, path.getFullPath());
+        }
+
+        // props
+        if (props != null && !props.isEmpty()) {
+            buffer.put((byte) 1);
+            ReadWriteIOUtils.write(props, buffer);
+        } else {
+            buffer.put((byte) 0);
+        }
+
+        buffer.putLong(index);
+    }
+
+    @Override
+    public void deserialize(ByteBuffer buffer) throws IllegalPathException {
+        indexType = IndexType.deserialize(buffer.get());
+        time = buffer.getLong();
+
+        int pathNum = buffer.getInt();
+        paths = new ArrayList<>();
+        for (int i = 0; i < pathNum; i++) {
+            paths.add(new PartialPath(readString(buffer)));
+        }
+
+        // props
+        if (buffer.get() == 1) {
+            props = ReadWriteIOUtils.readMap(buffer);
+        }
+
+        this.index = buffer.getLong();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CreateIndexPlan that = (CreateIndexPlan) o;
+        return Objects.equals(paths, that.paths)
+                && Objects.equals(props, that.props)
+                && time == that.time
+                && Objects.equals(indexType, that.indexType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paths, props, time, indexType);
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "paths: %s, index type: %s, start time: %s, props: %s",
+                paths, indexType, time, props);
+    }
 }

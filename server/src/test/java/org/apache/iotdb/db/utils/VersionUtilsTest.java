@@ -29,27 +29,25 @@ import org.junit.Test;
 
 public class VersionUtilsTest {
 
-  @Test
-  public void uncompleteFileTest() {
-    List<ChunkMetadata> chunkMetadataList = new ArrayList<>();
-    chunkMetadataList.add(new ChunkMetadata("s1", TSDataType.INT32, 10, null));
-    chunkMetadataList.add(new ChunkMetadata("s1", TSDataType.INT32, 20, null));
-    chunkMetadataList.add(new ChunkMetadata("s1", TSDataType.INT32, 30, null));
-    chunkMetadataList.add(new ChunkMetadata("s1", TSDataType.INT32, 40, null));
-    chunkMetadataList.add(new ChunkMetadata("s1", TSDataType.INT32, 50, null));
+    @Test
+    public void uncompleteFileTest() {
+        List<ChunkMetadata> chunkMetadataList = new ArrayList<>();
+        chunkMetadataList.add(new ChunkMetadata("s1", TSDataType.INT32, 10, null));
+        chunkMetadataList.add(new ChunkMetadata("s1", TSDataType.INT32, 20, null));
+        chunkMetadataList.add(new ChunkMetadata("s1", TSDataType.INT32, 30, null));
+        chunkMetadataList.add(new ChunkMetadata("s1", TSDataType.INT32, 40, null));
+        chunkMetadataList.add(new ChunkMetadata("s1", TSDataType.INT32, 50, null));
 
-    List<Pair<Long, Long>> versionInfo = new ArrayList<>();
-    versionInfo.add(new Pair<>(25L, 1L));
-    versionInfo.add(new Pair<>(45L, 2L));
+        List<Pair<Long, Long>> versionInfo = new ArrayList<>();
+        versionInfo.add(new Pair<>(25L, 1L));
+        versionInfo.add(new Pair<>(45L, 2L));
 
-    VersionUtils.applyVersion(chunkMetadataList, versionInfo);
+        VersionUtils.applyVersion(chunkMetadataList, versionInfo);
 
-    Assert.assertEquals(1L, chunkMetadataList.get(0).getVersion());
-    Assert.assertEquals(1L, chunkMetadataList.get(1).getVersion());
-    Assert.assertEquals(2L, chunkMetadataList.get(2).getVersion());
-    Assert.assertEquals(2L, chunkMetadataList.get(3).getVersion());
-    Assert.assertEquals(0L, chunkMetadataList.get(4).getVersion());
-  }
-
-
+        Assert.assertEquals(1L, chunkMetadataList.get(0).getVersion());
+        Assert.assertEquals(1L, chunkMetadataList.get(1).getVersion());
+        Assert.assertEquals(2L, chunkMetadataList.get(2).getVersion());
+        Assert.assertEquals(2L, chunkMetadataList.get(3).getVersion());
+        Assert.assertEquals(0L, chunkMetadataList.get(4).getVersion());
+    }
 }

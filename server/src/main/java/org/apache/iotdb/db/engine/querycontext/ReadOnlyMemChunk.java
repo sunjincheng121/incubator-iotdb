@@ -38,116 +38,135 @@ import org.slf4j.LoggerFactory;
 
 public class ReadOnlyMemChunk {
 
-  // deletion list for this chunk
-  private final List<TimeRange> deletionList;
+    // deletion list for this chunk
+    private final List<TimeRange> deletionList;
 
-  private String measurementUid;
-  private TSDataType dataType;
-  private TSEncoding encoding;
+    private String measurementUid;
+    private TSDataType dataType;
+    private TSEncoding encoding;
 
-  private static final Logger logger = LoggerFactory.getLogger(ReadOnlyMemChunk.class);
-  private long version;
+    private static final Logger logger = LoggerFactory.getLogger(ReadOnlyMemChunk.class);
+    private long version;
 
-  private int floatPrecision = TSFileDescriptor.getInstance().getConfig().getFloatPrecision();
+    private int floatPrecision = TSFileDescriptor.getInstance().getConfig().getFloatPrecision();
 
-  private ChunkMetadata cachedMetaData;
+    private ChunkMetadata cachedMetaData;
 
-  private TVList chunkData;
+    private TVList chunkData;
 
-  private IPointReader chunkPointReader;
+    private IPointReader chunkPointReader;
 
-  private int chunkDataSize;
+    private int chunkDataSize;
 
-  public ReadOnlyMemChunk(String measurementUid, TSDataType dataType, TSEncoding encoding,
-      TVList tvList, Map<String, String> props, long version, int size,
-      List<TimeRange> deletionList)
-      throws IOException, QueryProcessException {
-    this.measurementUid = measurementUid;
-    this.dataType = dataType;
-    this.encoding = encoding;
-    this.version = version;
-    if (props != null && props.containsKey(Encoder.MAX_POINT_NUMBER)) {
-      try {
-        this.floatPrecision = Integer.parseInt(props.get(Encoder.MAX_POINT_NUMBER));
-      } catch (NumberFormatException e) {
-        logger.warn("The format of MAX_POINT_NUMBER {}  is not correct."
-            + " Using default float precision.", props.get(Encoder.MAX_POINT_NUMBER));
-      }
-      if (floatPrecision < 0) {
-        logger.warn("The MAX_POINT_NUMBER shouldn't be less than 0."
-            + " Using default float precision {}.",
-            TSFileDescriptor.getInstance().getConfig().getFloatPrecision());
-        floatPrecision = TSFileDescriptor.getInstance().getConfig().getFloatPrecision();
-      }
-    }
-
-    this.chunkData = tvList;
-    this.chunkDataSize = size;
-    this.deletionList = deletionList;
-
-    this.chunkPointReader = tvList.getIterator(floatPrecision, encoding, chunkDataSize, deletionList);
-    initChunkMeta();
-  }
-
-  private void initChunkMeta() throws IOException, QueryProcessException {
-    Statistics statsByType = Statistics.getStatsByType(dataType);
-    ChunkMetadata metaData = new ChunkMetadata(measurementUid, dataType, 0, statsByType);
-    if (!isEmpty()) {
-      IPointReader iterator = chunkData.getIterator(floatPrecision, encoding, chunkDataSize, deletionList);
-      while (iterator.hasNextTimeValuePair()) {
-        TimeValuePair timeValuePair = iterator.nextTimeValuePair();
-        switch (dataType) {
-          case BOOLEAN:
-            statsByType.update(timeValuePair.getTimestamp(), timeValuePair.getValue().getBoolean());
-            break;
-          case TEXT:
-            statsByType.update(timeValuePair.getTimestamp(), timeValuePair.getValue().getBinary());
-            break;
-          case FLOAT:
-            statsByType.update(timeValuePair.getTimestamp(), timeValuePair.getValue().getFloat());
-            break;
-          case INT32:
-            statsByType.update(timeValuePair.getTimestamp(), timeValuePair.getValue().getInt());
-            break;
-          case INT64:
-            statsByType.update(timeValuePair.getTimestamp(), timeValuePair.getValue().getLong());
-            break;
-          case DOUBLE:
-            statsByType.update(timeValuePair.getTimestamp(), timeValuePair.getValue().getDouble());
-            break;
-          default:
-            throw new QueryProcessException("Unsupported data type:" + dataType);
+    public ReadOnlyMemChunk(
+            String measurementUid,
+            TSDataType dataType,
+            TSEncoding encoding,
+            TVList tvList,
+            Map<String, String> props,
+            long version,
+            int size,
+            List<TimeRange> deletionList)
+            throws IOException, QueryProcessException {
+        this.measurementUid = measurementUid;
+        this.dataType = dataType;
+        this.encoding = encoding;
+        this.version = version;
+        if (props != null && props.containsKey(Encoder.MAX_POINT_NUMBER)) {
+            try {
+                this.floatPrecision = Integer.parseInt(props.get(Encoder.MAX_POINT_NUMBER));
+            } catch (NumberFormatException e) {
+                logger.warn(
+                        "The format of MAX_POINT_NUMBER {}  is not correct."
+                                + " Using default float precision.",
+                        props.get(Encoder.MAX_POINT_NUMBER));
+            }
+            if (floatPrecision < 0) {
+                logger.warn(
+                        "The MAX_POINT_NUMBER shouldn't be less than 0."
+                                + " Using default float precision {}.",
+                        TSFileDescriptor.getInstance().getConfig().getFloatPrecision());
+                floatPrecision = TSFileDescriptor.getInstance().getConfig().getFloatPrecision();
+            }
         }
-      }
+
+        this.chunkData = tvList;
+        this.chunkDataSize = size;
+        this.deletionList = deletionList;
+
+        this.chunkPointReader =
+                tvList.getIterator(floatPrecision, encoding, chunkDataSize, deletionList);
+        initChunkMeta();
     }
-    statsByType.setEmpty(isEmpty());
-    metaData.setChunkLoader(new MemChunkLoader(this));
-    metaData.setVersion(Long.MAX_VALUE);
-    cachedMetaData = metaData;
-  }
 
-  public TSDataType getDataType() {
-    return dataType;
-  }
+    private void initChunkMeta() throws IOException, QueryProcessException {
+        Statistics statsByType = Statistics.getStatsByType(dataType);
+        ChunkMetadata metaData = new ChunkMetadata(measurementUid, dataType, 0, statsByType);
+        if (!isEmpty()) {
+            IPointReader iterator =
+                    chunkData.getIterator(floatPrecision, encoding, chunkDataSize, deletionList);
+            while (iterator.hasNextTimeValuePair()) {
+                TimeValuePair timeValuePair = iterator.nextTimeValuePair();
+                switch (dataType) {
+                    case BOOLEAN:
+                        statsByType.update(
+                                timeValuePair.getTimestamp(),
+                                timeValuePair.getValue().getBoolean());
+                        break;
+                    case TEXT:
+                        statsByType.update(
+                                timeValuePair.getTimestamp(), timeValuePair.getValue().getBinary());
+                        break;
+                    case FLOAT:
+                        statsByType.update(
+                                timeValuePair.getTimestamp(), timeValuePair.getValue().getFloat());
+                        break;
+                    case INT32:
+                        statsByType.update(
+                                timeValuePair.getTimestamp(), timeValuePair.getValue().getInt());
+                        break;
+                    case INT64:
+                        statsByType.update(
+                                timeValuePair.getTimestamp(), timeValuePair.getValue().getLong());
+                        break;
+                    case DOUBLE:
+                        statsByType.update(
+                                timeValuePair.getTimestamp(), timeValuePair.getValue().getDouble());
+                        break;
+                    default:
+                        throw new QueryProcessException("Unsupported data type:" + dataType);
+                }
+            }
+        }
+        statsByType.setEmpty(isEmpty());
+        metaData.setChunkLoader(new MemChunkLoader(this));
+        metaData.setVersion(Long.MAX_VALUE);
+        cachedMetaData = metaData;
+    }
 
-  public boolean isEmpty() throws IOException {
-    return !chunkPointReader.hasNextTimeValuePair();
-  }
+    public TSDataType getDataType() {
+        return dataType;
+    }
 
-  public ChunkMetadata getChunkMetaData() {
-    return cachedMetaData;
-  }
+    public boolean isEmpty() throws IOException {
+        return !chunkPointReader.hasNextTimeValuePair();
+    }
 
-  public IPointReader getPointReader() {
-    chunkPointReader = chunkData.getIterator(floatPrecision, encoding, chunkDataSize, deletionList);
-    return chunkPointReader;
-  }
+    public ChunkMetadata getChunkMetaData() {
+        return cachedMetaData;
+    }
 
-  public long getVersion() {
-    return version;
-  }
+    public IPointReader getPointReader() {
+        chunkPointReader =
+                chunkData.getIterator(floatPrecision, encoding, chunkDataSize, deletionList);
+        return chunkPointReader;
+    }
 
-  public String getMeasurementUid() {
-    return measurementUid;
-  }
+    public long getVersion() {
+        return version;
+    }
+
+    public String getMeasurementUid() {
+        return measurementUid;
+    }
 }

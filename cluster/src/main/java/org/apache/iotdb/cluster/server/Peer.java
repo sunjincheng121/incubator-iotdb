@@ -23,48 +23,48 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Peer {
 
-  private long nextIndex;
-  private long matchIndex;
-  private AtomicInteger inconsistentHeartbeatNum = new AtomicInteger();
-  // lastLogIndex from the last heartbeat
-  private long lastHeartBeatIndex;
+    private long nextIndex;
+    private long matchIndex;
+    private AtomicInteger inconsistentHeartbeatNum = new AtomicInteger();
+    // lastLogIndex from the last heartbeat
+    private long lastHeartBeatIndex;
 
-  public Peer(long nextIndex) {
-    this.nextIndex = nextIndex;
-    this.matchIndex = -1;
-  }
+    public Peer(long nextIndex) {
+        this.nextIndex = nextIndex;
+        this.matchIndex = -1;
+    }
 
-  public synchronized long getNextIndex() {
-    return nextIndex;
-  }
+    public synchronized long getNextIndex() {
+        return nextIndex;
+    }
 
-  public synchronized void setNextIndex(long nextIndex) {
-    this.nextIndex = nextIndex;
-  }
+    public synchronized void setNextIndex(long nextIndex) {
+        this.nextIndex = nextIndex;
+    }
 
-  public synchronized long getMatchIndex() {
-    return matchIndex;
-  }
+    public synchronized long getMatchIndex() {
+        return matchIndex;
+    }
 
-  public synchronized void setMatchIndex(long matchIndex) {
-    this.matchIndex = matchIndex;
-    this.setNextIndex(Math.max(nextIndex, matchIndex + 1));
-    this.notifyAll();
-  }
+    public synchronized void setMatchIndex(long matchIndex) {
+        this.matchIndex = matchIndex;
+        this.setNextIndex(Math.max(nextIndex, matchIndex + 1));
+        this.notifyAll();
+    }
 
-  public int incInconsistentHeartbeatNum() {
-    return inconsistentHeartbeatNum.incrementAndGet();
-  }
+    public int incInconsistentHeartbeatNum() {
+        return inconsistentHeartbeatNum.incrementAndGet();
+    }
 
-  public void resetInconsistentHeartbeatNum() {
-    inconsistentHeartbeatNum.set(0);
-  }
+    public void resetInconsistentHeartbeatNum() {
+        inconsistentHeartbeatNum.set(0);
+    }
 
-  public long getLastHeartBeatIndex() {
-    return lastHeartBeatIndex;
-  }
+    public long getLastHeartBeatIndex() {
+        return lastHeartBeatIndex;
+    }
 
-  public void setLastHeartBeatIndex(long lastHeartBeatIndex) {
-    this.lastHeartBeatIndex = lastHeartBeatIndex;
-  }
+    public void setLastHeartBeatIndex(long lastHeartBeatIndex) {
+        this.lastHeartBeatIndex = lastHeartBeatIndex;
+    }
 }

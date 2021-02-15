@@ -41,108 +41,116 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("common-java:DuplicatedBlocks")
 public class AsyncDataClient extends AsyncClient {
 
-  private static final Logger logger = LoggerFactory.getLogger(AsyncDataClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(AsyncDataClient.class);
 
-  Node node;
-  AsyncClientPool pool;
+    Node node;
+    AsyncClientPool pool;
 
-  public AsyncDataClient(TProtocolFactory protocolFactory,
-      TAsyncClientManager clientManager,
-      TNonblockingTransport transport) {
-    super(protocolFactory, clientManager, transport);
-  }
-
-  public AsyncDataClient(TProtocolFactory protocolFactory,
-      TAsyncClientManager clientManager, Node node, AsyncClientPool pool) throws IOException {
-    // the difference of the two clients lies in the port
-    super(protocolFactory, clientManager, new TNonblockingSocket(node.getIp(), node.getDataPort()
-        , RaftServer.getConnectionTimeoutInMS()));
-    this.node = node;
-    this.pool = pool;
-  }
-
-  @Override
-  public void onComplete() {
-    super.onComplete();
-    // return itself to the pool if the job is done
-    if (pool != null) {
-      pool.putClient(node, this);
-      pool.onComplete(node);
+    public AsyncDataClient(
+            TProtocolFactory protocolFactory,
+            TAsyncClientManager clientManager,
+            TNonblockingTransport transport) {
+        super(protocolFactory, clientManager, transport);
     }
 
-  }
-
-  @SuppressWarnings("squid:S1135")
-  @Override
-  public void onError(Exception e) {
-    super.onError(e);
-    if (pool != null) {
-      pool.recreateClient(node);
-      //TODO: if e instance of network failure
-      pool.onError(node);
-    }
-  }
-
-  public void close() {
-    ___transport.close();
-    ___currentMethod = null;
-  }
-
-  public static class FactoryAsync extends AsyncClientFactory {
-
-    public FactoryAsync(org.apache.thrift.protocol.TProtocolFactory protocolFactory) {
-      this.protocolFactory = protocolFactory;
+    public AsyncDataClient(
+            TProtocolFactory protocolFactory,
+            TAsyncClientManager clientManager,
+            Node node,
+            AsyncClientPool pool)
+            throws IOException {
+        // the difference of the two clients lies in the port
+        super(
+                protocolFactory,
+                clientManager,
+                new TNonblockingSocket(
+                        node.getIp(), node.getDataPort(), RaftServer.getConnectionTimeoutInMS()));
+        this.node = node;
+        this.pool = pool;
     }
 
     @Override
-    public RaftService.AsyncClient getAsyncClient(Node node, AsyncClientPool pool)
-        throws IOException {
-      TAsyncClientManager manager = managers[clientCnt.incrementAndGet() % managers.length];
-      manager = manager == null ? new TAsyncClientManager() : manager;
-      return new AsyncDataClient(protocolFactory, manager, node, pool);
+    public void onComplete() {
+        super.onComplete();
+        // return itself to the pool if the job is done
+        if (pool != null) {
+            pool.putClient(node, this);
+            pool.onComplete(node);
+        }
     }
-  }
 
-  public static class SingleManagerFactory extends AsyncClientFactory {
+    @SuppressWarnings("squid:S1135")
+    @Override
+    public void onError(Exception e) {
+        super.onError(e);
+        if (pool != null) {
+            pool.recreateClient(node);
+            // TODO: if e instance of network failure
+            pool.onError(node);
+        }
+    }
 
-    private TAsyncClientManager manager;
+    public void close() {
+        ___transport.close();
+        ___currentMethod = null;
+    }
 
-    public SingleManagerFactory(org.apache.thrift.protocol.TProtocolFactory protocolFactory) {
-      this.protocolFactory = protocolFactory;
-      try {
-        manager = new TAsyncClientManager();
-      } catch (IOException e) {
-        logger.error("Cannot init manager of SingleThreadFactoryAsync", e);
-      }
+    public static class FactoryAsync extends AsyncClientFactory {
+
+        public FactoryAsync(org.apache.thrift.protocol.TProtocolFactory protocolFactory) {
+            this.protocolFactory = protocolFactory;
+        }
+
+        @Override
+        public RaftService.AsyncClient getAsyncClient(Node node, AsyncClientPool pool)
+                throws IOException {
+            TAsyncClientManager manager = managers[clientCnt.incrementAndGet() % managers.length];
+            manager = manager == null ? new TAsyncClientManager() : manager;
+            return new AsyncDataClient(protocolFactory, manager, node, pool);
+        }
+    }
+
+    public static class SingleManagerFactory extends AsyncClientFactory {
+
+        private TAsyncClientManager manager;
+
+        public SingleManagerFactory(org.apache.thrift.protocol.TProtocolFactory protocolFactory) {
+            this.protocolFactory = protocolFactory;
+            try {
+                manager = new TAsyncClientManager();
+            } catch (IOException e) {
+                logger.error("Cannot init manager of SingleThreadFactoryAsync", e);
+            }
+        }
+
+        @Override
+        public RaftService.AsyncClient getAsyncClient(Node node, AsyncClientPool pool)
+                throws IOException {
+            return new AsyncDataClient(protocolFactory, manager, node, pool);
+        }
     }
 
     @Override
-    public RaftService.AsyncClient getAsyncClient(Node node, AsyncClientPool pool)
-        throws IOException {
-      return new AsyncDataClient(protocolFactory, manager, node, pool);
+    public String toString() {
+        return "DataClient{" + "node=" + node + '}';
     }
-  }
 
-  @Override
-  public String toString() {
-    return "DataClient{" +
-        "node=" + node +
-        '}';
-  }
-
-  public Node getNode() {
-    return node;
-  }
-
-  public boolean isReady() {
-    if (___currentMethod != null) {
-      logger.warn("Client {} is running {} and will timeout at {}", hashCode(), ___currentMethod,
-          new Date(___currentMethod.getTimeoutTimestamp()));
+    public Node getNode() {
+        return node;
     }
-    return ___currentMethod == null && !hasError();
-  }
 
-  TAsyncMethodCall<Object> getCurrMethod() {
-    return ___currentMethod;
-  }
+    public boolean isReady() {
+        if (___currentMethod != null) {
+            logger.warn(
+                    "Client {} is running {} and will timeout at {}",
+                    hashCode(),
+                    ___currentMethod,
+                    new Date(___currentMethod.getTimeoutTimestamp()));
+        }
+        return ___currentMethod == null && !hasError();
+    }
+
+    TAsyncMethodCall<Object> getCurrMethod() {
+        return ___currentMethod;
+    }
 }

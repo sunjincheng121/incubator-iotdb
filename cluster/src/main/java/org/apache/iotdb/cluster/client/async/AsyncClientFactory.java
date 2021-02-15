@@ -30,33 +30,34 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AsyncClientFactory {
 
-  private static final Logger logger = LoggerFactory.getLogger(AsyncClientFactory.class);
-  static TAsyncClientManager[] managers;
-  org.apache.thrift.protocol.TProtocolFactory protocolFactory;
-  AtomicInteger clientCnt = new AtomicInteger();
+    private static final Logger logger = LoggerFactory.getLogger(AsyncClientFactory.class);
+    static TAsyncClientManager[] managers;
+    org.apache.thrift.protocol.TProtocolFactory protocolFactory;
+    AtomicInteger clientCnt = new AtomicInteger();
 
-  static {
-    managers =
-        new TAsyncClientManager[ClusterDescriptor.getInstance().getConfig()
-            .getSelectorNumOfClientPool()];
-    if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
-      for (int i = 0; i < managers.length; i++) {
-        try {
-          managers[i] = new TAsyncClientManager();
-        } catch (IOException e) {
-          logger.error("Cannot create data heartbeat client manager for factory", e);
+    static {
+        managers =
+                new TAsyncClientManager
+                        [ClusterDescriptor.getInstance().getConfig().getSelectorNumOfClientPool()];
+        if (ClusterDescriptor.getInstance().getConfig().isUseAsyncServer()) {
+            for (int i = 0; i < managers.length; i++) {
+                try {
+                    managers[i] = new TAsyncClientManager();
+                } catch (IOException e) {
+                    logger.error("Cannot create data heartbeat client manager for factory", e);
+                }
+            }
         }
-      }
     }
-  }
 
-  /**
-   * Get a client which will connect the given node and be cached in the given pool.
-   * @param node the cluster node the client will connect.
-   * @param pool the pool that will cache the client for reusing.
-   * @return
-   * @throws IOException
-   */
-  protected abstract RaftService.AsyncClient getAsyncClient(Node node, AsyncClientPool pool)
-      throws IOException;
+    /**
+     * Get a client which will connect the given node and be cached in the given pool.
+     *
+     * @param node the cluster node the client will connect.
+     * @param pool the pool that will cache the client for reusing.
+     * @return
+     * @throws IOException
+     */
+    protected abstract RaftService.AsyncClient getAsyncClient(Node node, AsyncClientPool pool)
+            throws IOException;
 }

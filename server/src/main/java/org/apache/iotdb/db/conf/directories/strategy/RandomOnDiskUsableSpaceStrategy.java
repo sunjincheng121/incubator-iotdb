@@ -26,40 +26,39 @@ import org.apache.iotdb.db.utils.CommonUtils;
 
 public class RandomOnDiskUsableSpaceStrategy extends DirectoryStrategy {
 
-  private Random random = new Random(System.currentTimeMillis());
+    private Random random = new Random(System.currentTimeMillis());
 
-  @Override
-  public int nextFolderIndex() throws DiskSpaceInsufficientException {
-    List<Long> spaceList = getFolderUsableSpaceList();
-    long spaceSum = spaceList.stream().mapToLong(Long::longValue).sum();
+    @Override
+    public int nextFolderIndex() throws DiskSpaceInsufficientException {
+        List<Long> spaceList = getFolderUsableSpaceList();
+        long spaceSum = spaceList.stream().mapToLong(Long::longValue).sum();
 
-    if (spaceSum <= 0) {
-      throw new DiskSpaceInsufficientException(folders);
+        if (spaceSum <= 0) {
+            throw new DiskSpaceInsufficientException(folders);
+        }
+
+        // The reason that avoid using Math.abs() is that, according to the doc of Math.abs(),
+        // if the argument is equal to the value of Long.MIN_VALUE, the result is that same value,
+        // which is negative.
+        long randomV = (random.nextLong() & Long.MAX_VALUE) % spaceSum;
+        int index = 0;
+        /* In fact, index will never equals spaceList.size(),
+        for that randomV is less than sum of spaceList. */
+        while (index < spaceList.size() && randomV >= spaceList.get(index)) {
+            randomV -= spaceList.get(index);
+            index++;
+        }
+
+        return index;
     }
 
-    // The reason that avoid using Math.abs() is that, according to the doc of Math.abs(),
-    // if the argument is equal to the value of Long.MIN_VALUE, the result is that same value, which is negative.
-    long randomV = (random.nextLong() & Long.MAX_VALUE) % spaceSum;
-    int index = 0;
-    /* In fact, index will never equals spaceList.size(),
-    for that randomV is less than sum of spaceList. */
-    while (index < spaceList.size() && randomV >= spaceList.get(index)) {
-      randomV -= spaceList.get(index);
-      index++;
+    /** get space list of all folders. */
+    public List<Long> getFolderUsableSpaceList() {
+        List<Long> spaceList = new ArrayList<>();
+        for (int i = 0; i < folders.size(); i++) {
+            String folder = folders.get(i);
+            spaceList.add(CommonUtils.getUsableSpace(folder));
+        }
+        return spaceList;
     }
-
-    return index;
-  }
-
-  /**
-   * get space list of all folders.
-   */
-  public List<Long> getFolderUsableSpaceList() {
-    List<Long> spaceList = new ArrayList<>();
-    for (int i = 0; i < folders.size(); i++) {
-      String folder = folders.get(i);
-      spaceList.add(CommonUtils.getUsableSpace(folder));
-    }
-    return spaceList;
-  }
 }

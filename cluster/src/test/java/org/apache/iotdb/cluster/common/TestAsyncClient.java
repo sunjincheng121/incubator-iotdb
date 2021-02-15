@@ -26,25 +26,27 @@ import org.apache.thrift.transport.TNonblockingTransport;
 
 public class TestAsyncClient extends AsyncClient {
 
-  private int serialNum;
+    private int serialNum;
 
-  public TestAsyncClient() {
-    super(null, null, null);
-  }
+    public TestAsyncClient() {
+        super(null, null, null);
+    }
 
-  public TestAsyncClient(int serialNum) {
-    this();
-    this.serialNum = serialNum;
-  }
+    public TestAsyncClient(int serialNum) {
+        this();
+        this.serialNum = serialNum;
+    }
 
-  TestAsyncClient(TProtocolFactory protocolFactory, TAsyncClientManager clientManager,
-      TNonblockingTransport transport, int serialNum) {
-    super(protocolFactory, clientManager, transport);
-    this.serialNum = serialNum;
-  }
+    TestAsyncClient(
+            TProtocolFactory protocolFactory,
+            TAsyncClientManager clientManager,
+            TNonblockingTransport transport,
+            int serialNum) {
+        super(protocolFactory, clientManager, transport);
+        this.serialNum = serialNum;
+    }
 
-  public int getSerialNum() {
-    return serialNum;
-  }
-
+    public int getSerialNum() {
+        return serialNum;
+    }
 }

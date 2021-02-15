@@ -26,17 +26,16 @@ import org.apache.iotdb.db.qp.physical.PhysicalPlan;
 
 public class MergePlan extends PhysicalPlan {
 
-  public MergePlan(OperatorType operatorType) {
-    super(false, operatorType);
-  }
+    public MergePlan(OperatorType operatorType) {
+        super(false, operatorType);
+    }
 
-  public MergePlan() {
-    super(false, OperatorType.MERGE);
-  }
+    public MergePlan() {
+        super(false, OperatorType.MERGE);
+    }
 
-  @Override
-  public List<PartialPath> getPaths() {
-    return Collections.emptyList();
-  }
-
+    @Override
+    public List<PartialPath> getPaths() {
+        return Collections.emptyList();
+    }
 }

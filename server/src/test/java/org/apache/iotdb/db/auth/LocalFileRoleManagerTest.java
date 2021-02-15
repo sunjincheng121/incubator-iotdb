@@ -34,110 +34,110 @@ import org.junit.Test;
 
 public class LocalFileRoleManagerTest {
 
-  private File testFolder;
-  private LocalFileRoleManager manager;
+    private File testFolder;
+    private LocalFileRoleManager manager;
 
-  @Before
-  public void setUp() throws Exception {
-    EnvironmentUtils.envSetUp();
-    testFolder = new File(TestConstant.BASE_OUTPUT_PATH.concat("test"));
-    testFolder.mkdirs();
-    manager = new LocalFileRoleManager(testFolder.getPath());
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    FileUtils.deleteDirectory(testFolder);
-    EnvironmentUtils.cleanEnv();
-  }
-
-  @Test
-  public void test() throws AuthException {
-    Role[] roles = new Role[5];
-    for (int i = 0; i < roles.length; i++) {
-      roles[i] = new Role("role" + i);
-      for (int j = 0; j <= i; j++) {
-        PathPrivilege pathPrivilege = new PathPrivilege("root.a.b.c" + j);
-        pathPrivilege.getPrivileges().add(j);
-        roles[i].getPrivilegeList().add(pathPrivilege);
-      }
+    @Before
+    public void setUp() throws Exception {
+        EnvironmentUtils.envSetUp();
+        testFolder = new File(TestConstant.BASE_OUTPUT_PATH.concat("test"));
+        testFolder.mkdirs();
+        manager = new LocalFileRoleManager(testFolder.getPath());
     }
 
-    // create
-    Role role = manager.getRole(roles[0].getName());
-    assertEquals(null, role);
-    for (Role role1 : roles) {
-      assertEquals(true, manager.createRole(role1.getName()));
-    }
-    for (Role role1 : roles) {
-      role = manager.getRole(role1.getName());
-      assertEquals(role1.getName(), role.getName());
+    @After
+    public void tearDown() throws Exception {
+        FileUtils.deleteDirectory(testFolder);
+        EnvironmentUtils.cleanEnv();
     }
 
-    assertEquals(false, manager.createRole(roles[0].getName()));
-    boolean caught = false;
-    try {
-      manager.createRole("too");
-    } catch (AuthException e) {
-      caught = true;
-    }
-    assertEquals(true, caught);
+    @Test
+    public void test() throws AuthException {
+        Role[] roles = new Role[5];
+        for (int i = 0; i < roles.length; i++) {
+            roles[i] = new Role("role" + i);
+            for (int j = 0; j <= i; j++) {
+                PathPrivilege pathPrivilege = new PathPrivilege("root.a.b.c" + j);
+                pathPrivilege.getPrivileges().add(j);
+                roles[i].getPrivilegeList().add(pathPrivilege);
+            }
+        }
 
-    // delete
-    assertEquals(false, manager.deleteRole("not a role"));
-    assertEquals(true, manager.deleteRole(roles[roles.length - 1].getName()));
-    assertEquals(null, manager.getRole(roles[roles.length - 1].getName()));
-    assertEquals(false, manager.deleteRole(roles[roles.length - 1].getName()));
+        // create
+        Role role = manager.getRole(roles[0].getName());
+        assertEquals(null, role);
+        for (Role role1 : roles) {
+            assertEquals(true, manager.createRole(role1.getName()));
+        }
+        for (Role role1 : roles) {
+            role = manager.getRole(role1.getName());
+            assertEquals(role1.getName(), role.getName());
+        }
 
-    // grant privilege
-    role = manager.getRole(roles[0].getName());
-    String path = "root.a.b.c";
-    int privilegeId = 0;
-    assertEquals(false, role.hasPrivilege(path, privilegeId));
-    assertEquals(true, manager.grantPrivilegeToRole(role.getName(), path, privilegeId));
-    assertEquals(true, manager.grantPrivilegeToRole(role.getName(), path, privilegeId + 1));
-    assertEquals(false, manager.grantPrivilegeToRole(role.getName(), path, privilegeId));
-    role = manager.getRole(roles[0].getName());
-    assertEquals(true, role.hasPrivilege(path, privilegeId));
-    caught = false;
-    try {
-      manager.grantPrivilegeToRole("not a role", path, privilegeId);
-    } catch (AuthException e) {
-      caught = true;
-    }
-    assertEquals(true, caught);
-    caught = false;
-    try {
-      manager.grantPrivilegeToRole(role.getName(), path, -1);
-    } catch (AuthException e) {
-      caught = true;
-    }
-    assertEquals(true, caught);
+        assertEquals(false, manager.createRole(roles[0].getName()));
+        boolean caught = false;
+        try {
+            manager.createRole("too");
+        } catch (AuthException e) {
+            caught = true;
+        }
+        assertEquals(true, caught);
 
-    // revoke privilege
-    role = manager.getRole(roles[0].getName());
-    assertEquals(true, manager.revokePrivilegeFromRole(role.getName(), path, privilegeId));
-    assertEquals(false, manager.revokePrivilegeFromRole(role.getName(), path, privilegeId));
-    caught = false;
-    try {
-      manager.revokePrivilegeFromRole("not a role", path, privilegeId);
-    } catch (AuthException e) {
-      caught = true;
-    }
-    assertEquals(true, caught);
-    caught = false;
-    try {
-      manager.revokePrivilegeFromRole(role.getName(), path, -1);
-    } catch (AuthException e) {
-      caught = true;
-    }
-    assertEquals(true, caught);
+        // delete
+        assertEquals(false, manager.deleteRole("not a role"));
+        assertEquals(true, manager.deleteRole(roles[roles.length - 1].getName()));
+        assertEquals(null, manager.getRole(roles[roles.length - 1].getName()));
+        assertEquals(false, manager.deleteRole(roles[roles.length - 1].getName()));
 
-    // list roles
-    List<String> rolenames = manager.listAllRoles();
-    rolenames.sort(null);
-    for (int i = 0; i < roles.length - 1; i++) {
-      assertEquals(roles[i].getName(), rolenames.get(i));
+        // grant privilege
+        role = manager.getRole(roles[0].getName());
+        String path = "root.a.b.c";
+        int privilegeId = 0;
+        assertEquals(false, role.hasPrivilege(path, privilegeId));
+        assertEquals(true, manager.grantPrivilegeToRole(role.getName(), path, privilegeId));
+        assertEquals(true, manager.grantPrivilegeToRole(role.getName(), path, privilegeId + 1));
+        assertEquals(false, manager.grantPrivilegeToRole(role.getName(), path, privilegeId));
+        role = manager.getRole(roles[0].getName());
+        assertEquals(true, role.hasPrivilege(path, privilegeId));
+        caught = false;
+        try {
+            manager.grantPrivilegeToRole("not a role", path, privilegeId);
+        } catch (AuthException e) {
+            caught = true;
+        }
+        assertEquals(true, caught);
+        caught = false;
+        try {
+            manager.grantPrivilegeToRole(role.getName(), path, -1);
+        } catch (AuthException e) {
+            caught = true;
+        }
+        assertEquals(true, caught);
+
+        // revoke privilege
+        role = manager.getRole(roles[0].getName());
+        assertEquals(true, manager.revokePrivilegeFromRole(role.getName(), path, privilegeId));
+        assertEquals(false, manager.revokePrivilegeFromRole(role.getName(), path, privilegeId));
+        caught = false;
+        try {
+            manager.revokePrivilegeFromRole("not a role", path, privilegeId);
+        } catch (AuthException e) {
+            caught = true;
+        }
+        assertEquals(true, caught);
+        caught = false;
+        try {
+            manager.revokePrivilegeFromRole(role.getName(), path, -1);
+        } catch (AuthException e) {
+            caught = true;
+        }
+        assertEquals(true, caught);
+
+        // list roles
+        List<String> rolenames = manager.listAllRoles();
+        rolenames.sort(null);
+        for (int i = 0; i < roles.length - 1; i++) {
+            assertEquals(roles[i].getName(), rolenames.get(i));
+        }
     }
-  }
 }

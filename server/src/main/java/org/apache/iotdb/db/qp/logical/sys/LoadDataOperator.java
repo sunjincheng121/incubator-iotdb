@@ -25,24 +25,22 @@ import org.apache.iotdb.db.qp.logical.RootOperator;
  */
 public class LoadDataOperator extends RootOperator {
 
-  private final String inputFilePath;
-  private final String measureType;
+    private final String inputFilePath;
+    private final String measureType;
 
-  /**
-   * Constructor of LoadDataOperator.
-   */
-  public LoadDataOperator(int tokenIntType, String inputFilePath, String measureType) {
-    super(tokenIntType);
-    operatorType = OperatorType.LOADDATA;
-    this.inputFilePath = inputFilePath;
-    this.measureType = measureType;
-  }
+    /** Constructor of LoadDataOperator. */
+    public LoadDataOperator(int tokenIntType, String inputFilePath, String measureType) {
+        super(tokenIntType);
+        operatorType = OperatorType.LOADDATA;
+        this.inputFilePath = inputFilePath;
+        this.measureType = measureType;
+    }
 
-  public String getInputFilePath() {
-    return inputFilePath;
-  }
+    public String getInputFilePath() {
+        return inputFilePath;
+    }
 
-  public String getMeasureType() {
-    return measureType;
-  }
+    public String getMeasureType() {
+        return measureType;
+    }
 }

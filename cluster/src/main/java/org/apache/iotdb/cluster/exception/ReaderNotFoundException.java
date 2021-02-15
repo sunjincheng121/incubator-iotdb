@@ -21,7 +21,7 @@ package org.apache.iotdb.cluster.exception;
 
 public class ReaderNotFoundException extends Exception {
 
-  public ReaderNotFoundException(long readerId) {
-    super(String.format("The requested reader %d is not found", readerId));
-  }
+    public ReaderNotFoundException(long readerId) {
+        super(String.format("The requested reader %d is not found", readerId));
+    }
 }

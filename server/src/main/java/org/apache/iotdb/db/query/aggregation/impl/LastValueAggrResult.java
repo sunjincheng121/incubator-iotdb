@@ -32,94 +32,94 @@ import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class LastValueAggrResult extends AggregateResult {
 
-  //timestamp of current value
-  protected long timestamp = Long.MIN_VALUE;
+    // timestamp of current value
+    protected long timestamp = Long.MIN_VALUE;
 
-  public LastValueAggrResult(TSDataType dataType) {
-    super(dataType, AggregationType.LAST_VALUE);
-    reset();
-  }
-
-  @Override
-  public void reset() {
-    super.reset();
-    timestamp = Long.MIN_VALUE;
-  }
-
-  @Override
-  public Object getResult() {
-    return hasCandidateResult() ? getValue() : null;
-  }
-
-  @Override
-  public void updateResultFromStatistics(Statistics statistics) {
-    Object lastVal = statistics.getLastValue();
-    setValue(lastVal);
-    timestamp = statistics.getEndTime();
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage) {
-    updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
-  }
-
-  @Override
-  public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
-    long time = Long.MIN_VALUE;
-    Object lastVal = null;
-    while (dataInThisPage.hasCurrent()
-        && dataInThisPage.currentTime() < maxBound
-        && dataInThisPage.currentTime() >= minBound) {
-      time = dataInThisPage.currentTime();
-      lastVal = dataInThisPage.currentValue();
-      dataInThisPage.next();
+    public LastValueAggrResult(TSDataType dataType) {
+        super(dataType, AggregationType.LAST_VALUE);
+        reset();
     }
 
-    if (time != Long.MIN_VALUE) {
-      setValue(lastVal);
-      timestamp = time;
+    @Override
+    public void reset() {
+        super.reset();
+        timestamp = Long.MIN_VALUE;
     }
-  }
 
-  @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
-    long time = Long.MIN_VALUE;
-    Object lastVal = null;
-    for (int i = 0; i < length; i++) {
-      Object value = dataReader.getValueInTimestamp(timestamps[i]);
-      if (value != null) {
-        time = timestamps[i];
-        lastVal = value;
-      }
+    @Override
+    public Object getResult() {
+        return hasCandidateResult() ? getValue() : null;
     }
-    if (time != Long.MIN_VALUE) {
-      setValue(lastVal);
-      timestamp = time;
+
+    @Override
+    public void updateResultFromStatistics(Statistics statistics) {
+        Object lastVal = statistics.getLastValue();
+        setValue(lastVal);
+        timestamp = statistics.getEndTime();
     }
-  }
 
-  @Override
-  public boolean hasFinalResult() {
-    return false;
-  }
-
-  @Override
-  public void merge(AggregateResult another) {
-    LastValueAggrResult anotherLast = (LastValueAggrResult) another;
-    if (this.getValue() == null || this.timestamp < anotherLast.timestamp) {
-      this.setValue(anotherLast.getValue());
-      this.timestamp = anotherLast.timestamp;
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage) {
+        updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
     }
-  }
 
-  @Override
-  protected void deserializeSpecificFields(ByteBuffer buffer) {
-    timestamp = buffer.getLong();
-  }
+    @Override
+    public void updateResultFromPageData(BatchData dataInThisPage, long minBound, long maxBound) {
+        long time = Long.MIN_VALUE;
+        Object lastVal = null;
+        while (dataInThisPage.hasCurrent()
+                && dataInThisPage.currentTime() < maxBound
+                && dataInThisPage.currentTime() >= minBound) {
+            time = dataInThisPage.currentTime();
+            lastVal = dataInThisPage.currentValue();
+            dataInThisPage.next();
+        }
 
-  @Override
-  protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
-    ReadWriteIOUtils.write(timestamp, outputStream);
-  }
+        if (time != Long.MIN_VALUE) {
+            setValue(lastVal);
+            timestamp = time;
+        }
+    }
+
+    @Override
+    public void updateResultUsingTimestamps(
+            long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
+        long time = Long.MIN_VALUE;
+        Object lastVal = null;
+        for (int i = 0; i < length; i++) {
+            Object value = dataReader.getValueInTimestamp(timestamps[i]);
+            if (value != null) {
+                time = timestamps[i];
+                lastVal = value;
+            }
+        }
+        if (time != Long.MIN_VALUE) {
+            setValue(lastVal);
+            timestamp = time;
+        }
+    }
+
+    @Override
+    public boolean hasFinalResult() {
+        return false;
+    }
+
+    @Override
+    public void merge(AggregateResult another) {
+        LastValueAggrResult anotherLast = (LastValueAggrResult) another;
+        if (this.getValue() == null || this.timestamp < anotherLast.timestamp) {
+            this.setValue(anotherLast.getValue());
+            this.timestamp = anotherLast.timestamp;
+        }
+    }
+
+    @Override
+    protected void deserializeSpecificFields(ByteBuffer buffer) {
+        timestamp = buffer.getLong();
+    }
+
+    @Override
+    protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
+        ReadWriteIOUtils.write(timestamp, outputStream);
+    }
 }

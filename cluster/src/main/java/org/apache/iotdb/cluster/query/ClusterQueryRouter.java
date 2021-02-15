@@ -47,42 +47,47 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 
 public class ClusterQueryRouter extends QueryRouter {
 
-  private MetaGroupMember metaGroupMember;
+    private MetaGroupMember metaGroupMember;
 
-  ClusterQueryRouter(MetaGroupMember metaGroupMember) {
-    this.metaGroupMember = metaGroupMember;
-  }
+    ClusterQueryRouter(MetaGroupMember metaGroupMember) {
+        this.metaGroupMember = metaGroupMember;
+    }
 
-  @Override
-  protected FillQueryExecutor getFillExecutor(List<PartialPath> fillPaths, List<TSDataType> dataTypes,
-      long queryTime, Map<TSDataType, IFill> fillType) {
-    return new ClusterFillExecutor(fillPaths, dataTypes, queryTime, fillType, metaGroupMember);
-  }
+    @Override
+    protected FillQueryExecutor getFillExecutor(
+            List<PartialPath> fillPaths,
+            List<TSDataType> dataTypes,
+            long queryTime,
+            Map<TSDataType, IFill> fillType) {
+        return new ClusterFillExecutor(fillPaths, dataTypes, queryTime, fillType, metaGroupMember);
+    }
 
-  @Override
-  protected GroupByWithoutValueFilterDataSet getGroupByWithoutValueFilterDataSet(
-      QueryContext context, GroupByTimePlan plan) throws StorageEngineException, QueryProcessException {
-    return new ClusterGroupByNoVFilterDataSet(context, plan, metaGroupMember);
-  }
+    @Override
+    protected GroupByWithoutValueFilterDataSet getGroupByWithoutValueFilterDataSet(
+            QueryContext context, GroupByTimePlan plan)
+            throws StorageEngineException, QueryProcessException {
+        return new ClusterGroupByNoVFilterDataSet(context, plan, metaGroupMember);
+    }
 
-  @Override
-  protected GroupByWithValueFilterDataSet getGroupByWithValueFilterDataSet(QueryContext context,
-      GroupByTimePlan plan) throws StorageEngineException, QueryProcessException {
-    return new ClusterGroupByVFilterDataSet(context, plan, metaGroupMember);
-  }
+    @Override
+    protected GroupByWithValueFilterDataSet getGroupByWithValueFilterDataSet(
+            QueryContext context, GroupByTimePlan plan)
+            throws StorageEngineException, QueryProcessException {
+        return new ClusterGroupByVFilterDataSet(context, plan, metaGroupMember);
+    }
 
-  @Override
-  protected AggregationExecutor getAggregationExecutor(AggregationPlan aggregationPlan) {
-    return new ClusterAggregateExecutor(aggregationPlan, metaGroupMember);
-  }
+    @Override
+    protected AggregationExecutor getAggregationExecutor(AggregationPlan aggregationPlan) {
+        return new ClusterAggregateExecutor(aggregationPlan, metaGroupMember);
+    }
 
-  @Override
-  protected RawDataQueryExecutor getRawDataQueryExecutor(RawDataQueryPlan queryPlan) {
-    return new ClusterDataQueryExecutor(queryPlan, metaGroupMember);
-  }
+    @Override
+    protected RawDataQueryExecutor getRawDataQueryExecutor(RawDataQueryPlan queryPlan) {
+        return new ClusterDataQueryExecutor(queryPlan, metaGroupMember);
+    }
 
-  @Override
-  protected LastQueryExecutor getLastQueryExecutor(LastQueryPlan lastQueryPlan) {
-    return new ClusterLastQueryExecutor(lastQueryPlan, metaGroupMember);
-  }
+    @Override
+    protected LastQueryExecutor getLastQueryExecutor(LastQueryPlan lastQueryPlan) {
+        return new ClusterLastQueryExecutor(lastQueryPlan, metaGroupMember);
+    }
 }

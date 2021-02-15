@@ -41,75 +41,77 @@ import org.junit.Assert;
 import org.junit.Before;
 
 /**
- * allNodes: node0, node1... node9
- * localNode: node0
- * pathList: root.sg0.s0, root.sg0.s1... root.sg0.s9 (all double type)
+ * allNodes: node0, node1... node9 localNode: node0 pathList: root.sg0.s0, root.sg0.s1...
+ * root.sg0.s9 (all double type)
  */
 public class BaseQueryTest extends MemberTest {
 
-  List<PartialPath> pathList;
-  List<TSDataType> dataTypes;
+    List<PartialPath> pathList;
+    List<TSDataType> dataTypes;
 
-  protected static void checkAggregations(List<AggregateResult> aggregationResults
-      , Object[] answer) {
-    Assert.assertEquals(answer.length, aggregationResults.size());
-    for (int i = 0; i < aggregationResults.size(); i++) {
-      AggregateResult aggregateResult = aggregationResults.get(i);
-      if (answer[i] != null) {
-        Assert.assertEquals((double) answer[i],
-            Double.parseDouble(aggregateResult.getResult().toString()),
-            0.00001);
-      } else {
-        assertNull(aggregateResult.getResult());
-      }
+    protected static void checkAggregations(
+            List<AggregateResult> aggregationResults, Object[] answer) {
+        Assert.assertEquals(answer.length, aggregationResults.size());
+        for (int i = 0; i < aggregationResults.size(); i++) {
+            AggregateResult aggregateResult = aggregationResults.get(i);
+            if (answer[i] != null) {
+                Assert.assertEquals(
+                        (double) answer[i],
+                        Double.parseDouble(aggregateResult.getResult().toString()),
+                        0.00001);
+            } else {
+                assertNull(aggregateResult.getResult());
+            }
+        }
     }
-  }
 
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    pathList = new ArrayList<>();
-    dataTypes = new ArrayList<>();
-    for (int i = 0; i < 10; i++) {
-      pathList.add(new PartialPath(TestUtils.getTestSeries(i, 0)));
-      dataTypes.add(TSDataType.DOUBLE);
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        pathList = new ArrayList<>();
+        dataTypes = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            pathList.add(new PartialPath(TestUtils.getTestSeries(i, 0)));
+            dataTypes.add(TSDataType.DOUBLE);
+        }
+        QueryCoordinator.getINSTANCE().setMetaGroupMember(testMetaMember);
+        TestUtils.prepareData();
     }
-    QueryCoordinator.getINSTANCE().setMetaGroupMember(testMetaMember);
-    TestUtils.prepareData();
-  }
 
-
-  @After
-  public void tearDown() throws Exception {
-    super.tearDown();
-    QueryCoordinator.getINSTANCE().setMetaGroupMember(null);
-  }
-
-  void checkSequentialDataset(QueryDataSet dataSet, int offset, int size) throws IOException {
-    for (int i = offset; i < offset + size; i++) {
-      assertTrue(dataSet.hasNext());
-      RowRecord record = dataSet.next();
-      assertEquals(i, record.getTimestamp());
-      assertEquals(10, record.getFields().size());
-      for (int j = 0; j < 10; j++) {
-        assertEquals(i * 1.0, record.getFields().get(j).getDoubleV(), 0.00001);
-      }
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+        QueryCoordinator.getINSTANCE().setMetaGroupMember(null);
     }
-    assertFalse(dataSet.hasNext());
-  }
 
-  protected void checkDoubleDataset(QueryDataSet queryDataSet, Object[] answers) throws IOException {
-    Assert.assertTrue(queryDataSet.hasNext());
-    RowRecord record = queryDataSet.next();
-    List<Field> fields = record.getFields();
-    Assert.assertEquals(answers.length, fields.size());
-    for (int i = 0; i < answers.length; i++) {
-      if (answers[i] != null) {
-        Assert.assertEquals((double) answers[i], Double.parseDouble(fields.get(i).getStringValue()),
-            0.000001);
-      } else {
-        assertNull(fields.get(i));
-      }
+    void checkSequentialDataset(QueryDataSet dataSet, int offset, int size) throws IOException {
+        for (int i = offset; i < offset + size; i++) {
+            assertTrue(dataSet.hasNext());
+            RowRecord record = dataSet.next();
+            assertEquals(i, record.getTimestamp());
+            assertEquals(10, record.getFields().size());
+            for (int j = 0; j < 10; j++) {
+                assertEquals(i * 1.0, record.getFields().get(j).getDoubleV(), 0.00001);
+            }
+        }
+        assertFalse(dataSet.hasNext());
     }
-  }
+
+    protected void checkDoubleDataset(QueryDataSet queryDataSet, Object[] answers)
+            throws IOException {
+        Assert.assertTrue(queryDataSet.hasNext());
+        RowRecord record = queryDataSet.next();
+        List<Field> fields = record.getFields();
+        Assert.assertEquals(answers.length, fields.size());
+        for (int i = 0; i < answers.length; i++) {
+            if (answers[i] != null) {
+                Assert.assertEquals(
+                        (double) answers[i],
+                        Double.parseDouble(fields.get(i).getStringValue()),
+                        0.000001);
+            } else {
+                assertNull(fields.get(i));
+            }
+        }
+    }
 }

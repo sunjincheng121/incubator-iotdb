@@ -35,96 +35,98 @@ import org.apache.iotdb.tsfile.read.reader.IBatchReader;
 
 public class ClusterQueryManager {
 
-  private AtomicLong idAtom = new AtomicLong();
-  private Map<Node, Map<Long, RemoteQueryContext>> queryContextMap = new ConcurrentHashMap<>();
-  private Map<Long, IBatchReader> seriesReaderMap = new ConcurrentHashMap<>();
-  private Map<Long, IReaderByTimestamp> seriesReaderByTimestampMap = new ConcurrentHashMap<>();
-  private Map<Long, IAggregateReader> aggrReaderMap = new ConcurrentHashMap<>();
-  private Map<Long, GroupByExecutor> groupByExecutorMap = new ConcurrentHashMap<>();
+    private AtomicLong idAtom = new AtomicLong();
+    private Map<Node, Map<Long, RemoteQueryContext>> queryContextMap = new ConcurrentHashMap<>();
+    private Map<Long, IBatchReader> seriesReaderMap = new ConcurrentHashMap<>();
+    private Map<Long, IReaderByTimestamp> seriesReaderByTimestampMap = new ConcurrentHashMap<>();
+    private Map<Long, IAggregateReader> aggrReaderMap = new ConcurrentHashMap<>();
+    private Map<Long, GroupByExecutor> groupByExecutorMap = new ConcurrentHashMap<>();
 
-
-  public synchronized RemoteQueryContext getQueryContext(Node node, long queryId, int fetchSize,
-      int deduplicatedPathNum) {
-    Map<Long, RemoteQueryContext> nodeContextMap = queryContextMap.computeIfAbsent(node,
-        n -> new HashMap<>());
-    return nodeContextMap.computeIfAbsent(queryId,
-        qId -> new RemoteQueryContext(QueryResourceManager.getInstance().assignQueryId(true,
-            fetchSize, deduplicatedPathNum)));
-  }
-
-  public long registerReader(IBatchReader reader) {
-    long newReaderId = idAtom.incrementAndGet();
-    seriesReaderMap.put(newReaderId, reader);
-    return newReaderId;
-  }
-
-  public long registerReaderByTime(IReaderByTimestamp readerByTimestamp) {
-    long newReaderId = idAtom.incrementAndGet();
-    seriesReaderByTimestampMap.put(newReaderId, readerByTimestamp);
-    return newReaderId;
-  }
-
-  public synchronized void endQuery(Node node, long queryId) throws StorageEngineException {
-    Map<Long, RemoteQueryContext> nodeContextMap = queryContextMap.get(node);
-    if (nodeContextMap == null) {
-      return;
-    }
-    RemoteQueryContext remoteQueryContext = nodeContextMap.remove(queryId);
-    if (remoteQueryContext == null) {
-      return;
-    }
-    // release file resources
-    QueryResourceManager.getInstance().endQuery(remoteQueryContext.getQueryId());
-
-    // remove the readers from the cache
-    Set<Long> readerIds = remoteQueryContext.getLocalReaderIds();
-    for (long readerId : readerIds) {
-      seriesReaderMap.remove(readerId);
-      seriesReaderByTimestampMap.remove(readerId);
+    public synchronized RemoteQueryContext getQueryContext(
+            Node node, long queryId, int fetchSize, int deduplicatedPathNum) {
+        Map<Long, RemoteQueryContext> nodeContextMap =
+                queryContextMap.computeIfAbsent(node, n -> new HashMap<>());
+        return nodeContextMap.computeIfAbsent(
+                queryId,
+                qId ->
+                        new RemoteQueryContext(
+                                QueryResourceManager.getInstance()
+                                        .assignQueryId(true, fetchSize, deduplicatedPathNum)));
     }
 
-    Set<Long> localGroupByExecutorIds = remoteQueryContext.getLocalGroupByExecutorIds();
-    for (Long localGroupByExecutorId : localGroupByExecutorIds) {
-      groupByExecutorMap.remove(localGroupByExecutorId);
+    public long registerReader(IBatchReader reader) {
+        long newReaderId = idAtom.incrementAndGet();
+        seriesReaderMap.put(newReaderId, reader);
+        return newReaderId;
     }
-  }
 
-  public IBatchReader getReader(long readerId) {
-    return seriesReaderMap.get(readerId);
-  }
-
-  public IReaderByTimestamp getReaderByTimestamp(long readerId) {
-    return seriesReaderByTimestampMap.get(readerId);
-  }
-
-  IAggregateReader getAggrReader(long readerId) {
-    return aggrReaderMap.get(readerId);
-  }
-
-  public void endAllQueries() throws StorageEngineException {
-    for (Map<Long, RemoteQueryContext> contextMap : queryContextMap.values()) {
-      for (RemoteQueryContext context : contextMap.values()) {
-        QueryResourceManager.getInstance().endQuery(context.getQueryId());
-      }
+    public long registerReaderByTime(IReaderByTimestamp readerByTimestamp) {
+        long newReaderId = idAtom.incrementAndGet();
+        seriesReaderByTimestampMap.put(newReaderId, readerByTimestamp);
+        return newReaderId;
     }
-    seriesReaderByTimestampMap.clear();
-    seriesReaderMap.clear();
-    aggrReaderMap.clear();
-  }
 
-  long registerAggrReader(IAggregateReader aggregateReader) {
-    long newReaderId = idAtom.incrementAndGet();
-    aggrReaderMap.put(newReaderId, aggregateReader);
-    return newReaderId;
-  }
+    public synchronized void endQuery(Node node, long queryId) throws StorageEngineException {
+        Map<Long, RemoteQueryContext> nodeContextMap = queryContextMap.get(node);
+        if (nodeContextMap == null) {
+            return;
+        }
+        RemoteQueryContext remoteQueryContext = nodeContextMap.remove(queryId);
+        if (remoteQueryContext == null) {
+            return;
+        }
+        // release file resources
+        QueryResourceManager.getInstance().endQuery(remoteQueryContext.getQueryId());
 
-  public long registerGroupByExecutor(GroupByExecutor groupByExecutor) {
-    long newExecutorId = idAtom.incrementAndGet();
-    groupByExecutorMap.put(newExecutorId, groupByExecutor);
-    return newExecutorId;
-  }
+        // remove the readers from the cache
+        Set<Long> readerIds = remoteQueryContext.getLocalReaderIds();
+        for (long readerId : readerIds) {
+            seriesReaderMap.remove(readerId);
+            seriesReaderByTimestampMap.remove(readerId);
+        }
 
-  public GroupByExecutor getGroupByExecutor(long executorId) {
-    return groupByExecutorMap.get(executorId);
-  }
+        Set<Long> localGroupByExecutorIds = remoteQueryContext.getLocalGroupByExecutorIds();
+        for (Long localGroupByExecutorId : localGroupByExecutorIds) {
+            groupByExecutorMap.remove(localGroupByExecutorId);
+        }
+    }
+
+    public IBatchReader getReader(long readerId) {
+        return seriesReaderMap.get(readerId);
+    }
+
+    public IReaderByTimestamp getReaderByTimestamp(long readerId) {
+        return seriesReaderByTimestampMap.get(readerId);
+    }
+
+    IAggregateReader getAggrReader(long readerId) {
+        return aggrReaderMap.get(readerId);
+    }
+
+    public void endAllQueries() throws StorageEngineException {
+        for (Map<Long, RemoteQueryContext> contextMap : queryContextMap.values()) {
+            for (RemoteQueryContext context : contextMap.values()) {
+                QueryResourceManager.getInstance().endQuery(context.getQueryId());
+            }
+        }
+        seriesReaderByTimestampMap.clear();
+        seriesReaderMap.clear();
+        aggrReaderMap.clear();
+    }
+
+    long registerAggrReader(IAggregateReader aggregateReader) {
+        long newReaderId = idAtom.incrementAndGet();
+        aggrReaderMap.put(newReaderId, aggregateReader);
+        return newReaderId;
+    }
+
+    public long registerGroupByExecutor(GroupByExecutor groupByExecutor) {
+        long newExecutorId = idAtom.incrementAndGet();
+        groupByExecutorMap.put(newExecutorId, groupByExecutor);
+        return newExecutorId;
+    }
+
+    public GroupByExecutor getGroupByExecutor(long executorId) {
+        return groupByExecutorMap.get(executorId);
+    }
 }

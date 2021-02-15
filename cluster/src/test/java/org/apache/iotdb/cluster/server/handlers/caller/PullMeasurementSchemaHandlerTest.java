@@ -38,52 +38,56 @@ import org.junit.Test;
 
 public class PullMeasurementSchemaHandlerTest {
 
-  @Test
-  public void testComplete() throws InterruptedException {
-    Node owner = TestUtils.getNode(1);
-    String prefixPath = "root";
-    AtomicReference<List<MeasurementSchema>> result = new AtomicReference<>();
-    List<MeasurementSchema> measurementSchemas = new ArrayList<>();
-    for (int i = 0; i < 10; i++) {
-      measurementSchemas.add(TestUtils.getTestMeasurementSchema(i));
-    }
-
-    PullMeasurementSchemaHandler handler = new PullMeasurementSchemaHandler(owner,
-        Collections.singletonList(prefixPath),
-        result);
-    synchronized (result) {
-      new Thread(() -> {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-        try {
-          dataOutputStream.writeInt(measurementSchemas.size());
-          for (MeasurementSchema measurementSchema : measurementSchemas) {
-            measurementSchema.serializeTo(dataOutputStream);
-          }
-        } catch (IOException e) {
-          // ignore
+    @Test
+    public void testComplete() throws InterruptedException {
+        Node owner = TestUtils.getNode(1);
+        String prefixPath = "root";
+        AtomicReference<List<MeasurementSchema>> result = new AtomicReference<>();
+        List<MeasurementSchema> measurementSchemas = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            measurementSchemas.add(TestUtils.getTestMeasurementSchema(i));
         }
-        PullSchemaResp resp = new PullSchemaResp();
-        resp.setSchemaBytes(outputStream.toByteArray());
-        handler.onComplete(resp);
-      }).start();
-      result.wait();
-    }
-    assertEquals(measurementSchemas, result.get());
-  }
 
-  @Test
-  public void testError() throws InterruptedException {
-    Node owner = TestUtils.getNode(1);
-    String prefixPath = "root";
-    AtomicReference<List<MeasurementSchema>> result = new AtomicReference<>();
-
-    PullMeasurementSchemaHandler handler = new PullMeasurementSchemaHandler(owner,
-        Collections.singletonList(prefixPath), result);
-    synchronized (result) {
-      new Thread(() -> handler.onError(new TestException())).start();
-      result.wait();
+        PullMeasurementSchemaHandler handler =
+                new PullMeasurementSchemaHandler(
+                        owner, Collections.singletonList(prefixPath), result);
+        synchronized (result) {
+            new Thread(
+                            () -> {
+                                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                                DataOutputStream dataOutputStream =
+                                        new DataOutputStream(outputStream);
+                                try {
+                                    dataOutputStream.writeInt(measurementSchemas.size());
+                                    for (MeasurementSchema measurementSchema : measurementSchemas) {
+                                        measurementSchema.serializeTo(dataOutputStream);
+                                    }
+                                } catch (IOException e) {
+                                    // ignore
+                                }
+                                PullSchemaResp resp = new PullSchemaResp();
+                                resp.setSchemaBytes(outputStream.toByteArray());
+                                handler.onComplete(resp);
+                            })
+                    .start();
+            result.wait();
+        }
+        assertEquals(measurementSchemas, result.get());
     }
-    assertNull(result.get());
-  }
+
+    @Test
+    public void testError() throws InterruptedException {
+        Node owner = TestUtils.getNode(1);
+        String prefixPath = "root";
+        AtomicReference<List<MeasurementSchema>> result = new AtomicReference<>();
+
+        PullMeasurementSchemaHandler handler =
+                new PullMeasurementSchemaHandler(
+                        owner, Collections.singletonList(prefixPath), result);
+        synchronized (result) {
+            new Thread(() -> handler.onError(new TestException())).start();
+            result.wait();
+        }
+        assertNull(result.get());
+    }
 }

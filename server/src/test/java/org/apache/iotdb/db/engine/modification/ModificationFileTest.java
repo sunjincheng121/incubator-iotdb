@@ -25,76 +25,77 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
 import org.apache.iotdb.db.constant.TestConstant;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.junit.Test;
 
 public class ModificationFileTest {
 
-  @Test
-  public void readMyWrite() {
-    String tempFileName = TestConstant.BASE_OUTPUT_PATH.concat("mod.temp");
-    Modification[] modifications = new Modification[]{
-        new Deletion(new PartialPath(new String[]{"d1", "s1"}), 1, 1),
-        new Deletion(new PartialPath(new String[]{"d1", "s2"}), 2, 2),
-        new Deletion(new PartialPath(new String[]{"d1", "s3"}), 3, 3, 4),
-        new Deletion(new PartialPath(new String[]{"d1", "s41"}), 4, 4, 5)
-    };
-    try (ModificationFile mFile = new ModificationFile(tempFileName)) {
-      for (int i = 0; i < 2; i++) {
-        mFile.write(modifications[i]);
-      }
-      List<Modification> modificationList = (List<Modification>) mFile.getModifications();
-      for (int i = 0; i < 2; i++) {
-        assertEquals(modifications[i], modificationList.get(i));
-      }
+    @Test
+    public void readMyWrite() {
+        String tempFileName = TestConstant.BASE_OUTPUT_PATH.concat("mod.temp");
+        Modification[] modifications =
+                new Modification[] {
+                    new Deletion(new PartialPath(new String[] {"d1", "s1"}), 1, 1),
+                    new Deletion(new PartialPath(new String[] {"d1", "s2"}), 2, 2),
+                    new Deletion(new PartialPath(new String[] {"d1", "s3"}), 3, 3, 4),
+                    new Deletion(new PartialPath(new String[] {"d1", "s41"}), 4, 4, 5)
+                };
+        try (ModificationFile mFile = new ModificationFile(tempFileName)) {
+            for (int i = 0; i < 2; i++) {
+                mFile.write(modifications[i]);
+            }
+            List<Modification> modificationList = (List<Modification>) mFile.getModifications();
+            for (int i = 0; i < 2; i++) {
+                assertEquals(modifications[i], modificationList.get(i));
+            }
 
-      for (int i = 2; i < 4; i++) {
-        mFile.write(modifications[i]);
-      }
-      modificationList = (List<Modification>) mFile.getModifications();
-      for (int i = 0; i < 4; i++) {
-        assertEquals(modifications[i], modificationList.get(i));
-      }
-    } catch (IOException e) {
-      fail(e.getMessage());
-    } finally {
-      new File(tempFileName).delete();
+            for (int i = 2; i < 4; i++) {
+                mFile.write(modifications[i]);
+            }
+            modificationList = (List<Modification>) mFile.getModifications();
+            for (int i = 0; i < 4; i++) {
+                assertEquals(modifications[i], modificationList.get(i));
+            }
+        } catch (IOException e) {
+            fail(e.getMessage());
+        } finally {
+            new File(tempFileName).delete();
+        }
     }
-  }
 
-  @Test
-  public void testAbort() {
-    String tempFileName = TestConstant.BASE_OUTPUT_PATH.concat("mod.temp");
-    Modification[] modifications = new Modification[]{
-        new Deletion(new PartialPath(new String[]{"d1", "s1"}), 1, 1),
-        new Deletion(new PartialPath(new String[]{"d1", "s2"}), 2, 2),
-        new Deletion(new PartialPath(new String[]{"d1", "s3"}), 3, 3, 4),
-        new Deletion(new PartialPath(new String[]{"d1", "s4"}), 4, 4, 5),
-    };
-    try (ModificationFile mFile = new ModificationFile(tempFileName)) {
-      for (int i = 0; i < 2; i++) {
-        mFile.write(modifications[i]);
-      }
-      List<Modification> modificationList = (List<Modification>) mFile.getModifications();
-      for (int i = 0; i < 2; i++) {
-        assertEquals(modifications[i], modificationList.get(i));
-      }
+    @Test
+    public void testAbort() {
+        String tempFileName = TestConstant.BASE_OUTPUT_PATH.concat("mod.temp");
+        Modification[] modifications =
+                new Modification[] {
+                    new Deletion(new PartialPath(new String[] {"d1", "s1"}), 1, 1),
+                    new Deletion(new PartialPath(new String[] {"d1", "s2"}), 2, 2),
+                    new Deletion(new PartialPath(new String[] {"d1", "s3"}), 3, 3, 4),
+                    new Deletion(new PartialPath(new String[] {"d1", "s4"}), 4, 4, 5),
+                };
+        try (ModificationFile mFile = new ModificationFile(tempFileName)) {
+            for (int i = 0; i < 2; i++) {
+                mFile.write(modifications[i]);
+            }
+            List<Modification> modificationList = (List<Modification>) mFile.getModifications();
+            for (int i = 0; i < 2; i++) {
+                assertEquals(modifications[i], modificationList.get(i));
+            }
 
-      for (int i = 2; i < 4; i++) {
-        mFile.write(modifications[i]);
-      }
-      modificationList = (List<Modification>) mFile.getModifications();
-      mFile.abort();
+            for (int i = 2; i < 4; i++) {
+                mFile.write(modifications[i]);
+            }
+            modificationList = (List<Modification>) mFile.getModifications();
+            mFile.abort();
 
-      for (int i = 0; i < 3; i++) {
-        assertEquals(modifications[i], modificationList.get(i));
-      }
-    } catch (IOException e) {
-      fail(e.getMessage());
-    } finally {
-      new File(tempFileName).delete();
+            for (int i = 0; i < 3; i++) {
+                assertEquals(modifications[i], modificationList.get(i));
+            }
+        } catch (IOException e) {
+            fail(e.getMessage());
+        } finally {
+            new File(tempFileName).delete();
+        }
     }
-  }
 }

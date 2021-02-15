@@ -25,51 +25,51 @@ import org.apache.iotdb.tsfile.exception.cache.CacheException;
 
 public abstract class RandomDeleteCache<K, V> implements Cache<K, V> {
 
-  private int cacheSize;
-  private Map<K, V> cache;
+    private int cacheSize;
+    private Map<K, V> cache;
 
-  public RandomDeleteCache(int cacheSize) {
-    this.cacheSize = cacheSize;
-    this.cache = new ConcurrentHashMap<>();
-  }
-
-  @Override
-  public V get(K key) throws CacheException {
-    V v = cache.get(key);
-    if (v == null) {
-      randomRemoveObjectIfCacheIsFull();
-      cache.put(key, loadObjectByKey(key));
-      v = cache.get(key);
+    public RandomDeleteCache(int cacheSize) {
+        this.cacheSize = cacheSize;
+        this.cache = new ConcurrentHashMap<>();
     }
-    return v;
-  }
 
-  private void randomRemoveObjectIfCacheIsFull() {
-    if (cache.size() == this.cacheSize) {
-      removeFirstObject();
+    @Override
+    public V get(K key) throws CacheException {
+        V v = cache.get(key);
+        if (v == null) {
+            randomRemoveObjectIfCacheIsFull();
+            cache.put(key, loadObjectByKey(key));
+            v = cache.get(key);
+        }
+        return v;
     }
-  }
 
-  private void removeFirstObject() {
-    if (cache.size() == 0) {
-      return;
+    private void randomRemoveObjectIfCacheIsFull() {
+        if (cache.size() == this.cacheSize) {
+            removeFirstObject();
+        }
     }
-    K key = cache.keySet().iterator().next();
-    cache.remove(key);
-  }
 
-  public abstract V loadObjectByKey(K key) throws CacheException;
+    private void removeFirstObject() {
+        if (cache.size() == 0) {
+            return;
+        }
+        K key = cache.keySet().iterator().next();
+        cache.remove(key);
+    }
 
-  public void removeObject(K key) {
-    cache.remove(key);
-  }
+    public abstract V loadObjectByKey(K key) throws CacheException;
 
-  @Override
-  public void clear() {
-    cache.clear();
-  }
+    public void removeObject(K key) {
+        cache.remove(key);
+    }
 
-  public int size() {
-    return cache.size();
-  }
+    @Override
+    public void clear() {
+        cache.clear();
+    }
+
+    public int size() {
+        return cache.size();
+    }
 }

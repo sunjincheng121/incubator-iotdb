@@ -20,12 +20,11 @@ package org.apache.iotdb.tsfile.read.expression;
 
 public interface IBinaryExpression extends IExpression {
 
-  IExpression getLeft();
+    IExpression getLeft();
 
-  IExpression getRight();
+    IExpression getRight();
 
-  void setLeft(IExpression leftExpression);
+    void setLeft(IExpression leftExpression);
 
-  void setRight(IExpression rightExpression);
-
+    void setRight(IExpression rightExpression);
 }

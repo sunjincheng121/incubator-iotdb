@@ -30,22 +30,24 @@ import org.junit.Test;
 
 public class CommitLogCallbackTest {
 
-  @Test
-  public void test() throws InterruptedException, IOException {
-    RaftMember raftMember = new TestMetaGroupMember();
-    CommitLogCallback commitLogCallback = new CommitLogCallback(raftMember);
-    synchronized (raftMember.getSyncLock()) {
-      new Thread(() -> {
-        commitLogCallback.onComplete(null);
-      }).start();
-      raftMember.getSyncLock().wait();
+    @Test
+    public void test() throws InterruptedException, IOException {
+        RaftMember raftMember = new TestMetaGroupMember();
+        CommitLogCallback commitLogCallback = new CommitLogCallback(raftMember);
+        synchronized (raftMember.getSyncLock()) {
+            new Thread(
+                            () -> {
+                                commitLogCallback.onComplete(null);
+                            })
+                    .start();
+            raftMember.getSyncLock().wait();
+        }
+        assertTrue(true);
+        raftMember.stop();
     }
-    assertTrue(true);
-    raftMember.stop();
-  }
 
-  @After
-  public void tearDown() throws Exception {
-    EnvironmentUtils.cleanAllDir();
-  }
+    @After
+    public void tearDown() throws Exception {
+        EnvironmentUtils.cleanAllDir();
+    }
 }

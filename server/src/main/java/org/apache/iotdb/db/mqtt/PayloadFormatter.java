@@ -20,12 +20,11 @@ package org.apache.iotdb.db.mqtt;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
 
-/**
- * PayloadFormatter format the payload to the messages.
- */
+/** PayloadFormatter format the payload to the messages. */
 public interface PayloadFormatter {
     /**
      * format a payload to a list of messages
+     *
      * @param payload
      * @return
      */
@@ -33,6 +32,7 @@ public interface PayloadFormatter {
 
     /**
      * get the formatter name
+     *
      * @return
      */
     String getName();

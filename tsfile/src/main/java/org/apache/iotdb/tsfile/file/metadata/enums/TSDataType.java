@@ -24,117 +24,119 @@ import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.exception.write.UnSupportedDataTypeException;
 
 public enum TSDataType {
-  BOOLEAN, INT32, INT64, FLOAT, DOUBLE, TEXT;
+    BOOLEAN,
+    INT32,
+    INT64,
+    FLOAT,
+    DOUBLE,
+    TEXT;
 
-  /**
-   * give an integer to return a data type.
-   *
-   * @param type -param to judge enum type
-   * @return -enum type
-   */
-  public static TSDataType deserialize(short type) {
-    return getTsDataType(type);
-  }
-
-
-  private static TSDataType getTsDataType(short type) {
-    if (type >= 6 || type < 0) {
-      throw new IllegalArgumentException("Invalid input: " + type);
+    /**
+     * give an integer to return a data type.
+     *
+     * @param type -param to judge enum type
+     * @return -enum type
+     */
+    public static TSDataType deserialize(short type) {
+        return getTsDataType(type);
     }
-    switch (type) {
-      case 0:
-        return BOOLEAN;
-      case 1:
-        return INT32;
-      case 2:
-        return INT64;
-      case 3:
-        return FLOAT;
-      case 4:
-        return DOUBLE;
-      default:
-        return TEXT;
+
+    private static TSDataType getTsDataType(short type) {
+        if (type >= 6 || type < 0) {
+            throw new IllegalArgumentException("Invalid input: " + type);
+        }
+        switch (type) {
+            case 0:
+                return BOOLEAN;
+            case 1:
+                return INT32;
+            case 2:
+                return INT64;
+            case 3:
+                return FLOAT;
+            case 4:
+                return DOUBLE;
+            default:
+                return TEXT;
+        }
     }
-  }
 
-  public static byte deserializeToByte(short type) {
-    if (type >= 6 || type < 0) {
-      throw new IllegalArgumentException("Invalid input: " + type);
+    public static byte deserializeToByte(short type) {
+        if (type >= 6 || type < 0) {
+            throw new IllegalArgumentException("Invalid input: " + type);
+        }
+        return (byte) type;
     }
-    return (byte) type;
-  }
 
-  /**
-   * give an byte to return a data type.
-   *
-   * @param type byte number
-   * @return data type
-   */
-  public static TSDataType byteToEnum(byte type) {
-    return getTsDataType(type);
-  }
-
-  public static TSDataType deserializeFrom(ByteBuffer buffer) {
-    return deserialize(buffer.getShort());
-  }
-
-  public static int getSerializedSize() {
-    return Short.BYTES;
-  }
-
-  public void serializeTo(ByteBuffer byteBuffer) {
-    byteBuffer.putShort(serialize());
-  }
-
-  public void serializeTo(DataOutputStream outputStream) throws IOException {
-    outputStream.writeShort(serialize());
-  }
-
-  /**
-   * return a serialize data type.
-   *
-   * @return -enum type
-   */
-  public short serialize() {
-    return enumToByte();
-  }
-
-  public int getDataTypeSize() {
-    switch (this) {
-      case BOOLEAN:
-        return 1;
-      case INT32:
-      case FLOAT:
-        return 4;
-        // For text: return the size of reference here
-      case TEXT:
-      case INT64:
-      case DOUBLE:
-        return 8;
-      default:
-        throw new UnSupportedDataTypeException(this.toString());
+    /**
+     * give an byte to return a data type.
+     *
+     * @param type byte number
+     * @return data type
+     */
+    public static TSDataType byteToEnum(byte type) {
+        return getTsDataType(type);
     }
-  }
 
-  /**
-   * @return byte number
-   */
-  public byte enumToByte() {
-    switch (this) {
-      case BOOLEAN:
-        return 0;
-      case INT32:
-        return 1;
-      case INT64:
-        return 2;
-      case FLOAT:
-        return 3;
-      case DOUBLE:
-        return 4;
-      case TEXT:
-        return 5;
-      default:
-        return -1;
+    public static TSDataType deserializeFrom(ByteBuffer buffer) {
+        return deserialize(buffer.getShort());
     }
-  }
+
+    public static int getSerializedSize() {
+        return Short.BYTES;
+    }
+
+    public void serializeTo(ByteBuffer byteBuffer) {
+        byteBuffer.putShort(serialize());
+    }
+
+    public void serializeTo(DataOutputStream outputStream) throws IOException {
+        outputStream.writeShort(serialize());
+    }
+
+    /**
+     * return a serialize data type.
+     *
+     * @return -enum type
+     */
+    public short serialize() {
+        return enumToByte();
+    }
+
+    public int getDataTypeSize() {
+        switch (this) {
+            case BOOLEAN:
+                return 1;
+            case INT32:
+            case FLOAT:
+                return 4;
+                // For text: return the size of reference here
+            case TEXT:
+            case INT64:
+            case DOUBLE:
+                return 8;
+            default:
+                throw new UnSupportedDataTypeException(this.toString());
+        }
+    }
+
+    /** @return byte number */
+    public byte enumToByte() {
+        switch (this) {
+            case BOOLEAN:
+                return 0;
+            case INT32:
+                return 1;
+            case INT64:
+                return 2;
+            case FLOAT:
+                return 3;
+            case DOUBLE:
+                return 4;
+            case TEXT:
+                return 5;
+            default:
+                return -1;
+        }
+    }
 }

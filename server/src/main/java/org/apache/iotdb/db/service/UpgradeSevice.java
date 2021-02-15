@@ -33,90 +33,89 @@ import org.slf4j.LoggerFactory;
 
 public class UpgradeSevice implements IService {
 
-  private static final Logger logger = LoggerFactory.getLogger(UpgradeSevice.class);
+    private static final Logger logger = LoggerFactory.getLogger(UpgradeSevice.class);
 
-  private static final UpgradeSevice INSTANCE = new UpgradeSevice();
-  private ExecutorService upgradeThreadPool;
-  private AtomicInteger threadCnt = new AtomicInteger();
-  private static int cntUpgradeFileNum;
+    private static final UpgradeSevice INSTANCE = new UpgradeSevice();
+    private ExecutorService upgradeThreadPool;
+    private AtomicInteger threadCnt = new AtomicInteger();
+    private static int cntUpgradeFileNum;
 
+    private UpgradeSevice() {}
 
-  private UpgradeSevice() {
-  }
-
-  public static UpgradeSevice getINSTANCE() {
-    return INSTANCE;
-  }
-
-  @Override
-  public void start() throws StartupException {
-    int updateThreadNum = IoTDBDescriptor.getInstance().getConfig().getUpgradeThreadNum();
-    if (updateThreadNum <= 0) {
-      updateThreadNum = 1;
+    public static UpgradeSevice getINSTANCE() {
+        return INSTANCE;
     }
-    upgradeThreadPool = Executors.newFixedThreadPool(updateThreadNum,
-        r -> new Thread(r, "UpgradeThread-" + threadCnt.getAndIncrement()));
-    UpgradeLog.createUpgradeLog();
-    countUpgradeFiles();
-    if (cntUpgradeFileNum == 0) {
-      stop();
-      return;
+
+    @Override
+    public void start() throws StartupException {
+        int updateThreadNum = IoTDBDescriptor.getInstance().getConfig().getUpgradeThreadNum();
+        if (updateThreadNum <= 0) {
+            updateThreadNum = 1;
+        }
+        upgradeThreadPool =
+                Executors.newFixedThreadPool(
+                        updateThreadNum,
+                        r -> new Thread(r, "UpgradeThread-" + threadCnt.getAndIncrement()));
+        UpgradeLog.createUpgradeLog();
+        countUpgradeFiles();
+        if (cntUpgradeFileNum == 0) {
+            stop();
+            return;
+        }
+        upgradeAll();
     }
-    upgradeAll();
-  }
 
-  @Override
-  public void stop() {
-    UpgradeLog.closeLogWriter();
-    if (upgradeThreadPool != null) {
-      upgradeThreadPool.shutdownNow();
-      logger.info("Waiting for upgrade task pool to shut down");
-      while (!upgradeThreadPool.isTerminated()) {
-        // wait
-      }
-      upgradeThreadPool = null;
-      logger.info("Upgrade service stopped");
+    @Override
+    public void stop() {
+        UpgradeLog.closeLogWriter();
+        if (upgradeThreadPool != null) {
+            upgradeThreadPool.shutdownNow();
+            logger.info("Waiting for upgrade task pool to shut down");
+            while (!upgradeThreadPool.isTerminated()) {
+                // wait
+            }
+            upgradeThreadPool = null;
+            logger.info("Upgrade service stopped");
+        }
     }
-  }
 
-  @Override
-  public ServiceType getID() {
-    return ServiceType.UPGRADE_SERVICE;
-  }
-
-
-  public static void setCntUpgradeFileNum(int cntUpgradeFileNum) {
-    UpgradeUtils.getCntUpgradeFileLock().writeLock().lock();
-    try {
-      UpgradeSevice.cntUpgradeFileNum = cntUpgradeFileNum;
-    } finally {
-      UpgradeUtils.getCntUpgradeFileLock().writeLock().unlock();
+    @Override
+    public ServiceType getID() {
+        return ServiceType.UPGRADE_SERVICE;
     }
-  }
 
-  public static int getCntUpgradeFileNum() {
-    UpgradeUtils.getCntUpgradeFileLock().readLock().lock();
-    try {
-      return cntUpgradeFileNum;
-    } finally {
-      UpgradeUtils.getCntUpgradeFileLock().readLock().unlock();
+    public static void setCntUpgradeFileNum(int cntUpgradeFileNum) {
+        UpgradeUtils.getCntUpgradeFileLock().writeLock().lock();
+        try {
+            UpgradeSevice.cntUpgradeFileNum = cntUpgradeFileNum;
+        } finally {
+            UpgradeUtils.getCntUpgradeFileLock().writeLock().unlock();
+        }
     }
-  }
 
-  public void submitUpgradeTask(UpgradeTask upgradeTask) {
-    upgradeThreadPool.submit(upgradeTask);
-  }
-
-  private static void countUpgradeFiles() {
-    cntUpgradeFileNum = StorageEngine.getInstance().countUpgradeFiles();
-    logger.info("finish counting upgrading files, total num:{}", cntUpgradeFileNum);
-  }
-
-  private static void upgradeAll() {
-    try {
-      StorageEngine.getInstance().upgradeAll();
-    } catch (StorageEngineException e) {
-      logger.error("Cannot perform a global upgrade because", e);
+    public static int getCntUpgradeFileNum() {
+        UpgradeUtils.getCntUpgradeFileLock().readLock().lock();
+        try {
+            return cntUpgradeFileNum;
+        } finally {
+            UpgradeUtils.getCntUpgradeFileLock().readLock().unlock();
+        }
     }
-  }
+
+    public void submitUpgradeTask(UpgradeTask upgradeTask) {
+        upgradeThreadPool.submit(upgradeTask);
+    }
+
+    private static void countUpgradeFiles() {
+        cntUpgradeFileNum = StorageEngine.getInstance().countUpgradeFiles();
+        logger.info("finish counting upgrading files, total num:{}", cntUpgradeFileNum);
+    }
+
+    private static void upgradeAll() {
+        try {
+            StorageEngine.getInstance().upgradeAll();
+        } catch (StorageEngineException e) {
+            logger.error("Cannot perform a global upgrade because", e);
+        }
+    }
 }

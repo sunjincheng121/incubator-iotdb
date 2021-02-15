@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 package org.apache.iotdb.cluster.client.sync;
 
 import java.io.IOException;
@@ -31,33 +30,35 @@ import org.junit.Test;
 
 public class SyncMetaHeartbeatClientTest {
 
-  @Test
-  public void test() throws IOException, TTransportException, InterruptedException {
-    Node node = new Node();
-    node.setMetaPort(9003).setIp("localhost");
-    ServerSocket serverSocket = new ServerSocket(node.getMetaPort() + 1);
-    Thread listenThread = new Thread(() -> {
-      while (!Thread.interrupted()) {
-        try {
-          serverSocket.accept();
-        } catch (IOException e) {
-          return;
-        }
-      }
-    });
-    listenThread.start();
+    @Test
+    public void test() throws IOException, TTransportException, InterruptedException {
+        Node node = new Node();
+        node.setMetaPort(9003).setIp("localhost");
+        ServerSocket serverSocket = new ServerSocket(node.getMetaPort() + 1);
+        Thread listenThread =
+                new Thread(
+                        () -> {
+                            while (!Thread.interrupted()) {
+                                try {
+                                    serverSocket.accept();
+                                } catch (IOException e) {
+                                    return;
+                                }
+                            }
+                        });
+        listenThread.start();
 
-    try {
-      FactorySync factoryAsync = new FactorySync(new Factory());
-      SyncMetaHeartbeatClient syncClient = factoryAsync.getSyncClient(node, null);
-      Assert.assertEquals(
-          "SyncMetaHeartbeatClient{node=Node(ip:localhost, metaPort:9003,"
-              + " nodeIdentifier:0, dataPort:0, clientPort:0),metaHeartbeatPort=9004}",
-          syncClient.toString());
-    } finally {
-      serverSocket.close();
-      listenThread.interrupt();
-      listenThread.join();
+        try {
+            FactorySync factoryAsync = new FactorySync(new Factory());
+            SyncMetaHeartbeatClient syncClient = factoryAsync.getSyncClient(node, null);
+            Assert.assertEquals(
+                    "SyncMetaHeartbeatClient{node=Node(ip:localhost, metaPort:9003,"
+                            + " nodeIdentifier:0, dataPort:0, clientPort:0),metaHeartbeatPort=9004}",
+                    syncClient.toString());
+        } finally {
+            serverSocket.close();
+            listenThread.interrupt();
+            listenThread.join();
+        }
     }
-  }
 }

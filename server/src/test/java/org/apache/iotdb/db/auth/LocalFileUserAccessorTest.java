@@ -36,73 +36,73 @@ import org.junit.Test;
 
 public class LocalFileUserAccessorTest {
 
-  private File testFolder;
-  private LocalFileUserAccessor accessor;
+    private File testFolder;
+    private LocalFileUserAccessor accessor;
 
-  @Before
-  public void setUp() throws Exception {
-    EnvironmentUtils.envSetUp();
-    testFolder = new File(TestConstant.BASE_OUTPUT_PATH.concat("test"));
-    testFolder.mkdirs();
-    accessor = new LocalFileUserAccessor(testFolder.getPath());
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    FileUtils.deleteDirectory(testFolder);
-    EnvironmentUtils.cleanEnv();
-  }
-
-  @Test
-  public void test() throws IOException {
-    User[] users = new User[5];
-    for (int i = 0; i < users.length; i++) {
-      users[i] = new User("user" + i, "password" + i);
-      for (int j = 0; j <= i; j++) {
-        PathPrivilege pathPrivilege = new PathPrivilege("root.a.b.c" + j);
-        pathPrivilege.getPrivileges().add(j);
-        users[i].getPrivilegeList().add(pathPrivilege);
-        users[i].getRoleList().add("role" + j);
-      }
+    @Before
+    public void setUp() throws Exception {
+        EnvironmentUtils.envSetUp();
+        testFolder = new File(TestConstant.BASE_OUTPUT_PATH.concat("test"));
+        testFolder.mkdirs();
+        accessor = new LocalFileUserAccessor(testFolder.getPath());
     }
 
-    // save
-    for (User user : users) {
-      try {
-        accessor.saveUser(user);
-      } catch (IOException e) {
-        fail(e.getMessage());
-      }
+    @After
+    public void tearDown() throws Exception {
+        FileUtils.deleteDirectory(testFolder);
+        EnvironmentUtils.cleanEnv();
     }
 
-    // load
-    for (User user : users) {
-      try {
-        User loadedUser = accessor.loadUser(user.getName());
-        assertEquals(user, loadedUser);
-      } catch (IOException e) {
-        fail(e.getMessage());
-      }
-    }
-    assertEquals(null, accessor.loadUser("not a user"));
+    @Test
+    public void test() throws IOException {
+        User[] users = new User[5];
+        for (int i = 0; i < users.length; i++) {
+            users[i] = new User("user" + i, "password" + i);
+            for (int j = 0; j <= i; j++) {
+                PathPrivilege pathPrivilege = new PathPrivilege("root.a.b.c" + j);
+                pathPrivilege.getPrivileges().add(j);
+                users[i].getPrivilegeList().add(pathPrivilege);
+                users[i].getRoleList().add("role" + j);
+            }
+        }
 
-    // list
-    List<String> usernames = accessor.listAllUsers();
-    usernames.sort(null);
-    for (int i = 0; i < users.length; i++) {
-      assertEquals(users[i].getName(), usernames.get(i));
-    }
+        // save
+        for (User user : users) {
+            try {
+                accessor.saveUser(user);
+            } catch (IOException e) {
+                fail(e.getMessage());
+            }
+        }
 
-    // delete
-    assertEquals(false, accessor.deleteUser("not a user"));
-    assertEquals(true, accessor.deleteUser(users[users.length - 1].getName()));
-    usernames = accessor.listAllUsers();
-    assertEquals(users.length - 1, usernames.size());
-    usernames.sort(null);
-    for (int i = 0; i < users.length - 1; i++) {
-      assertEquals(users[i].getName(), usernames.get(i));
+        // load
+        for (User user : users) {
+            try {
+                User loadedUser = accessor.loadUser(user.getName());
+                assertEquals(user, loadedUser);
+            } catch (IOException e) {
+                fail(e.getMessage());
+            }
+        }
+        assertEquals(null, accessor.loadUser("not a user"));
+
+        // list
+        List<String> usernames = accessor.listAllUsers();
+        usernames.sort(null);
+        for (int i = 0; i < users.length; i++) {
+            assertEquals(users[i].getName(), usernames.get(i));
+        }
+
+        // delete
+        assertEquals(false, accessor.deleteUser("not a user"));
+        assertEquals(true, accessor.deleteUser(users[users.length - 1].getName()));
+        usernames = accessor.listAllUsers();
+        assertEquals(users.length - 1, usernames.size());
+        usernames.sort(null);
+        for (int i = 0; i < users.length - 1; i++) {
+            assertEquals(users[i].getName(), usernames.get(i));
+        }
+        User nullUser = accessor.loadUser(users[users.length - 1].getName());
+        assertEquals(null, nullUser);
     }
-    User nullUser = accessor.loadUser(users[users.length - 1].getName());
-    assertEquals(null, nullUser);
-  }
 }

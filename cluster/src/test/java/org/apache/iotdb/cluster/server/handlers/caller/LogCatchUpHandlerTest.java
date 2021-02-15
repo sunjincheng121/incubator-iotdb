@@ -40,86 +40,86 @@ import org.junit.Test;
 
 public class LogCatchUpHandlerTest {
 
-  private RaftMember member;
+    private RaftMember member;
 
-  @Before
-  public void setUp() {
-    member = new TestMetaGroupMember();
-  }
-
-  @After
-  public void tearDown() throws IOException {
-    member.closeLogManager();
-    member.stop();
-    EnvironmentUtils.cleanAllDir();
-  }
-
-  @Test
-  public void testComplete() throws InterruptedException {
-    Node follower = TestUtils.getNode(1);
-    Log log = new TestLog();
-    AtomicBoolean appendSucceed = new AtomicBoolean();
-    LogCatchUpHandler handler = new LogCatchUpHandler();
-    handler.setAppendSucceed(appendSucceed);
-    handler.setFollower(follower);
-    handler.setLog(log);
-    handler.setRaftMember(member);
-    synchronized (appendSucceed) {
-      new Thread(() -> handler.onComplete(Response.RESPONSE_AGREE)).start();
-      appendSucceed.wait();
+    @Before
+    public void setUp() {
+        member = new TestMetaGroupMember();
     }
-    assertTrue(appendSucceed.get());
-  }
 
-  @Test
-  public void testLogMismatch() throws InterruptedException {
-    Node follower = TestUtils.getNode(1);
-    Log log = new TestLog();
-    AtomicBoolean appendSucceed = new AtomicBoolean();
-    LogCatchUpHandler handler = new LogCatchUpHandler();
-    handler.setAppendSucceed(appendSucceed);
-    handler.setFollower(follower);
-    handler.setLog(log);
-    handler.setRaftMember(member);
-    synchronized (appendSucceed) {
-      new Thread(() -> handler.onComplete(Response.RESPONSE_LOG_MISMATCH)).start();
-      appendSucceed.wait();
+    @After
+    public void tearDown() throws IOException {
+        member.closeLogManager();
+        member.stop();
+        EnvironmentUtils.cleanAllDir();
     }
-    assertTrue(appendSucceed.get());
-  }
 
-  @Test
-  public void testLeadershipStale() throws InterruptedException {
-    Node follower = TestUtils.getNode(1);
-    Log log = new TestLog();
-    AtomicBoolean appendSucceed = new AtomicBoolean();
-    LogCatchUpHandler handler = new LogCatchUpHandler();
-    handler.setAppendSucceed(appendSucceed);
-    handler.setFollower(follower);
-    handler.setLog(log);
-    handler.setRaftMember(member);
-    synchronized (appendSucceed) {
-      new Thread(() -> handler.onComplete(100L)).start();
-      appendSucceed.wait();
+    @Test
+    public void testComplete() throws InterruptedException {
+        Node follower = TestUtils.getNode(1);
+        Log log = new TestLog();
+        AtomicBoolean appendSucceed = new AtomicBoolean();
+        LogCatchUpHandler handler = new LogCatchUpHandler();
+        handler.setAppendSucceed(appendSucceed);
+        handler.setFollower(follower);
+        handler.setLog(log);
+        handler.setRaftMember(member);
+        synchronized (appendSucceed) {
+            new Thread(() -> handler.onComplete(Response.RESPONSE_AGREE)).start();
+            appendSucceed.wait();
+        }
+        assertTrue(appendSucceed.get());
     }
-    assertFalse(appendSucceed.get());
-    assertEquals(100, member.getTerm().get());
-  }
 
-  @Test
-  public void testError() throws InterruptedException {
-    Node follower = TestUtils.getNode(1);
-    Log log = new TestLog();
-    AtomicBoolean appendSucceed = new AtomicBoolean();
-    LogCatchUpHandler handler = new LogCatchUpHandler();
-    handler.setAppendSucceed(appendSucceed);
-    handler.setFollower(follower);
-    handler.setLog(log);
-    handler.setRaftMember(member);
-    synchronized (appendSucceed) {
-      new Thread(() -> handler.onError(new TestException())).start();
-      appendSucceed.wait();
+    @Test
+    public void testLogMismatch() throws InterruptedException {
+        Node follower = TestUtils.getNode(1);
+        Log log = new TestLog();
+        AtomicBoolean appendSucceed = new AtomicBoolean();
+        LogCatchUpHandler handler = new LogCatchUpHandler();
+        handler.setAppendSucceed(appendSucceed);
+        handler.setFollower(follower);
+        handler.setLog(log);
+        handler.setRaftMember(member);
+        synchronized (appendSucceed) {
+            new Thread(() -> handler.onComplete(Response.RESPONSE_LOG_MISMATCH)).start();
+            appendSucceed.wait();
+        }
+        assertTrue(appendSucceed.get());
     }
-    assertFalse(appendSucceed.get());
-  }
+
+    @Test
+    public void testLeadershipStale() throws InterruptedException {
+        Node follower = TestUtils.getNode(1);
+        Log log = new TestLog();
+        AtomicBoolean appendSucceed = new AtomicBoolean();
+        LogCatchUpHandler handler = new LogCatchUpHandler();
+        handler.setAppendSucceed(appendSucceed);
+        handler.setFollower(follower);
+        handler.setLog(log);
+        handler.setRaftMember(member);
+        synchronized (appendSucceed) {
+            new Thread(() -> handler.onComplete(100L)).start();
+            appendSucceed.wait();
+        }
+        assertFalse(appendSucceed.get());
+        assertEquals(100, member.getTerm().get());
+    }
+
+    @Test
+    public void testError() throws InterruptedException {
+        Node follower = TestUtils.getNode(1);
+        Log log = new TestLog();
+        AtomicBoolean appendSucceed = new AtomicBoolean();
+        LogCatchUpHandler handler = new LogCatchUpHandler();
+        handler.setAppendSucceed(appendSucceed);
+        handler.setFollower(follower);
+        handler.setLog(log);
+        handler.setRaftMember(member);
+        synchronized (appendSucceed) {
+            new Thread(() -> handler.onError(new TestException())).start();
+            appendSucceed.wait();
+        }
+        assertFalse(appendSucceed.get());
+    }
 }

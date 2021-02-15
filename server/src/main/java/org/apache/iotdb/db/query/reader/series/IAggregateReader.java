@@ -24,37 +24,33 @@ import org.apache.iotdb.tsfile.read.common.BatchData;
 
 public interface IAggregateReader {
 
-  boolean hasNextFile() throws IOException;
+    boolean hasNextFile() throws IOException;
 
-  boolean canUseCurrentFileStatistics() throws IOException;
+    boolean canUseCurrentFileStatistics() throws IOException;
 
-  Statistics currentFileStatistics() throws IOException;
+    Statistics currentFileStatistics() throws IOException;
 
-  void skipCurrentFile();
+    void skipCurrentFile();
 
-  boolean hasNextChunk() throws IOException;
+    boolean hasNextChunk() throws IOException;
 
-  boolean canUseCurrentChunkStatistics() throws IOException;
+    boolean canUseCurrentChunkStatistics() throws IOException;
 
-  Statistics currentChunkStatistics();
+    Statistics currentChunkStatistics();
 
-  void skipCurrentChunk();
+    void skipCurrentChunk();
 
-  boolean hasNextPage() throws IOException;
+    boolean hasNextPage() throws IOException;
 
-  /**
-   * only be used without value filter
-   */
-  boolean canUseCurrentPageStatistics() throws IOException;
+    /** only be used without value filter */
+    boolean canUseCurrentPageStatistics() throws IOException;
 
-  /**
-   * only be used without value filter
-   */
-  Statistics currentPageStatistics() throws IOException;
+    /** only be used without value filter */
+    Statistics currentPageStatistics() throws IOException;
 
-  void skipCurrentPage();
+    void skipCurrentPage();
 
-  BatchData nextPage() throws IOException;
+    BatchData nextPage() throws IOException;
 
-  boolean isAscending();
+    boolean isAscending();
 }

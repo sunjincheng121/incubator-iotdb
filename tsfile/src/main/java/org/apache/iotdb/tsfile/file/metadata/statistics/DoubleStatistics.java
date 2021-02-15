@@ -18,230 +18,256 @@
  */
 package org.apache.iotdb.tsfile.file.metadata.statistics;
 
-import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
-import org.apache.iotdb.tsfile.utils.BytesUtils;
-import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+import org.apache.iotdb.tsfile.utils.BytesUtils;
+import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class DoubleStatistics extends Statistics<Double> {
 
-  private double minValue;
-  private double maxValue;
-  private double firstValue;
-  private double lastValue;
-  private double sumValue;
+    private double minValue;
+    private double maxValue;
+    private double firstValue;
+    private double lastValue;
+    private double sumValue;
 
-  static final int DOUBLE_STATISTICS_FIXED_RAM_SIZE = 80;
+    static final int DOUBLE_STATISTICS_FIXED_RAM_SIZE = 80;
 
-  @Override
-  public TSDataType getType() {
-    return TSDataType.DOUBLE;
-  }
-
-  @Override
-  public int getStatsSize() {
-    return 40;
-  }
-
-  /**
-   * initialize double statistics.
-   *
-   * @param min   min value
-   * @param max   max value
-   * @param first the first value
-   * @param last  the last value
-   * @param sum   sum value
-   */
-  public void initializeStats(double min, double max, double first, double last, double sum) {
-    this.minValue = min;
-    this.maxValue = max;
-    this.firstValue = first;
-    this.lastValue = last;
-    this.sumValue = sum;
-  }
-
-  private void updateStats(double minValue, double maxValue, double lastValue, double sumValue) {
-    if (minValue < this.minValue) {
-      this.minValue = minValue;
+    @Override
+    public TSDataType getType() {
+        return TSDataType.DOUBLE;
     }
-    if (maxValue > this.maxValue) {
-      this.maxValue = maxValue;
+
+    @Override
+    public int getStatsSize() {
+        return 40;
     }
-    this.sumValue += sumValue;
-    this.lastValue = lastValue;
-  }
 
-  private void updateStats(double minValue, double maxValue, double firstValue, double lastValue, double sumValue, long startTime, long endTime) {
-    if (minValue < this.minValue) {
-      this.minValue = minValue;
+    /**
+     * initialize double statistics.
+     *
+     * @param min min value
+     * @param max max value
+     * @param first the first value
+     * @param last the last value
+     * @param sum sum value
+     */
+    public void initializeStats(double min, double max, double first, double last, double sum) {
+        this.minValue = min;
+        this.maxValue = max;
+        this.firstValue = first;
+        this.lastValue = last;
+        this.sumValue = sum;
     }
-    if (maxValue > this.maxValue) {
-      this.maxValue = maxValue;
+
+    private void updateStats(double minValue, double maxValue, double lastValue, double sumValue) {
+        if (minValue < this.minValue) {
+            this.minValue = minValue;
+        }
+        if (maxValue > this.maxValue) {
+            this.maxValue = maxValue;
+        }
+        this.sumValue += sumValue;
+        this.lastValue = lastValue;
     }
-    this.sumValue += sumValue;
-    // only if endTime greater or equals to the current endTime need we update the last value
-    // only if startTime less or equals to the current startTime need we update the first value
-    // otherwise, just ignore
-    if (startTime <= this.getStartTime()) {
-      this.firstValue = firstValue;
+
+    private void updateStats(
+            double minValue,
+            double maxValue,
+            double firstValue,
+            double lastValue,
+            double sumValue,
+            long startTime,
+            long endTime) {
+        if (minValue < this.minValue) {
+            this.minValue = minValue;
+        }
+        if (maxValue > this.maxValue) {
+            this.maxValue = maxValue;
+        }
+        this.sumValue += sumValue;
+        // only if endTime greater or equals to the current endTime need we update the last value
+        // only if startTime less or equals to the current startTime need we update the first value
+        // otherwise, just ignore
+        if (startTime <= this.getStartTime()) {
+            this.firstValue = firstValue;
+        }
+        if (endTime >= this.getEndTime()) {
+            this.lastValue = lastValue;
+        }
     }
-    if (endTime >= this.getEndTime()) {
-      this.lastValue = lastValue;
+
+    @Override
+    public void setMinMaxFromBytes(byte[] minBytes, byte[] maxBytes) {
+        minValue = BytesUtils.bytesToDouble(minBytes);
+        maxValue = BytesUtils.bytesToDouble(maxBytes);
     }
-  }
 
-  @Override
-  public void setMinMaxFromBytes(byte[] minBytes, byte[] maxBytes) {
-    minValue = BytesUtils.bytesToDouble(minBytes);
-    maxValue = BytesUtils.bytesToDouble(maxBytes);
-  }
-
-  @Override
-  void updateStats(double value) {
-    if (this.isEmpty) {
-      initializeStats(value, value, value, value, value);
-      isEmpty = false;
-    } else {
-      updateStats(value, value, value, value);
+    @Override
+    void updateStats(double value) {
+        if (this.isEmpty) {
+            initializeStats(value, value, value, value, value);
+            isEmpty = false;
+        } else {
+            updateStats(value, value, value, value);
+        }
     }
-  }
 
-  @Override
-  void updateStats(double[] values, int batchSize) {
-    for (int i = 0; i < batchSize; i++) {
-      updateStats(values[i]);
+    @Override
+    void updateStats(double[] values, int batchSize) {
+        for (int i = 0; i < batchSize; i++) {
+            updateStats(values[i]);
+        }
     }
-  }
 
-  @Override
-  public long calculateRamSize() {
-    return DOUBLE_STATISTICS_FIXED_RAM_SIZE;
-  }
-
-  @Override
-  public Double getMinValue() {
-    return minValue;
-  }
-
-  @Override
-  public Double getMaxValue() {
-    return maxValue;
-  }
-
-  @Override
-  public Double getFirstValue() {
-    return firstValue;
-  }
-
-  @Override
-  public Double getLastValue() {
-    return lastValue;
-  }
-
-  @Override
-  public double getSumValue() {
-    return sumValue;
-  }
-
-  @Override
-  protected void mergeStatisticsValue(Statistics stats) {
-    DoubleStatistics doubleStats = (DoubleStatistics) stats;
-    if (this.isEmpty) {
-      initializeStats(doubleStats.getMinValue(), doubleStats.getMaxValue(), doubleStats.getFirstValue(),
-          doubleStats.getLastValue(), doubleStats.getSumValue());
-      isEmpty = false;
-    } else {
-      updateStats(doubleStats.getMinValue(), doubleStats.getMaxValue(), doubleStats.getFirstValue(),
-          doubleStats.getLastValue(), doubleStats.getSumValue(), stats.getStartTime(), stats.getEndTime());
+    @Override
+    public long calculateRamSize() {
+        return DOUBLE_STATISTICS_FIXED_RAM_SIZE;
     }
-  }
 
-  @Override
-  public byte[] getMinValueBytes() {
-    return BytesUtils.doubleToBytes(minValue);
-  }
+    @Override
+    public Double getMinValue() {
+        return minValue;
+    }
 
-  @Override
-  public byte[] getMaxValueBytes() {
-    return BytesUtils.doubleToBytes(maxValue);
-  }
+    @Override
+    public Double getMaxValue() {
+        return maxValue;
+    }
 
-  @Override
-  public byte[] getFirstValueBytes() {
-    return BytesUtils.doubleToBytes(firstValue);
-  }
+    @Override
+    public Double getFirstValue() {
+        return firstValue;
+    }
 
-  @Override
-  public byte[] getLastValueBytes() {
-    return BytesUtils.doubleToBytes(lastValue);
-  }
+    @Override
+    public Double getLastValue() {
+        return lastValue;
+    }
 
-  @Override
-  public byte[] getSumValueBytes() {
-    return BytesUtils.doubleToBytes(sumValue);
-  }
+    @Override
+    public double getSumValue() {
+        return sumValue;
+    }
 
-  @Override
-  public ByteBuffer getMinValueBuffer() {
-    return ReadWriteIOUtils.getByteBuffer(minValue);
-  }
+    @Override
+    protected void mergeStatisticsValue(Statistics stats) {
+        DoubleStatistics doubleStats = (DoubleStatistics) stats;
+        if (this.isEmpty) {
+            initializeStats(
+                    doubleStats.getMinValue(),
+                    doubleStats.getMaxValue(),
+                    doubleStats.getFirstValue(),
+                    doubleStats.getLastValue(),
+                    doubleStats.getSumValue());
+            isEmpty = false;
+        } else {
+            updateStats(
+                    doubleStats.getMinValue(),
+                    doubleStats.getMaxValue(),
+                    doubleStats.getFirstValue(),
+                    doubleStats.getLastValue(),
+                    doubleStats.getSumValue(),
+                    stats.getStartTime(),
+                    stats.getEndTime());
+        }
+    }
 
-  @Override
-  public ByteBuffer getMaxValueBuffer() {
-    return ReadWriteIOUtils.getByteBuffer(maxValue);
-  }
+    @Override
+    public byte[] getMinValueBytes() {
+        return BytesUtils.doubleToBytes(minValue);
+    }
 
-  @Override
-  public ByteBuffer getFirstValueBuffer() {
-    return ReadWriteIOUtils.getByteBuffer(firstValue);
-  }
+    @Override
+    public byte[] getMaxValueBytes() {
+        return BytesUtils.doubleToBytes(maxValue);
+    }
 
-  @Override
-  public ByteBuffer getLastValueBuffer() {
-    return ReadWriteIOUtils.getByteBuffer(lastValue);
-  }
+    @Override
+    public byte[] getFirstValueBytes() {
+        return BytesUtils.doubleToBytes(firstValue);
+    }
 
-  @Override
-  public ByteBuffer getSumValueBuffer() {
-    return ReadWriteIOUtils.getByteBuffer(sumValue);
-  }
+    @Override
+    public byte[] getLastValueBytes() {
+        return BytesUtils.doubleToBytes(lastValue);
+    }
 
-  @Override
-  public int serializeStats(OutputStream outputStream) throws IOException {
-    int byteLen = 0;
-    byteLen += ReadWriteIOUtils.write(minValue, outputStream);
-    byteLen += ReadWriteIOUtils.write(maxValue, outputStream);
-    byteLen += ReadWriteIOUtils.write(firstValue, outputStream);
-    byteLen += ReadWriteIOUtils.write(lastValue, outputStream);
-    byteLen += ReadWriteIOUtils.write(sumValue, outputStream);
-    return byteLen;
-  }
+    @Override
+    public byte[] getSumValueBytes() {
+        return BytesUtils.doubleToBytes(sumValue);
+    }
 
-  @Override
-  void deserialize(InputStream inputStream) throws IOException {
-    this.minValue = ReadWriteIOUtils.readDouble(inputStream);
-    this.maxValue = ReadWriteIOUtils.readDouble(inputStream);
-    this.firstValue = ReadWriteIOUtils.readDouble(inputStream);
-    this.lastValue = ReadWriteIOUtils.readDouble(inputStream);
-    this.sumValue = ReadWriteIOUtils.readDouble(inputStream);
-  }
+    @Override
+    public ByteBuffer getMinValueBuffer() {
+        return ReadWriteIOUtils.getByteBuffer(minValue);
+    }
 
-  @Override
-  void deserialize(ByteBuffer byteBuffer) {
-    this.minValue = ReadWriteIOUtils.readDouble(byteBuffer);
-    this.maxValue = ReadWriteIOUtils.readDouble(byteBuffer);
-    this.firstValue = ReadWriteIOUtils.readDouble(byteBuffer);
-    this.lastValue = ReadWriteIOUtils.readDouble(byteBuffer);
-    this.sumValue = ReadWriteIOUtils.readDouble(byteBuffer);
-  }
+    @Override
+    public ByteBuffer getMaxValueBuffer() {
+        return ReadWriteIOUtils.getByteBuffer(maxValue);
+    }
 
-  @Override
-  public String toString() {
-    return super.toString() + " [minValue:" + minValue + ",maxValue:" + maxValue + ",firstValue:" + firstValue +
-        ",lastValue:" + lastValue + ",sumValue:" + sumValue + "]";
-  }
+    @Override
+    public ByteBuffer getFirstValueBuffer() {
+        return ReadWriteIOUtils.getByteBuffer(firstValue);
+    }
+
+    @Override
+    public ByteBuffer getLastValueBuffer() {
+        return ReadWriteIOUtils.getByteBuffer(lastValue);
+    }
+
+    @Override
+    public ByteBuffer getSumValueBuffer() {
+        return ReadWriteIOUtils.getByteBuffer(sumValue);
+    }
+
+    @Override
+    public int serializeStats(OutputStream outputStream) throws IOException {
+        int byteLen = 0;
+        byteLen += ReadWriteIOUtils.write(minValue, outputStream);
+        byteLen += ReadWriteIOUtils.write(maxValue, outputStream);
+        byteLen += ReadWriteIOUtils.write(firstValue, outputStream);
+        byteLen += ReadWriteIOUtils.write(lastValue, outputStream);
+        byteLen += ReadWriteIOUtils.write(sumValue, outputStream);
+        return byteLen;
+    }
+
+    @Override
+    void deserialize(InputStream inputStream) throws IOException {
+        this.minValue = ReadWriteIOUtils.readDouble(inputStream);
+        this.maxValue = ReadWriteIOUtils.readDouble(inputStream);
+        this.firstValue = ReadWriteIOUtils.readDouble(inputStream);
+        this.lastValue = ReadWriteIOUtils.readDouble(inputStream);
+        this.sumValue = ReadWriteIOUtils.readDouble(inputStream);
+    }
+
+    @Override
+    void deserialize(ByteBuffer byteBuffer) {
+        this.minValue = ReadWriteIOUtils.readDouble(byteBuffer);
+        this.maxValue = ReadWriteIOUtils.readDouble(byteBuffer);
+        this.firstValue = ReadWriteIOUtils.readDouble(byteBuffer);
+        this.lastValue = ReadWriteIOUtils.readDouble(byteBuffer);
+        this.sumValue = ReadWriteIOUtils.readDouble(byteBuffer);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString()
+                + " [minValue:"
+                + minValue
+                + ",maxValue:"
+                + maxValue
+                + ",firstValue:"
+                + firstValue
+                + ",lastValue:"
+                + lastValue
+                + ",sumValue:"
+                + sumValue
+                + "]";
+    }
 }

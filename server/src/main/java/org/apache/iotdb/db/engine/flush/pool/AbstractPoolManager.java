@@ -27,68 +27,65 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 
 public abstract class AbstractPoolManager {
-  
-  private static final int WAIT_TIMEOUT = 2000;
 
-  protected ExecutorService pool;
+    private static final int WAIT_TIMEOUT = 2000;
 
-  /**
-   * Block new flush submits and exit when all RUNNING THREADS AND TASKS IN THE QUEUE end.
-   */
-  public void close() {
-    Logger logger = getLogger();
-    pool.shutdownNow();
-    long totalWaitTime = WAIT_TIMEOUT;
-    logger.info("Waiting for {} thread pool to shut down.", getName());
-    while (!pool.isTerminated()) {
-      try {
-        if (!pool.awaitTermination(WAIT_TIMEOUT, TimeUnit.MILLISECONDS)) {
-          logger.info("{} thread pool doesn't exit after {}ms.", getName(),
-              + totalWaitTime);
+    protected ExecutorService pool;
+
+    /** Block new flush submits and exit when all RUNNING THREADS AND TASKS IN THE QUEUE end. */
+    public void close() {
+        Logger logger = getLogger();
+        pool.shutdownNow();
+        long totalWaitTime = WAIT_TIMEOUT;
+        logger.info("Waiting for {} thread pool to shut down.", getName());
+        while (!pool.isTerminated()) {
+            try {
+                if (!pool.awaitTermination(WAIT_TIMEOUT, TimeUnit.MILLISECONDS)) {
+                    logger.info(
+                            "{} thread pool doesn't exit after {}ms.", getName(), +totalWaitTime);
+                }
+                totalWaitTime += WAIT_TIMEOUT;
+            } catch (InterruptedException e) {
+                logger.error("Interrupted while waiting {} thread pool to exit. ", getName(), e);
+                Thread.currentThread().interrupt();
+            }
         }
-        totalWaitTime += WAIT_TIMEOUT;
-      } catch (InterruptedException e) {
-        logger.error("Interrupted while waiting {} thread pool to exit. ", getName(), e);
-        Thread.currentThread().interrupt();
-      }
     }
-  }
 
-  public synchronized Future<?> submit(Runnable task) {
-    return pool.submit(task);
-  }
-
-  public synchronized <T> Future<T> submit(Callable<T> task) {
-    return pool.submit(task);
-  }
-
-  public int getWorkingTasksNumber() {
-    return ((ThreadPoolExecutor) pool).getActiveCount();
-  }
-
-  public int getWaitingTasksNumber() {
-    return ((ThreadPoolExecutor) pool).getQueue().size();
-  }
-
-  public int getTotalTasks() {
-    return getWorkingTasksNumber() + getWaitingTasksNumber();
-  }
-
-  public int getCorePoolSize() {
-    return ((ThreadPoolExecutor) pool).getCorePoolSize();
-  }
-
-  public abstract Logger getLogger();
-
-  public abstract void start();
-
-  public void stop() {
-    if (pool != null) {
-      close();
-      pool = null;
+    public synchronized Future<?> submit(Runnable task) {
+        return pool.submit(task);
     }
-  }
 
-  public abstract String getName();
+    public synchronized <T> Future<T> submit(Callable<T> task) {
+        return pool.submit(task);
+    }
 
+    public int getWorkingTasksNumber() {
+        return ((ThreadPoolExecutor) pool).getActiveCount();
+    }
+
+    public int getWaitingTasksNumber() {
+        return ((ThreadPoolExecutor) pool).getQueue().size();
+    }
+
+    public int getTotalTasks() {
+        return getWorkingTasksNumber() + getWaitingTasksNumber();
+    }
+
+    public int getCorePoolSize() {
+        return ((ThreadPoolExecutor) pool).getCorePoolSize();
+    }
+
+    public abstract Logger getLogger();
+
+    public abstract void start();
+
+    public void stop() {
+        if (pool != null) {
+            close();
+            pool = null;
+        }
+    }
+
+    public abstract String getName();
 }

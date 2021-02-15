@@ -22,8 +22,8 @@ import org.junit.Test;
 
 public class QueryResourceManagerTest {
 
-  @Test
-  public void test() {
-    //TODO
-  }
+    @Test
+    public void test() {
+        // TODO
+    }
 }

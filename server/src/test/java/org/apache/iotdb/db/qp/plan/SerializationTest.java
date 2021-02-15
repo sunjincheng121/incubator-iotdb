@@ -49,91 +49,108 @@ import org.junit.Test;
 
 public class SerializationTest {
 
-  private Planner processor = new Planner();
+    private Planner processor = new Planner();
 
-  @Before
-  public void before() throws MetadataException {
-    IoTDB.metaManager.init();
-    IoTDB.metaManager.setStorageGroup(new PartialPath("root.vehicle"));
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.vehicle.d1.s1"), TSDataType.FLOAT, TSEncoding.PLAIN,
-            CompressionType.UNCOMPRESSED, null);
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.vehicle.d2.s1"), TSDataType.FLOAT, TSEncoding.PLAIN,
-            CompressionType.UNCOMPRESSED, null);
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.vehicle.d3.s1"), TSDataType.FLOAT, TSEncoding.PLAIN,
-            CompressionType.UNCOMPRESSED, null);
-    IoTDB.metaManager
-        .createTimeseries(new PartialPath("root.vehicle.d4.s1"), TSDataType.FLOAT, TSEncoding.PLAIN,
-            CompressionType.UNCOMPRESSED, null);
-  }
-
-  @After
-  public void clean() throws IOException {
-    IoTDB.metaManager.clear();
-    EnvironmentUtils.cleanAllDir();
-  }
-
-  @Test
-  public void testInsert() throws QueryProcessException, IOException, IllegalPathException {
-    String sqlStr = "INSERT INTO root.vehicle.d1(timestamp, s1) VALUES (1, 5.0)";
-    PhysicalPlan plan = processor.parseSQLToPhysicalPlan(sqlStr);
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
-      plan.serialize(dataOutputStream);
-      ByteBuffer buffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-      PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
-      assertEquals(plan, planB);
+    @Before
+    public void before() throws MetadataException {
+        IoTDB.metaManager.init();
+        IoTDB.metaManager.setStorageGroup(new PartialPath("root.vehicle"));
+        IoTDB.metaManager.createTimeseries(
+                new PartialPath("root.vehicle.d1.s1"),
+                TSDataType.FLOAT,
+                TSEncoding.PLAIN,
+                CompressionType.UNCOMPRESSED,
+                null);
+        IoTDB.metaManager.createTimeseries(
+                new PartialPath("root.vehicle.d2.s1"),
+                TSDataType.FLOAT,
+                TSEncoding.PLAIN,
+                CompressionType.UNCOMPRESSED,
+                null);
+        IoTDB.metaManager.createTimeseries(
+                new PartialPath("root.vehicle.d3.s1"),
+                TSDataType.FLOAT,
+                TSEncoding.PLAIN,
+                CompressionType.UNCOMPRESSED,
+                null);
+        IoTDB.metaManager.createTimeseries(
+                new PartialPath("root.vehicle.d4.s1"),
+                TSDataType.FLOAT,
+                TSEncoding.PLAIN,
+                CompressionType.UNCOMPRESSED,
+                null);
     }
 
-    ByteBuffer buffer = ByteBuffer.allocate(4096);
-    plan.serialize(buffer);
-    buffer.flip();
-    PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
-    assertEquals(plan, planB);
-  }
-
-  @Test
-  public void testFlush() throws IOException, IllegalPathException {
-    Map<PartialPath, List<Pair<Long, Boolean>>> storageGroupPartitionIds = new HashMap<>();
-
-    Boolean isSeqArray[] = new Boolean[]{null, true};
-    boolean isSyncArray[] = new boolean[]{true, false};
-    Random random = new Random();
-    for (int i = 0; i < 10; i++) {
-      List<Pair<Long, Boolean>> partitionIdPairs = new ArrayList<>();
-      for (int j = 0; j < 10; j++) {
-        partitionIdPairs.add(new Pair<Long, Boolean>((long) i + j, isSyncArray[random.nextInt(1)]));
-      }
-
-      storageGroupPartitionIds.put(new PartialPath(new String[]{"path_" + i}), partitionIdPairs);
+    @After
+    public void clean() throws IOException {
+        IoTDB.metaManager.clear();
+        EnvironmentUtils.cleanAllDir();
     }
-    for (Boolean isSeq : isSeqArray) {
-      for (boolean isSync : isSyncArray) {
-        FlushPlan plan = new FlushPlan(isSeq, isSync, storageGroupPartitionIds);
 
+    @Test
+    public void testInsert() throws QueryProcessException, IOException, IllegalPathException {
+        String sqlStr = "INSERT INTO root.vehicle.d1(timestamp, s1) VALUES (1, 5.0)";
+        PhysicalPlan plan = processor.parseSQLToPhysicalPlan(sqlStr);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
-          plan.serialize(dataOutputStream);
-          ByteBuffer buffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-          FlushPlan planB = (FlushPlan) PhysicalPlan.Factory.create(buffer);
-          assertEquals(plan.getPaths(), planB.getPaths());
-          assertEquals(plan.getStorageGroupPartitionIds(), planB.getStorageGroupPartitionIds());
-          assertEquals(plan.isSeq(), planB.isSeq());
-          assertEquals(plan.isSync(), planB.isSync());
+            plan.serialize(dataOutputStream);
+            ByteBuffer buffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
+            PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
+            assertEquals(plan, planB);
         }
 
         ByteBuffer buffer = ByteBuffer.allocate(4096);
         plan.serialize(buffer);
         buffer.flip();
-        FlushPlan planB = (FlushPlan) PhysicalPlan.Factory.create(buffer);
-        assertEquals(plan.getPaths(), planB.getPaths());
-        assertEquals(plan.getStorageGroupPartitionIds(), planB.getStorageGroupPartitionIds());
-        assertEquals(plan.isSeq(), planB.isSeq());
-        assertEquals(plan.isSync(), planB.isSync());
-      }
+        PhysicalPlan planB = PhysicalPlan.Factory.create(buffer);
+        assertEquals(plan, planB);
     }
-  }
 
+    @Test
+    public void testFlush() throws IOException, IllegalPathException {
+        Map<PartialPath, List<Pair<Long, Boolean>>> storageGroupPartitionIds = new HashMap<>();
+
+        Boolean isSeqArray[] = new Boolean[] {null, true};
+        boolean isSyncArray[] = new boolean[] {true, false};
+        Random random = new Random();
+        for (int i = 0; i < 10; i++) {
+            List<Pair<Long, Boolean>> partitionIdPairs = new ArrayList<>();
+            for (int j = 0; j < 10; j++) {
+                partitionIdPairs.add(
+                        new Pair<Long, Boolean>((long) i + j, isSyncArray[random.nextInt(1)]));
+            }
+
+            storageGroupPartitionIds.put(
+                    new PartialPath(new String[] {"path_" + i}), partitionIdPairs);
+        }
+        for (Boolean isSeq : isSeqArray) {
+            for (boolean isSync : isSyncArray) {
+                FlushPlan plan = new FlushPlan(isSeq, isSync, storageGroupPartitionIds);
+
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                try (DataOutputStream dataOutputStream =
+                        new DataOutputStream(byteArrayOutputStream)) {
+                    plan.serialize(dataOutputStream);
+                    ByteBuffer buffer = ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
+                    FlushPlan planB = (FlushPlan) PhysicalPlan.Factory.create(buffer);
+                    assertEquals(plan.getPaths(), planB.getPaths());
+                    assertEquals(
+                            plan.getStorageGroupPartitionIds(),
+                            planB.getStorageGroupPartitionIds());
+                    assertEquals(plan.isSeq(), planB.isSeq());
+                    assertEquals(plan.isSync(), planB.isSync());
+                }
+
+                ByteBuffer buffer = ByteBuffer.allocate(4096);
+                plan.serialize(buffer);
+                buffer.flip();
+                FlushPlan planB = (FlushPlan) PhysicalPlan.Factory.create(buffer);
+                assertEquals(plan.getPaths(), planB.getPaths());
+                assertEquals(
+                        plan.getStorageGroupPartitionIds(), planB.getStorageGroupPartitionIds());
+                assertEquals(plan.isSeq(), planB.isSeq());
+                assertEquals(plan.isSync(), planB.isSync());
+            }
+        }
+    }
 }

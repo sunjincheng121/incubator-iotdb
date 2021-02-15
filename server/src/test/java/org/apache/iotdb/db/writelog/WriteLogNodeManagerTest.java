@@ -36,76 +36,80 @@ import org.apache.iotdb.db.writelog.manager.MultiFileLogNodeManager;
 import org.apache.iotdb.db.writelog.manager.WriteLogNodeManager;
 import org.apache.iotdb.db.writelog.node.WriteLogNode;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
-import org.apache.iotdb.tsfile.read.common.Path;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class WriteLogNodeManagerTest {
 
-  private IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
+    private IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
 
-  private boolean enableWal;
+    private boolean enableWal;
 
-  @Before
-  public void setUp() throws Exception {
-    enableWal = config.isEnableWal();
-    config.setEnableWal(true);
-    EnvironmentUtils.envSetUp();
-  }
+    @Before
+    public void setUp() throws Exception {
+        enableWal = config.isEnableWal();
+        config.setEnableWal(true);
+        EnvironmentUtils.envSetUp();
+    }
 
-  @After
-  public void tearDown() throws Exception {
-    EnvironmentUtils.cleanEnv();
-    config.setEnableWal(enableWal);
-  }
+    @After
+    public void tearDown() throws Exception {
+        EnvironmentUtils.cleanEnv();
+        config.setEnableWal(enableWal);
+    }
 
-  @Test
-  public void testGetAndDelete() throws IOException {
-    String identifier = "testLogNode";
-    WriteLogNodeManager manager = MultiFileLogNodeManager.getInstance();
-    WriteLogNode logNode = manager.getNode(identifier);
-    assertEquals(identifier, logNode.getIdentifier());
+    @Test
+    public void testGetAndDelete() throws IOException {
+        String identifier = "testLogNode";
+        WriteLogNodeManager manager = MultiFileLogNodeManager.getInstance();
+        WriteLogNode logNode = manager.getNode(identifier);
+        assertEquals(identifier, logNode.getIdentifier());
 
-    WriteLogNode theSameNode = manager.getNode(identifier);
-    assertSame(logNode, theSameNode);
+        WriteLogNode theSameNode = manager.getNode(identifier);
+        assertSame(logNode, theSameNode);
 
-    manager.deleteNode(identifier);
-    WriteLogNode anotherNode = manager.getNode(identifier);
-    assertNotSame(logNode, anotherNode);
-  }
+        manager.deleteNode(identifier);
+        WriteLogNode anotherNode = manager.getNode(identifier);
+        assertNotSame(logNode, anotherNode);
+    }
 
-  @Test
-  public void testAutoSync() throws IOException, InterruptedException, IllegalPathException {
-    // this test check that nodes in a manager will sync periodically.
-    int flushWalPeriod = config.getFlushWalThreshold();
-    config.setForceWalPeriodInMs(10000);
-    File tempRestore = File.createTempFile("managerTest", "restore");
-    File tempProcessorStore = File.createTempFile("managerTest", "processorStore");
+    @Test
+    public void testAutoSync() throws IOException, InterruptedException, IllegalPathException {
+        // this test check that nodes in a manager will sync periodically.
+        int flushWalPeriod = config.getFlushWalThreshold();
+        config.setForceWalPeriodInMs(10000);
+        File tempRestore = File.createTempFile("managerTest", "restore");
+        File tempProcessorStore = File.createTempFile("managerTest", "processorStore");
 
-    WriteLogNodeManager manager = MultiFileLogNodeManager.getInstance();
-    WriteLogNode logNode = manager
-        .getNode("root.managerTest");
+        WriteLogNodeManager manager = MultiFileLogNodeManager.getInstance();
+        WriteLogNode logNode = manager.getNode("root.managerTest");
 
-    InsertRowPlan bwInsertPlan = new InsertRowPlan(new PartialPath("logTestDevice"), 100,
-        new String[]{"s1", "s2", "s3", "s4"},
-        new TSDataType[]{TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN},
-        new String[]{"1.0", "15", "str", "false"});
-    DeletePlan deletePlan = new DeletePlan(Long.MIN_VALUE, 50, new PartialPath("root.logTestDevice.s1"));
+        InsertRowPlan bwInsertPlan =
+                new InsertRowPlan(
+                        new PartialPath("logTestDevice"),
+                        100,
+                        new String[] {"s1", "s2", "s3", "s4"},
+                        new TSDataType[] {
+                            TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN
+                        },
+                        new String[] {"1.0", "15", "str", "false"});
+        DeletePlan deletePlan =
+                new DeletePlan(Long.MIN_VALUE, 50, new PartialPath("root.logTestDevice.s1"));
 
-    File walFile = new File(logNode.getLogDirectory() + File.separator + "wal1");
-    assertTrue(!walFile.exists());
+        File walFile = new File(logNode.getLogDirectory() + File.separator + "wal1");
+        assertTrue(!walFile.exists());
 
-    logNode.write(bwInsertPlan);
-    logNode.write(deletePlan);
+        logNode.write(bwInsertPlan);
+        logNode.write(deletePlan);
 
-    Thread.sleep(config.getForceWalPeriodInMs() + 1000);
-    assertTrue(walFile.exists());
+        Thread.sleep(config.getForceWalPeriodInMs() + 1000);
+        assertTrue(walFile.exists());
 
-    logNode.delete();
-    config.setForceWalPeriodInMs(flushWalPeriod);
-    tempRestore.delete();
-    tempProcessorStore.delete();
-    tempRestore.getParentFile().delete();
-  }
+        logNode.delete();
+        config.setForceWalPeriodInMs(flushWalPeriod);
+        tempRestore.delete();
+        tempProcessorStore.delete();
+        tempRestore.getParentFile().delete();
+    }
 }

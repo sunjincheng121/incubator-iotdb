@@ -28,66 +28,64 @@ import org.apache.iotdb.cluster.log.Log;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 import org.apache.iotdb.db.utils.SerializeUtils;
 
-/**
- * AddNodeLog records the operation of adding a node into this cluster.
- */
+/** AddNodeLog records the operation of adding a node into this cluster. */
 public class AddNodeLog extends Log {
 
-  private Node newNode;
+    private Node newNode;
 
-  public Node getNewNode() {
-    return newNode;
-  }
-
-  public void setNewNode(Node newNode) {
-    this.newNode = newNode;
-  }
-
-  @Override
-  public ByteBuffer serialize() {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
-      dataOutputStream.writeByte(Types.ADD_NODE.ordinal());
-      dataOutputStream.writeLong(getCurrLogIndex());
-      dataOutputStream.writeLong(getCurrLogTerm());
-
-      SerializeUtils.serialize(newNode, dataOutputStream);
-    } catch (IOException e) {
-      // ignored
+    public Node getNewNode() {
+        return newNode;
     }
-    return ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
-  }
 
-  @Override
-  public void deserialize(ByteBuffer buffer) {
-
-    // marker is previously read, remaining fields:
-    // curr index(long), curr term(long)
-    // ipLength(int), inBytes(byte[]), port(int), identifier(int), dataPort(int)
-    setCurrLogIndex(buffer.getLong());
-    setCurrLogTerm(buffer.getLong());
-
-    newNode = new Node();
-    SerializeUtils.deserialize(newNode, buffer);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public void setNewNode(Node newNode) {
+        this.newNode = newNode;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    if (!super.equals(o)) {
-      return false;
-    }
-    AddNodeLog that = (AddNodeLog) o;
-    return Objects.equals(newNode, that.newNode);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(super.hashCode(), newNode);
-  }
+    @Override
+    public ByteBuffer serialize() {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {
+            dataOutputStream.writeByte(Types.ADD_NODE.ordinal());
+            dataOutputStream.writeLong(getCurrLogIndex());
+            dataOutputStream.writeLong(getCurrLogTerm());
+
+            SerializeUtils.serialize(newNode, dataOutputStream);
+        } catch (IOException e) {
+            // ignored
+        }
+        return ByteBuffer.wrap(byteArrayOutputStream.toByteArray());
+    }
+
+    @Override
+    public void deserialize(ByteBuffer buffer) {
+
+        // marker is previously read, remaining fields:
+        // curr index(long), curr term(long)
+        // ipLength(int), inBytes(byte[]), port(int), identifier(int), dataPort(int)
+        setCurrLogIndex(buffer.getLong());
+        setCurrLogTerm(buffer.getLong());
+
+        newNode = new Node();
+        SerializeUtils.deserialize(newNode, buffer);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        AddNodeLog that = (AddNodeLog) o;
+        return Objects.equals(newNode, that.newNode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), newNode);
+    }
 }

@@ -34,75 +34,80 @@ import org.slf4j.LoggerFactory;
  */
 public class MaxSeriesMergeFileSelector extends MaxFileMergeFileSelector {
 
-  public static final int MAX_SERIES_NUM = 1024;
-  private static final Logger logger = LoggerFactory.getLogger(MaxSeriesMergeFileSelector.class);
+    public static final int MAX_SERIES_NUM = 1024;
+    private static final Logger logger = LoggerFactory.getLogger(MaxSeriesMergeFileSelector.class);
 
-  private List<TsFileResource> lastSelectedSeqFiles = Collections.emptyList();
-  private List<TsFileResource> lastSelectedUnseqFiles = Collections.emptyList();
-  private long lastTotalMemoryCost;
+    private List<TsFileResource> lastSelectedSeqFiles = Collections.emptyList();
+    private List<TsFileResource> lastSelectedUnseqFiles = Collections.emptyList();
+    private long lastTotalMemoryCost;
 
-  public MaxSeriesMergeFileSelector(
-      MergeResource mergeResource,
-      long memoryBudget) {
-    super(mergeResource, memoryBudget);
-  }
-
-  @Override
-  public List[] select() throws MergeException {
-    long startTime = System.currentTimeMillis();
-    try {
-      logger.info("Selecting merge candidates from {} seqFile, {} unseqFiles", resource.getSeqFiles().size(),
-          resource.getUnseqFiles().size());
-
-      searchMaxSeriesNum();
-      resource.setSeqFiles(selectedSeqFiles);
-      resource.setUnseqFiles(selectedUnseqFiles);
-      resource.removeOutdatedSeqReaders();
-      if (selectedUnseqFiles.isEmpty()) {
-        logger.info("No merge candidates are found");
-        return new List[0];
-      }
-    } catch (IOException e) {
-      throw new MergeException(e);
+    public MaxSeriesMergeFileSelector(MergeResource mergeResource, long memoryBudget) {
+        super(mergeResource, memoryBudget);
     }
-    if (logger.isInfoEnabled()) {
-      logger.info("Selected merge candidates, {} seqFiles, {} unseqFiles, total memory cost {}, "
-              + "concurrent merge num {}" + "time consumption {}ms",
-          selectedSeqFiles.size(), selectedUnseqFiles.size(), totalCost, concurrentMergeNum,
-          System.currentTimeMillis() - startTime);
-    }
-    return new List[]{selectedSeqFiles, selectedUnseqFiles};
-  }
 
-  private void searchMaxSeriesNum() throws IOException {
-    binSearch();
-  }
+    @Override
+    public List[] select() throws MergeException {
+        long startTime = System.currentTimeMillis();
+        try {
+            logger.info(
+                    "Selecting merge candidates from {} seqFile, {} unseqFiles",
+                    resource.getSeqFiles().size(),
+                    resource.getUnseqFiles().size());
 
-  private void binSearch() throws IOException {
-    int lb = 0;
-    int ub = MAX_SERIES_NUM + 1;
-    while (true) {
-      int mid = (lb + ub) / 2;
-      if (mid == lb) {
-        break;
-      }
-      concurrentMergeNum = mid;
-      select(false);
-      if (selectedUnseqFiles.isEmpty()) {
-        select(true);
-      }
-      if (selectedUnseqFiles.isEmpty()) {
-        ub = mid;
-      } else {
-        lastSelectedSeqFiles = selectedSeqFiles;
-        lastSelectedUnseqFiles = selectedUnseqFiles;
-        lastTotalMemoryCost = totalCost;
-        lb = mid;
-      }
+            searchMaxSeriesNum();
+            resource.setSeqFiles(selectedSeqFiles);
+            resource.setUnseqFiles(selectedUnseqFiles);
+            resource.removeOutdatedSeqReaders();
+            if (selectedUnseqFiles.isEmpty()) {
+                logger.info("No merge candidates are found");
+                return new List[0];
+            }
+        } catch (IOException e) {
+            throw new MergeException(e);
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "Selected merge candidates, {} seqFiles, {} unseqFiles, total memory cost {}, "
+                            + "concurrent merge num {}"
+                            + "time consumption {}ms",
+                    selectedSeqFiles.size(),
+                    selectedUnseqFiles.size(),
+                    totalCost,
+                    concurrentMergeNum,
+                    System.currentTimeMillis() - startTime);
+        }
+        return new List[] {selectedSeqFiles, selectedUnseqFiles};
     }
-    selectedUnseqFiles = lastSelectedUnseqFiles;
-    selectedSeqFiles = lastSelectedSeqFiles;
-    concurrentMergeNum = lb;
-    totalCost = lastTotalMemoryCost;
-  }
+
+    private void searchMaxSeriesNum() throws IOException {
+        binSearch();
+    }
+
+    private void binSearch() throws IOException {
+        int lb = 0;
+        int ub = MAX_SERIES_NUM + 1;
+        while (true) {
+            int mid = (lb + ub) / 2;
+            if (mid == lb) {
+                break;
+            }
+            concurrentMergeNum = mid;
+            select(false);
+            if (selectedUnseqFiles.isEmpty()) {
+                select(true);
+            }
+            if (selectedUnseqFiles.isEmpty()) {
+                ub = mid;
+            } else {
+                lastSelectedSeqFiles = selectedSeqFiles;
+                lastSelectedUnseqFiles = selectedUnseqFiles;
+                lastTotalMemoryCost = totalCost;
+                lb = mid;
+            }
+        }
+        selectedUnseqFiles = lastSelectedUnseqFiles;
+        selectedSeqFiles = lastSelectedSeqFiles;
+        concurrentMergeNum = lb;
+        totalCost = lastTotalMemoryCost;
+    }
 }

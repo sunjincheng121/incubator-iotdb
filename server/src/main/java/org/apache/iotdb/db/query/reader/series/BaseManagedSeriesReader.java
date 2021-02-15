@@ -20,26 +20,26 @@ package org.apache.iotdb.db.query.reader.series;
 
 public abstract class BaseManagedSeriesReader implements ManagedSeriesReader {
 
-  protected volatile boolean managedByPool;
-  protected volatile boolean hasRemaining;
+    protected volatile boolean managedByPool;
+    protected volatile boolean hasRemaining;
 
-  @Override
-  public boolean isManagedByQueryManager() {
-    return managedByPool;
-  }
+    @Override
+    public boolean isManagedByQueryManager() {
+        return managedByPool;
+    }
 
-  @Override
-  public void setManagedByQueryManager(boolean managedByQueryManager) {
-    this.managedByPool = managedByQueryManager;
-  }
+    @Override
+    public void setManagedByQueryManager(boolean managedByQueryManager) {
+        this.managedByPool = managedByQueryManager;
+    }
 
-  @Override
-  public boolean hasRemaining() {
-    return hasRemaining;
-  }
+    @Override
+    public boolean hasRemaining() {
+        return hasRemaining;
+    }
 
-  @Override
-  public void setHasRemaining(boolean hasRemaining) {
-    this.hasRemaining = hasRemaining;
-  }
+    @Override
+    public void setHasRemaining(boolean hasRemaining) {
+        this.hasRemaining = hasRemaining;
+    }
 }

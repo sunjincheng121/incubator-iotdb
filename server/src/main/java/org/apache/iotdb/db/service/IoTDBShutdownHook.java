@@ -24,13 +24,16 @@ import org.slf4j.LoggerFactory;
 
 public class IoTDBShutdownHook extends Thread {
 
-  private static final Logger logger = LoggerFactory.getLogger(IoTDBShutdownHook.class);
+    private static final Logger logger = LoggerFactory.getLogger(IoTDBShutdownHook.class);
 
-  @Override
-  public void run() {
-    if(logger.isInfoEnabled()) {
-      logger.info("IoTDB exits. Jvm memory usage: {}", MemUtils.bytesCntToStr(
-          Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
+    @Override
+    public void run() {
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "IoTDB exits. Jvm memory usage: {}",
+                    MemUtils.bytesCntToStr(
+                            Runtime.getRuntime().totalMemory()
+                                    - Runtime.getRuntime().freeMemory()));
+        }
     }
-  }
 }

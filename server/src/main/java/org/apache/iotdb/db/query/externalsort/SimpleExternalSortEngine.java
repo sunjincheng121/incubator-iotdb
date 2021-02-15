@@ -32,148 +32,145 @@ import org.apache.iotdb.tsfile.read.reader.IPointReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class SimpleExternalSortEngine implements ExternalSortJobEngine {
 
-  private ExternalSortJobScheduler scheduler;
+    private ExternalSortJobScheduler scheduler;
 
-  private String queryDir;
-  private int minExternalSortSourceCount;
-  private boolean enableExternalSort;
-  private static final Logger logger = LoggerFactory.getLogger(SimpleExternalSortEngine.class);
+    private String queryDir;
+    private int minExternalSortSourceCount;
+    private boolean enableExternalSort;
+    private static final Logger logger = LoggerFactory.getLogger(SimpleExternalSortEngine.class);
 
-  private SimpleExternalSortEngine() {
-    queryDir = IoTDBDescriptor.getInstance().getConfig().getQueryDir() + File.separator;
-    minExternalSortSourceCount = IoTDBDescriptor.getInstance().getConfig()
-        .getExternalSortThreshold();
-    enableExternalSort = IoTDBDescriptor.getInstance().getConfig().isEnableExternalSort();
-    scheduler = ExternalSortJobScheduler.getInstance();
+    private SimpleExternalSortEngine() {
+        queryDir = IoTDBDescriptor.getInstance().getConfig().getQueryDir() + File.separator;
+        minExternalSortSourceCount =
+                IoTDBDescriptor.getInstance().getConfig().getExternalSortThreshold();
+        enableExternalSort = IoTDBDescriptor.getInstance().getConfig().isEnableExternalSort();
+        scheduler = ExternalSortJobScheduler.getInstance();
 
-    // create queryDir
-    try {
-      FileUtils.deleteDirectory(new File(queryDir));
-      FileUtils.forceMkdir(new File(queryDir));
-    } catch (IOException e) {
-      throw new StorageEngineFailureException(e);
-    }
-  }
-
-  @Override
-  public List<IPointReader> executeForIPointReader(long queryId,
-      List<ChunkReaderWrap> chunkReaderWraps)
-      throws IOException {
-    if (!enableExternalSort || chunkReaderWraps.size() < minExternalSortSourceCount) {
-      return generateIPointReader(chunkReaderWraps, 0, chunkReaderWraps.size());
-    }
-    if (logger.isInfoEnabled()) {
-      logger.info("query {} measurement {} uses external sort.", queryId,
-          chunkReaderWraps.get(0).getMeasurementUid());
-    }
-    ExternalSortJob job = createJob(queryId, chunkReaderWraps);
-    return job.executeForIPointReader();
-  }
-
-  @Override
-  public List<IReaderByTimestamp> executeForByTimestampReader(long queryId,
-      List<ChunkReaderWrap> chunkReaderWraps) throws IOException {
-    if (!enableExternalSort || chunkReaderWraps.size() < minExternalSortSourceCount) {
-      return generateIReaderByTimestamp(chunkReaderWraps, 0, chunkReaderWraps.size());
-    }
-    if (logger.isInfoEnabled()) {
-      logger.info("query {} measurement {} uses external sort.", queryId,
-          chunkReaderWraps.get(0).getMeasurementUid());
-    }
-    ExternalSortJob job = createJob(queryId, chunkReaderWraps);
-    return convert(job.executeForIPointReader());
-  }
-
-  @Override
-  public ExternalSortJob createJob(long queryId, List<ChunkReaderWrap> readerWrapList) {
-    long jobId = scheduler.genJobId();
-    List<ExternalSortJobPart> ret = new ArrayList<>();
-    for (ChunkReaderWrap readerWrap : readerWrapList) {
-      ret.add(new SingleSourceExternalSortJobPart(readerWrap));
+        // create queryDir
+        try {
+            FileUtils.deleteDirectory(new File(queryDir));
+            FileUtils.forceMkdir(new File(queryDir));
+        } catch (IOException e) {
+            throw new StorageEngineFailureException(e);
+        }
     }
 
-    int partId = 0;
-    while (ret.size() >= minExternalSortSourceCount) {
-      List<ExternalSortJobPart> tmpPartList = new ArrayList<>();
-      for (int i = 0; i < ret.size(); ) {
-        int toIndex = Math.min(i + minExternalSortSourceCount, ret.size());
-        List<ExternalSortJobPart> partGroup = ret.subList(i, toIndex);
-        i = toIndex;
-        String tmpFilePath = queryDir + jobId + "_"
-            + partId;
-        MultiSourceExternalSortJobPart part = new MultiSourceExternalSortJobPart(queryId,
-            tmpFilePath, partGroup);
-        tmpPartList.add(part);
-        partId++;
-      }
-      ret = tmpPartList;
+    @Override
+    public List<IPointReader> executeForIPointReader(
+            long queryId, List<ChunkReaderWrap> chunkReaderWraps) throws IOException {
+        if (!enableExternalSort || chunkReaderWraps.size() < minExternalSortSourceCount) {
+            return generateIPointReader(chunkReaderWraps, 0, chunkReaderWraps.size());
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "query {} measurement {} uses external sort.",
+                    queryId,
+                    chunkReaderWraps.get(0).getMeasurementUid());
+        }
+        ExternalSortJob job = createJob(queryId, chunkReaderWraps);
+        return job.executeForIPointReader();
     }
-    return new ExternalSortJob(ret);
-  }
 
-  String getQueryDir() {
-    return queryDir;
-  }
-
-  void setQueryDir(String queryDir) {
-    this.queryDir = queryDir;
-  }
-
-  int getMinExternalSortSourceCount() {
-    return minExternalSortSourceCount;
-  }
-
-  void setMinExternalSortSourceCount(int minExternalSortSourceCount) {
-    this.minExternalSortSourceCount = minExternalSortSourceCount;
-  }
-
-  /**
-   * init IPointReader with ChunkReaderWrap.
-   */
-  private List<IPointReader> generateIPointReader(List<ChunkReaderWrap> readerWraps,
-      final int start, final int size) throws IOException {
-    List<IPointReader> pointReaderList = new ArrayList<>();
-    for (int i = start; i < start + size; i++) {
-      pointReaderList.add(readerWraps.get(i).getIPointReader());
+    @Override
+    public List<IReaderByTimestamp> executeForByTimestampReader(
+            long queryId, List<ChunkReaderWrap> chunkReaderWraps) throws IOException {
+        if (!enableExternalSort || chunkReaderWraps.size() < minExternalSortSourceCount) {
+            return generateIReaderByTimestamp(chunkReaderWraps, 0, chunkReaderWraps.size());
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "query {} measurement {} uses external sort.",
+                    queryId,
+                    chunkReaderWraps.get(0).getMeasurementUid());
+        }
+        ExternalSortJob job = createJob(queryId, chunkReaderWraps);
+        return convert(job.executeForIPointReader());
     }
-    return pointReaderList;
-  }
 
-  /**
-   * init IReaderByTimestamp with ChunkReaderWrap.
-   */
-  private List<IReaderByTimestamp> generateIReaderByTimestamp(List<ChunkReaderWrap> readerWraps,
-      final int start, final int size) throws IOException {
-    List<IReaderByTimestamp> readerByTimestampList = new ArrayList<>();
-    for (int i = start; i < start + size; i++) {
-      readerByTimestampList.add(readerWraps.get(i).getIReaderByTimestamp());
+    @Override
+    public ExternalSortJob createJob(long queryId, List<ChunkReaderWrap> readerWrapList) {
+        long jobId = scheduler.genJobId();
+        List<ExternalSortJobPart> ret = new ArrayList<>();
+        for (ChunkReaderWrap readerWrap : readerWrapList) {
+            ret.add(new SingleSourceExternalSortJobPart(readerWrap));
+        }
+
+        int partId = 0;
+        while (ret.size() >= minExternalSortSourceCount) {
+            List<ExternalSortJobPart> tmpPartList = new ArrayList<>();
+            for (int i = 0; i < ret.size(); ) {
+                int toIndex = Math.min(i + minExternalSortSourceCount, ret.size());
+                List<ExternalSortJobPart> partGroup = ret.subList(i, toIndex);
+                i = toIndex;
+                String tmpFilePath = queryDir + jobId + "_" + partId;
+                MultiSourceExternalSortJobPart part =
+                        new MultiSourceExternalSortJobPart(queryId, tmpFilePath, partGroup);
+                tmpPartList.add(part);
+                partId++;
+            }
+            ret = tmpPartList;
+        }
+        return new ExternalSortJob(ret);
     }
-    return readerByTimestampList;
-  }
 
-  /**
-   * convert IPointReader to implement interface of IReaderByTimestamp.
-   *
-   * @param pointReaderList reader list that implements IPointReader
-   * @return reader list that implements IReaderByTimestamp
-   */
-  private List<IReaderByTimestamp> convert(List<IPointReader> pointReaderList) {
-    List<IReaderByTimestamp> readerByTimestampList = new ArrayList<>();
-    for (IPointReader pointReader : pointReaderList) {
-      readerByTimestampList.add(new ByTimestampReaderAdapter(pointReader));
+    String getQueryDir() {
+        return queryDir;
     }
-    return readerByTimestampList;
-  }
 
-  private static class SimpleExternalSortJobEngineHelper {
+    void setQueryDir(String queryDir) {
+        this.queryDir = queryDir;
+    }
 
-    private static final SimpleExternalSortEngine INSTANCE = new SimpleExternalSortEngine();
-  }
+    int getMinExternalSortSourceCount() {
+        return minExternalSortSourceCount;
+    }
 
-  public static SimpleExternalSortEngine getInstance() {
-    return SimpleExternalSortJobEngineHelper.INSTANCE;
-  }
+    void setMinExternalSortSourceCount(int minExternalSortSourceCount) {
+        this.minExternalSortSourceCount = minExternalSortSourceCount;
+    }
+
+    /** init IPointReader with ChunkReaderWrap. */
+    private List<IPointReader> generateIPointReader(
+            List<ChunkReaderWrap> readerWraps, final int start, final int size) throws IOException {
+        List<IPointReader> pointReaderList = new ArrayList<>();
+        for (int i = start; i < start + size; i++) {
+            pointReaderList.add(readerWraps.get(i).getIPointReader());
+        }
+        return pointReaderList;
+    }
+
+    /** init IReaderByTimestamp with ChunkReaderWrap. */
+    private List<IReaderByTimestamp> generateIReaderByTimestamp(
+            List<ChunkReaderWrap> readerWraps, final int start, final int size) throws IOException {
+        List<IReaderByTimestamp> readerByTimestampList = new ArrayList<>();
+        for (int i = start; i < start + size; i++) {
+            readerByTimestampList.add(readerWraps.get(i).getIReaderByTimestamp());
+        }
+        return readerByTimestampList;
+    }
+
+    /**
+     * convert IPointReader to implement interface of IReaderByTimestamp.
+     *
+     * @param pointReaderList reader list that implements IPointReader
+     * @return reader list that implements IReaderByTimestamp
+     */
+    private List<IReaderByTimestamp> convert(List<IPointReader> pointReaderList) {
+        List<IReaderByTimestamp> readerByTimestampList = new ArrayList<>();
+        for (IPointReader pointReader : pointReaderList) {
+            readerByTimestampList.add(new ByTimestampReaderAdapter(pointReader));
+        }
+        return readerByTimestampList;
+    }
+
+    private static class SimpleExternalSortJobEngineHelper {
+
+        private static final SimpleExternalSortEngine INSTANCE = new SimpleExternalSortEngine();
+    }
+
+    public static SimpleExternalSortEngine getInstance() {
+        return SimpleExternalSortJobEngineHelper.INSTANCE;
+    }
 }

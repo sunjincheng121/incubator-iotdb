@@ -26,22 +26,22 @@ import org.slf4j.LoggerFactory;
 
 public class CommitLogCallback implements AsyncMethodCallback<Void> {
 
-  private static final Logger logger = LoggerFactory.getLogger(CommitLogCallback.class);
-  private final RaftMember raftMember;
+    private static final Logger logger = LoggerFactory.getLogger(CommitLogCallback.class);
+    private final RaftMember raftMember;
 
-  public CommitLogCallback(RaftMember raftMember) {
-    this.raftMember = raftMember;
-  }
-
-  @Override
-  public void onComplete(Void v) {
-    synchronized (raftMember.getSyncLock()) {
-      raftMember.getSyncLock().notifyAll();
+    public CommitLogCallback(RaftMember raftMember) {
+        this.raftMember = raftMember;
     }
-  }
 
-  @Override
-  public void onError(Exception e) {
-    logger.error("async commit log failed", e);
-  }
+    @Override
+    public void onComplete(Void v) {
+        synchronized (raftMember.getSyncLock()) {
+            raftMember.getSyncLock().notifyAll();
+        }
+    }
+
+    @Override
+    public void onError(Exception e) {
+        logger.error("async commit log failed", e);
+    }
 }

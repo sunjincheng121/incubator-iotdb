@@ -19,8 +19,8 @@
 package org.apache.iotdb.tsfile.read;
 
 import java.io.IOException;
-import org.apache.iotdb.tsfile.read.controller.IChunkLoader;
 import org.apache.iotdb.tsfile.read.controller.CachedChunkLoaderImpl;
+import org.apache.iotdb.tsfile.read.controller.IChunkLoader;
 import org.apache.iotdb.tsfile.read.controller.IMetadataQuerier;
 import org.apache.iotdb.tsfile.read.controller.MetadataQuerierByFileImpl;
 import org.apache.iotdb.tsfile.read.expression.QueryExpression;
@@ -29,31 +29,30 @@ import org.apache.iotdb.tsfile.read.query.executor.TsFileExecutor;
 
 public class ReadOnlyTsFile implements AutoCloseable {
 
-  private TsFileSequenceReader fileReader;
-  private IMetadataQuerier metadataQuerier;
-  private IChunkLoader chunkLoader;
-  private TsFileExecutor tsFileExecutor;
+    private TsFileSequenceReader fileReader;
+    private IMetadataQuerier metadataQuerier;
+    private IChunkLoader chunkLoader;
+    private TsFileExecutor tsFileExecutor;
 
-  /**
-   * constructor, create ReadOnlyTsFile with TsFileSequenceReader.
-   */
-  public ReadOnlyTsFile(TsFileSequenceReader fileReader) throws IOException {
-    this.fileReader = fileReader;
-    this.metadataQuerier = new MetadataQuerierByFileImpl(fileReader);
-    this.chunkLoader = new CachedChunkLoaderImpl(fileReader);
-    tsFileExecutor = new TsFileExecutor(metadataQuerier, chunkLoader);
-  }
+    /** constructor, create ReadOnlyTsFile with TsFileSequenceReader. */
+    public ReadOnlyTsFile(TsFileSequenceReader fileReader) throws IOException {
+        this.fileReader = fileReader;
+        this.metadataQuerier = new MetadataQuerierByFileImpl(fileReader);
+        this.chunkLoader = new CachedChunkLoaderImpl(fileReader);
+        tsFileExecutor = new TsFileExecutor(metadataQuerier, chunkLoader);
+    }
 
-  public QueryDataSet query(QueryExpression queryExpression) throws IOException {
-    return tsFileExecutor.execute(queryExpression);
-  }
+    public QueryDataSet query(QueryExpression queryExpression) throws IOException {
+        return tsFileExecutor.execute(queryExpression);
+    }
 
-  public QueryDataSet query(QueryExpression queryExpression, long partitionStartOffset,
-      long partitionEndOffset) throws IOException {
-    return tsFileExecutor.execute(queryExpression, partitionStartOffset, partitionEndOffset);
-  }
+    public QueryDataSet query(
+            QueryExpression queryExpression, long partitionStartOffset, long partitionEndOffset)
+            throws IOException {
+        return tsFileExecutor.execute(queryExpression, partitionStartOffset, partitionEndOffset);
+    }
 
-  public void close() throws IOException {
-    fileReader.close();
-  }
+    public void close() throws IOException {
+        fileReader.close();
+    }
 }

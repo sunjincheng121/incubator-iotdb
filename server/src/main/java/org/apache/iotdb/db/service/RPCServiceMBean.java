@@ -22,13 +22,13 @@ import org.apache.iotdb.db.exception.StartupException;
 
 public interface RPCServiceMBean {
 
-  String getRPCServiceStatus();
+    String getRPCServiceStatus();
 
-  int getRPCPort();
+    int getRPCPort();
 
-  void startService() throws StartupException;
+    void startService() throws StartupException;
 
-  void restartService() throws StartupException;
+    void restartService() throws StartupException;
 
-  void stopService();
+    void stopService();
 }

@@ -24,7 +24,7 @@ package org.apache.iotdb.db.qp.logical;
  */
 public abstract class RootOperator extends Operator {
 
-  public RootOperator(int tokenIntType) {
-    super(tokenIntType);
-  }
+    public RootOperator(int tokenIntType) {
+        super(tokenIntType);
+    }
 }

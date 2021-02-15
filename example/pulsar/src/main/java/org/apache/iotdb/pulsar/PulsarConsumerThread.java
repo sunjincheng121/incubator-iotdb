@@ -28,43 +28,44 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PulsarConsumerThread implements Runnable {
-  private static final String INSERT_TEMPLATE = "INSERT INTO root.vehicle.%s(timestamp,%s) VALUES (%s,'%s')";
+    private static final String INSERT_TEMPLATE =
+            "INSERT INTO root.vehicle.%s(timestamp,%s) VALUES (%s,'%s')";
 
-  private static final Logger logger = LoggerFactory.getLogger(PulsarConsumerThread.class);
+    private static final Logger logger = LoggerFactory.getLogger(PulsarConsumerThread.class);
 
-  private final Consumer<?> consumer;
+    private final Consumer<?> consumer;
 
-  public PulsarConsumerThread(Consumer<?> consumer) throws ClassNotFoundException {
-    this.consumer = consumer;
-    Class.forName("org.apache.iotdb.jdbc.IoTDBDriver");
-  }
-
-  /**
-   * Write data to IoTDB
-   */
-  private void writeData(Statement statement, String message) throws SQLException {
-
-    String[] items = message.split(",");
-
-    String sql = String.format(INSERT_TEMPLATE, items[0], items[1], items[2], items[3]);
-    statement.execute(sql);
-  }
-
-  @SuppressWarnings("squid:S2068")
-  @Override
-  public void run() {
-    try (Connection connection = DriverManager
-        .getConnection(Constant.IOTDB_CONNECTION_URL, Constant.IOTDB_CONNECTION_USER,
-            Constant.IOTDB_CONNECTION_PASSWORD);
-         Statement statement = connection.createStatement()) {
-      do {
-        Message<?> msg = consumer.receive();
-        writeData(statement, new String(msg.getData()));
-
-        consumer.acknowledge(msg);
-      } while (true);
-    } catch (Exception e) {
-      logger.error(e.getMessage());
+    public PulsarConsumerThread(Consumer<?> consumer) throws ClassNotFoundException {
+        this.consumer = consumer;
+        Class.forName("org.apache.iotdb.jdbc.IoTDBDriver");
     }
-  }
+
+    /** Write data to IoTDB */
+    private void writeData(Statement statement, String message) throws SQLException {
+
+        String[] items = message.split(",");
+
+        String sql = String.format(INSERT_TEMPLATE, items[0], items[1], items[2], items[3]);
+        statement.execute(sql);
+    }
+
+    @SuppressWarnings("squid:S2068")
+    @Override
+    public void run() {
+        try (Connection connection =
+                        DriverManager.getConnection(
+                                Constant.IOTDB_CONNECTION_URL,
+                                Constant.IOTDB_CONNECTION_USER,
+                                Constant.IOTDB_CONNECTION_PASSWORD);
+                Statement statement = connection.createStatement()) {
+            do {
+                Message<?> msg = consumer.receive();
+                writeData(statement, new String(msg.getData()));
+
+                consumer.acknowledge(msg);
+            } while (true);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+    }
 }

@@ -31,47 +31,49 @@ import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
 public class MemPageReader implements IPageReader {
 
-  private final IPointReader timeValuePairIterator;
-  private final ChunkMetadata chunkMetadata;
-  private Filter valueFilter;
+    private final IPointReader timeValuePairIterator;
+    private final ChunkMetadata chunkMetadata;
+    private Filter valueFilter;
 
-  public MemPageReader(IPointReader timeValuePairIterator, ChunkMetadata chunkMetadata,
-      Filter filter) {
-    this.timeValuePairIterator = timeValuePairIterator;
-    this.chunkMetadata = chunkMetadata;
-    this.valueFilter = filter;
-  }
-
-  @Override
-  public BatchData getAllSatisfiedPageData(boolean ascending) throws IOException {
-    BatchData batchData = BatchDataFactory
-        .createBatchData(chunkMetadata.getDataType(), ascending, false);
-    while (timeValuePairIterator.hasNextTimeValuePair()) {
-      TimeValuePair timeValuePair = timeValuePairIterator.nextTimeValuePair();
-      if (valueFilter == null || valueFilter
-          .satisfy(timeValuePair.getTimestamp(), timeValuePair.getValue().getValue())) {
-        batchData.putAnObject(timeValuePair.getTimestamp(), timeValuePair.getValue().getValue());
-      }
+    public MemPageReader(
+            IPointReader timeValuePairIterator, ChunkMetadata chunkMetadata, Filter filter) {
+        this.timeValuePairIterator = timeValuePairIterator;
+        this.chunkMetadata = chunkMetadata;
+        this.valueFilter = filter;
     }
-    return batchData.flip();
-  }
 
-  @Override
-  public Statistics getStatistics() {
-    return chunkMetadata.getStatistics();
-  }
-
-  @Override
-  public void setFilter(Filter filter) {
-    if (valueFilter == null) {
-      this.valueFilter = filter;
-    } else {
-      valueFilter = new AndFilter(this.valueFilter, filter);
+    @Override
+    public BatchData getAllSatisfiedPageData(boolean ascending) throws IOException {
+        BatchData batchData =
+                BatchDataFactory.createBatchData(chunkMetadata.getDataType(), ascending, false);
+        while (timeValuePairIterator.hasNextTimeValuePair()) {
+            TimeValuePair timeValuePair = timeValuePairIterator.nextTimeValuePair();
+            if (valueFilter == null
+                    || valueFilter.satisfy(
+                            timeValuePair.getTimestamp(), timeValuePair.getValue().getValue())) {
+                batchData.putAnObject(
+                        timeValuePair.getTimestamp(), timeValuePair.getValue().getValue());
+            }
+        }
+        return batchData.flip();
     }
-  }
 
-  @Override
-  public boolean isModified() {
-    return false;
-  }
+    @Override
+    public Statistics getStatistics() {
+        return chunkMetadata.getStatistics();
+    }
+
+    @Override
+    public void setFilter(Filter filter) {
+        if (valueFilter == null) {
+            this.valueFilter = filter;
+        } else {
+            valueFilter = new AndFilter(this.valueFilter, filter);
+        }
+    }
+
+    @Override
+    public boolean isModified() {
+        return false;
+    }
 }

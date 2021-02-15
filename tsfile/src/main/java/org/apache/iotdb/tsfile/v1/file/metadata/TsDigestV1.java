@@ -1,4 +1,3 @@
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,55 +20,53 @@
 package org.apache.iotdb.tsfile.v1.file.metadata;
 
 import java.nio.ByteBuffer;
-
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Digest/statistics per chunk group and per page.
- */
+/** Digest/statistics per chunk group and per page. */
 public class TsDigestV1 {
 
-  private ByteBuffer[] statistics;
+    private ByteBuffer[] statistics;
 
-  public TsDigestV1() {
-    // allowed to declare an empty TsDigest whose fields will be assigned later.
-  }
-
-  /**
-   * use given buffer to deserialize.
-   *
-   * @param buffer -given buffer
-   * @return -an instance of TsDigest
-   */
-  public static TsDigestV1 deserializeFrom(ByteBuffer buffer) {
-    TsDigestV1 digest = new TsDigestV1();
-    int size = ReadWriteIOUtils.readInt(buffer);
-    if (size > 0) {
-      digest.statistics = new ByteBuffer[StatisticType.getTotalTypeNum()];
-      ByteBuffer value;
-      for (int i = 0; i < size; i++) {
-        short n = ReadWriteIOUtils.readShort(buffer);
-        value = ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(buffer);
-        digest.statistics[n] = value;
-      }
-    } // else left digest.statistics as null
-
-    return digest;
-  }
-
-  /**
-   * get statistics of the current object.
-   */
-  public ByteBuffer[] getStatistics() {
-    return statistics;
-  }
-
-  public enum StatisticType {
-    MIN_VALUE, MAX_VALUE, FIRST_VALUE, LAST_VALUE, SUM_VALUE;
-
-    public static int getTotalTypeNum() {
-      return StatisticType.values().length;
+    public TsDigestV1() {
+        // allowed to declare an empty TsDigest whose fields will be assigned later.
     }
 
-  }
+    /**
+     * use given buffer to deserialize.
+     *
+     * @param buffer -given buffer
+     * @return -an instance of TsDigest
+     */
+    public static TsDigestV1 deserializeFrom(ByteBuffer buffer) {
+        TsDigestV1 digest = new TsDigestV1();
+        int size = ReadWriteIOUtils.readInt(buffer);
+        if (size > 0) {
+            digest.statistics = new ByteBuffer[StatisticType.getTotalTypeNum()];
+            ByteBuffer value;
+            for (int i = 0; i < size; i++) {
+                short n = ReadWriteIOUtils.readShort(buffer);
+                value = ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(buffer);
+                digest.statistics[n] = value;
+            }
+        } // else left digest.statistics as null
+
+        return digest;
+    }
+
+    /** get statistics of the current object. */
+    public ByteBuffer[] getStatistics() {
+        return statistics;
+    }
+
+    public enum StatisticType {
+        MIN_VALUE,
+        MAX_VALUE,
+        FIRST_VALUE,
+        LAST_VALUE,
+        SUM_VALUE;
+
+        public static int getTotalTypeNum() {
+            return StatisticType.values().length;
+        }
+    }
 }

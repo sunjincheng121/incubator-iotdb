@@ -24,18 +24,16 @@ import java.util.Map;
 import org.apache.iotdb.cluster.partition.NodeRemovalResult;
 import org.apache.iotdb.cluster.rpc.thrift.Node;
 
-/**
- * SlotNodeRemovalResult stores the removed partition group and who will take over its slots.
- */
+/** SlotNodeRemovalResult stores the removed partition group and who will take over its slots. */
 public class SlotNodeRemovalResult extends NodeRemovalResult {
 
-  private Map<Node, List<Integer>> newSlotOwners;
+    private Map<Node, List<Integer>> newSlotOwners;
 
-  public Map<Node, List<Integer>> getNewSlotOwners() {
-    return newSlotOwners;
-  }
+    public Map<Node, List<Integer>> getNewSlotOwners() {
+        return newSlotOwners;
+    }
 
-  public void setNewSlotOwners(Map<Node, List<Integer>> newSlotOwners) {
-    this.newSlotOwners = newSlotOwners;
-  }
+    public void setNewSlotOwners(Map<Node, List<Integer>> newSlotOwners) {
+        this.newSlotOwners = newSlotOwners;
+    }
 }
