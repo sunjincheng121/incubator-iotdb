@@ -55,7 +55,6 @@ public class QueryCoordinator {
   private MetaGroupMember metaGroupMember;
   private Map<Node, NodeStatus> nodeStatusMap = new ConcurrentHashMap<>();
 
-
   private QueryCoordinator() {
     // singleton class
   }
@@ -152,8 +151,11 @@ public class QueryCoordinator {
     } else {
       nodeStatus.setLastResponseLatency(Long.MAX_VALUE);
     }
-    logger.info("NodeStatus of {} is updated, status: {}, response time: {}", node,
-        nodeStatus.getStatus(), nodeStatus.getLastResponseLatency());
+    logger.info(
+        "NodeStatus of {} is updated, status: {}, response time: {}",
+        node,
+        nodeStatus.getStatus(),
+        nodeStatus.getLastResponseLatency());
     return nodeStatus;
   }
 

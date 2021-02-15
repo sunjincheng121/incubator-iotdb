@@ -18,18 +18,15 @@
  */
 package org.apache.iotdb.tsfile.file.metadata.statistics;
 
-import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
-import org.apache.iotdb.tsfile.utils.BytesUtils;
-import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+import org.apache.iotdb.tsfile.utils.BytesUtils;
+import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Statistics for float type.
- */
+/** Statistics for float type. */
 public class FloatStatistics extends Statistics<Float> {
 
   private float minValue;
@@ -39,7 +36,6 @@ public class FloatStatistics extends Statistics<Float> {
   private double sumValue;
 
   static final int FLOAT_STATISTICS_FIXED_RAM_SIZE = 64;
-
 
   @Override
   public TSDataType getType() {
@@ -70,7 +66,14 @@ public class FloatStatistics extends Statistics<Float> {
     this.lastValue = last;
   }
 
-  private void updateStats(float minValue, float maxValue, float first, float last, double sumValue, long startTime, long endTime) {
+  private void updateStats(
+      float minValue,
+      float maxValue,
+      float first,
+      float last,
+      double sumValue,
+      long startTime,
+      long endTime) {
     if (minValue < this.minValue) {
       this.minValue = minValue;
     }
@@ -146,12 +149,22 @@ public class FloatStatistics extends Statistics<Float> {
   protected void mergeStatisticsValue(Statistics stats) {
     FloatStatistics floatStats = (FloatStatistics) stats;
     if (isEmpty) {
-      initializeStats(floatStats.getMinValue(), floatStats.getMaxValue(), floatStats.getFirstValue(),
-          floatStats.getLastValue(), floatStats.getSumValue());
+      initializeStats(
+          floatStats.getMinValue(),
+          floatStats.getMaxValue(),
+          floatStats.getFirstValue(),
+          floatStats.getLastValue(),
+          floatStats.getSumValue());
       isEmpty = false;
     } else {
-      updateStats(floatStats.getMinValue(), floatStats.getMaxValue(), floatStats.getFirstValue(),
-          floatStats.getLastValue(), floatStats.getSumValue(), stats.getStartTime(), stats.getEndTime());
+      updateStats(
+          floatStats.getMinValue(),
+          floatStats.getMaxValue(),
+          floatStats.getFirstValue(),
+          floatStats.getLastValue(),
+          floatStats.getSumValue(),
+          stats.getStartTime(),
+          stats.getEndTime());
     }
   }
 
@@ -236,7 +249,17 @@ public class FloatStatistics extends Statistics<Float> {
 
   @Override
   public String toString() {
-    return super.toString() + " [minValue:" + minValue + ",maxValue:" + maxValue + ",firstValue:" + firstValue +
-        ",lastValue:" + lastValue + ",sumValue:" + sumValue + "]";
+    return super.toString()
+        + " [minValue:"
+        + minValue
+        + ",maxValue:"
+        + maxValue
+        + ",firstValue:"
+        + firstValue
+        + ",lastValue:"
+        + lastValue
+        + ",sumValue:"
+        + sumValue
+        + "]";
   }
 }

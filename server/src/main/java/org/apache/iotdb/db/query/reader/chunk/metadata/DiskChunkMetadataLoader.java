@@ -40,8 +40,8 @@ public class DiskChunkMetadataLoader implements IChunkMetadataLoader {
   // time filter or value filter, only used to check time range
   private Filter filter;
 
-  public DiskChunkMetadataLoader(TsFileResource resource, PartialPath seriesPath,
-      QueryContext context, Filter filter) {
+  public DiskChunkMetadataLoader(
+      TsFileResource resource, PartialPath seriesPath, QueryContext context, Filter filter) {
     this.resource = resource;
     this.seriesPath = seriesPath;
     this.context = context;
@@ -51,17 +51,21 @@ public class DiskChunkMetadataLoader implements IChunkMetadataLoader {
   @Override
   public List<ChunkMetadata> loadChunkMetadataList(TimeseriesMetadata timeseriesMetadata)
       throws IOException {
-    List<ChunkMetadata> chunkMetadataList = ChunkMetadataCache
-        .getInstance().get(resource.getTsFilePath(), seriesPath, timeseriesMetadata);
+    List<ChunkMetadata> chunkMetadataList =
+        ChunkMetadataCache.getInstance()
+            .get(resource.getTsFilePath(), seriesPath, timeseriesMetadata);
 
     setDiskChunkLoader(chunkMetadataList, resource, seriesPath, context);
 
     /*
      * remove not satisfied ChunkMetaData
      */
-    chunkMetadataList.removeIf(chunkMetaData -> (filter != null && !filter
-        .satisfyStartEndTime(chunkMetaData.getStartTime(), chunkMetaData.getEndTime()))
-        || chunkMetaData.getStartTime() > chunkMetaData.getEndTime());
+    chunkMetadataList.removeIf(
+        chunkMetaData ->
+            (filter != null
+                    && !filter.satisfyStartEndTime(
+                        chunkMetaData.getStartTime(), chunkMetaData.getEndTime()))
+                || chunkMetaData.getStartTime() > chunkMetaData.getEndTime());
     return chunkMetadataList;
   }
 
@@ -77,8 +81,11 @@ public class DiskChunkMetadataLoader implements IChunkMetadataLoader {
     setDiskChunkLoader(chunkMetadataList, resource, seriesPath, context);
   }
 
-  public static void setDiskChunkLoader(List<ChunkMetadata> chunkMetadataList,
-      TsFileResource resource, PartialPath seriesPath, QueryContext context) {
+  public static void setDiskChunkLoader(
+      List<ChunkMetadata> chunkMetadataList,
+      TsFileResource resource,
+      PartialPath seriesPath,
+      QueryContext context) {
     List<Modification> pathModifications =
         context.getPathModifications(resource.getModFile(), seriesPath);
 
@@ -90,5 +97,4 @@ public class DiskChunkMetadataLoader implements IChunkMetadataLoader {
       data.setChunkLoader(new DiskChunkLoader(resource));
     }
   }
-
 }

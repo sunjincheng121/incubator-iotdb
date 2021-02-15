@@ -57,8 +57,8 @@ import org.slf4j.LoggerFactory;
 public class CompactionUtils {
 
   private static final Logger logger = LoggerFactory.getLogger(CompactionUtils.class);
-  private static final int MERGE_PAGE_POINT_NUM = IoTDBDescriptor.getInstance().getConfig()
-      .getMergePagePointNumberThreshold();
+  private static final int MERGE_PAGE_POINT_NUM =
+      IoTDBDescriptor.getInstance().getConfig().getMergePagePointNumberThreshold();
 
   private CompactionUtils() {
     throw new IllegalStateException("Utility class");
@@ -68,8 +68,8 @@ public class CompactionUtils {
       Map<TsFileSequenceReader, List<ChunkMetadata>> readerChunkMetadataMap) throws IOException {
     ChunkMetadata newChunkMetadata = null;
     Chunk newChunk = null;
-    for (Entry<TsFileSequenceReader, List<ChunkMetadata>> entry : readerChunkMetadataMap
-        .entrySet()) {
+    for (Entry<TsFileSequenceReader, List<ChunkMetadata>> entry :
+        readerChunkMetadataMap.entrySet()) {
       for (ChunkMetadata chunkMetadata : entry.getValue()) {
         Chunk chunk = entry.getKey().readMemChunk(chunkMetadata);
         if (newChunkMetadata == null) {
@@ -85,20 +85,19 @@ public class CompactionUtils {
   }
 
   private static long readByDeserializeMerge(
-      Map<TsFileSequenceReader, List<ChunkMetadata>> readerChunkMetadataMap, long maxVersion,
+      Map<TsFileSequenceReader, List<ChunkMetadata>> readerChunkMetadataMap,
+      long maxVersion,
       Map<Long, TimeValuePair> timeValuePairMap)
       throws IOException {
-    for (Entry<TsFileSequenceReader, List<ChunkMetadata>> entry : readerChunkMetadataMap
-        .entrySet()) {
+    for (Entry<TsFileSequenceReader, List<ChunkMetadata>> entry :
+        readerChunkMetadataMap.entrySet()) {
       TsFileSequenceReader reader = entry.getKey();
       List<ChunkMetadata> chunkMetadataList = entry.getValue();
       for (ChunkMetadata chunkMetadata : chunkMetadataList) {
         maxVersion = Math.max(chunkMetadata.getVersion(), maxVersion);
-        IChunkReader chunkReader = new ChunkReaderByTimestamp(
-            reader.readMemChunk(chunkMetadata));
+        IChunkReader chunkReader = new ChunkReaderByTimestamp(reader.readMemChunk(chunkMetadata));
         while (chunkReader.hasNextSatisfiedPage()) {
-          IPointReader iPointReader = new BatchDataIterator(
-              chunkReader.nextPageData());
+          IPointReader iPointReader = new BatchDataIterator(chunkReader.nextPageData());
           while (iPointReader.hasNextTimeValuePair()) {
             TimeValuePair timeValuePair = iPointReader.nextTimeValuePair();
             timeValuePairMap.put(timeValuePair.getTimestamp(), timeValuePair);
@@ -109,17 +108,22 @@ public class CompactionUtils {
     return maxVersion;
   }
 
-  private static long writeByAppendMerge(long maxVersion, String device,
+  private static long writeByAppendMerge(
+      long maxVersion,
+      String device,
       RateLimiter compactionWriteRateLimiter,
       Map<TsFileSequenceReader, List<ChunkMetadata>> readerChunkMetadatasMap,
-      TsFileResource targetResource, RestorableTsFileIOWriter writer) throws IOException {
+      TsFileResource targetResource,
+      RestorableTsFileIOWriter writer)
+      throws IOException {
     Pair<ChunkMetadata, Chunk> chunkPair = readByAppendMerge(readerChunkMetadatasMap);
     ChunkMetadata newChunkMetadata = chunkPair.left;
     Chunk newChunk = chunkPair.right;
     if (newChunkMetadata != null && newChunk != null) {
       maxVersion = Math.max(newChunkMetadata.getVersion(), maxVersion);
       // wait for limit write
-      MergeManager.mergeRateLimiterAcquire(compactionWriteRateLimiter,
+      MergeManager.mergeRateLimiterAcquire(
+          compactionWriteRateLimiter,
           (long) newChunk.getHeader().getDataSize() + newChunk.getData().position());
       writer.writeChunk(newChunk, newChunkMetadata);
       targetResource.updateStartTime(device, newChunkMetadata.getStartTime());
@@ -128,14 +132,17 @@ public class CompactionUtils {
     return maxVersion;
   }
 
-  private static long writeByDeserializeMerge(long maxVersion, String device,
+  private static long writeByDeserializeMerge(
+      long maxVersion,
+      String device,
       RateLimiter compactionRateLimiter,
       Entry<String, Map<TsFileSequenceReader, List<ChunkMetadata>>> entry,
-      TsFileResource targetResource, RestorableTsFileIOWriter writer) throws IOException {
+      TsFileResource targetResource,
+      RestorableTsFileIOWriter writer)
+      throws IOException {
     Map<Long, TimeValuePair> timeValuePairMap = new TreeMap<>();
     maxVersion = readByDeserializeMerge(entry.getValue(), maxVersion, timeValuePairMap);
-    Iterator<List<ChunkMetadata>> chunkMetadataListIterator = entry.getValue().values()
-        .iterator();
+    Iterator<List<ChunkMetadata>> chunkMetadataListIterator = entry.getValue().values().iterator();
     if (!chunkMetadataListIterator.hasNext()) {
       return maxVersion;
     }
@@ -145,8 +152,9 @@ public class CompactionUtils {
     }
     IChunkWriter chunkWriter;
     try {
-      chunkWriter = new ChunkWriterImpl(
-          IoTDB.metaManager.getSeriesSchema(new PartialPath(device), entry.getKey()), true);
+      chunkWriter =
+          new ChunkWriterImpl(
+              IoTDB.metaManager.getSeriesSchema(new PartialPath(device), entry.getKey()), true);
     } catch (MetadataException e) {
       throw new IOException(e);
     }
@@ -156,20 +164,20 @@ public class CompactionUtils {
       targetResource.updateEndTime(device, timeValuePair.getTimestamp());
     }
     // wait for limit write
-    MergeManager
-        .mergeRateLimiterAcquire(compactionRateLimiter, chunkWriter.getCurrentChunkSize());
+    MergeManager.mergeRateLimiterAcquire(compactionRateLimiter, chunkWriter.getCurrentChunkSize());
     chunkWriter.writeToFileWriter(writer);
     return maxVersion;
   }
 
-  private static Set<String> getTsFileDevicesSet(List<TsFileResource> subLevelResources,
-      Map<String, TsFileSequenceReader> tsFileSequenceReaderMap, String storageGroup)
+  private static Set<String> getTsFileDevicesSet(
+      List<TsFileResource> subLevelResources,
+      Map<String, TsFileSequenceReader> tsFileSequenceReaderMap,
+      String storageGroup)
       throws IOException {
     Set<String> tsFileDevicesSet = new HashSet<>();
     for (TsFileResource levelResource : subLevelResources) {
-      TsFileSequenceReader reader = buildReaderFromTsFileResource(levelResource,
-          tsFileSequenceReaderMap,
-          storageGroup);
+      TsFileSequenceReader reader =
+          buildReaderFromTsFileResource(levelResource, tsFileSequenceReaderMap, storageGroup);
       if (reader == null) {
         continue;
       }
@@ -179,37 +187,42 @@ public class CompactionUtils {
   }
 
   /**
-   * @param targetResource   the target resource to be merged to
-   * @param tsFileResources  the source resource to be merged
-   * @param storageGroup     the storage group name
+   * @param targetResource the target resource to be merged to
+   * @param tsFileResources the source resource to be merged
+   * @param storageGroup the storage group name
    * @param compactionLogger the logger
-   * @param devices          the devices to be skipped(used by recover)
+   * @param devices the devices to be skipped(used by recover)
    */
   @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  public static void merge(TsFileResource targetResource,
-      List<TsFileResource> tsFileResources, String storageGroup,
+  public static void merge(
+      TsFileResource targetResource,
+      List<TsFileResource> tsFileResources,
+      String storageGroup,
       CompactionLogger compactionLogger,
-      Set<String> devices, boolean sequence) throws IOException {
+      Set<String> devices,
+      boolean sequence)
+      throws IOException {
     RestorableTsFileIOWriter writer = new RestorableTsFileIOWriter(targetResource.getTsFile());
     Map<String, TsFileSequenceReader> tsFileSequenceReaderMap = new HashMap<>();
     RateLimiter compactionWriteRateLimiter = MergeManager.getINSTANCE().getMergeWriteRateLimiter();
-    Set<String> tsFileDevicesMap = getTsFileDevicesSet(tsFileResources, tsFileSequenceReaderMap,
-        storageGroup);
+    Set<String> tsFileDevicesMap =
+        getTsFileDevicesSet(tsFileResources, tsFileSequenceReaderMap, storageGroup);
     for (String device : tsFileDevicesMap) {
       if (devices.contains(device)) {
         continue;
       }
       writer.startChunkGroup(device);
       // sort chunkMeta by measurement
-      Map<String, Map<TsFileSequenceReader, List<ChunkMetadata>>> measurementChunkMetadataMap = new HashMap<>();
+      Map<String, Map<TsFileSequenceReader, List<ChunkMetadata>>> measurementChunkMetadataMap =
+          new HashMap<>();
       for (TsFileResource levelResource : tsFileResources) {
-        TsFileSequenceReader reader = buildReaderFromTsFileResource(levelResource,
-            tsFileSequenceReaderMap, storageGroup);
+        TsFileSequenceReader reader =
+            buildReaderFromTsFileResource(levelResource, tsFileSequenceReaderMap, storageGroup);
         if (reader == null) {
           continue;
         }
-        Map<String, List<ChunkMetadata>> chunkMetadataMap = reader
-            .readChunkMetadataInDevice(device);
+        Map<String, List<ChunkMetadata>> chunkMetadataMap =
+            reader.readChunkMetadataInDevice(device);
         for (Entry<String, List<ChunkMetadata>> entry : chunkMetadataMap.entrySet()) {
           for (ChunkMetadata chunkMetadata : entry.getValue()) {
             Map<TsFileSequenceReader, List<ChunkMetadata>> readerChunkMetadataMap;
@@ -227,25 +240,25 @@ public class CompactionUtils {
             }
             chunkMetadataList.add(chunkMetadata);
             readerChunkMetadataMap.put(reader, chunkMetadataList);
-            measurementChunkMetadataMap
-                .put(chunkMetadata.getMeasurementUid(), readerChunkMetadataMap);
+            measurementChunkMetadataMap.put(
+                chunkMetadata.getMeasurementUid(), readerChunkMetadataMap);
           }
         }
       }
       if (!sequence) {
         long maxVersion = Long.MIN_VALUE;
-        for (Entry<String, Map<TsFileSequenceReader, List<ChunkMetadata>>> entry : measurementChunkMetadataMap
-            .entrySet()) {
-          maxVersion = writeByDeserializeMerge(maxVersion, device, compactionWriteRateLimiter,
-              entry,
-              targetResource, writer);
+        for (Entry<String, Map<TsFileSequenceReader, List<ChunkMetadata>>> entry :
+            measurementChunkMetadataMap.entrySet()) {
+          maxVersion =
+              writeByDeserializeMerge(
+                  maxVersion, device, compactionWriteRateLimiter, entry, targetResource, writer);
         }
         writer.endChunkGroup();
         writer.writeVersion(maxVersion);
       } else {
         long maxVersion = Long.MIN_VALUE;
-        for (Entry<String, Map<TsFileSequenceReader, List<ChunkMetadata>>> entry : measurementChunkMetadataMap
-            .entrySet()) {
+        for (Entry<String, Map<TsFileSequenceReader, List<ChunkMetadata>>> entry :
+            measurementChunkMetadataMap.entrySet()) {
           Map<TsFileSequenceReader, List<ChunkMetadata>> readerChunkMetadatasMap = entry.getValue();
           boolean isPageEnoughLarge = true;
           for (List<ChunkMetadata> chunkMetadatas : readerChunkMetadatasMap.values()) {
@@ -259,14 +272,20 @@ public class CompactionUtils {
           if (isPageEnoughLarge) {
             logger.debug("{} [Compaction] page enough large, use append merge", storageGroup);
             // append page in chunks, so we do not have to deserialize a chunk
-            maxVersion = writeByAppendMerge(maxVersion, device, compactionWriteRateLimiter,
-                readerChunkMetadatasMap, targetResource, writer);
+            maxVersion =
+                writeByAppendMerge(
+                    maxVersion,
+                    device,
+                    compactionWriteRateLimiter,
+                    readerChunkMetadatasMap,
+                    targetResource,
+                    writer);
           } else {
-            logger
-                .debug("{} [Compaction] page too small, use deserialize merge", storageGroup);
+            logger.debug("{} [Compaction] page too small, use deserialize merge", storageGroup);
             // we have to deserialize chunks to merge pages
-            maxVersion = writeByDeserializeMerge(maxVersion, device, compactionWriteRateLimiter,
-                entry, targetResource, writer);
+            maxVersion =
+                writeByDeserializeMerge(
+                    maxVersion, device, compactionWriteRateLimiter, entry, targetResource, writer);
           }
         }
         writer.endChunkGroup();
@@ -289,9 +308,12 @@ public class CompactionUtils {
     targetResource.close();
   }
 
-  private static TsFileSequenceReader buildReaderFromTsFileResource(TsFileResource levelResource,
-      Map<String, TsFileSequenceReader> tsFileSequenceReaderMap, String storageGroup) {
-    return tsFileSequenceReaderMap.computeIfAbsent(levelResource.getTsFile().getAbsolutePath(),
+  private static TsFileSequenceReader buildReaderFromTsFileResource(
+      TsFileResource levelResource,
+      Map<String, TsFileSequenceReader> tsFileSequenceReaderMap,
+      String storageGroup) {
+    return tsFileSequenceReaderMap.computeIfAbsent(
+        levelResource.getTsFile().getAbsolutePath(),
         path -> {
           try {
             if (levelResource.getTsFile().exists()) {
@@ -303,7 +325,8 @@ public class CompactionUtils {
           } catch (IOException e) {
             logger.error(
                 "Storage group {}, flush recover meets error. reader create failed.",
-                storageGroup, e);
+                storageGroup,
+                e);
             return null;
           }
         });

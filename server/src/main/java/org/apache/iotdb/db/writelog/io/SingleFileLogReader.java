@@ -83,9 +83,12 @@ public class SingleFileLogReader implements ILogReader {
       checkSummer.reset();
       checkSummer.update(buffer, 0, logSize);
       if (checkSummer.getValue() != checkSum) {
-        throw new IOException(String.format("The check sum of the No.%d log batch is incorrect! In "
-            + "file: "
-            + "%d Calculated: %d.", idx, checkSum, checkSummer.getValue()));
+        throw new IOException(
+            String.format(
+                "The check sum of the No.%d log batch is incorrect! In "
+                    + "file: "
+                    + "%d Calculated: %d.",
+                idx, checkSum, checkSummer.getValue()));
       }
 
       batchLogReader = new BatchLogReader(ByteBuffer.wrap(buffer));
@@ -100,11 +103,11 @@ public class SingleFileLogReader implements ILogReader {
 
   @Override
   public PhysicalPlan next() {
-    if (!hasNext()){
+    if (!hasNext()) {
       throw new NoSuchElementException();
     }
 
-    idx ++;
+    idx++;
     return batchLogReader.next();
   }
 

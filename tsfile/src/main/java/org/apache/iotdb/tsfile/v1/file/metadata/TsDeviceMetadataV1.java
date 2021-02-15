@@ -19,34 +19,26 @@
 
 package org.apache.iotdb.tsfile.v1.file.metadata;
 
-import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class TsDeviceMetadataV1 {
 
-  /**
-   * start time for a device.
-   **/
+  /** start time for a device. */
   private long startTime = Long.MAX_VALUE;
 
-  /**
-   * end time for a device.
-   **/
+  /** end time for a device. */
   private long endTime = Long.MIN_VALUE;
 
-  /**
-   * Row groups in this file.
-   */
+  /** Row groups in this file. */
   private List<ChunkGroupMetaDataV1> chunkGroupMetadataList = new ArrayList<>();
 
   public TsDeviceMetadataV1() {
     // allowed to clair an empty TsDeviceMetadata whose fields will be assigned later.
   }
-
 
   /**
    * deserialize from the given buffer.
@@ -83,5 +75,4 @@ public class TsDeviceMetadataV1 {
   public long getEndTime() {
     return endTime;
   }
-
 }

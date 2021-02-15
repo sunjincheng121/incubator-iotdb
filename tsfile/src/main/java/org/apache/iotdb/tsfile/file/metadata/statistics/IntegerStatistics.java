@@ -18,18 +18,15 @@
  */
 package org.apache.iotdb.tsfile.file.metadata.statistics;
 
-import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
-import org.apache.iotdb.tsfile.utils.BytesUtils;
-import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+import org.apache.iotdb.tsfile.utils.BytesUtils;
+import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Statistics for int type.
- */
+/** Statistics for int type. */
 public class IntegerStatistics extends Statistics<Integer> {
 
   private int minValue;
@@ -39,7 +36,6 @@ public class IntegerStatistics extends Statistics<Integer> {
   private double sumValue;
 
   static final int INTEGER_STATISTICS_FIXED_RAM_SIZE = 64;
-
 
   @Override
   public TSDataType getType() {
@@ -70,7 +66,14 @@ public class IntegerStatistics extends Statistics<Integer> {
     this.lastValue = lastValue;
   }
 
-  private void updateStats(int minValue, int maxValue, int firstValue, int lastValue, double sumValue, long startTime, long endTime) {
+  private void updateStats(
+      int minValue,
+      int maxValue,
+      int firstValue,
+      int lastValue,
+      double sumValue,
+      long startTime,
+      long endTime) {
     if (minValue < this.minValue) {
       this.minValue = minValue;
     }
@@ -147,14 +150,23 @@ public class IntegerStatistics extends Statistics<Integer> {
   protected void mergeStatisticsValue(Statistics stats) {
     IntegerStatistics intStats = (IntegerStatistics) stats;
     if (isEmpty) {
-      initializeStats(intStats.getMinValue(), intStats.getMaxValue(), intStats.getFirstValue(), intStats.getLastValue(),
+      initializeStats(
+          intStats.getMinValue(),
+          intStats.getMaxValue(),
+          intStats.getFirstValue(),
+          intStats.getLastValue(),
           intStats.getSumValue());
       isEmpty = false;
     } else {
-      updateStats(intStats.getMinValue(), intStats.getMaxValue(), intStats.getFirstValue(), intStats.getLastValue(),
-          intStats.getSumValue(), stats.getStartTime(), stats.getEndTime());
+      updateStats(
+          intStats.getMinValue(),
+          intStats.getMaxValue(),
+          intStats.getFirstValue(),
+          intStats.getLastValue(),
+          intStats.getSumValue(),
+          stats.getStartTime(),
+          stats.getEndTime());
     }
-
   }
 
   @Override
@@ -238,7 +250,17 @@ public class IntegerStatistics extends Statistics<Integer> {
 
   @Override
   public String toString() {
-    return super.toString() + " [minValue:" + minValue + ",maxValue:" + maxValue + ",firstValue:" + firstValue +
-        ",lastValue:" + lastValue + ",sumValue:" + sumValue + "]";
+    return super.toString()
+        + " [minValue:"
+        + minValue
+        + ",maxValue:"
+        + maxValue
+        + ",firstValue:"
+        + firstValue
+        + ",lastValue:"
+        + lastValue
+        + ",sumValue:"
+        + sumValue
+        + "]";
   }
 }

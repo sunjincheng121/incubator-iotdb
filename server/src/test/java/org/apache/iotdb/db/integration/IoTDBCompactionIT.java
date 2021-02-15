@@ -25,7 +25,6 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Random;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
 import org.apache.iotdb.jdbc.Config;
@@ -58,24 +57,28 @@ public class IoTDBCompactionIT {
 
   @Test
   public void test() throws SQLException {
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+    try (Connection connection =
+            DriverManager.getConnection(
+                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
         Statement statement = connection.createStatement()) {
       statement.execute("SET STORAGE GROUP TO root.compactionTest");
       for (int i = 1; i <= 3; i++) {
         try {
-          statement.execute("CREATE TIMESERIES root.compactionTest.s" + i + " WITH DATATYPE=INT64,"
-              + "ENCODING=PLAIN");
+          statement.execute(
+              "CREATE TIMESERIES root.compactionTest.s"
+                  + i
+                  + " WITH DATATYPE=INT64,"
+                  + "ENCODING=PLAIN");
         } catch (SQLException e) {
           // ignore
         }
       }
 
       for (int i = 0; i < 32; i++) {
-        statement
-            .execute(
-                String.format("INSERT INTO root.compactionTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                    + "%d,%d)", i, i + 1, i + 2, i + 3));
+        statement.execute(
+            String.format(
+                "INSERT INTO root.compactionTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                i, i + 1, i + 2, i + 3));
         statement.execute("FLUSH");
       }
 
@@ -99,10 +102,12 @@ public class IoTDBCompactionIT {
 
   @Test
   public void testAppendMergeAfterDeserializeMerge() throws SQLException {
-    boolean prevEnableUnseqCompaction = IoTDBDescriptor.getInstance().getConfig().isEnableUnseqCompaction();
+    boolean prevEnableUnseqCompaction =
+        IoTDBDescriptor.getInstance().getConfig().isEnableUnseqCompaction();
     IoTDBDescriptor.getInstance().getConfig().setEnableUnseqCompaction(false);
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+    try (Connection connection =
+            DriverManager.getConnection(
+                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
         Statement statement = connection.createStatement()) {
       statement.execute("SET STORAGE GROUP TO root.compactionTest");
       try {
@@ -111,13 +116,13 @@ public class IoTDBCompactionIT {
         // ignore
       }
 
-      long pageSize=100;
+      long pageSize = 100;
       long timestamp = 1;
 
       for (long row = 0; row < 10000; row++) {
-        statement
-            .execute(
-                String.format("INSERT INTO root.compactionTest(timestamp,s1) VALUES (%d,%d)", timestamp, 1));
+        statement.execute(
+            String.format(
+                "INSERT INTO root.compactionTest(timestamp,s1) VALUES (%d,%d)", timestamp, 1));
         if (row % pageSize == 0) {
           statement.execute("FLUSH");
         }
@@ -127,9 +132,9 @@ public class IoTDBCompactionIT {
       timestamp = 8322;
 
       for (long row = 0; row < 2400; row++) {
-        statement
-            .execute(
-                String.format("INSERT INTO root.compactionTest(timestamp,s1) VALUES (%d,%d)", timestamp, 1));
+        statement.execute(
+            String.format(
+                "INSERT INTO root.compactionTest(timestamp,s1) VALUES (%d,%d)", timestamp, 1));
         if (row % pageSize == 0) {
           statement.execute("FLUSH");
         }
@@ -137,7 +142,8 @@ public class IoTDBCompactionIT {
       }
 
       int cnt;
-      try (ResultSet resultSet = statement.executeQuery("SELECT COUNT(s1) FROM root.compactionTest")) {
+      try (ResultSet resultSet =
+          statement.executeQuery("SELECT COUNT(s1) FROM root.compactionTest")) {
         cnt = 0;
         while (resultSet.next()) {
           System.out.println(resultSet.getLong(1));
@@ -149,6 +155,4 @@ public class IoTDBCompactionIT {
     }
     IoTDBDescriptor.getInstance().getConfig().setEnableUnseqCompaction(prevEnableUnseqCompaction);
   }
-
-
 }

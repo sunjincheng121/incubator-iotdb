@@ -46,17 +46,20 @@ public class TsFileSequenceRead {
       filename = args[0];
     }
     try (TsFileSequenceReader reader = new TsFileSequenceReader(filename)) {
-      System.out.println("file length: " + FSFactoryProducer.getFSFactory().getFile(filename).length());
+      System.out.println(
+          "file length: " + FSFactoryProducer.getFSFactory().getFile(filename).length());
       System.out.println("file magic head: " + reader.readHeadMagic());
       System.out.println("file magic tail: " + reader.readTailMagic());
       System.out.println("Level 1 metadata position: " + reader.getFileMetadataPos());
       System.out.println("Level 1 metadata size: " + reader.getFileMetadataSize());
       // Sequential reading of one ChunkGroup now follows this order:
       // first SeriesChunks (headers and data) in one ChunkGroup, then the CHUNK_GROUP_FOOTER
-      // Because we do not know how many chunks a ChunkGroup may have, we should read one byte (the marker) ahead and
+      // Because we do not know how many chunks a ChunkGroup may have, we should read one byte (the
+      // marker) ahead and
       // judge accordingly.
-      reader.position((long) TSFileConfig.MAGIC_STRING.getBytes().length + TSFileConfig.VERSION_NUMBER
-              .getBytes().length);
+      reader.position(
+          (long) TSFileConfig.MAGIC_STRING.getBytes().length
+              + TSFileConfig.VERSION_NUMBER.getBytes().length);
       System.out.println("[Chunk Group]");
       System.out.println("position: " + reader.position());
       byte marker;
@@ -67,11 +70,12 @@ public class TsFileSequenceRead {
             System.out.println("\tposition: " + reader.position());
             ChunkHeader header = reader.readChunkHeader();
             System.out.println("\tMeasurement: " + header.getMeasurementID());
-            Decoder defaultTimeDecoder = Decoder.getDecoderByType(
+            Decoder defaultTimeDecoder =
+                Decoder.getDecoderByType(
                     TSEncoding.valueOf(TSFileDescriptor.getInstance().getConfig().getTimeEncoder()),
                     TSDataType.INT64);
-            Decoder valueDecoder = Decoder
-                    .getDecoderByType(header.getEncodingType(), header.getDataType());
+            Decoder valueDecoder =
+                Decoder.getDecoderByType(header.getEncodingType(), header.getDataType());
             for (int j = 0; j < header.getNumOfPages(); j++) {
               valueDecoder.reset();
               System.out.println("\t\t[Page]\n \t\tPage head position: " + reader.position());
@@ -79,15 +83,18 @@ public class TsFileSequenceRead {
               System.out.println("\t\tPage data position: " + reader.position());
               System.out.println("\t\tpoints in the page: " + pageHeader.getNumOfValues());
               ByteBuffer pageData = reader.readPage(pageHeader, header.getCompressionType());
-              System.out
-                      .println("\t\tUncompressed page data size: " + pageHeader.getUncompressedSize());
-              PageReader reader1 = new PageReader(pageData, header.getDataType(), valueDecoder,
-                      defaultTimeDecoder, null);
+              System.out.println(
+                  "\t\tUncompressed page data size: " + pageHeader.getUncompressedSize());
+              PageReader reader1 =
+                  new PageReader(
+                      pageData, header.getDataType(), valueDecoder, defaultTimeDecoder, null);
               BatchData batchData = reader1.getAllSatisfiedPageData();
               while (batchData.hasCurrent()) {
                 System.out.println(
-                        "\t\t\ttime, value: " + batchData.currentTime() + ", " + batchData
-                                .currentValue());
+                    "\t\t\ttime, value: "
+                        + batchData.currentTime()
+                        + ", "
+                        + batchData.currentValue());
                 batchData.next();
               }
             }
@@ -108,8 +115,9 @@ public class TsFileSequenceRead {
       System.out.println("[Metadata]");
       for (String device : reader.getAllDevices()) {
         Map<String, List<ChunkMetadata>> seriesMetaData = reader.readChunkMetadataInDevice(device);
-        System.out.println(String
-                .format("\t[Device]Device %s, Number of Measurements %d", device, seriesMetaData.size()));
+        System.out.println(
+            String.format(
+                "\t[Device]Device %s, Number of Measurements %d", device, seriesMetaData.size()));
         for (Map.Entry<String, List<ChunkMetadata>> serie : seriesMetaData.entrySet()) {
           System.out.println("\t\tMeasurement:" + serie.getKey());
           for (ChunkMetadata chunkMetadata : serie.getValue()) {

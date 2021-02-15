@@ -95,5 +95,4 @@ public class PartialPathTest {
     Assert.assertFalse(p1.matchFullPath(new PartialPath("root.sg2.d1.*")));
     Assert.assertFalse(p1.matchFullPath(new PartialPath("")));
   }
-
 }

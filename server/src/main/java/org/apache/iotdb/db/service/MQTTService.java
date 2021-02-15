@@ -35,71 +35,78 @@ import org.apache.iotdb.db.mqtt.PublishHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * The IoTDB MQTT Service.
- */
+/** The IoTDB MQTT Service. */
 public class MQTTService implements IService {
-    private static final Logger LOG = LoggerFactory.getLogger(MQTTService.class);
-    private Server server = new Server();
-    
-    @Override
-    public void start() throws StartupException {
-        startup();
-    }
+  private static final Logger LOG = LoggerFactory.getLogger(MQTTService.class);
+  private Server server = new Server();
 
-    @Override
-    public void stop() {
-        shutdown();
-    }
+  @Override
+  public void start() throws StartupException {
+    startup();
+  }
 
-    public void startup() {
-        IoTDBConfig iotDBConfig = IoTDBDescriptor.getInstance().getConfig();
-        IConfig config = createBrokerConfig(iotDBConfig);
-        List<InterceptHandler> handlers = Lists.newArrayList(new PublishHandler(iotDBConfig));
-        IAuthenticator authenticator = new BrokerAuthenticator();
+  @Override
+  public void stop() {
+    shutdown();
+  }
 
-        server.startServer(config, handlers, null, authenticator, null);
+  public void startup() {
+    IoTDBConfig iotDBConfig = IoTDBDescriptor.getInstance().getConfig();
+    IConfig config = createBrokerConfig(iotDBConfig);
+    List<InterceptHandler> handlers = Lists.newArrayList(new PublishHandler(iotDBConfig));
+    IAuthenticator authenticator = new BrokerAuthenticator();
 
-        LOG.info("Start MQTT service successfully, listening on ip {} port {}",
-                iotDBConfig.getMqttHost(), iotDBConfig.getMqttPort());
+    server.startServer(config, handlers, null, authenticator, null);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            LOG.info("Stopping IoTDB MQTT service...");
-            shutdown();
-            LOG.info("IoTDB MQTT service stopped.");
-        }));
-    }
+    LOG.info(
+        "Start MQTT service successfully, listening on ip {} port {}",
+        iotDBConfig.getMqttHost(),
+        iotDBConfig.getMqttPort());
 
-    private IConfig createBrokerConfig(IoTDBConfig iotDBConfig) {
-        Properties properties = new Properties();
-        properties.setProperty(BrokerConstants.HOST_PROPERTY_NAME, iotDBConfig.getMqttHost());
-        properties.setProperty(BrokerConstants.PORT_PROPERTY_NAME, String.valueOf(iotDBConfig.getMqttPort()));
-        properties.setProperty(BrokerConstants.BROKER_INTERCEPTOR_THREAD_POOL_SIZE, String.valueOf(iotDBConfig.getMqttHandlerPoolSize()));
-        properties.setProperty(BrokerConstants.IMMEDIATE_BUFFER_FLUSH_PROPERTY_NAME, "true");
-        properties.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, "false");
-        properties.setProperty(BrokerConstants.ALLOW_ZERO_BYTE_CLIENT_ID_PROPERTY_NAME, "true");
-        properties.setProperty(BrokerConstants.NETTY_MAX_BYTES_PROPERTY_NAME, String.valueOf(iotDBConfig.getMqttMaxMessageSize()));
-        return new MemoryConfig(properties);
-    }
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  LOG.info("Stopping IoTDB MQTT service...");
+                  shutdown();
+                  LOG.info("IoTDB MQTT service stopped.");
+                }));
+  }
 
-    public void shutdown() {
-        server.stopServer();
-    }
+  private IConfig createBrokerConfig(IoTDBConfig iotDBConfig) {
+    Properties properties = new Properties();
+    properties.setProperty(BrokerConstants.HOST_PROPERTY_NAME, iotDBConfig.getMqttHost());
+    properties.setProperty(
+        BrokerConstants.PORT_PROPERTY_NAME, String.valueOf(iotDBConfig.getMqttPort()));
+    properties.setProperty(
+        BrokerConstants.BROKER_INTERCEPTOR_THREAD_POOL_SIZE,
+        String.valueOf(iotDBConfig.getMqttHandlerPoolSize()));
+    properties.setProperty(BrokerConstants.IMMEDIATE_BUFFER_FLUSH_PROPERTY_NAME, "true");
+    properties.setProperty(BrokerConstants.ALLOW_ANONYMOUS_PROPERTY_NAME, "false");
+    properties.setProperty(BrokerConstants.ALLOW_ZERO_BYTE_CLIENT_ID_PROPERTY_NAME, "true");
+    properties.setProperty(
+        BrokerConstants.NETTY_MAX_BYTES_PROPERTY_NAME,
+        String.valueOf(iotDBConfig.getMqttMaxMessageSize()));
+    return new MemoryConfig(properties);
+  }
 
-    @Override
-    public ServiceType getID() {
-        return ServiceType.MQTT_SERVICE;
-    }
+  public void shutdown() {
+    server.stopServer();
+  }
 
-    public static final MQTTService getInstance() {
-        return MQTTServiceHolder.INSTANCE;
-    }
+  @Override
+  public ServiceType getID() {
+    return ServiceType.MQTT_SERVICE;
+  }
 
-    private static class MQTTServiceHolder {
+  public static final MQTTService getInstance() {
+    return MQTTServiceHolder.INSTANCE;
+  }
 
-        private static final MQTTService INSTANCE = new MQTTService();
+  private static class MQTTServiceHolder {
 
-        private MQTTServiceHolder() {
-        }
-    }
+    private static final MQTTService INSTANCE = new MQTTService();
+
+    private MQTTServiceHolder() {}
+  }
 }

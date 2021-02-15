@@ -31,9 +31,7 @@ import org.apache.iotdb.tsfile.utils.BloomFilter;
 import org.apache.iotdb.tsfile.utils.Pair;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * TSFileMetaData collects all metadata info and saves in its data structure.
- */
+/** TSFileMetaData collects all metadata info and saves in its data structure. */
 public class TsFileMetadata {
 
   // fields below are IoTDB extensions and they does not affect TsFile's
@@ -137,8 +135,7 @@ public class TsFileMetadata {
    * @param outputStream -output stream to determine byte length
    * @return -byte length
    */
-  public int serializeBloomFilter(OutputStream outputStream, Set<Path> paths)
-      throws IOException {
+  public int serializeBloomFilter(OutputStream outputStream, Set<Path> paths) throws IOException {
     int byteLen = 0;
     BloomFilter filter = buildBloomFilter(paths);
 
@@ -157,9 +154,9 @@ public class TsFileMetadata {
    * @return bloom filter
    */
   private BloomFilter buildBloomFilter(Set<Path> paths) {
-    BloomFilter filter = BloomFilter
-        .getEmptyBloomFilter(TSFileDescriptor.getInstance().getConfig().getBloomFilterErrorRate(),
-            paths.size());
+    BloomFilter filter =
+        BloomFilter.getEmptyBloomFilter(
+            TSFileDescriptor.getInstance().getConfig().getBloomFilterErrorRate(), paths.size());
     for (Path path : paths) {
       filter.add(path.toString());
     }

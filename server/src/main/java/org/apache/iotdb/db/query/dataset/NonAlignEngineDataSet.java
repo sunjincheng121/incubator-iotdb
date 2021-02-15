@@ -53,9 +53,10 @@ public class NonAlignEngineDataSet extends QueryDataSet {
     private WatermarkEncoder encoder;
     private int index;
 
-
-    public ReadTask(ManagedSeriesReader reader,
-        BlockingQueue<Pair<ByteBuffer, ByteBuffer>> blockingQueue, WatermarkEncoder encoder,
+    public ReadTask(
+        ManagedSeriesReader reader,
+        BlockingQueue<Pair<ByteBuffer, ByteBuffer>> blockingQueue,
+        WatermarkEncoder encoder,
         int index) {
       this.reader = reader;
       this.blockingQueue = blockingQueue;
@@ -123,13 +124,10 @@ public class NonAlignEngineDataSet extends QueryDataSet {
                       ReadWriteIOUtils.write(doubleValue, valueBAOS);
                       break;
                     case BOOLEAN:
-                      ReadWriteIOUtils.write(batchData.getBoolean(),
-                          valueBAOS);
+                      ReadWriteIOUtils.write(batchData.getBoolean(), valueBAOS);
                       break;
                     case TEXT:
-                      ReadWriteIOUtils
-                          .write(batchData.getBinary(),
-                              valueBAOS);
+                      ReadWriteIOUtils.write(batchData.getBinary(), valueBAOS);
                       break;
                     default:
                       throw new UnSupportedDataTypeException(
@@ -199,11 +197,8 @@ public class NonAlignEngineDataSet extends QueryDataSet {
       } catch (Exception e) {
         LOGGER.error("Something gets wrong: ", e);
       }
-
     }
-
   }
-
 
   private List<ManagedSeriesReader> seriesReaderWithoutValueFilterList;
 
@@ -247,12 +242,12 @@ public class NonAlignEngineDataSet extends QueryDataSet {
   /**
    * constructor of EngineDataSet.
    *
-   * @param paths     paths in List structure
+   * @param paths paths in List structure
    * @param dataTypes time series data type
-   * @param readers   readers in List(IPointReader) structure
+   * @param readers readers in List(IPointReader) structure
    */
-  public NonAlignEngineDataSet(List<PartialPath> paths, List<TSDataType> dataTypes,
-      List<ManagedSeriesReader> readers) {
+  public NonAlignEngineDataSet(
+      List<PartialPath> paths, List<TSDataType> dataTypes, List<ManagedSeriesReader> readers) {
     super(new ArrayList<>(paths), dataTypes);
     this.seriesReaderWithoutValueFilterList = readers;
     blockingQueueArray = new BlockingQueue[readers.size()];
@@ -283,9 +278,7 @@ public class NonAlignEngineDataSet extends QueryDataSet {
     this.initialized = true;
   }
 
-  /**
-   * for RPC in RawData query between client and server fill time buffers and value buffers
-   */
+  /** for RPC in RawData query between client and server fill time buffers and value buffers */
   public TSQueryNonAlignDataSet fillBuffer(int fetchSize, WatermarkEncoder encoder)
       throws InterruptedException {
     if (!initialized) {
@@ -299,8 +292,8 @@ public class NonAlignEngineDataSet extends QueryDataSet {
 
     for (int seriesIndex = 0; seriesIndex < seriesNum; seriesIndex++) {
       if (!noMoreDataInQueueArray[seriesIndex]) {
-        Pair<ByteBuffer, ByteBuffer> timeValueByteBufferPair = blockingQueueArray[seriesIndex]
-            .take();
+        Pair<ByteBuffer, ByteBuffer> timeValueByteBufferPair =
+            blockingQueueArray[seriesIndex].take();
         if (timeValueByteBufferPair.left == null || timeValueByteBufferPair.right == null) {
           noMoreDataInQueueArray[seriesIndex] = true;
           timeValueByteBufferPair.left = ByteBuffer.allocate(0);
@@ -322,8 +315,8 @@ public class NonAlignEngineDataSet extends QueryDataSet {
           // now we should submit it again
           if (!reader.isManagedByQueryManager() && reader.hasRemaining()) {
             reader.setManagedByQueryManager(true);
-            pool.submit(new ReadTask(reader, blockingQueueArray[seriesIndex],
-                encoder, seriesIndex));
+            pool.submit(
+                new ReadTask(reader, blockingQueueArray[seriesIndex], encoder, seriesIndex));
           }
         }
       }
@@ -336,7 +329,6 @@ public class NonAlignEngineDataSet extends QueryDataSet {
     return tsQueryNonAlignDataSet;
   }
 
-
   @Override
   protected boolean hasNextWithoutConstraint() {
     return false;
@@ -346,6 +338,4 @@ public class NonAlignEngineDataSet extends QueryDataSet {
   protected RowRecord nextWithoutConstraint() {
     return null;
   }
-
-
 }

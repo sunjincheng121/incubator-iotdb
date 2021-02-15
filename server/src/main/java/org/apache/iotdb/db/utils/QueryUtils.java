@@ -36,15 +36,16 @@ public class QueryUtils {
 
   /**
    * modifyChunkMetaData iterates the chunkMetaData and applies all available modifications on it to
-   * generate a ModifiedChunkMetadata. <br/> the caller should guarantee that chunkMetaData and
-   * modifications refer to the same time series paths.
+   * generate a ModifiedChunkMetadata. <br>
+   * the caller should guarantee that chunkMetaData and modifications refer to the same time series
+   * paths.
    *
    * @param chunkMetaData the original chunkMetaData.
    * @param modifications all possible modifications.
    */
   @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  public static void modifyChunkMetaData(List<ChunkMetadata> chunkMetaData,
-      List<Modification> modifications) {
+  public static void modifyChunkMetaData(
+      List<ChunkMetadata> chunkMetaData, List<Modification> modifications) {
     int modIndex = 0;
     for (int metaIndex = 0; metaIndex < chunkMetaData.size(); metaIndex++) {
       ChunkMetadata metaData = chunkMetaData.get(metaIndex);
@@ -55,21 +56,22 @@ public class QueryUtils {
       }
     }
     // remove chunks that are completely deleted
-    chunkMetaData.removeIf(metaData -> {
-      if (metaData.getDeleteIntervalList() != null) {
-        for (TimeRange range : metaData.getDeleteIntervalList()) {
-          if (range.contains(metaData.getStartTime(), metaData.getEndTime())) {
-            return true;
-          } else {
-            if (range.overlaps(new TimeRange(metaData.getStartTime(), metaData.getEndTime()))) {
-              metaData.setModified(true);
+    chunkMetaData.removeIf(
+        metaData -> {
+          if (metaData.getDeleteIntervalList() != null) {
+            for (TimeRange range : metaData.getDeleteIntervalList()) {
+              if (range.contains(metaData.getStartTime(), metaData.getEndTime())) {
+                return true;
+              } else {
+                if (range.overlaps(new TimeRange(metaData.getStartTime(), metaData.getEndTime()))) {
+                  metaData.setModified(true);
+                }
+                return false;
+              }
             }
-            return false;
           }
-        }
-      }
-      return false;
-    });
+          return false;
+        });
   }
 
   private static void doModifyChunkMetaData(Modification modification, ChunkMetadata metaData) {
@@ -80,8 +82,8 @@ public class QueryUtils {
   }
 
   // remove files that do not satisfy the filter
-  public static void filterQueryDataSource(QueryDataSource queryDataSource,
-      TsFileFilter fileFilter) {
+  public static void filterQueryDataSource(
+      QueryDataSource queryDataSource, TsFileFilter fileFilter) {
     if (fileFilter == null) {
       return;
     }

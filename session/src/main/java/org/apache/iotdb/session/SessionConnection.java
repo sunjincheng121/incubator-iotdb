@@ -57,7 +57,8 @@ import org.slf4j.LoggerFactory;
 public class SessionConnection {
 
   private static final Logger logger = LoggerFactory.getLogger(SessionConnection.class);
-  public static final String MSG_RECONNECTION_FAIL = "Fail to reconnect to server. Please check server status";
+  public static final String MSG_RECONNECTION_FAIL =
+      "Fail to reconnect to server. Please check server status";
   private Session session;
   private TTransport transport;
   private TSIService.Iface client;
@@ -75,8 +76,9 @@ public class SessionConnection {
   }
 
   private void init(EndPoint endPoint) throws IoTDBConnectionException {
-    transport = RpcTransportFactory.INSTANCE.getTransport(
-        new TSocket(endPoint.getIp(), endPoint.getPort(), session.connectionTimeoutInMs));
+    transport =
+        RpcTransportFactory.INSTANCE.getTransport(
+            new TSocket(endPoint.getIp(), endPoint.getPort(), session.connectionTimeoutInMs));
 
     try {
       transport.open();
@@ -102,12 +104,15 @@ public class SessionConnection {
       RpcUtils.verifySuccess(openResp.getStatus());
 
       if (Session.protocolVersion.getValue() != openResp.getServerProtocolVersion().getValue()) {
-        logger.warn("Protocol differ, Client version is {}}, but Server version is {}",
-            Session.protocolVersion.getValue(), openResp.getServerProtocolVersion().getValue());
+        logger.warn(
+            "Protocol differ, Client version is {}}, but Server version is {}",
+            Session.protocolVersion.getValue(),
+            openResp.getServerProtocolVersion().getValue());
         // less than 0.10
         if (openResp.getServerProtocolVersion().getValue() == 0) {
-          throw new TException(String
-              .format("Protocol not supported, Client version is %s, but Server version is %s",
+          throw new TException(
+              String.format(
+                  "Protocol not supported, Client version is %s, but Server version is %s",
                   Session.protocolVersion.getValue(),
                   openResp.getServerProtocolVersion().getValue()));
         }
@@ -121,7 +126,6 @@ public class SessionConnection {
       throw new IoTDBConnectionException(e);
     }
   }
-
 
   public void close() throws IoTDBConnectionException {
     TSCloseSessionReq req = new TSCloseSessionReq(sessionId);
@@ -152,8 +156,7 @@ public class SessionConnection {
           throw new IoTDBConnectionException(tException);
         }
       } else {
-        throw new IoTDBConnectionException(
-            MSG_RECONNECTION_FAIL);
+        throw new IoTDBConnectionException(MSG_RECONNECTION_FAIL);
       }
     }
     RpcUtils.verifySuccess(resp);
@@ -234,8 +237,7 @@ public class SessionConnection {
           throw new IoTDBConnectionException(tException);
         }
       } else {
-        throw new IoTDBConnectionException(
-            MSG_RECONNECTION_FAIL);
+        throw new IoTDBConnectionException(MSG_RECONNECTION_FAIL);
       }
     }
   }
@@ -270,15 +272,20 @@ public class SessionConnection {
           throw new IoTDBConnectionException(tException);
         }
       } else {
-        throw new IoTDBConnectionException(
-            MSG_RECONNECTION_FAIL);
+        throw new IoTDBConnectionException(MSG_RECONNECTION_FAIL);
       }
     }
 
     RpcUtils.verifySuccess(execResp.getStatus());
-    return new SessionDataSet(sql, execResp.getColumns(), execResp.getDataTypeList(),
+    return new SessionDataSet(
+        sql,
+        execResp.getColumns(),
+        execResp.getDataTypeList(),
         execResp.columnNameIndexMap,
-        execResp.getQueryId(), client, sessionId, execResp.queryDataSet,
+        execResp.getQueryId(),
+        client,
+        sessionId,
+        execResp.queryDataSet,
         execResp.isIgnoreTimeStamp());
   }
 
@@ -298,16 +305,15 @@ public class SessionConnection {
           throw new IoTDBConnectionException(tException);
         }
       } else {
-        throw new IoTDBConnectionException(
-            MSG_RECONNECTION_FAIL);
+        throw new IoTDBConnectionException(MSG_RECONNECTION_FAIL);
       }
     }
   }
 
   protected SessionDataSet executeRawDataQuery(List<String> paths, long startTime, long endTime)
       throws StatementExecutionException, IoTDBConnectionException {
-    TSRawDataQueryReq execReq = new TSRawDataQueryReq(sessionId, paths, startTime, endTime,
-        statementId);
+    TSRawDataQueryReq execReq =
+        new TSRawDataQueryReq(sessionId, paths, startTime, endTime, statementId);
     execReq.setFetchSize(session.fetchSize);
     TSExecuteStatementResp execResp;
     try {
@@ -327,9 +333,15 @@ public class SessionConnection {
     }
 
     RpcUtils.verifySuccess(execResp.getStatus());
-    return new SessionDataSet("", execResp.getColumns(), execResp.getDataTypeList(),
+    return new SessionDataSet(
+        "",
+        execResp.getColumns(),
+        execResp.getDataTypeList(),
         execResp.columnNameIndexMap,
-        execResp.getQueryId(), client, sessionId, execResp.queryDataSet,
+        execResp.getQueryId(),
+        client,
+        sessionId,
+        execResp.queryDataSet,
         execResp.isIgnoreTimeStamp());
   }
 
@@ -347,8 +359,7 @@ public class SessionConnection {
           throw new IoTDBConnectionException(tException);
         }
       } else {
-        throw new IoTDBConnectionException(
-            MSG_RECONNECTION_FAIL);
+        throw new IoTDBConnectionException(MSG_RECONNECTION_FAIL);
       }
     }
   }
@@ -367,8 +378,7 @@ public class SessionConnection {
           throw new IoTDBConnectionException(tException);
         }
       } else {
-        throw new IoTDBConnectionException(
-            MSG_RECONNECTION_FAIL);
+        throw new IoTDBConnectionException(MSG_RECONNECTION_FAIL);
       }
     }
   }
@@ -406,8 +416,7 @@ public class SessionConnection {
           throw new IoTDBConnectionException(tException);
         }
       } else {
-        throw new IoTDBConnectionException(
-            MSG_RECONNECTION_FAIL);
+        throw new IoTDBConnectionException(MSG_RECONNECTION_FAIL);
       }
     }
   }
@@ -481,8 +490,7 @@ public class SessionConnection {
           throw new IoTDBConnectionException(tException);
         }
       } else {
-        throw new IoTDBConnectionException(
-            MSG_RECONNECTION_FAIL);
+        throw new IoTDBConnectionException(MSG_RECONNECTION_FAIL);
       }
     }
   }

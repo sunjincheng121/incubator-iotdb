@@ -59,8 +59,9 @@ public abstract class BaseSingleNodeTest {
     replicaNum = ClusterDescriptor.getInstance().getConfig().getReplicationNum();
     autoCreateSchema = ClusterDescriptor.getInstance().getConfig().isEnableAutoCreateSchema();
     ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(true);
-    ClusterDescriptor.getInstance().getConfig().setSeedNodeUrls(Collections.singletonList(
-        "127.0.0.1:9003:40011:55560"));
+    ClusterDescriptor.getInstance()
+        .getConfig()
+        .setSeedNodeUrls(Collections.singletonList("127.0.0.1:9003:40011:55560"));
     ClusterDescriptor.getInstance().getConfig().setReplicationNum(1);
     ClusterDescriptor.getInstance().getConfig().setEnableAutoCreateSchema(true);
   }

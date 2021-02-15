@@ -44,9 +44,7 @@ import org.apache.iotdb.rpc.StatementExecutionException;
 import org.apache.iotdb.session.Session;
 import org.apache.iotdb.tsfile.common.constant.TsFileConstant;
 
-/**
- * read a CSV formatted data File and insert all the data into IoTDB.
- */
+/** read a CSV formatted data File and insert all the data into IoTDB. */
 public class ImportCsv extends AbstractCsvTool {
 
   private static final String FILE_ARGS = "f";
@@ -56,7 +54,8 @@ public class ImportCsv extends AbstractCsvTool {
   private static final String TSFILEDB_CLI_PREFIX = "ImportCsv";
   private static final String ILLEGAL_PATH_ARGUMENT = "Path parameter is null";
 
-  // put these variable in here, because sonar fails.  have to extract some code into a function. nextNode method.
+  // put these variable in here, because sonar fails.  have to extract some code into a function.
+  // nextNode method.
   private static int i;
   private static int startIndex;
 
@@ -68,27 +67,37 @@ public class ImportCsv extends AbstractCsvTool {
   private static Options createOptions() {
     Options options = createNewOptions();
 
-    Option opFile = Option.builder(FILE_ARGS).required().argName(FILE_NAME).hasArg().desc(
-        "If input a file path, load a csv file, "
-            + "otherwise load all csv file under this directory (required)")
-        .build();
+    Option opFile =
+        Option.builder(FILE_ARGS)
+            .required()
+            .argName(FILE_NAME)
+            .hasArg()
+            .desc(
+                "If input a file path, load a csv file, "
+                    + "otherwise load all csv file under this directory (required)")
+            .build();
     options.addOption(opFile);
 
-    Option opHelp = Option.builder(HELP_ARGS).longOpt(HELP_ARGS)
-        .hasArg(false).desc("Display help information")
-        .build();
+    Option opHelp =
+        Option.builder(HELP_ARGS)
+            .longOpt(HELP_ARGS)
+            .hasArg(false)
+            .desc("Display help information")
+            .build();
     options.addOption(opHelp);
 
-    Option opTimeZone = Option.builder(TIME_ZONE_ARGS).argName(TIME_ZONE_NAME).hasArg()
-        .desc("Time Zone eg. +08:00 or -01:00 (optional)").build();
+    Option opTimeZone =
+        Option.builder(TIME_ZONE_ARGS)
+            .argName(TIME_ZONE_NAME)
+            .hasArg()
+            .desc("Time Zone eg. +08:00 or -01:00 (optional)")
+            .build();
     options.addOption(opTimeZone);
 
     return options;
   }
 
-  /**
-   * Data from csv To tsfile.
-   */
+  /** Data from csv To tsfile. */
   private static void loadDataFromCSV(File file) {
     int fileLine;
     try {
@@ -124,8 +133,7 @@ public class ImportCsv extends AbstractCsvTool {
       while ((line = br.readLine()) != null) {
         cols = splitCsvLine(line);
         lineNumber++;
-        for (Entry<String, List<Integer>> deviceToPositions : devicesToPositions
-            .entrySet()) {
+        for (Entry<String, List<Integer>> deviceToPositions : devicesToPositions.entrySet()) {
           String device = deviceToPositions.getKey();
           devices.add(device);
 
@@ -166,7 +174,6 @@ public class ImportCsv extends AbstractCsvTool {
       }
     }
   }
-
 
   public static void main(String[] args) throws IOException {
     Options options = createOptions();
@@ -217,9 +224,8 @@ public class ImportCsv extends AbstractCsvTool {
     timeZoneID = commandLine.getOptionValue(TIME_ZONE_ARGS);
   }
 
-  public static void importCsvFromFile(String ip, String port, String username,
-      String password, String filename,
-      String timeZone) {
+  public static void importCsvFromFile(
+      String ip, String port, String username, String password, String filename, String timeZone) {
     try {
       session = new Session(ip, Integer.parseInt(port), username, password);
       session.open(false);
@@ -235,15 +241,15 @@ public class ImportCsv extends AbstractCsvTool {
     } catch (IoTDBConnectionException e) {
       System.out.println("Encounter an error when connecting to server, because " + e.getMessage());
     } catch (StatementExecutionException e) {
-      System.out
-          .println("Encounter an error when executing the statement, because " + e.getMessage());
+      System.out.println(
+          "Encounter an error when executing the statement, because " + e.getMessage());
     } finally {
       if (session != null) {
         try {
           session.close();
         } catch (IoTDBConnectionException e) {
-          System.out
-              .println("Encounter an error when closing the connection, because " + e.getMessage());
+          System.out.println(
+              "Encounter an error when closing the connection, because " + e.getMessage());
         }
       }
     }
@@ -253,8 +259,8 @@ public class ImportCsv extends AbstractCsvTool {
     if (file.getName().endsWith(FILE_SUFFIX)) {
       loadDataFromCSV(file);
     } else {
-      System.out
-          .println("File " + file.getName() + "  should ends with '.csv' if you want to import");
+      System.out.println(
+          "File " + file.getName() + "  should ends with '.csv' if you want to import");
     }
   }
 
@@ -269,8 +275,8 @@ public class ImportCsv extends AbstractCsvTool {
         if (subFile.getName().endsWith(FILE_SUFFIX)) {
           loadDataFromCSV(subFile);
         } else {
-          System.out
-              .println("File " + file.getName() + " should ends with '.csv' if you want to import");
+          System.out.println(
+              "File " + file.getName() + " should ends with '.csv' if you want to import");
         }
       }
     }
@@ -280,7 +286,8 @@ public class ImportCsv extends AbstractCsvTool {
     int line;
     try (LineNumberReader count = new LineNumberReader(new FileReader(file))) {
       while (count.skip(Long.MAX_VALUE) > 0) {
-        // Loop just in case the file is > Long.MAX_VALUE or skip() decides to not read the entire file
+        // Loop just in case the file is > Long.MAX_VALUE or skip() decides to not read the entire
+        // file
       }
       // +1 because line index starts at 0
       line = count.getLineNumber() + 1;
@@ -288,7 +295,11 @@ public class ImportCsv extends AbstractCsvTool {
     return line;
   }
 
-  private static void splitColToDeviceAndMeasurement(String col, Map<String, List<Integer>> devicesToPositions, Map<String, List<String>> devicesToMeasurements, int position) {
+  private static void splitColToDeviceAndMeasurement(
+      String col,
+      Map<String, List<Integer>> devicesToPositions,
+      Map<String, List<String>> devicesToMeasurements,
+      int position) {
     if (col.length() > 0) {
       if (col.charAt(col.length() - 1) == TsFileConstant.DOUBLE_QUOTE) {
         int endIndex = col.lastIndexOf('"', col.length() - 2);
@@ -297,8 +308,12 @@ public class ImportCsv extends AbstractCsvTool {
           endIndex = col.lastIndexOf('"', endIndex - 2);
         }
         if (endIndex != -1 && (endIndex == 0 || col.charAt(endIndex - 1) == '.')) {
-          putDeviceAndMeasurement(col.substring(0, endIndex - 1), col.substring(endIndex),
-              devicesToPositions, devicesToMeasurements, position);
+          putDeviceAndMeasurement(
+              col.substring(0, endIndex - 1),
+              col.substring(endIndex),
+              devicesToPositions,
+              devicesToMeasurements,
+              position);
         } else {
           throw new IllegalArgumentException(ILLEGAL_PATH_ARGUMENT);
         }
@@ -308,8 +323,12 @@ public class ImportCsv extends AbstractCsvTool {
         if (endIndex < 0) {
           putDeviceAndMeasurement("", col, devicesToPositions, devicesToMeasurements, position);
         } else {
-          putDeviceAndMeasurement(col.substring(0, endIndex), col.substring(endIndex + 1),
-              devicesToPositions, devicesToMeasurements, position);
+          putDeviceAndMeasurement(
+              col.substring(0, endIndex),
+              col.substring(endIndex + 1),
+              devicesToPositions,
+              devicesToMeasurements,
+              position);
         }
       } else {
         throw new IllegalArgumentException(ILLEGAL_PATH_ARGUMENT);
@@ -319,7 +338,12 @@ public class ImportCsv extends AbstractCsvTool {
     }
   }
 
-  private static void putDeviceAndMeasurement(String device, String measurement, Map<String, List<Integer>> devicesToPositions, Map<String, List<String>> devicesToMeasurements, int position) {
+  private static void putDeviceAndMeasurement(
+      String device,
+      String measurement,
+      Map<String, List<Integer>> devicesToPositions,
+      Map<String, List<String>> devicesToMeasurements,
+      int position) {
     if (devicesToMeasurements.get(device) == null && devicesToPositions.get(device) == null) {
       List<String> measurements = new ArrayList<>();
       measurements.add(measurement);
@@ -366,5 +390,4 @@ public class ImportCsv extends AbstractCsvTool {
       throw new IllegalArgumentException("Illegal csv line" + path);
     }
   }
-
 }

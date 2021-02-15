@@ -44,9 +44,9 @@ public class UpdatePlan extends PhysicalPlan {
    * Construct function for UpdatePlan.
    *
    * @param startTime -start time
-   * @param endTime   -end time
-   * @param value     -value
-   * @param path      -path
+   * @param endTime -end time
+   * @param value -value
+   * @param path -path
    */
   public UpdatePlan(long startTime, long endTime, String value, PartialPath path) {
     super(false, Operator.OperatorType.UPDATE);
@@ -58,9 +58,9 @@ public class UpdatePlan extends PhysicalPlan {
   /**
    * Construct function for UpdatePlan.
    *
-   * @param list  -list to initial intervals
+   * @param list -list to initial intervals
    * @param value -value
-   * @param path  -path
+   * @param path -path
    */
   public UpdatePlan(List<Pair<Long, Long>> list, String value, PartialPath path) {
     super(false, Operator.OperatorType.UPDATE);
@@ -123,7 +123,8 @@ public class UpdatePlan extends PhysicalPlan {
       return false;
     }
     UpdatePlan that = (UpdatePlan) o;
-    return Objects.equals(intervals, that.intervals) && Objects.equals(value, that.value)
+    return Objects.equals(intervals, that.intervals)
+        && Objects.equals(value, that.value)
         && Objects.equals(path, that.path);
   }
 
@@ -131,5 +132,4 @@ public class UpdatePlan extends PhysicalPlan {
   public int hashCode() {
     return Objects.hash(value, path);
   }
-
 }

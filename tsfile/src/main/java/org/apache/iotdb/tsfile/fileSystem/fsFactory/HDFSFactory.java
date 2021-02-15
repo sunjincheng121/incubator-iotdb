@@ -61,9 +61,8 @@ public class HDFSFactory implements FSFactory {
       listFilesByPrefix = clazz.getMethod("listFilesByPrefix", String.class, String.class);
       renameTo = clazz.getMethod("renameTo", File.class);
     } catch (ClassNotFoundException | NoSuchMethodException e) {
-      logger
-          .error("Failed to get Hadoop file system. Please check your dependency of Hadoop module.",
-              e);
+      logger.error(
+          "Failed to get Hadoop file system. Please check your dependency of Hadoop module.", e);
     }
   }
 
@@ -86,9 +85,8 @@ public class HDFSFactory implements FSFactory {
     try {
       return (File) constructorWithPathname.newInstance(pathname);
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-      logger
-          .error("Failed to get file: {}. Please check your dependency of Hadoop module.", pathname,
-              e);
+      logger.error(
+          "Failed to get file: {}. Please check your dependency of Hadoop module.", pathname, e);
       return null;
     }
   }
@@ -97,8 +95,10 @@ public class HDFSFactory implements FSFactory {
     try {
       return (File) constructorWithParentStringAndChild.newInstance(parent, child);
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-      logger.error("Failed to get file: {}. Please check your dependency of Hadoop module.",
-          parent + File.separator + child, e);
+      logger.error(
+          "Failed to get file: {}. Please check your dependency of Hadoop module.",
+          parent + File.separator + child,
+          e);
       return null;
     }
   }
@@ -107,8 +107,10 @@ public class HDFSFactory implements FSFactory {
     try {
       return (File) constructorWithParentFileAndChild.newInstance(parent, child);
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-      logger.error("Failed to get file: {}. Please check your dependency of Hadoop module.",
-          parent.getAbsolutePath() + File.separator + child, e);
+      logger.error(
+          "Failed to get file: {}. Please check your dependency of Hadoop module.",
+          parent.getAbsolutePath() + File.separator + child,
+          e);
       return null;
     }
   }
@@ -117,58 +119,60 @@ public class HDFSFactory implements FSFactory {
     try {
       return (File) constructorWithUri.newInstance(uri);
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-      logger
-          .error("Failed to get file: {}. Please check your dependency of Hadoop module.", uri, e);
+      logger.error(
+          "Failed to get file: {}. Please check your dependency of Hadoop module.", uri, e);
       return null;
     }
   }
 
   public BufferedReader getBufferedReader(String filePath) {
     try {
-      return (BufferedReader) getBufferedReader
-          .invoke(constructorWithPathname.newInstance(filePath), filePath);
+      return (BufferedReader)
+          getBufferedReader.invoke(constructorWithPathname.newInstance(filePath), filePath);
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
       logger.error(
           "Failed to get buffered reader for {}. Please check your dependency of Hadoop module.",
-          filePath, e);
+          filePath,
+          e);
       return null;
     }
   }
 
   public BufferedWriter getBufferedWriter(String filePath, boolean append) {
     try {
-      return (BufferedWriter) getBufferedWriter
-          .invoke(constructorWithPathname.newInstance(filePath), filePath, append);
+      return (BufferedWriter)
+          getBufferedWriter.invoke(constructorWithPathname.newInstance(filePath), filePath, append);
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
       logger.error(
           "Failed to get buffered writer for {}. Please check your dependency of Hadoop module.",
-          filePath, e);
+          filePath,
+          e);
       return null;
     }
   }
 
   public BufferedInputStream getBufferedInputStream(String filePath) {
     try {
-      return (BufferedInputStream) getBufferedInputStream
-          .invoke(constructorWithPathname.newInstance(filePath),
-              filePath);
+      return (BufferedInputStream)
+          getBufferedInputStream.invoke(constructorWithPathname.newInstance(filePath), filePath);
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
       logger.error(
           "Failed to get buffered input stream for {}. Please check your dependency of Hadoop module.",
-          filePath, e);
+          filePath,
+          e);
       return null;
     }
   }
 
   public BufferedOutputStream getBufferedOutputStream(String filePath) {
     try {
-      return (BufferedOutputStream) getBufferedOutputStream
-          .invoke(constructorWithPathname.newInstance(filePath),
-              filePath);
+      return (BufferedOutputStream)
+          getBufferedOutputStream.invoke(constructorWithPathname.newInstance(filePath), filePath);
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
       logger.error(
           "Failed to get buffered output stream for {}. Please check your dependency of Hadoop module.",
-          filePath, e);
+          filePath,
+          e);
       return null;
     }
   }
@@ -179,30 +183,37 @@ public class HDFSFactory implements FSFactory {
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
       logger.error(
           "Failed to rename file from {} to {}. Please check your dependency of Hadoop module.",
-          srcFile.getName(), destFile.getName());
+          srcFile.getName(),
+          destFile.getName());
     }
   }
 
   public File[] listFilesBySuffix(String fileFolder, String suffix) {
     try {
-      return (File[]) listFilesBySuffix
-          .invoke(constructorWithPathname.newInstance(fileFolder), fileFolder, suffix);
+      return (File[])
+          listFilesBySuffix.invoke(
+              constructorWithPathname.newInstance(fileFolder), fileFolder, suffix);
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
       logger.error(
           "Failed to list files in {} with SUFFIX {}. Please check your dependency of Hadoop module.",
-          fileFolder, suffix, e);
+          fileFolder,
+          suffix,
+          e);
       return null;
     }
   }
 
   public File[] listFilesByPrefix(String fileFolder, String prefix) {
     try {
-      return (File[]) listFilesByPrefix
-          .invoke(constructorWithPathname.newInstance(fileFolder), fileFolder, prefix);
+      return (File[])
+          listFilesByPrefix.invoke(
+              constructorWithPathname.newInstance(fileFolder), fileFolder, prefix);
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
       logger.error(
           "Failed to list files in {} with PREFIX {}. Please check your dependency of Hadoop module.",
-          fileFolder, prefix, e);
+          fileFolder,
+          prefix,
+          e);
       return null;
     }
   }

@@ -20,7 +20,7 @@ package org.apache.iotdb.db.qp.physical.sys;
 
 import org.apache.iotdb.db.metadata.PartialPath;
 
-public class ShowDevicesPlan extends ShowPlan{
+public class ShowDevicesPlan extends ShowPlan {
   private PartialPath path;
 
   public ShowDevicesPlan(ShowContentType showContentType, PartialPath path) {
@@ -32,4 +32,3 @@ public class ShowDevicesPlan extends ShowPlan{
     return this.path;
   }
 }
-

@@ -19,18 +19,15 @@
 
 package org.apache.iotdb.tsfile.v1.file.metadata;
 
+import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.statistics.Statistics;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 import org.apache.iotdb.tsfile.v1.file.metadata.statistics.StatisticsV1;
 
-import java.nio.ByteBuffer;
-/**
- * MetaData of one chunk.
- */
+/** MetaData of one chunk. */
 public class ChunkMetadataV1 {
-
 
   private String measurementUid;
 
@@ -55,8 +52,7 @@ public class ChunkMetadataV1 {
 
   private TsDigestV1 valuesStatistics;
 
-  private ChunkMetadataV1() {
-  }
+  private ChunkMetadataV1() {}
 
   /**
    * deserialize from ByteBuffer.
@@ -82,12 +78,12 @@ public class ChunkMetadataV1 {
   public long getNumOfPoints() {
     return numOfPoints;
   }
-  
+
   public ChunkMetadata upgradeToChunkMetadata() {
-    Statistics<?> statistics = StatisticsV1
-        .constructStatisticsFromOldChunkMetadata(this);
-    ChunkMetadata chunkMetadata = new ChunkMetadata(this.measurementUid, this.tsDataType,
-        this.offsetOfChunkHeader, statistics);
+    Statistics<?> statistics = StatisticsV1.constructStatisticsFromOldChunkMetadata(this);
+    ChunkMetadata chunkMetadata =
+        new ChunkMetadata(
+            this.measurementUid, this.tsDataType, this.offsetOfChunkHeader, statistics);
     chunkMetadata.setFromOldTsFile(true);
     return chunkMetadata;
   }

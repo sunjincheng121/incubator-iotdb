@@ -69,13 +69,14 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
   private long fileMetadataPos;
   private int fileMetadataSize;
   private ByteBuffer markerBuffer = ByteBuffer.allocate(Byte.BYTES);
-  private Decoder defaultTimeDecoder = Decoder.getDecoderByType(
-      TSEncoding.valueOf(TSFileDescriptor.getInstance().getConfig().getTimeEncoder()),
-      TSDataType.INT64);
+  private Decoder defaultTimeDecoder =
+      Decoder.getDecoderByType(
+          TSEncoding.valueOf(TSFileDescriptor.getInstance().getConfig().getTimeEncoder()),
+          TSDataType.INT64);
   private Decoder valueDecoder;
   protected String file;
 
-  // PartitionId -> TsFileIOWriter 
+  // PartitionId -> TsFileIOWriter
   private Map<Long, TsFileIOWriter> partitionWriterMap;
 
   /**
@@ -123,18 +124,19 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
     }
   }
 
-  /**
-   *
-   */
+  /** */
   public void loadMetadataSize() throws IOException {
     ByteBuffer metadataSize = ByteBuffer.allocate(Integer.BYTES);
-    tsFileInput.read(metadataSize,
+    tsFileInput.read(
+        metadataSize,
         tsFileInput.size() - TSFileConfig.MAGIC_STRING.getBytes().length - Integer.BYTES);
     metadataSize.flip();
     // read file metadata size and position
     fileMetadataSize = ReadWriteIOUtils.readInt(metadataSize);
     fileMetadataPos =
-        tsFileInput.size() - TSFileConfig.MAGIC_STRING.getBytes().length - Integer.BYTES
+        tsFileInput.size()
+            - TSFileConfig.MAGIC_STRING.getBytes().length
+            - Integer.BYTES
             - fileMetadataSize;
     // skip the magic header
     position(TSFileConfig.MAGIC_STRING.length());
@@ -149,24 +151,20 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
     return new String(magicStringBytes.array());
   }
 
-  /**
-   * whether the file is a complete TsFile: only if the head magic and tail magic string exists.
-   */
+  /** whether the file is a complete TsFile: only if the head magic and tail magic string exists. */
   public boolean isComplete() throws IOException {
-    return tsFileInput.size() >= TSFileConfig.MAGIC_STRING.length() * 2 && readTailMagic()
-        .equals(readHeadMagic());
+    return tsFileInput.size() >= TSFileConfig.MAGIC_STRING.length() * 2
+        && readTailMagic().equals(readHeadMagic());
   }
 
-  /**
-   * this function does not modify the position of the file reader.
-   */
+  /** this function does not modify the position of the file reader. */
   public String readHeadMagic() throws IOException {
     return readHeadMagic(false);
   }
 
   /**
    * @param movePosition whether move the position of the file reader after reading the magic header
-   * to the end of the magic head string.
+   *     to the end of the magic head string.
    */
   public String readHeadMagic(boolean movePosition) throws IOException {
     ByteBuffer magicStringBytes = ByteBuffer.allocate(TSFileConfig.MAGIC_STRING.length());
@@ -180,28 +178,22 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
     return new String(magicStringBytes.array());
   }
 
-  /**
-   * this function reads version number and checks compatibility of TsFile.
-   */
+  /** this function reads version number and checks compatibility of TsFile. */
   public String readVersionNumber() throws IOException {
-    ByteBuffer versionNumberBytes = ByteBuffer
-        .allocate(TSFileConfig.VERSION_NUMBER.getBytes().length);
+    ByteBuffer versionNumberBytes =
+        ByteBuffer.allocate(TSFileConfig.VERSION_NUMBER.getBytes().length);
     tsFileInput.position(TSFileConfig.MAGIC_STRING.getBytes().length);
     tsFileInput.read(versionNumberBytes);
     versionNumberBytes.flip();
     return new String(versionNumberBytes.array());
   }
 
-  /**
-   * this function does not modify the position of the file reader.
-   */
+  /** this function does not modify the position of the file reader. */
   public TsFileMetadataV1 readFileMetadata() throws IOException {
     return TsFileMetadataV1.deserializeFrom(readData(fileMetadataPos, fileMetadataSize));
   }
 
-  /**
-   * this function does not modify the position of the file reader.
-   */
+  /** this function does not modify the position of the file reader. */
   public TsDeviceMetadataV1 readTsDeviceMetaData(TsDeviceMetadataIndexV1 index) throws IOException {
     return TsDeviceMetadataV1.deserializeFrom(readData(index.getOffset(), index.getLen()));
   }
@@ -218,8 +210,8 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
   }
 
   /**
-   * read data from current position of the input, and deserialize it to a CHUNK_HEADER. <br> This
-   * method is not threadsafe.
+   * read data from current position of the input, and deserialize it to a CHUNK_HEADER. <br>
+   * This method is not threadsafe.
    *
    * @return a CHUNK_HEADER
    * @throws IOException io error
@@ -237,17 +229,15 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
     return HeaderUtils.deserializePageHeaderV1(tsFileInput.wrapAsInputStream(), type);
   }
 
-  public ByteBuffer readPage(PageHeader header, CompressionType type)
-      throws IOException {
+  public ByteBuffer readPage(PageHeader header, CompressionType type) throws IOException {
     ByteBuffer buffer = readData(-1, header.getCompressedSize());
     IUnCompressor unCompressor = IUnCompressor.getUnCompressor(type);
     ByteBuffer uncompressedBuffer = ByteBuffer.allocate(header.getUncompressedSize());
     if (type == CompressionType.UNCOMPRESSED) {
       return buffer;
     }
-    unCompressor.uncompress(buffer.array(), buffer.position(), buffer.remaining(),
-        uncompressedBuffer.array(),
-        0);
+    unCompressor.uncompress(
+        buffer.array(), buffer.position(), buffer.remaining(), uncompressedBuffer.array(), 0);
     return uncompressedBuffer;
   }
 
@@ -264,7 +254,8 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
   }
 
   /**
-   * read one byte from the input. <br> this method is not thread safe
+   * read one byte from the input. <br>
+   * this method is not thread safe
    */
   public byte readMarker() throws IOException {
     markerBuffer.clear();
@@ -289,12 +280,12 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
 
   /**
    * read data from tsFileInput, from the current position (if position = -1), or the given
-   * position. <br> if position = -1, the tsFileInput's position will be changed to the current
-   * position + real data size that been read. Other wise, the tsFileInput's position is not
-   * changed.
+   * position. <br>
+   * if position = -1, the tsFileInput's position will be changed to the current position + real
+   * data size that been read. Other wise, the tsFileInput's position is not changed.
    *
    * @param position the start position of data in the tsFileInput, or the current position if
-   * position = -1
+   *     position = -1
    * @param size the size of data that want to read
    * @return data that been read.
    */
@@ -323,7 +314,7 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
       throws IOException, WriteProcessException {
     File oldTsFile = FSFactoryProducer.getFSFactory().getFile(this.file);
 
-    // check if the old TsFile has correct header 
+    // check if the old TsFile has correct header
     if (!fileCheck(oldTsFile)) {
       return;
     }
@@ -352,10 +343,12 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
               versionOfChunkGroup = oldVersionInfo.get(startOffsetOfChunkGroup);
             }
             ChunkHeader header = this.readChunkHeader();
-            MeasurementSchema measurementSchema = new MeasurementSchema(header.getMeasurementID(),
-                header.getDataType(),
-                header.getEncodingType(),
-                header.getCompressionType());
+            MeasurementSchema measurementSchema =
+                new MeasurementSchema(
+                    header.getMeasurementID(),
+                    header.getDataType(),
+                    header.getEncodingType(),
+                    header.getCompressionType());
             measurementSchemaList.add(measurementSchema);
             List<PageHeader> pageHeadersInChunk = new ArrayList<>();
             List<ByteBuffer> dataInChunk = new ArrayList<>();
@@ -364,9 +357,10 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
               PageHeader pageHeader = readPageHeader(header.getDataType());
               boolean pageInSamePartition = checkIfPageInSameTimePartition(pageHeader);
               pagePartitionInfo.add(pageInSamePartition);
-              ByteBuffer pageData = pageInSamePartition ?
-                  readCompressedPage(pageHeader)
-                  : readPage(pageHeader, header.getCompressionType());
+              ByteBuffer pageData =
+                  pageInSamePartition
+                      ? readCompressedPage(pageHeader)
+                      : readPage(pageHeader, header.getCompressionType());
               pageHeadersInChunk.add(pageHeader);
               dataInChunk.add(pageData);
             }
@@ -378,8 +372,14 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
             // this is the footer of a ChunkGroup.
             ChunkGroupFooter chunkGroupFooter = this.readChunkGroupFooter();
             String deviceID = chunkGroupFooter.getDeviceID();
-            rewrite(oldTsFile, deviceID, measurementSchemaList, pageHeadersInChunkGroup,
-                pageDataInChunkGroup, versionOfChunkGroup, pagePartitionInfoInChunkGroup);
+            rewrite(
+                oldTsFile,
+                deviceID,
+                measurementSchemaList,
+                pageHeadersInChunkGroup,
+                pageDataInChunkGroup,
+                versionOfChunkGroup,
+                pagePartitionInfoInChunkGroup);
 
             pageHeadersInChunkGroup.clear();
             pageDataInChunkGroup.clear();
@@ -400,8 +400,12 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
         upgradedResources.add(endFileAndGenerateResource(tsFileIOWriter));
       }
     } catch (IOException e2) {
-      logger.info("TsFile upgrade process cannot proceed at position {} after {} chunk groups "
-          + "recovered, because : {}", this.position(), chunkGroupCount, e2.getMessage());
+      logger.info(
+          "TsFile upgrade process cannot proceed at position {} after {} chunk groups "
+              + "recovered, because : {}",
+          this.position(),
+          chunkGroupCount,
+          e2.getMessage());
     } finally {
       if (tsFileInput != null) {
         tsFileInput.close();
@@ -419,9 +423,14 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
    * this case, we have to decode the data to points, and then rewrite the data points to different
    * chunkWriters, finally write chunks to their own upgraded TsFiles
    */
-  private void rewrite(File oldTsFile, String deviceId, List<MeasurementSchema> schemas,
-      List<List<PageHeader>> pageHeadersInChunkGroup, List<List<ByteBuffer>> dataInChunkGroup,
-      long versionOfChunkGroup, List<List<Boolean>> pagePartitionInfoInChunkGroup)
+  private void rewrite(
+      File oldTsFile,
+      String deviceId,
+      List<MeasurementSchema> schemas,
+      List<List<PageHeader>> pageHeadersInChunkGroup,
+      List<List<ByteBuffer>> dataInChunkGroup,
+      long versionOfChunkGroup,
+      List<List<Boolean>> pagePartitionInfoInChunkGroup)
       throws IOException, PageException {
     Map<Long, Map<MeasurementSchema, ChunkWriterImpl>> chunkWritersInChunkGroup = new HashMap<>();
     for (int i = 0; i < schemas.size(); i++) {
@@ -429,21 +438,24 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
       List<ByteBuffer> pageDataInChunk = dataInChunkGroup.get(i);
       List<PageHeader> pageHeadersInChunk = pageHeadersInChunkGroup.get(i);
       List<Boolean> pagePartitionInfo = pagePartitionInfoInChunkGroup.get(i);
-      valueDecoder = Decoder
-          .getDecoderByType(schema.getEncodingType(), schema.getType());
+      valueDecoder = Decoder.getDecoderByType(schema.getEncodingType(), schema.getType());
       for (int j = 0; j < pageDataInChunk.size(); j++) {
         if (Boolean.TRUE.equals(pagePartitionInfo.get(j))) {
-          writePageInSamePartitionToFile(oldTsFile, schema, pageHeadersInChunk.get(j),
-              pageDataInChunk.get(j), chunkWritersInChunkGroup);
-        } else {
-          writePageInDifferentPartitionsToFiles(oldTsFile, schema, pageDataInChunk.get(j),
+          writePageInSamePartitionToFile(
+              oldTsFile,
+              schema,
+              pageHeadersInChunk.get(j),
+              pageDataInChunk.get(j),
               chunkWritersInChunkGroup);
+        } else {
+          writePageInDifferentPartitionsToFiles(
+              oldTsFile, schema, pageDataInChunk.get(j), chunkWritersInChunkGroup);
         }
       }
     }
 
-    for (Entry<Long, Map<MeasurementSchema, ChunkWriterImpl>> entry : chunkWritersInChunkGroup
-        .entrySet()) {
+    for (Entry<Long, Map<MeasurementSchema, ChunkWriterImpl>> entry :
+        chunkWritersInChunkGroup.entrySet()) {
       long partitionId = entry.getKey();
       TsFileIOWriter tsFileIOWriter = partitionWriterMap.get(partitionId);
       tsFileIOWriter.startChunkGroup(deviceId);
@@ -457,15 +469,23 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
   }
 
   private TsFileIOWriter getOrDefaultTsFileIOWriter(File oldTsFile, long partition) {
-    return partitionWriterMap.computeIfAbsent(partition, k ->
-        {
-          File partitionDir = FSFactoryProducer.getFSFactory().getFile(oldTsFile.getParent()
-              + File.separator + partition);
+    return partitionWriterMap.computeIfAbsent(
+        partition,
+        k -> {
+          File partitionDir =
+              FSFactoryProducer.getFSFactory()
+                  .getFile(oldTsFile.getParent() + File.separator + partition);
           if (!partitionDir.exists()) {
             partitionDir.mkdirs();
           }
-          File newFile = FSFactoryProducer.getFSFactory().getFile(oldTsFile.getParent()
-              + File.separator + partition + File.separator + oldTsFile.getName());
+          File newFile =
+              FSFactoryProducer.getFSFactory()
+                  .getFile(
+                      oldTsFile.getParent()
+                          + File.separator
+                          + partition
+                          + File.separator
+                          + oldTsFile.getName());
           try {
             if (!newFile.createNewFile()) {
               logger.error("The TsFile {} has been created ", newFile);
@@ -476,43 +496,44 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
             logger.error("Create new TsFile {} failed ", newFile);
             return null;
           }
-        }
-    );
+        });
   }
 
-  private void writePageInSamePartitionToFile(File oldTsFile, MeasurementSchema schema,
+  private void writePageInSamePartitionToFile(
+      File oldTsFile,
+      MeasurementSchema schema,
       PageHeader pageHeader,
       ByteBuffer pageData,
       Map<Long, Map<MeasurementSchema, ChunkWriterImpl>> chunkWritersInChunkGroup)
       throws PageException {
     long partitionId = StorageEngine.getTimePartition(pageHeader.getStartTime());
     getOrDefaultTsFileIOWriter(oldTsFile, partitionId);
-    Map<MeasurementSchema, ChunkWriterImpl> chunkWriters = chunkWritersInChunkGroup
-        .getOrDefault(partitionId, new HashMap<>());
-    ChunkWriterImpl chunkWriter = chunkWriters
-        .getOrDefault(schema, new ChunkWriterImpl(schema));
+    Map<MeasurementSchema, ChunkWriterImpl> chunkWriters =
+        chunkWritersInChunkGroup.getOrDefault(partitionId, new HashMap<>());
+    ChunkWriterImpl chunkWriter = chunkWriters.getOrDefault(schema, new ChunkWriterImpl(schema));
     chunkWriter.writePageHeaderAndDataIntoBuff(pageData, pageHeader);
     chunkWriters.put(schema, chunkWriter);
     chunkWritersInChunkGroup.put(partitionId, chunkWriters);
   }
 
-  private void writePageInDifferentPartitionsToFiles(File oldTsFile, MeasurementSchema schema,
+  private void writePageInDifferentPartitionsToFiles(
+      File oldTsFile,
+      MeasurementSchema schema,
       ByteBuffer pageData,
       Map<Long, Map<MeasurementSchema, ChunkWriterImpl>> chunkWritersInChunkGroup)
       throws IOException {
     valueDecoder.reset();
-    PageReader pageReader = new PageReader(pageData, schema.getType(), valueDecoder,
-        defaultTimeDecoder, null);
+    PageReader pageReader =
+        new PageReader(pageData, schema.getType(), valueDecoder, defaultTimeDecoder, null);
     BatchData batchData = pageReader.getAllSatisfiedPageData();
     while (batchData.hasCurrent()) {
       long time = batchData.currentTime();
       Object value = batchData.currentValue();
       long partitionId = StorageEngine.getTimePartition(time);
 
-      Map<MeasurementSchema, ChunkWriterImpl> chunkWriters = chunkWritersInChunkGroup
-          .getOrDefault(partitionId, new HashMap<>());
-      ChunkWriterImpl chunkWriter = chunkWriters
-          .getOrDefault(schema, new ChunkWriterImpl(schema));
+      Map<MeasurementSchema, ChunkWriterImpl> chunkWriters =
+          chunkWritersInChunkGroup.getOrDefault(partitionId, new HashMap<>());
+      ChunkWriterImpl chunkWriter = chunkWriters.getOrDefault(schema, new ChunkWriterImpl(schema));
       getOrDefaultTsFileIOWriter(oldTsFile, partitionId);
       switch (schema.getType()) {
         case INT32:
@@ -543,9 +564,7 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
     }
   }
 
-  /**
-   * check if the file to be upgraded has correct magic strings and version number
-   */
+  /** check if the file to be upgraded has correct magic strings and version number */
   private boolean fileCheck(File oldTsFile) throws IOException {
     long fileSize;
     if (!oldTsFile.exists()) {
@@ -587,8 +606,8 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
     }
 
     for (TsDeviceMetadataV1 oldTsDeviceMetadata : oldDeviceMetadataList) {
-      for (ChunkGroupMetaDataV1 oldChunkGroupMetadata : oldTsDeviceMetadata
-          .getChunkGroupMetaDataList()) {
+      for (ChunkGroupMetaDataV1 oldChunkGroupMetadata :
+          oldTsDeviceMetadata.getChunkGroupMetaDataList()) {
         long version = oldChunkGroupMetadata.getVersion();
         long offsetOfChunkGroup = oldChunkGroupMetadata.getStartOffsetOfChunkGroup();
         // get version informations
@@ -602,10 +621,10 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
       throws IOException {
     tsFileIOWriter.endFile();
     TsFileResource tsFileResource = new TsFileResource(tsFileIOWriter.getFile());
-    Map<String, List<TimeseriesMetadata>> deviceTimeseriesMetadataMap = tsFileIOWriter
-        .getDeviceTimeseriesMetadataMap();
-    for (Map.Entry<String, List<TimeseriesMetadata>> entry : deviceTimeseriesMetadataMap
-        .entrySet()) {
+    Map<String, List<TimeseriesMetadata>> deviceTimeseriesMetadataMap =
+        tsFileIOWriter.getDeviceTimeseriesMetadataMap();
+    for (Map.Entry<String, List<TimeseriesMetadata>> entry :
+        deviceTimeseriesMetadataMap.entrySet()) {
       String device = entry.getKey();
       for (TimeseriesMetadata timeseriesMetaData : entry.getValue()) {
         tsFileResource.updateStartTime(device, timeseriesMetaData.getStatistics().getStartTime());
@@ -615,5 +634,4 @@ public class TsFileOnlineUpgradeTool implements AutoCloseable {
     tsFileResource.setClosed(true);
     return tsFileResource;
   }
-
 }

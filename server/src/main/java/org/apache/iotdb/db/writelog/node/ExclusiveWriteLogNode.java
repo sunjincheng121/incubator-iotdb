@@ -42,9 +42,7 @@ import org.apache.iotdb.db.writelog.io.MultiFileLogReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * This WriteLogNode is used to manage insert ahead logs of a TsFile.
- */
+/** This WriteLogNode is used to manage insert ahead logs of a TsFile. */
 public class ExclusiveWriteLogNode implements WriteLogNode, Comparable<ExclusiveWriteLogNode> {
 
   public static final String WAL_FILE_NAME = "wal";
@@ -58,10 +56,10 @@ public class ExclusiveWriteLogNode implements WriteLogNode, Comparable<Exclusive
 
   private IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
 
-  private ByteBuffer logBufferWorking = ByteBuffer
-      .allocate(IoTDBDescriptor.getInstance().getConfig().getWalBufferSize() / 2);
-  private ByteBuffer logBufferIdle = ByteBuffer
-      .allocate(IoTDBDescriptor.getInstance().getConfig().getWalBufferSize() / 2);
+  private ByteBuffer logBufferWorking =
+      ByteBuffer.allocate(IoTDBDescriptor.getInstance().getConfig().getWalBufferSize() / 2);
+  private ByteBuffer logBufferIdle =
+      ByteBuffer.allocate(IoTDBDescriptor.getInstance().getConfig().getWalBufferSize() / 2);
   private ByteBuffer logBufferFlushing;
 
   private final Object switchBufferCondition = new Object();
@@ -103,8 +101,7 @@ public class ExclusiveWriteLogNode implements WriteLogNode, Comparable<Exclusive
         sync();
       }
     } catch (BufferOverflowException e) {
-      throw new IOException(
-          "Log cannot fit into the buffer, please increase wal_buffer_size", e);
+      throw new IOException("Log cannot fit into the buffer, please increase wal_buffer_size", e);
     } finally {
       lock.unlock();
     }
@@ -161,7 +158,6 @@ public class ExclusiveWriteLogNode implements WriteLogNode, Comparable<Exclusive
     forceWal();
   }
 
-
   @Override
   public void notifyStartFlush() {
     lock.lock();
@@ -177,8 +173,8 @@ public class ExclusiveWriteLogNode implements WriteLogNode, Comparable<Exclusive
   public void notifyEndFlush() {
     lock.lock();
     try {
-      File logFile = SystemFileFactory.INSTANCE
-          .getFile(logDirectory, WAL_FILE_NAME + ++lastFlushedId);
+      File logFile =
+          SystemFileFactory.INSTANCE.getFile(logDirectory, WAL_FILE_NAME + ++lastFlushedId);
       discard(logFile);
     } finally {
       lock.unlock();
@@ -210,7 +206,8 @@ public class ExclusiveWriteLogNode implements WriteLogNode, Comparable<Exclusive
   @Override
   public ILogReader getLogReader() {
     File[] logFiles = SystemFileFactory.INSTANCE.getFile(logDirectory).listFiles();
-    Arrays.sort(logFiles,
+    Arrays.sort(
+        logFiles,
         Comparator.comparingInt(f -> Integer.parseInt(f.getName().replace(WAL_FILE_NAME, ""))));
     return new MultiFileLogReader(logFiles);
   }

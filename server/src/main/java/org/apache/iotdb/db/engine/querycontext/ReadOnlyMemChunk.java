@@ -58,8 +58,14 @@ public class ReadOnlyMemChunk {
 
   private int chunkDataSize;
 
-  public ReadOnlyMemChunk(String measurementUid, TSDataType dataType, TSEncoding encoding,
-      TVList tvList, Map<String, String> props, long version, int size,
+  public ReadOnlyMemChunk(
+      String measurementUid,
+      TSDataType dataType,
+      TSEncoding encoding,
+      TVList tvList,
+      Map<String, String> props,
+      long version,
+      int size,
       List<TimeRange> deletionList)
       throws IOException, QueryProcessException {
     this.measurementUid = measurementUid;
@@ -70,12 +76,14 @@ public class ReadOnlyMemChunk {
       try {
         this.floatPrecision = Integer.parseInt(props.get(Encoder.MAX_POINT_NUMBER));
       } catch (NumberFormatException e) {
-        logger.warn("The format of MAX_POINT_NUMBER {}  is not correct."
-            + " Using default float precision.", props.get(Encoder.MAX_POINT_NUMBER));
+        logger.warn(
+            "The format of MAX_POINT_NUMBER {}  is not correct."
+                + " Using default float precision.",
+            props.get(Encoder.MAX_POINT_NUMBER));
       }
       if (floatPrecision < 0) {
-        logger.warn("The MAX_POINT_NUMBER shouldn't be less than 0."
-            + " Using default float precision {}.",
+        logger.warn(
+            "The MAX_POINT_NUMBER shouldn't be less than 0." + " Using default float precision {}.",
             TSFileDescriptor.getInstance().getConfig().getFloatPrecision());
         floatPrecision = TSFileDescriptor.getInstance().getConfig().getFloatPrecision();
       }
@@ -85,7 +93,8 @@ public class ReadOnlyMemChunk {
     this.chunkDataSize = size;
     this.deletionList = deletionList;
 
-    this.chunkPointReader = tvList.getIterator(floatPrecision, encoding, chunkDataSize, deletionList);
+    this.chunkPointReader =
+        tvList.getIterator(floatPrecision, encoding, chunkDataSize, deletionList);
     initChunkMeta();
   }
 
@@ -93,7 +102,8 @@ public class ReadOnlyMemChunk {
     Statistics statsByType = Statistics.getStatsByType(dataType);
     ChunkMetadata metaData = new ChunkMetadata(measurementUid, dataType, 0, statsByType);
     if (!isEmpty()) {
-      IPointReader iterator = chunkData.getIterator(floatPrecision, encoding, chunkDataSize, deletionList);
+      IPointReader iterator =
+          chunkData.getIterator(floatPrecision, encoding, chunkDataSize, deletionList);
       while (iterator.hasNextTimeValuePair()) {
         TimeValuePair timeValuePair = iterator.nextTimeValuePair();
         switch (dataType) {

@@ -24,7 +24,12 @@ import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.exception.write.UnSupportedDataTypeException;
 
 public enum TSDataType {
-  BOOLEAN, INT32, INT64, FLOAT, DOUBLE, TEXT;
+  BOOLEAN,
+  INT32,
+  INT64,
+  FLOAT,
+  DOUBLE,
+  TEXT;
 
   /**
    * give an integer to return a data type.
@@ -35,7 +40,6 @@ public enum TSDataType {
   public static TSDataType deserialize(short type) {
     return getTsDataType(type);
   }
-
 
   private static TSDataType getTsDataType(short type) {
     if (type >= 6 || type < 0) {
@@ -116,9 +120,7 @@ public enum TSDataType {
     }
   }
 
-  /**
-   * @return byte number
-   */
+  /** @return byte number */
   public byte enumToByte() {
     switch (this) {
       case BOOLEAN:

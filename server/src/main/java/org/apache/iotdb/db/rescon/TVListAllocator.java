@@ -40,9 +40,9 @@ import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 public class TVListAllocator implements TVListAllocatorMBean, IService {
 
   private Map<TSDataType, Queue<TVList>> tvListCache = new EnumMap<>(TSDataType.class);
-  private String mbeanName = String
-      .format("%s:%s=%s", IoTDBConstant.IOTDB_PACKAGE, IoTDBConstant.JMX_TYPE,
-          getID().getJmxName());
+  private String mbeanName =
+      String.format(
+          "%s:%s=%s", IoTDBConstant.IOTDB_PACKAGE, IoTDBConstant.JMX_TYPE, getID().getJmxName());
 
   private static final TVListAllocator INSTANCE = new TVListAllocator();
 
@@ -51,8 +51,7 @@ public class TVListAllocator implements TVListAllocatorMBean, IService {
   }
 
   public synchronized TVList allocate(TSDataType dataType) {
-    Queue<TVList> tvLists = tvListCache.computeIfAbsent(dataType,
-        k -> new ArrayDeque<>());
+    Queue<TVList> tvLists = tvListCache.computeIfAbsent(dataType, k -> new ArrayDeque<>());
     TVList list = tvLists.poll();
     return list != null ? list : TVList.newList(dataType);
   }

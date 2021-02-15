@@ -29,10 +29,12 @@ public class RpcTransportFactory extends TTransportFactory {
   // TODO: make it a config
   public static boolean USE_SNAPPY = false;
   public static final RpcTransportFactory INSTANCE;
+
   static {
-    INSTANCE = USE_SNAPPY ?
-        new RpcTransportFactory(new TimeoutChangeableTSnappyFramedTransport.Factory()) :
-        new RpcTransportFactory(new Factory());
+    INSTANCE =
+        USE_SNAPPY
+            ? new RpcTransportFactory(new TimeoutChangeableTSnappyFramedTransport.Factory())
+            : new RpcTransportFactory(new Factory());
   }
 
   private TTransportFactory inner;

@@ -19,8 +19,18 @@
 
 package org.apache.iotdb.cluster.log;
 
-
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.iotdb.cluster.config.ClusterDescriptor;
 import org.apache.iotdb.cluster.rpc.thrift.AppendEntriesRequest;
 import org.apache.iotdb.cluster.rpc.thrift.AppendEntryRequest;
@@ -40,18 +50,6 @@ import org.apache.thrift.async.AsyncMethodCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * A LogDispatcher servers a raft leader by queuing logs that the leader wants to send to the
  * follower and send the logs in an ordered manner so that the followers will not wait for previous
@@ -63,10 +61,9 @@ public class LogDispatcher {
 
   private static final Logger logger = LoggerFactory.getLogger(LogDispatcher.class);
   private RaftMember member;
-  private boolean useBatchInLogCatchUp = ClusterDescriptor.getInstance().getConfig()
-      .isUseBatchInLogCatchUp();
-  private List<BlockingQueue<SendLogRequest>> nodeLogQueues =
-      new ArrayList<>();
+  private boolean useBatchInLogCatchUp =
+      ClusterDescriptor.getInstance().getConfig().isUseBatchInLogCatchUp();
+  private List<BlockingQueue<SendLogRequest>> nodeLogQueues = new ArrayList<>();
   private ExecutorService executorService;
   private ExecutorService serializationService;
 
@@ -97,22 +94,24 @@ public class LogDispatcher {
       try {
         boolean addSucceeded;
         if (ClusterDescriptor.getInstance().getConfig().isWaitForSlowNode()) {
-          addSucceeded = nodeLogQueue.offer(log,
-              ClusterDescriptor.getInstance().getConfig().getWriteOperationTimeoutMS(),
-              TimeUnit.MILLISECONDS);
+          addSucceeded =
+              nodeLogQueue.offer(
+                  log,
+                  ClusterDescriptor.getInstance().getConfig().getWriteOperationTimeoutMS(),
+                  TimeUnit.MILLISECONDS);
         } else {
           addSucceeded = nodeLogQueue.add(log);
         }
 
         if (!addSucceeded) {
-          logger.debug("Log queue[{}] of {} is full, ignore the log to this node", i,
-              member.getName());
+          logger.debug(
+              "Log queue[{}] of {} is full, ignore the log to this node", i, member.getName());
         } else {
           log.setEnqueueTime(System.nanoTime());
         }
       } catch (IllegalStateException e) {
-        logger.debug("Log queue[{}] of {} is full, ignore the log to this node", i,
-            member.getName());
+        logger.debug(
+            "Log queue[{}] of {} is full, ignore the log to this node", i, member.getName());
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       }
@@ -140,8 +139,11 @@ public class LogDispatcher {
     private long enqueueTime;
     private Future<ByteBuffer> serializedLogFuture;
 
-    public SendLogRequest(Log log, AtomicInteger voteCounter,
-        AtomicBoolean leaderShipStale, AtomicLong newLeaderTerm,
+    public SendLogRequest(
+        Log log,
+        AtomicInteger voteCounter,
+        AtomicBoolean leaderShipStale,
+        AtomicLong newLeaderTerm,
         AppendEntryRequest appendEntryRequest) {
       this.setLog(log);
       this.setVoteCounter(voteCounter);
@@ -194,16 +196,13 @@ public class LogDispatcher {
       return appendEntryRequest;
     }
 
-    public void setAppendEntryRequest(
-        AppendEntryRequest appendEntryRequest) {
+    public void setAppendEntryRequest(AppendEntryRequest appendEntryRequest) {
       this.appendEntryRequest = appendEntryRequest;
     }
 
     @Override
     public String toString() {
-      return "SendLogRequest{" +
-          "log=" + log +
-          '}';
+      return "SendLogRequest{" + "log=" + log + '}';
     }
   }
 
@@ -214,12 +213,13 @@ public class LogDispatcher {
     private List<SendLogRequest> currBatch = new ArrayList<>();
     private Peer peer;
 
-    DispatcherThread(Node receiver,
-        BlockingQueue<SendLogRequest> logBlockingDeque) {
+    DispatcherThread(Node receiver, BlockingQueue<SendLogRequest> logBlockingDeque) {
       this.receiver = receiver;
       this.logBlockingDeque = logBlockingDeque;
-      this.peer = member.getPeerMap().computeIfAbsent(receiver,
-          r -> new Peer(member.getLogManager().getLastLogIndex()));
+      this.peer =
+          member
+              .getPeerMap()
+              .computeIfAbsent(receiver, r -> new Peer(member.getLogManager().getLastLogIndex()));
     }
 
     @Override
@@ -247,26 +247,29 @@ public class LogDispatcher {
       logger.info("Dispatcher exits");
     }
 
-    private void appendEntriesAsync(List<ByteBuffer> logList, AppendEntriesRequest request,
-        List<SendLogRequest> currBatch)
+    private void appendEntriesAsync(
+        List<ByteBuffer> logList, AppendEntriesRequest request, List<SendLogRequest> currBatch)
         throws TException {
       AsyncMethodCallback<Long> handler = new AppendEntriesHandler(currBatch);
       AsyncClient client = member.getSendLogAsyncClient(receiver);
       if (logger.isDebugEnabled()) {
-        logger.debug("{}: append entries {} with {} logs", member.getName(), receiver,
-            logList.size());
+        logger.debug(
+            "{}: append entries {} with {} logs", member.getName(), receiver, logList.size());
       }
       if (client != null) {
         client.appendEntries(request, handler);
       }
     }
 
-    private void appendEntriesSync(List<ByteBuffer> logList, AppendEntriesRequest request,
-        List<SendLogRequest> currBatch) {
+    private void appendEntriesSync(
+        List<ByteBuffer> logList, AppendEntriesRequest request, List<SendLogRequest> currBatch) {
 
       long startTime = Timer.Statistic.RAFT_SENDER_WAIT_FOR_PREV_LOG.getOperationStartTime();
       if (!member.waitForPrevLog(peer, currBatch.get(0).getLog())) {
-        logger.warn("{}: node {} timed out when appending {}", member.getName(), receiver,
+        logger.warn(
+            "{}: node {} timed out when appending {}",
+            member.getName(),
+            receiver,
             currBatch.get(0).getLog());
         return;
       }
@@ -283,8 +286,12 @@ public class LogDispatcher {
         long result = client.appendEntries(request);
         Timer.Statistic.RAFT_SENDER_SEND_LOG.calOperationCostTimeFromStart(startTime);
         if (result != -1 && logger.isInfoEnabled()) {
-          logger.info("{}: Append {} logs to {}, resp: {}", member.getName(), logList.size(),
-              receiver, result);
+          logger.info(
+              "{}: Append {} logs to {}, resp: {}",
+              member.getName(),
+              logList.size(),
+              receiver,
+              result);
         }
         handler.onComplete(result);
       } catch (TException e) {
@@ -296,8 +303,8 @@ public class LogDispatcher {
       }
     }
 
-    private AppendEntriesRequest prepareRequest(List<ByteBuffer> logList,
-        List<SendLogRequest> currBatch, int firstIndex) {
+    private AppendEntriesRequest prepareRequest(
+        List<ByteBuffer> logList, List<SendLogRequest> currBatch, int firstIndex) {
       AppendEntriesRequest request = new AppendEntriesRequest();
 
       if (member.getHeader() != null) {
@@ -323,7 +330,9 @@ public class LogDispatcher {
 
     private void sendLogs(List<SendLogRequest> currBatch) throws TException {
       int logIndex = 0;
-      logger.debug("send logs from index {} to {}", currBatch.get(0).getLog().getCurrLogIndex(),
+      logger.debug(
+          "send logs from index {} to {}",
+          currBatch.get(0).getLog().getCurrLogIndex(),
           currBatch.get(currBatch.size() - 1).getLog().getCurrLogIndex());
       while (logIndex < currBatch.size()) {
         long logSize = IoTDBDescriptor.getInstance().getConfig().getThriftMaxFrameSize();
@@ -336,8 +345,8 @@ public class LogDispatcher {
             break;
           }
           logSize -= curSize;
-          Timer.Statistic.LOG_DISPATCHER_LOG_IN_QUEUE
-              .calOperationCostTimeFromStart(currBatch.get(logIndex).getLog().getCreateTime());
+          Timer.Statistic.LOG_DISPATCHER_LOG_IN_QUEUE.calOperationCostTimeFromStart(
+              currBatch.get(logIndex).getLog().getCreateTime());
           logList.add(currBatch.get(logIndex).getAppendEntryRequest().entry);
         }
 
@@ -348,8 +357,8 @@ public class LogDispatcher {
           appendEntriesSync(logList, appendEntriesRequest, currBatch.subList(prevIndex, logIndex));
         }
         for (; prevIndex < logIndex; prevIndex++) {
-          Timer.Statistic.LOG_DISPATCHER_FROM_CREATE_TO_END
-              .calOperationCostTimeFromStart(currBatch.get(prevIndex).getLog().getCreateTime());
+          Timer.Statistic.LOG_DISPATCHER_FROM_CREATE_TO_END.calOperationCostTimeFromStart(
+              currBatch.get(prevIndex).getLog().getCreateTime());
         }
       }
     }
@@ -369,13 +378,17 @@ public class LogDispatcher {
     }
 
     private void sendLog(SendLogRequest logRequest) {
-      Timer.Statistic.LOG_DISPATCHER_LOG_IN_QUEUE
-          .calOperationCostTimeFromStart(logRequest.getLog().getCreateTime());
-      member.sendLogToFollower(logRequest.getLog(), logRequest.getVoteCounter(), receiver,
-          logRequest.getLeaderShipStale(), logRequest.getNewLeaderTerm(),
+      Timer.Statistic.LOG_DISPATCHER_LOG_IN_QUEUE.calOperationCostTimeFromStart(
+          logRequest.getLog().getCreateTime());
+      member.sendLogToFollower(
+          logRequest.getLog(),
+          logRequest.getVoteCounter(),
+          receiver,
+          logRequest.getLeaderShipStale(),
+          logRequest.getNewLeaderTerm(),
           logRequest.getAppendEntryRequest());
-      Timer.Statistic.LOG_DISPATCHER_FROM_CREATE_TO_END
-          .calOperationCostTimeFromStart(logRequest.getLog().getCreateTime());
+      Timer.Statistic.LOG_DISPATCHER_FROM_CREATE_TO_END.calOperationCostTimeFromStart(
+          logRequest.getLog().getCreateTime());
     }
 
     class AppendEntriesHandler implements AsyncMethodCallback<Long> {
@@ -385,10 +398,14 @@ public class LogDispatcher {
       private AppendEntriesHandler(List<SendLogRequest> batch) {
         singleEntryHandlers = new ArrayList<>(batch.size());
         for (SendLogRequest sendLogRequest : batch) {
-          AppendNodeEntryHandler handler = getAppendNodeEntryHandler(sendLogRequest.getLog(),
-              sendLogRequest.getVoteCounter()
-              , receiver,
-              sendLogRequest.getLeaderShipStale(), sendLogRequest.getNewLeaderTerm(), peer);
+          AppendNodeEntryHandler handler =
+              getAppendNodeEntryHandler(
+                  sendLogRequest.getLog(),
+                  sendLogRequest.getVoteCounter(),
+                  receiver,
+                  sendLogRequest.getLeaderShipStale(),
+                  sendLogRequest.getNewLeaderTerm(),
+                  peer);
           singleEntryHandlers.add(handler);
         }
       }
@@ -407,8 +424,13 @@ public class LogDispatcher {
         }
       }
 
-      private AppendNodeEntryHandler getAppendNodeEntryHandler(Log log, AtomicInteger voteCounter,
-          Node node, AtomicBoolean leaderShipStale, AtomicLong newLeaderTerm, Peer peer) {
+      private AppendNodeEntryHandler getAppendNodeEntryHandler(
+          Log log,
+          AtomicInteger voteCounter,
+          Node node,
+          AtomicBoolean leaderShipStale,
+          AtomicLong newLeaderTerm,
+          Peer peer) {
         AppendNodeEntryHandler handler = new AppendNodeEntryHandler();
         handler.setReceiver(node);
         handler.setVoteCounter(voteCounter);

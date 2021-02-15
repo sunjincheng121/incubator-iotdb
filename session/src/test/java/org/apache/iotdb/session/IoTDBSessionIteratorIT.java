@@ -55,18 +55,19 @@ public class IoTDBSessionIteratorIT {
 
   @Test
   public void test1() {
-    String[] retArray = new String[]{
-        "0,1,2.0,null",
-        "1,1,2.0,null",
-        "2,1,2.0,null",
-        "3,1,2.0,null",
-        "4,1,2.0,null",
-        "5,1,2.0,4.0",
-        "6,1,2.0,4.0",
-        "7,1,2.0,4.0",
-        "8,1,2.0,4.0",
-        "9,1,2.0,4.0",
-    };
+    String[] retArray =
+        new String[] {
+          "0,1,2.0,null",
+          "1,1,2.0,null",
+          "2,1,2.0,null",
+          "3,1,2.0,null",
+          "4,1,2.0,null",
+          "5,1,2.0,4.0",
+          "6,1,2.0,4.0",
+          "7,1,2.0,4.0",
+          "8,1,2.0,4.0",
+          "9,1,2.0,4.0",
+        };
 
     try {
       SessionDataSet sessionDataSet = session.executeQueryStatement("select * from root.sg1");
@@ -74,8 +75,13 @@ public class IoTDBSessionIteratorIT {
       DataIterator iterator = sessionDataSet.iterator();
       int count = 0;
       while (iterator.next()) {
-        String ans = String.format("%s,%s,%s,%s", iterator.getLong(1), iterator.getInt("root.sg1.d1.s1"),
-            iterator.getFloat(3), iterator.getString("root.sg1.d2.s1"));
+        String ans =
+            String.format(
+                "%s,%s,%s,%s",
+                iterator.getLong(1),
+                iterator.getInt("root.sg1.d1.s1"),
+                iterator.getFloat(3),
+                iterator.getString("root.sg1.d2.s1"));
         assertEquals(retArray[count], ans);
         count++;
       }
@@ -89,11 +95,8 @@ public class IoTDBSessionIteratorIT {
 
   @Test
   public void test2() {
-    String[] retArray = new String[]{
-        "9,root.sg1.d1.s1,1",
-        "9,root.sg1.d1.s2,2.0",
-        "9,root.sg1.d2.s1,4.0"
-    };
+    String[] retArray =
+        new String[] {"9,root.sg1.d1.s1,1", "9,root.sg1.d1.s2,2.0", "9,root.sg1.d2.s1,4.0"};
 
     try {
       SessionDataSet sessionDataSet = session.executeQueryStatement("select last * from root.sg1");
@@ -101,8 +104,9 @@ public class IoTDBSessionIteratorIT {
       DataIterator iterator = sessionDataSet.iterator();
       int count = 0;
       while (iterator.next()) {
-        String ans = String.format("%s,%s,%s", iterator.getLong(1), iterator.getString(2),
-            iterator.getString(3));
+        String ans =
+            String.format(
+                "%s,%s,%s", iterator.getLong(1), iterator.getString(2), iterator.getString(3));
         assertEquals(retArray[count], ans);
         count++;
       }
@@ -116,10 +120,7 @@ public class IoTDBSessionIteratorIT {
 
   @Test
   public void test3() {
-    String[] retArray = new String[]{
-        "root.sg1.d1",
-        "root.sg1.d2"
-    };
+    String[] retArray = new String[] {"root.sg1.d1", "root.sg1.d2"};
 
     try {
       SessionDataSet sessionDataSet = session.executeQueryStatement("show devices");
@@ -145,12 +146,12 @@ public class IoTDBSessionIteratorIT {
     session.open();
 
     session.setStorageGroup("root.sg1");
-    session.createTimeseries("root.sg1.d1.s1", TSDataType.INT32, TSEncoding.RLE,
-        CompressionType.SNAPPY);
-    session.createTimeseries("root.sg1.d1.s2", TSDataType.FLOAT, TSEncoding.RLE,
-        CompressionType.SNAPPY);
-    session.createTimeseries("root.sg1.d2.s1", TSDataType.DOUBLE, TSEncoding.RLE,
-        CompressionType.SNAPPY);
+    session.createTimeseries(
+        "root.sg1.d1.s1", TSDataType.INT32, TSEncoding.RLE, CompressionType.SNAPPY);
+    session.createTimeseries(
+        "root.sg1.d1.s2", TSDataType.FLOAT, TSEncoding.RLE, CompressionType.SNAPPY);
+    session.createTimeseries(
+        "root.sg1.d2.s1", TSDataType.DOUBLE, TSEncoding.RLE, CompressionType.SNAPPY);
     String deviceId = "root.sg1.d1";
     List<String> measurements = new ArrayList<>();
     List<TSDataType> types = new ArrayList<>();
@@ -178,5 +179,4 @@ public class IoTDBSessionIteratorIT {
       session.insertRecord(deviceId, time, measurements, types, values);
     }
   }
-
 }

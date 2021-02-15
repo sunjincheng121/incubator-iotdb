@@ -1,4 +1,3 @@
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -21,12 +20,9 @@
 package org.apache.iotdb.tsfile.v1.file.metadata;
 
 import java.nio.ByteBuffer;
-
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Digest/statistics per chunk group and per page.
- */
+/** Digest/statistics per chunk group and per page. */
 public class TsDigestV1 {
 
   private ByteBuffer[] statistics;
@@ -57,19 +53,20 @@ public class TsDigestV1 {
     return digest;
   }
 
-  /**
-   * get statistics of the current object.
-   */
+  /** get statistics of the current object. */
   public ByteBuffer[] getStatistics() {
     return statistics;
   }
 
   public enum StatisticType {
-    MIN_VALUE, MAX_VALUE, FIRST_VALUE, LAST_VALUE, SUM_VALUE;
+    MIN_VALUE,
+    MAX_VALUE,
+    FIRST_VALUE,
+    LAST_VALUE,
+    SUM_VALUE;
 
     public static int getTotalTypeNum() {
       return StatisticType.values().length;
     }
-
   }
 }

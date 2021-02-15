@@ -23,9 +23,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Statistics for double type.
- */
+/** Statistics for double type. */
 public class DoubleStatisticsV1 extends StatisticsV1<Double> {
 
   private double min;

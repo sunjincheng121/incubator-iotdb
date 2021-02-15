@@ -18,15 +18,14 @@
  */
 package org.apache.iotdb.tsfile.file.metadata.statistics;
 
-import org.apache.iotdb.tsfile.exception.filter.StatisticsClassException;
-import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
-import org.apache.iotdb.tsfile.utils.BytesUtils;
-import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import org.apache.iotdb.tsfile.exception.filter.StatisticsClassException;
+import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
+import org.apache.iotdb.tsfile.utils.BytesUtils;
+import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
 public class BooleanStatistics extends Statistics<Boolean> {
 
@@ -34,7 +33,6 @@ public class BooleanStatistics extends Statistics<Boolean> {
   private boolean lastValue;
 
   static final int BOOLEAN_STATISTICS_FIXED_RAM_SIZE = 48;
-
 
   @Override
   public TSDataType getType() {
@@ -50,7 +48,7 @@ public class BooleanStatistics extends Statistics<Boolean> {
    * initialize boolean Statistics.
    *
    * @param firstValue first boolean value
-   * @param lastValue  last boolean value
+   * @param lastValue last boolean value
    */
   public void initializeStats(boolean firstValue, boolean lastValue) {
     this.firstValue = firstValue;
@@ -96,8 +94,7 @@ public class BooleanStatistics extends Statistics<Boolean> {
   }
 
   @Override
-  public void setMinMaxFromBytes(byte[] minBytes, byte[] maxBytes) {
-  }
+  public void setMinMaxFromBytes(byte[] minBytes, byte[] maxBytes) {}
 
   @Override
   public Boolean getMinValue() {
@@ -156,7 +153,11 @@ public class BooleanStatistics extends Statistics<Boolean> {
       initializeStats(boolStats.getFirstValue(), boolStats.getLastValue());
       isEmpty = false;
     } else {
-      updateStats(boolStats.getFirstValue(), boolStats.getLastValue(), stats.getStartTime(), stats.getEndTime());
+      updateStats(
+          boolStats.getFirstValue(),
+          boolStats.getLastValue(),
+          stats.getStartTime(),
+          stats.getEndTime());
     }
   }
 

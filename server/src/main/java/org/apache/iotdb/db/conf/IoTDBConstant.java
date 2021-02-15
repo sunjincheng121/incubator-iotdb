@@ -20,16 +20,17 @@ package org.apache.iotdb.db.conf;
 
 public class IoTDBConstant {
 
-  private IoTDBConstant() {
-  }
+  private IoTDBConstant() {}
 
   public static final String ENV_FILE_NAME = "iotdb-env";
   public static final String IOTDB_CONF = "IOTDB_CONF";
   public static final String GLOBAL_DB_NAME = "IoTDB";
-  //when running the program in IDE, we can not get the version info using getImplementationVersion()
+  // when running the program in IDE, we can not get the version info using
+  // getImplementationVersion()
   public static final String VERSION =
-      IoTDBConstant.class.getPackage().getImplementationVersion() != null ? IoTDBConstant.class
-          .getPackage().getImplementationVersion() : "UNKNOWN";
+      IoTDBConstant.class.getPackage().getImplementationVersion() != null
+          ? IoTDBConstant.class.getPackage().getImplementationVersion()
+          : "UNKNOWN";
 
   public static final String AUDIT_LOGGER_NAME = "IoTDB_AUDIT_LOGGER";
 
@@ -103,7 +104,7 @@ public class IoTDBConstant {
   public static final String TRACING_FOLDER_NAME = "tracing";
   public static final String TRACING_LOG = "tracing.txt";
 
-  // mqtt  
+  // mqtt
   public static final String ENABLE_MQTT = "enable_mqtt_service";
   public static final String MQTT_HOST_NAME = "mqtt_host";
   public static final String MQTT_PORT_NAME = "mqtt_port";

@@ -26,17 +26,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.apache.iotdb.tsfile.encoding.common.EndianType;
-import org.apache.iotdb.tsfile.encoding.decoder.IntRleDecoder;
-import org.apache.iotdb.tsfile.encoding.decoder.RleDecoder;
 import org.apache.iotdb.tsfile.encoding.encoder.IntRleEncoder;
 import org.apache.iotdb.tsfile.encoding.encoder.RleEncoder;
 import org.apache.iotdb.tsfile.utils.ReadWriteForEncodingUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class IntRleDecoderTest {
 
@@ -105,8 +101,7 @@ public class IntRleDecoderTest {
   }
 
   @After
-  public void tearDown() throws Exception {
-  }
+  public void tearDown() throws Exception {}
 
   @Test
   public void testRleReadBigInt() throws IOException {
@@ -189,7 +184,6 @@ public class IntRleDecoderTest {
         } else {
           encoder.encode(true, baos);
         }
-
       }
       encoder.flush(baos);
     }
@@ -207,7 +201,6 @@ public class IntRleDecoderTest {
         } else {
           assertEquals(true, value_);
         }
-
       }
     }
   }

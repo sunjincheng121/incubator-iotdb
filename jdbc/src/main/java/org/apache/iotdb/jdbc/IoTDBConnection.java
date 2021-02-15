@@ -58,11 +58,11 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class IoTDBConnection implements Connection {
 
   private static final Logger logger = LoggerFactory.getLogger(IoTDBConnection.class);
-  private static final TSProtocolVersion protocolVersion = TSProtocolVersion.IOTDB_SERVICE_PROTOCOL_V3;
+  private static final TSProtocolVersion protocolVersion =
+      TSProtocolVersion.IOTDB_SERVICE_PROTOCOL_V3;
   private static final String NOT_SUPPORT_PREPARE_CALL = "Not support prepareCall";
   private static final String NOT_SUPPORT_PREPARE_STATEMENT = "Not support prepareStatement";
   private TSIService.Iface client = null;
@@ -85,10 +85,9 @@ public class IoTDBConnection implements Connection {
     params = Utils.parseUrl(url, info);
 
     openTransport();
-    if(Config.rpcThriftCompressionEnable) {
+    if (Config.rpcThriftCompressionEnable) {
       setClient(new TSIService.Client(new TCompactProtocol(transport)));
-    }
-    else {
+    } else {
       setClient(new TSIService.Client(new TBinaryProtocol(transport)));
     }
     // open client session
@@ -127,7 +126,8 @@ public class IoTDBConnection implements Connection {
     try {
       getClient().closeSession(req);
     } catch (TException e) {
-      throw new SQLException("Error occurs when closing session at server. Maybe server is down.", e);
+      throw new SQLException(
+          "Error occurs when closing session at server. Maybe server is down.", e);
     } finally {
       isClosed = true;
       if (transport != null) {
@@ -179,12 +179,12 @@ public class IoTDBConnection implements Connection {
       throws SQLException {
     if (resultSetConcurrency != ResultSet.CONCUR_READ_ONLY) {
       throw new SQLException(
-          String.format("Statements with result set concurrency %d are not supported",
-              resultSetConcurrency));
+          String.format(
+              "Statements with result set concurrency %d are not supported", resultSetConcurrency));
     }
     if (resultSetType == ResultSet.TYPE_SCROLL_SENSITIVE) {
-      throw new SQLException(String.format("Statements with ResultSet type %d are not supported",
-          resultSetType));
+      throw new SQLException(
+          String.format("Statements with ResultSet type %d are not supported", resultSetType));
     }
     return new IoTDBStatement(this, getClient(), sessionId, zoneId);
   }
@@ -361,8 +361,9 @@ public class IoTDBConnection implements Connection {
   }
 
   @Override
-  public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-      int resultSetHoldability) throws SQLException {
+  public PreparedStatement prepareStatement(
+      String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability)
+      throws SQLException {
     throw new SQLException(NOT_SUPPORT_PREPARE_STATEMENT);
   }
 
@@ -414,9 +415,9 @@ public class IoTDBConnection implements Connection {
   }
 
   private void openTransport() throws TTransportException {
-    transport = RpcTransportFactory.INSTANCE
-        .getTransport(new TSocket(params.getHost(), params.getPort(),
-            Config.connectionTimeoutInMs));
+    transport =
+        RpcTransportFactory.INSTANCE.getTransport(
+            new TSocket(params.getHost(), params.getPort(), Config.connectionTimeoutInMs));
     if (!transport.isOpen()) {
       transport.open();
     }
@@ -437,11 +438,14 @@ public class IoTDBConnection implements Connection {
       RpcUtils.verifySuccess(openResp.getStatus());
 
       if (protocolVersion.getValue() != openResp.getServerProtocolVersion().getValue()) {
-        logger.warn("Protocol differ, Client version is {}}, but Server version is {}",
-            protocolVersion.getValue(), openResp.getServerProtocolVersion().getValue());
-        if (openResp.getServerProtocolVersion().getValue() == 0) {// less than 0.10
-          throw new TException(String
-              .format("Protocol not supported, Client version is %s, but Server version is %s",
+        logger.warn(
+            "Protocol differ, Client version is {}}, but Server version is {}",
+            protocolVersion.getValue(),
+            openResp.getServerProtocolVersion().getValue());
+        if (openResp.getServerProtocolVersion().getValue() == 0) { // less than 0.10
+          throw new TException(
+              String.format(
+                  "Protocol not supported, Client version is %s, but Server version is %s",
                   protocolVersion.getValue(), openResp.getServerProtocolVersion().getValue()));
         }
       }
@@ -450,12 +454,17 @@ public class IoTDBConnection implements Connection {
       transport.close();
       if (e.getMessage().contains("Required field 'client_protocol' was not present!")) {
         // the server is an old version (less than 0.10)
-        throw new SQLException(String.format(
-            "Can not establish connection with %s : You may try to connect an old version IoTDB instance using a client with new version: %s. ",
-            params.getJdbcUriString(), e.getMessage()), e);
+        throw new SQLException(
+            String.format(
+                "Can not establish connection with %s : You may try to connect an old version IoTDB instance using a client with new version: %s. ",
+                params.getJdbcUriString(), e.getMessage()),
+            e);
       }
-      throw new SQLException(String.format("Can not establish connection with %s : %s. ",
-          params.getJdbcUriString(), e.getMessage()), e);
+      throw new SQLException(
+          String.format(
+              "Can not establish connection with %s : %s. ",
+              params.getJdbcUriString(), e.getMessage()),
+          e);
     } catch (StatementExecutionException e) {
       // failed to connect, disconnect from the server
       transport.close();
@@ -471,10 +480,9 @@ public class IoTDBConnection implements Connection {
         if (transport != null) {
           transport.close();
           openTransport();
-          if(Config.rpcThriftCompressionEnable) {
+          if (Config.rpcThriftCompressionEnable) {
             setClient(new TSIService.Client(new TCompactProtocol(transport)));
-          }
-          else {
+          } else {
             setClient(new TSIService.Client(new TBinaryProtocol(transport)));
           }
           openSession();
@@ -515,6 +523,4 @@ public class IoTDBConnection implements Connection {
   public ServerProperties getServerProperties() throws TException {
     return getClient().getProperties();
   }
-
-
 }

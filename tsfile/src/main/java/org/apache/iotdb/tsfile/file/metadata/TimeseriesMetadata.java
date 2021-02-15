@@ -49,11 +49,14 @@ public class TimeseriesMetadata implements Accountable {
   // used for SeriesReader to indicate whether it is a seq/unseq timeseries metadata
   private boolean isSeq = true;
 
-  public TimeseriesMetadata() {
-  }
+  public TimeseriesMetadata() {}
 
-  public TimeseriesMetadata(long startOffsetOfChunkMetaDataList, int chunkMetaDataListDataSize,
-      String measurementId, TSDataType dataType, Statistics statistics) {
+  public TimeseriesMetadata(
+      long startOffsetOfChunkMetaDataList,
+      int chunkMetaDataListDataSize,
+      String measurementId,
+      TSDataType dataType,
+      Statistics statistics) {
     this.startOffsetOfChunkMetaDataList = startOffsetOfChunkMetaDataList;
     this.chunkMetaDataListDataSize = chunkMetaDataListDataSize;
     this.measurementId = measurementId;
@@ -161,7 +164,7 @@ public class TimeseriesMetadata implements Accountable {
   public long getRamSize() {
     return ramSize;
   }
-  
+
   public void setSeq(boolean seq) {
     isSeq = seq;
   }

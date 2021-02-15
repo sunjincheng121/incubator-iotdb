@@ -31,8 +31,7 @@ public class ListDataSet extends QueryDataSet {
   private List<RowRecord> records = new ArrayList<>();
   private int index = 0;
 
-  public ListDataSet(List<PartialPath> paths,
-      List<TSDataType> dataTypes) {
+  public ListDataSet(List<PartialPath> paths, List<TSDataType> dataTypes) {
     super(new ArrayList<>(paths), dataTypes);
   }
 

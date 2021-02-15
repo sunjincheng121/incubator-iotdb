@@ -23,9 +23,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Statistics for int type.
- */
+/** Statistics for int type. */
 public class IntegerStatisticsV1 extends StatisticsV1<Integer> {
 
   private int min;

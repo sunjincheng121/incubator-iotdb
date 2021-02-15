@@ -19,21 +19,16 @@
 package org.apache.iotdb.tsfile.read.common;
 
 import java.nio.ByteBuffer;
-
 import java.util.List;
 import org.apache.iotdb.tsfile.common.cache.Accountable;
 import org.apache.iotdb.tsfile.file.header.ChunkHeader;
 
-/**
- * used in query.
- */
+/** used in query. */
 public class Chunk implements Accountable {
 
   private ChunkHeader chunkHeader;
   private ByteBuffer chunkData;
-  /**
-   * A list of deleted intervals.
-   */
+  /** A list of deleted intervals. */
   private List<TimeRange> deleteIntervalList;
 
   private long ramSize;
@@ -62,8 +57,8 @@ public class Chunk implements Accountable {
 
   public void mergeChunk(Chunk chunk) {
     chunkHeader.mergeChunkHeader(chunk.chunkHeader);
-    ByteBuffer newChunkData = ByteBuffer
-        .allocate(chunkData.array().length + chunk.chunkData.array().length);
+    ByteBuffer newChunkData =
+        ByteBuffer.allocate(chunkData.array().length + chunk.chunkData.array().length);
     newChunkData.put(chunkData.array());
     newChunkData.put(chunk.chunkData.array());
     chunkData = newChunkData;

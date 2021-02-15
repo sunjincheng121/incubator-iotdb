@@ -19,7 +19,14 @@
 package org.apache.iotdb.tsfile.file.metadata.enums;
 
 public enum CompressionType {
-  UNCOMPRESSED, SNAPPY, GZIP, LZO, SDT, PAA, PLA, LZ4;
+  UNCOMPRESSED,
+  SNAPPY,
+  GZIP,
+  LZO,
+  SDT,
+  PAA,
+  PLA,
+  LZ4;
 
   /**
    * deserialize short number.
@@ -37,7 +44,6 @@ public enum CompressionType {
     }
     return (byte) compressor;
   }
-
 
   private static CompressionType getCompressionType(short compressor) {
     if (compressor >= 8 || compressor < 0) {
@@ -86,9 +92,7 @@ public enum CompressionType {
     return enumToByte();
   }
 
-  /**
-   * @return byte number
-   */
+  /** @return byte number */
   public byte enumToByte() {
     switch (this) {
       case SNAPPY:
@@ -135,5 +139,4 @@ public enum CompressionType {
         return "";
     }
   }
-
 }

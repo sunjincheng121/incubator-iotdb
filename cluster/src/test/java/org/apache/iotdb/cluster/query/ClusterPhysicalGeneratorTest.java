@@ -33,7 +33,7 @@ import org.apache.iotdb.db.qp.physical.crud.RawDataQueryPlan;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ClusterPhysicalGeneratorTest extends BaseQueryTest{
+public class ClusterPhysicalGeneratorTest extends BaseQueryTest {
 
   private ClusterPhysicalGenerator physicalGenerator;
 
@@ -54,8 +54,8 @@ public class ClusterPhysicalGeneratorTest extends BaseQueryTest{
 
     operator.setSelectOperator(selectOperator);
     operator.setFromOperator(fromOperator);
-    RawDataQueryPlan plan = (RawDataQueryPlan) physicalGenerator.transformToPhysicalPlan(operator
-        , 1024);
+    RawDataQueryPlan plan =
+        (RawDataQueryPlan) physicalGenerator.transformToPhysicalPlan(operator, 1024);
 
     assertEquals(pathList, plan.getDeduplicatedPaths());
     assertEquals(dataTypes, plan.getDeduplicatedDataTypes());

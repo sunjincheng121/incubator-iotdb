@@ -70,13 +70,18 @@ public class WriteLogNodeTest {
 
     WriteLogNode logNode = new ExclusiveWriteLogNode(identifier);
 
-    InsertRowPlan bwInsertPlan = new InsertRowPlan(new PartialPath(identifier), 100,
-        new String[]{"s1", "s2", "s3", "s4"},
-        new TSDataType[]{TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN},
-        new String[]{"1.0", "15", "str", "false"});
+    InsertRowPlan bwInsertPlan =
+        new InsertRowPlan(
+            new PartialPath(identifier),
+            100,
+            new String[] {"s1", "s2", "s3", "s4"},
+            new TSDataType[] {
+              TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN
+            },
+            new String[] {"1.0", "15", "str", "false"});
     DeletePlan deletePlan = new DeletePlan(Long.MIN_VALUE, 50, new PartialPath(identifier + ".s1"));
 
-    long[] times = new long[]{110L, 111L, 112L, 113L};
+    long[] times = new long[] {110L, 111L, 112L, 113L};
     List<Integer> dataTypes = new ArrayList<>();
     dataTypes.add(TSDataType.DOUBLE.ordinal());
     dataTypes.add(TSDataType.INT64.ordinal());
@@ -95,8 +100,9 @@ public class WriteLogNodeTest {
       ((boolean[]) columns[3])[r] = false;
     }
 
-    InsertTabletPlan tabletPlan = new InsertTabletPlan(new PartialPath(identifier),
-      new String[]{"s1", "s2", "s3", "s4"}, dataTypes);
+    InsertTabletPlan tabletPlan =
+        new InsertTabletPlan(
+            new PartialPath(identifier), new String[] {"s1", "s2", "s3", "s4"}, dataTypes);
     tabletPlan.setTimes(times);
     tabletPlan.setColumns(columns);
     tabletPlan.setRowCount(times.length);
@@ -111,8 +117,8 @@ public class WriteLogNodeTest {
 
     logNode.close();
 
-    File walFile = new File(
-        config.getWalDir() + File.separator + identifier + File.separator + "wal1");
+    File walFile =
+        new File(config.getWalDir() + File.separator + identifier + File.separator + "wal1");
     assertTrue(walFile.exists());
 
     ILogReader reader = logNode.getLogReader();
@@ -133,10 +139,15 @@ public class WriteLogNodeTest {
 
     WriteLogNode logNode = new ExclusiveWriteLogNode(identifier);
 
-    InsertRowPlan bwInsertPlan = new InsertRowPlan(new PartialPath(identifier), 100,
-        new String[]{"s1", "s2", "s3", "s4"},
-        new TSDataType[]{TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN},
-        new String[]{"1.0", "15", "str", "false"});
+    InsertRowPlan bwInsertPlan =
+        new InsertRowPlan(
+            new PartialPath(identifier),
+            100,
+            new String[] {"s1", "s2", "s3", "s4"},
+            new TSDataType[] {
+              TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN
+            },
+            new String[] {"1.0", "15", "str", "false"});
     DeletePlan deletePlan = new DeletePlan(Long.MIN_VALUE, 50, new PartialPath(identifier + ".s1"));
 
     logNode.write(bwInsertPlan);
@@ -170,23 +181,29 @@ public class WriteLogNodeTest {
 
     WriteLogNode logNode = new ExclusiveWriteLogNode("root.logTestDevice");
 
-    InsertRowPlan bwInsertPlan = new InsertRowPlan(new PartialPath("root.logTestDevice"), 100,
-        new String[]{"s1", "s2", "s3", "s4"},
-        new TSDataType[]{TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN},
-        new String[]{"1.0", "15", "str", "false"});
-    DeletePlan deletePlan = new DeletePlan(Long.MIN_VALUE, 50, new PartialPath("root.logTestDevice.s1"));
+    InsertRowPlan bwInsertPlan =
+        new InsertRowPlan(
+            new PartialPath("root.logTestDevice"),
+            100,
+            new String[] {"s1", "s2", "s3", "s4"},
+            new TSDataType[] {
+              TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN
+            },
+            new String[] {"1.0", "15", "str", "false"});
+    DeletePlan deletePlan =
+        new DeletePlan(Long.MIN_VALUE, 50, new PartialPath("root.logTestDevice.s1"));
 
     logNode.write(bwInsertPlan);
 
-    File walFile = new File(
-        config.getWalDir() + File.separator + "root.logTestDevice" + File.separator + "wal1");
+    File walFile =
+        new File(
+            config.getWalDir() + File.separator + "root.logTestDevice" + File.separator + "wal1");
     assertFalse(walFile.exists());
 
     logNode.write(deletePlan);
     System.out.println("Waiting for wal file to be created");
-    while (!walFile.exists()) {
+    while (!walFile.exists()) {}
 
-    }
     assertTrue(walFile.exists());
 
     logNode.delete();
@@ -200,23 +217,28 @@ public class WriteLogNodeTest {
 
     WriteLogNode logNode = new ExclusiveWriteLogNode("root.logTestDevice");
 
-    InsertRowPlan bwInsertPlan = new InsertRowPlan(new PartialPath("logTestDevice"), 100,
-        new String[]{"s1", "s2", "s3", "s4"},
-        new TSDataType[]{TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN},
-        new String[]{"1.0", "15", "str", "false"});
-    DeletePlan deletePlan = new DeletePlan(Long.MIN_VALUE, 50, new PartialPath("root.logTestDevice.s1"));
+    InsertRowPlan bwInsertPlan =
+        new InsertRowPlan(
+            new PartialPath("logTestDevice"),
+            100,
+            new String[] {"s1", "s2", "s3", "s4"},
+            new TSDataType[] {
+              TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN
+            },
+            new String[] {"1.0", "15", "str", "false"});
+    DeletePlan deletePlan =
+        new DeletePlan(Long.MIN_VALUE, 50, new PartialPath("root.logTestDevice.s1"));
 
     logNode.write(bwInsertPlan);
     logNode.write(deletePlan);
 
     logNode.forceSync();
 
-    File walFile = new File(
-        config.getWalDir() + File.separator + "root.logTestDevice" + File.separator + "wal1");
+    File walFile =
+        new File(
+            config.getWalDir() + File.separator + "root.logTestDevice" + File.separator + "wal1");
     System.out.println("Waiting for wal to be created");
-    while (!walFile.exists()) {
-
-    }
+    while (!walFile.exists()) {}
 
     assertTrue(new File(logNode.getLogDirectory()).exists());
     logNode.delete();
@@ -225,13 +247,19 @@ public class WriteLogNodeTest {
 
   @Test
   public void testOverSizedWAL() throws IOException, IllegalPathException {
-    // this test uses a dummy insert log node to insert an over-sized log and assert exception caught
+    // this test uses a dummy insert log node to insert an over-sized log and assert exception
+    // caught
     WriteLogNode logNode = new ExclusiveWriteLogNode("root.logTestDevice.oversize");
 
-    InsertRowPlan bwInsertPlan = new InsertRowPlan(new PartialPath("root.logTestDevice.oversize"), 100,
-        new String[]{"s1", "s2", "s3", "s4"},
-        new TSDataType[]{TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN},
-        new String[]{"1.0", "15", new String(new char[65 * 1024 * 1024]), "false"});
+    InsertRowPlan bwInsertPlan =
+        new InsertRowPlan(
+            new PartialPath("root.logTestDevice.oversize"),
+            100,
+            new String[] {"s1", "s2", "s3", "s4"},
+            new TSDataType[] {
+              TSDataType.DOUBLE, TSDataType.INT64, TSDataType.TEXT, TSDataType.BOOLEAN
+            },
+            new String[] {"1.0", "15", new String(new char[65 * 1024 * 1024]), "false"});
 
     boolean caught = false;
     try {

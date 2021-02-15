@@ -63,72 +63,72 @@ public class CatchUpTaskTest {
   private Node header = new Node();
   private boolean prevUseAsyncServer;
 
-
-  private RaftMember sender = new TestMetaGroupMember() {
-    @Override
-    public PartitionTable getPartitionTable() {
-      return new SlotPartitionTable(TestUtils.getNode(0));
-    }
-
-    @Override
-    public Client getSyncClient(Node node) {
-      return new TestSyncClient() {
+  private RaftMember sender =
+      new TestMetaGroupMember() {
         @Override
-        public long appendEntry(AppendEntryRequest request) {
-          return dummyAppendEntry(request);
+        public PartitionTable getPartitionTable() {
+          return new SlotPartitionTable(TestUtils.getNode(0));
         }
 
         @Override
-        public long appendEntries(AppendEntriesRequest request) {
-          return dummyAppendEntries(request);
+        public Client getSyncClient(Node node) {
+          return new TestSyncClient() {
+            @Override
+            public long appendEntry(AppendEntryRequest request) {
+              return dummyAppendEntry(request);
+            }
+
+            @Override
+            public long appendEntries(AppendEntriesRequest request) {
+              return dummyAppendEntries(request);
+            }
+
+            @Override
+            public boolean matchTerm(long index, long term, Node header) {
+              return dummyMatchTerm(index, term);
+            }
+
+            @Override
+            public void sendSnapshot(SendSnapshotRequest request) {
+              // do nothing
+            }
+          };
         }
 
         @Override
-        public boolean matchTerm(long index, long term, Node header) {
-          return dummyMatchTerm(index, term);
+        public AsyncClient getAsyncClient(Node node) {
+          return new TestAsyncClient() {
+            @Override
+            public void appendEntry(
+                AppendEntryRequest request, AsyncMethodCallback<Long> resultHandler) {
+              new Thread(() -> resultHandler.onComplete(dummyAppendEntry(request))).start();
+            }
+
+            @Override
+            public void appendEntries(
+                AppendEntriesRequest request, AsyncMethodCallback<Long> resultHandler) {
+              new Thread(() -> resultHandler.onComplete(dummyAppendEntries(request))).start();
+            }
+
+            @Override
+            public void matchTerm(
+                long index, long term, Node header, AsyncMethodCallback<Boolean> resultHandler) {
+              new Thread(() -> resultHandler.onComplete(dummyMatchTerm(index, term))).start();
+            }
+
+            @Override
+            public void sendSnapshot(
+                SendSnapshotRequest request, AsyncMethodCallback<Void> resultHandler) {
+              new Thread(() -> resultHandler.onComplete(null)).start();
+            }
+          };
         }
 
         @Override
-        public void sendSnapshot(SendSnapshotRequest request) {
-          // do nothing
+        public Node getHeader() {
+          return header;
         }
       };
-    }
-
-    @Override
-    public AsyncClient getAsyncClient(Node node) {
-      return new TestAsyncClient() {
-        @Override
-        public void appendEntry(AppendEntryRequest request,
-            AsyncMethodCallback<Long> resultHandler) {
-          new Thread(() -> resultHandler.onComplete(dummyAppendEntry(request))).start();
-        }
-
-        @Override
-        public void appendEntries(AppendEntriesRequest request,
-            AsyncMethodCallback<Long> resultHandler) {
-          new Thread(() -> resultHandler.onComplete(dummyAppendEntries(request))).start();
-        }
-
-        @Override
-        public void matchTerm(long index, long term, Node header,
-            AsyncMethodCallback<Boolean> resultHandler) {
-          new Thread(() -> resultHandler.onComplete(dummyMatchTerm(index, term))).start();
-        }
-
-        @Override
-        public void sendSnapshot(SendSnapshotRequest request,
-            AsyncMethodCallback<Void> resultHandler) {
-          new Thread(() -> resultHandler.onComplete(null)).start();
-        }
-      };
-    }
-
-    @Override
-    public Node getHeader() {
-      return header;
-    }
-  };
 
   private long dummyAppendEntry(AppendEntryRequest request) {
     Log log = receivedLogs.get(receivedLogs.size() - 1);
@@ -169,8 +169,7 @@ public class CatchUpTaskTest {
       return true;
     } else {
       for (Log receivedLog : receivedLogs) {
-        if (receivedLog.getCurrLogTerm() == term
-            && receivedLog.getCurrLogIndex() == index) {
+        if (receivedLog.getCurrLogTerm() == term && receivedLog.getCurrLogIndex() == index) {
           return true;
         }
       }
@@ -267,7 +266,8 @@ public class CatchUpTaskTest {
       }
       sender.getLogManager().append(logList);
       sender.getLogManager().commitTo(9);
-      sender.getLogManager()
+      sender
+          .getLogManager()
           .setMaxHaveAppliedCommitIndex(sender.getLogManager().getCommitLogIndex());
       Node receiver = new Node();
       sender.setCharacter(NodeCharacter.LEADER);
@@ -346,8 +346,7 @@ public class CatchUpTaskTest {
     }
     sender.getLogManager().append(logList);
     sender.getLogManager().commitTo(9);
-    sender.getLogManager()
-        .setMaxHaveAppliedCommitIndex(sender.getLogManager().getCommitLogIndex());
+    sender.getLogManager().setMaxHaveAppliedCommitIndex(sender.getLogManager().getCommitLogIndex());
     Node receiver = new Node();
     sender.setCharacter(NodeCharacter.LEADER);
     Peer peer = new Peer(10);

@@ -36,8 +36,6 @@ import org.apache.iotdb.tsfile.read.TsFileSequenceReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 public class UpgradeUtils {
 
   private static final Logger logger = LoggerFactory.getLogger(UpgradeUtils.class);
@@ -53,12 +51,10 @@ public class UpgradeUtils {
     return upgradeLogLock;
   }
 
-  /**
-   * judge whether a tsfile needs to be upgraded
-   */
+  /** judge whether a tsfile needs to be upgraded */
   public static boolean isNeedUpgrade(TsFileResource tsFileResource) {
     tsFileResource.readLock();
-    //case the TsFile's length is equal to 0, the TsFile does not need to be upgraded
+    // case the TsFile's length is equal to 0, the TsFile does not need to be upgraded
     try {
       if (tsFileResource.getTsFile().length() == 0) {
         return false;
@@ -66,14 +62,16 @@ public class UpgradeUtils {
     } finally {
       tsFileResource.readUnlock();
     }
-    try (TsFileSequenceReader tsFileSequenceReader = new TsFileSequenceReader(
-        tsFileResource.getTsFile().getAbsolutePath())) {
+    try (TsFileSequenceReader tsFileSequenceReader =
+        new TsFileSequenceReader(tsFileResource.getTsFile().getAbsolutePath())) {
       if (tsFileSequenceReader.readVersionNumber().equals(TSFileConfig.VERSION_NUMBER_V1)) {
         return true;
       }
     } catch (Exception e) {
-      logger.error("meet error when judge whether file needs to be upgraded, the file's path:{}",
-          tsFileResource.getTsFile().getAbsolutePath(), e);
+      logger.error(
+          "meet error when judge whether file needs to be upgraded, the file's path:{}",
+          tsFileResource.getTsFile().getAbsolutePath(),
+          e);
     } finally {
       tsFileResource.readUnlock();
     }
@@ -81,28 +79,30 @@ public class UpgradeUtils {
   }
 
   /**
-   * Since one old TsFile may be upgraded to multiple upgraded files, 
-   * this method is for getting the name of one of the upgraded file. 
-   * 
+   * Since one old TsFile may be upgraded to multiple upgraded files, this method is for getting the
+   * name of one of the upgraded file.
+   *
    * @param upgradeResource TsFile resource to be upgraded
    * @return name of upgraded file
-   * 
    */
-  public static String getOneUpgradedFileName(TsFileResource upgradeResource)
-      throws IOException {
+  public static String getOneUpgradedFileName(TsFileResource upgradeResource) throws IOException {
     upgradeResource.deserialize();
     long firstPartitionId = upgradeResource.getTimePartition();
     File oldTsFile = upgradeResource.getTsFile();
     return oldTsFile.getParent()
-        + File.separator + firstPartitionId + File.separator+ oldTsFile.getName();
+        + File.separator
+        + firstPartitionId
+        + File.separator
+        + oldTsFile.getName();
   }
 
   @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
   public static void recoverUpgrade() {
     if (FSFactoryProducer.getFSFactory().getFile(UpgradeLog.getUpgradeLogPath()).exists()) {
-      try (BufferedReader upgradeLogReader = new BufferedReader(
-          new FileReader(
-              FSFactoryProducer.getFSFactory().getFile(UpgradeLog.getUpgradeLogPath())))) {
+      try (BufferedReader upgradeLogReader =
+          new BufferedReader(
+              new FileReader(
+                  FSFactoryProducer.getFSFactory().getFile(UpgradeLog.getUpgradeLogPath())))) {
         Map<String, Integer> upgradeRecoverMap = new HashMap<>();
         String line = null;
         while ((line = upgradeLogReader.readLine()) != null) {
@@ -114,58 +114,66 @@ public class UpgradeUtils {
           }
         }
         for (String key : upgradeRecoverMap.keySet()) {
-          if (upgradeRecoverMap.get(key) == UpgradeCheckStatus.BEGIN_UPGRADE_FILE
-              .getCheckStatusCode()) {
+          if (upgradeRecoverMap.get(key)
+              == UpgradeCheckStatus.BEGIN_UPGRADE_FILE.getCheckStatusCode()) {
             // delete generated TsFiles and partition directories
-            File upgradeDir = FSFactoryProducer.getFSFactory().getFile(key)
-                .getParentFile();
+            File upgradeDir = FSFactoryProducer.getFSFactory().getFile(key).getParentFile();
             File[] partitionDirs = upgradeDir.listFiles();
             for (File partitionDir : partitionDirs) {
               if (partitionDir.isDirectory()) {
                 File[] generatedFiles = partitionDir.listFiles();
                 for (File generatedFile : generatedFiles) {
-                  if (generatedFile.getName().equals(FSFactoryProducer.getFSFactory()
-                      .getFile(key).getName())) {
+                  if (generatedFile
+                      .getName()
+                      .equals(FSFactoryProducer.getFSFactory().getFile(key).getName())) {
                     Files.delete(generatedFile.toPath());
                   }
                 }
               }
             }
-          } else if (upgradeRecoverMap.get(key) == UpgradeCheckStatus.AFTER_UPGRADE_FILE
-              .getCheckStatusCode()) {
-            String upgradedFileName = getOneUpgradedFileName(new TsFileResource(
-                FSFactoryProducer.getFSFactory().getFile(key)));
-            if (FSFactoryProducer.getFSFactory().getFile(key).exists() && FSFactoryProducer
-                .getFSFactory().getFile(upgradedFileName).exists()) {
+          } else if (upgradeRecoverMap.get(key)
+              == UpgradeCheckStatus.AFTER_UPGRADE_FILE.getCheckStatusCode()) {
+            String upgradedFileName =
+                getOneUpgradedFileName(
+                    new TsFileResource(FSFactoryProducer.getFSFactory().getFile(key)));
+            if (FSFactoryProducer.getFSFactory().getFile(key).exists()
+                && FSFactoryProducer.getFSFactory().getFile(upgradedFileName).exists()) {
               // if both old tsfile and upgrade file exists, delete the old tsfile and resource
               Files.delete(FSFactoryProducer.getFSFactory().getFile(key).toPath());
-              Files.delete(FSFactoryProducer.getFSFactory().getFile(key 
-                  + TsFileResource.RESOURCE_SUFFIX).toPath());
-            } 
+              Files.delete(
+                  FSFactoryProducer.getFSFactory()
+                      .getFile(key + TsFileResource.RESOURCE_SUFFIX)
+                      .toPath());
+            }
             // move the upgrade files and resources to their own partition directories
-            File upgradeDir = FSFactoryProducer.getFSFactory().getFile(key)
-                .getParentFile();
+            File upgradeDir = FSFactoryProducer.getFSFactory().getFile(key).getParentFile();
             String storageGroupPath = upgradeDir.getParent();
             File[] partitionDirs = upgradeDir.listFiles();
             for (File partitionDir : partitionDirs) {
               if (partitionDir.isDirectory()) {
                 String partitionId = partitionDir.getName();
-                File destPartitionDir = FSFactoryProducer.getFSFactory().getFile(storageGroupPath, partitionId);
+                File destPartitionDir =
+                    FSFactoryProducer.getFSFactory().getFile(storageGroupPath, partitionId);
                 if (!destPartitionDir.exists()) {
                   destPartitionDir.mkdir();
                 }
                 File[] generatedFiles = partitionDir.listFiles();
                 for (File generatedFile : generatedFiles) {
-                  FSFactoryProducer.getFSFactory().moveFile(generatedFile, 
-                      FSFactoryProducer.getFSFactory().getFile(destPartitionDir, generatedFile.getName()));
+                  FSFactoryProducer.getFSFactory()
+                      .moveFile(
+                          generatedFile,
+                          FSFactoryProducer.getFSFactory()
+                              .getFile(destPartitionDir, generatedFile.getName()));
                 }
               }
             }
           }
         }
       } catch (IOException e) {
-        logger.error("meet error when recover upgrade process, file path:{}",
-            UpgradeLog.getUpgradeLogPath(), e);
+        logger.error(
+            "meet error when recover upgrade process, file path:{}",
+            UpgradeLog.getUpgradeLogPath(),
+            e);
       } finally {
         FSFactoryProducer.getFSFactory().getFile(UpgradeLog.getUpgradeLogPath()).delete();
       }

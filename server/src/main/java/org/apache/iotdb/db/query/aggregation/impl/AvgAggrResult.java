@@ -68,8 +68,11 @@ public class AvgAggrResult extends AggregateResult {
       throw new StatisticsClassException("Binary statistics does not support: avg");
     }
     cnt += statistics.getCount();
-    avg = avg * ((double) preCnt / cnt) + ((double) statistics.getCount() / cnt)
-        * statistics.getSumValue() / statistics.getCount();
+    avg =
+        avg * ((double) preCnt / cnt)
+            + ((double) statistics.getCount() / cnt)
+                * statistics.getSumValue()
+                / statistics.getCount();
   }
 
   @Override
@@ -90,8 +93,8 @@ public class AvgAggrResult extends AggregateResult {
   }
 
   @Override
-  public void updateResultUsingTimestamps(long[] timestamps, int length,
-      IReaderByTimestamp dataReader) throws IOException {
+  public void updateResultUsingTimestamps(
+      long[] timestamps, int length, IReaderByTimestamp dataReader) throws IOException {
     for (int i = 0; i < length; i++) {
       Object value = dataReader.getValueInTimestamp(timestamps[i]);
       if (value != null) {
@@ -118,8 +121,7 @@ public class AvgAggrResult extends AggregateResult {
       case TEXT:
       case BOOLEAN:
       default:
-        throw new IOException(
-            String.format("Unsupported data type in aggregation AVG : %s", type));
+        throw new IOException(String.format("Unsupported data type in aggregation AVG : %s", type));
     }
     avg = avg * ((double) cnt / (cnt + 1)) + val * (1.0 / (cnt + 1));
     cnt++;
@@ -137,8 +139,9 @@ public class AvgAggrResult extends AggregateResult {
       // avoid two empty results producing an NaN
       return;
     }
-    avg = avg * ((double) cnt / (cnt + anotherAvg.cnt)) +
-        anotherAvg.avg * ((double) anotherAvg.cnt / (cnt + anotherAvg.cnt));
+    avg =
+        avg * ((double) cnt / (cnt + anotherAvg.cnt))
+            + anotherAvg.avg * ((double) anotherAvg.cnt / (cnt + anotherAvg.cnt));
     cnt += anotherAvg.cnt;
   }
 

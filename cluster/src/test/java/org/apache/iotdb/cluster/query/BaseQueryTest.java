@@ -41,22 +41,22 @@ import org.junit.Assert;
 import org.junit.Before;
 
 /**
- * allNodes: node0, node1... node9
- * localNode: node0
- * pathList: root.sg0.s0, root.sg0.s1... root.sg0.s9 (all double type)
+ * allNodes: node0, node1... node9 localNode: node0 pathList: root.sg0.s0, root.sg0.s1...
+ * root.sg0.s9 (all double type)
  */
 public class BaseQueryTest extends MemberTest {
 
   List<PartialPath> pathList;
   List<TSDataType> dataTypes;
 
-  protected static void checkAggregations(List<AggregateResult> aggregationResults
-      , Object[] answer) {
+  protected static void checkAggregations(
+      List<AggregateResult> aggregationResults, Object[] answer) {
     Assert.assertEquals(answer.length, aggregationResults.size());
     for (int i = 0; i < aggregationResults.size(); i++) {
       AggregateResult aggregateResult = aggregationResults.get(i);
       if (answer[i] != null) {
-        Assert.assertEquals((double) answer[i],
+        Assert.assertEquals(
+            (double) answer[i],
             Double.parseDouble(aggregateResult.getResult().toString()),
             0.00001);
       } else {
@@ -78,7 +78,6 @@ public class BaseQueryTest extends MemberTest {
     TestUtils.prepareData();
   }
 
-
   @After
   public void tearDown() throws Exception {
     super.tearDown();
@@ -98,15 +97,16 @@ public class BaseQueryTest extends MemberTest {
     assertFalse(dataSet.hasNext());
   }
 
-  protected void checkDoubleDataset(QueryDataSet queryDataSet, Object[] answers) throws IOException {
+  protected void checkDoubleDataset(QueryDataSet queryDataSet, Object[] answers)
+      throws IOException {
     Assert.assertTrue(queryDataSet.hasNext());
     RowRecord record = queryDataSet.next();
     List<Field> fields = record.getFields();
     Assert.assertEquals(answers.length, fields.size());
     for (int i = 0; i < answers.length; i++) {
       if (answers[i] != null) {
-        Assert.assertEquals((double) answers[i], Double.parseDouble(fields.get(i).getStringValue()),
-            0.000001);
+        Assert.assertEquals(
+            (double) answers[i], Double.parseDouble(fields.get(i).getStringValue()), 0.000001);
       } else {
         assertNull(fields.get(i));
       }

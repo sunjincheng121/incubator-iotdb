@@ -44,8 +44,14 @@ public class ShowTimeSeriesPlan extends ShowPlan {
     this.path = path;
   }
 
-  public ShowTimeSeriesPlan(PartialPath path, boolean isContains, String key, String value, int limit,
-      int offset, boolean orderByHeat) {
+  public ShowTimeSeriesPlan(
+      PartialPath path,
+      boolean isContains,
+      String key,
+      String value,
+      int limit,
+      int offset,
+      boolean orderByHeat) {
     super(ShowContentType.TIMESERIES);
     this.path = path;
     this.isContains = isContains;

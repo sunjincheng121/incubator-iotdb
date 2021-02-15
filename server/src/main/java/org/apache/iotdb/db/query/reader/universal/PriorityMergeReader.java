@@ -24,9 +24,7 @@ import java.util.PriorityQueue;
 import org.apache.iotdb.tsfile.read.TimeValuePair;
 import org.apache.iotdb.tsfile.read.reader.IPointReader;
 
-/**
- * This class implements {@link IPointReader} for data sources with different priorities.
- */
+/** This class implements {@link IPointReader} for data sources with different priorities. */
 public class PriorityMergeReader implements IPointReader {
 
   // max time of all added readers in PriorityMergeReader
@@ -36,21 +34,25 @@ public class PriorityMergeReader implements IPointReader {
   protected PriorityQueue<Element> heap;
 
   public PriorityMergeReader() {
-    heap = new PriorityQueue<>((o1, o2) -> {
-      int timeCompare = Long.compare(o1.timeValuePair.getTimestamp(),
-          o2.timeValuePair.getTimestamp());
-      return timeCompare != 0 ? timeCompare : Long.compare(o2.priority, o1.priority);
-    });
+    heap =
+        new PriorityQueue<>(
+            (o1, o2) -> {
+              int timeCompare =
+                  Long.compare(o1.timeValuePair.getTimestamp(), o2.timeValuePair.getTimestamp());
+              return timeCompare != 0 ? timeCompare : Long.compare(o2.priority, o1.priority);
+            });
   }
 
   // only used in external sort, need to refactor later
   public PriorityMergeReader(List<IPointReader> prioritySeriesReaders, int startPriority)
       throws IOException {
-    heap = new PriorityQueue<>((o1, o2) -> {
-      int timeCompare = Long.compare(o1.timeValuePair.getTimestamp(),
-          o2.timeValuePair.getTimestamp());
-      return timeCompare != 0 ? timeCompare : Long.compare(o2.priority, o1.priority);
-    });
+    heap =
+        new PriorityQueue<>(
+            (o1, o2) -> {
+              int timeCompare =
+                  Long.compare(o1.timeValuePair.getTimestamp(), o2.timeValuePair.getTimestamp());
+              return timeCompare != 0 ? timeCompare : Long.compare(o2.priority, o1.priority);
+            });
     for (IPointReader reader : prioritySeriesReaders) {
       addReader(reader, startPriority++);
     }

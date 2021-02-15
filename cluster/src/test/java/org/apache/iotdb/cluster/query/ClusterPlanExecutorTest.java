@@ -37,7 +37,7 @@ import org.apache.iotdb.tsfile.read.query.dataset.QueryDataSet;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ClusterPlanExecutorTest extends BaseQueryTest{
+public class ClusterPlanExecutorTest extends BaseQueryTest {
 
   private ClusterPlanExecutor queryExecutor;
 
@@ -49,8 +49,8 @@ public class ClusterPlanExecutorTest extends BaseQueryTest{
 
   @Test
   public void testQuery()
-      throws QueryProcessException, QueryFilterOptimizationException, StorageEngineException, IOException,
-      MetadataException {
+      throws QueryProcessException, QueryFilterOptimizationException, StorageEngineException,
+          IOException, MetadataException {
     RawDataQueryPlan queryPlan = new RawDataQueryPlan();
     queryPlan.setDeduplicatedPaths(pathList);
     queryPlan.setDeduplicatedDataTypes(dataTypes);
@@ -76,7 +76,8 @@ public class ClusterPlanExecutorTest extends BaseQueryTest{
   public void testGetAllStorageGroupNodes() {
     List<StorageGroupMNode> allStorageGroupNodes = queryExecutor.getAllStorageGroupNodes();
     for (int i = 0; i < allStorageGroupNodes.size(); i++) {
-      assertEquals(IoTDB.metaManager.getAllStorageGroupNodes().get(i).getFullPath(),
+      assertEquals(
+          IoTDB.metaManager.getAllStorageGroupNodes().get(i).getFullPath(),
           allStorageGroupNodes.get(i).getFullPath());
     }
   }

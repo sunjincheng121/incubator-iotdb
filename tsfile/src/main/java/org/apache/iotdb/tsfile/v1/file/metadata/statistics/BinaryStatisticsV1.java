@@ -24,9 +24,7 @@ import java.nio.ByteBuffer;
 import org.apache.iotdb.tsfile.utils.Binary;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 
-/**
- * Statistics for string type.
- */
+/** Statistics for string type. */
 public class BinaryStatisticsV1 extends StatisticsV1<Binary> {
 
   private Binary min = new Binary("");
@@ -62,14 +60,14 @@ public class BinaryStatisticsV1 extends StatisticsV1<Binary> {
 
   @Override
   void deserialize(ByteBuffer byteBuffer) throws IOException {
-    this.min = new Binary(
-        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
-    this.max = new Binary(
-        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
-    this.first = new Binary(
-        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
-    this.last = new Binary(
-        ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
+    this.min =
+        new Binary(ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
+    this.max =
+        new Binary(ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
+    this.first =
+        new Binary(ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
+    this.last =
+        new Binary(ReadWriteIOUtils.readByteBufferWithSelfDescriptionLength(byteBuffer).array());
     this.sum = ReadWriteIOUtils.readDouble(byteBuffer);
   }
 

@@ -101,8 +101,6 @@ public class LogWriter implements ILogWriter {
 
   @Override
   public String toString() {
-    return "LogWriter{" +
-        "logFile=" + logFile +
-        '}';
+    return "LogWriter{" + "logFile=" + logFile + '}';
   }
 }

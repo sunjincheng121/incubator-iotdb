@@ -35,9 +35,11 @@ public class CommitLogCallbackTest {
     RaftMember raftMember = new TestMetaGroupMember();
     CommitLogCallback commitLogCallback = new CommitLogCallback(raftMember);
     synchronized (raftMember.getSyncLock()) {
-      new Thread(() -> {
-        commitLogCallback.onComplete(null);
-      }).start();
+      new Thread(
+              () -> {
+                commitLogCallback.onComplete(null);
+              })
+          .start();
       raftMember.getSyncLock().wait();
     }
     assertTrue(true);

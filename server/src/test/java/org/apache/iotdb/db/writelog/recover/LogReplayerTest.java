@@ -80,17 +80,18 @@ public class LogReplayerTest {
     File tsFile = SystemFileFactory.INSTANCE.getFile("temp", "1-1-1.tsfile");
     File modF = SystemFileFactory.INSTANCE.getFile("test.mod");
     ModificationFile modFile = new ModificationFile(modF.getPath());
-    VersionController versionController = new VersionController() {
-      @Override
-      public long nextVersion() {
-        return 5;
-      }
+    VersionController versionController =
+        new VersionController() {
+          @Override
+          public long nextVersion() {
+            return 5;
+          }
 
-      @Override
-      public long currVersion() {
-        return 5;
-      }
-    };
+          @Override
+          public long currVersion() {
+            return 5;
+          }
+        };
     TsFileResource tsFileResource = new TsFileResource(tsFile);
     IMemTable memTable = new PrimitiveMemTable();
 
@@ -98,26 +99,49 @@ public class LogReplayerTest {
     try {
       for (int i = 0; i <= 5; i++) {
         for (int j = 0; j <= 5; j++) {
-          IoTDB.metaManager
-              .createTimeseries(new PartialPath("root.sg.device" + i + ".sensor" + j), TSDataType.INT64,
-                  TSEncoding.PLAIN, TSFileDescriptor.getInstance().getConfig().getCompressor(),
-                  Collections.emptyMap());
+          IoTDB.metaManager.createTimeseries(
+              new PartialPath("root.sg.device" + i + ".sensor" + j),
+              TSDataType.INT64,
+              TSEncoding.PLAIN,
+              TSFileDescriptor.getInstance().getConfig().getCompressor(),
+              Collections.emptyMap());
         }
       }
 
-      LogReplayer replayer = new LogReplayer(logNodePrefix, tsFile.getPath(), modFile,
-          versionController, tsFileResource, memTable, false);
+      LogReplayer replayer =
+          new LogReplayer(
+              logNodePrefix,
+              tsFile.getPath(),
+              modFile,
+              versionController,
+              tsFileResource,
+              memTable,
+              false);
 
       WriteLogNode node =
           MultiFileLogNodeManager.getInstance().getNode(logNodePrefix + tsFile.getName());
       node.write(
-          new InsertRowPlan(new PartialPath("root.sg.device0"), 100, "sensor0", TSDataType.INT64,
+          new InsertRowPlan(
+              new PartialPath("root.sg.device0"),
+              100,
+              "sensor0",
+              TSDataType.INT64,
               String.valueOf(0)));
       node.write(
-          new InsertRowPlan(new PartialPath("root.sg.device0"), 2, "sensor1", TSDataType.INT64, String.valueOf(0)));
+          new InsertRowPlan(
+              new PartialPath("root.sg.device0"),
+              2,
+              "sensor1",
+              TSDataType.INT64,
+              String.valueOf(0)));
       for (int i = 1; i < 5; i++) {
-        node.write(new InsertRowPlan(new PartialPath("root.sg.device" + i), i, "sensor" + i, TSDataType.INT64,
-            String.valueOf(i)));
+        node.write(
+            new InsertRowPlan(
+                new PartialPath("root.sg.device" + i),
+                i,
+                "sensor" + i,
+                TSDataType.INT64,
+                String.valueOf(i)));
       }
       node.write(insertTablePlan());
       DeletePlan deletePlan = new DeletePlan(0, 200, new PartialPath("root.sg.device0.sensor0"));
@@ -127,9 +151,14 @@ public class LogReplayerTest {
       replayer.replayLogs();
 
       for (int i = 0; i < 5; i++) {
-        ReadOnlyMemChunk memChunk = memTable
-            .query("root.sg.device" + i, "sensor" + i, TSDataType.INT64,
-                TSEncoding.RLE, Collections.emptyMap(), Long.MIN_VALUE);
+        ReadOnlyMemChunk memChunk =
+            memTable.query(
+                "root.sg.device" + i,
+                "sensor" + i,
+                TSDataType.INT64,
+                TSEncoding.RLE,
+                Collections.emptyMap(),
+                Long.MIN_VALUE);
         IPointReader iterator = memChunk.getPointReader();
         if (i == 0) {
           assertFalse(iterator.hasNextTimeValuePair());
@@ -155,12 +184,17 @@ public class LogReplayerTest {
         assertEquals(i, tsFileResource.getEndTime("root.sg.device" + i));
       }
 
-      //test insert tablet
-      for (int i = 0; i < 2 ; i++) {
-        ReadOnlyMemChunk memChunk = memTable
-            .query("root.sg.device5", "sensor" + i, TSDataType.INT64,
-                TSEncoding.PLAIN, Collections.emptyMap(), Long.MIN_VALUE);
-        //s0 has datatype boolean, but required INT64, will return null
+      // test insert tablet
+      for (int i = 0; i < 2; i++) {
+        ReadOnlyMemChunk memChunk =
+            memTable.query(
+                "root.sg.device5",
+                "sensor" + i,
+                TSDataType.INT64,
+                TSEncoding.PLAIN,
+                Collections.emptyMap(),
+                Long.MIN_VALUE);
+        // s0 has datatype boolean, but required INT64, will return null
         if (i == 0) {
           assertNull(memChunk);
         } else {
@@ -183,9 +217,9 @@ public class LogReplayerTest {
   }
 
   /**
-   * insert tablet plan, time series expected datatype is INT64
-   * s0 is set to boolean, it will output null value
-   * s1 is set to INT64, it will output its value
+   * insert tablet plan, time series expected datatype is INT64 s0 is set to boolean, it will output
+   * null value s1 is set to INT64, it will output its value
+   *
    * @return
    * @throws IllegalPathException
    * @throws IOException
@@ -205,7 +239,8 @@ public class LogReplayerTest {
     mNodes[0] = new MeasurementMNode(null, "sensor0", null, null);
     mNodes[0] = new MeasurementMNode(null, "sensor1", null, null);
 
-    InsertTabletPlan insertTabletPlan = new InsertTabletPlan(new PartialPath(deviceId), measurements, dataTypes);
+    InsertTabletPlan insertTabletPlan =
+        new InsertTabletPlan(new PartialPath(deviceId), measurements, dataTypes);
 
     long[] times = new long[100];
     Object[] columns = new Object[2];
@@ -213,9 +248,9 @@ public class LogReplayerTest {
     columns[1] = new long[100];
 
     for (long r = 0; r < 100; r++) {
-      times[(int)r] = r;
-      ((boolean[]) columns[0])[(int)r] = false;
-      ((long[]) columns[1])[(int)r] = r;
+      times[(int) r] = r;
+      ((boolean[]) columns[0])[(int) r] = false;
+      ((long[]) columns[1])[(int) r] = r;
     }
     insertTabletPlan.setTimes(times);
     insertTabletPlan.setColumns(columns);

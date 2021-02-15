@@ -30,8 +30,8 @@ public abstract class TCompressedElasticFramedTransport extends TElasticFramedTr
   private TByteBuffer writeCompressBuffer;
   private TByteBuffer readCompressBuffer;
 
-  protected TCompressedElasticFramedTransport(TTransport underlying, int initialBufferCapacity,
-      int maxLength) {
+  protected TCompressedElasticFramedTransport(
+      TTransport underlying, int initialBufferCapacity, int maxLength) {
     super(underlying, initialBufferCapacity, maxLength);
     writeCompressBuffer = new TByteBuffer(ByteBuffer.allocate(initialBufferCapacity));
     readCompressBuffer = new TByteBuffer(ByteBuffer.allocate(initialBufferCapacity));
@@ -44,8 +44,8 @@ public abstract class TCompressedElasticFramedTransport extends TElasticFramedTr
 
     if (size < 0) {
       close();
-      throw new TTransportException(TTransportException.CORRUPTED_DATA,
-          "Read a negative frame size (" + size + ")!");
+      throw new TTransportException(
+          TTransportException.CORRUPTED_DATA, "Read a negative frame size (" + size + ")!");
     }
 
     readBuffer.fill(underlying, size);
@@ -83,8 +83,13 @@ public abstract class TCompressedElasticFramedTransport extends TElasticFramedTr
     try {
       int maxCompressedLength = maxCompressedLength(length);
       writeCompressBuffer = resizeCompressBuf(maxCompressedLength, writeCompressBuffer);
-      int compressedLength = compress(writeBuffer.getBuf().array(), 0, length,
-          writeCompressBuffer.getByteBuffer().array(), 0);
+      int compressedLength =
+          compress(
+              writeBuffer.getBuf().array(),
+              0,
+              length,
+              writeCompressBuffer.getByteBuffer().array(),
+              0);
       RpcStat.writeCompressedBytes.addAndGet(compressedLength);
       TFramedTransport.encodeFrameSize(compressedLength, i32buf);
       underlying.write(i32buf, 0, 4);
@@ -105,9 +110,9 @@ public abstract class TCompressedElasticFramedTransport extends TElasticFramedTr
 
   protected abstract int maxCompressedLength(int len);
 
-  protected abstract int compress(byte[] input, int inOff, int len, byte[] output,
-      int outOff) throws IOException;
+  protected abstract int compress(byte[] input, int inOff, int len, byte[] output, int outOff)
+      throws IOException;
 
-  protected abstract void uncompress(byte[] input, int inOff, int size, byte[] output,
-      int outOff) throws IOException;
+  protected abstract void uncompress(byte[] input, int inOff, int size, byte[] output, int outOff)
+      throws IOException;
 }

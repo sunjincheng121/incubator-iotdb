@@ -109,13 +109,14 @@ public class TElasticFramedTransport extends TTransport {
 
     if (size < 0) {
       close();
-      throw new TTransportException(TTransportException.CORRUPTED_DATA,
-          "Read a negative frame size (" + size + ")!");
+      throw new TTransportException(
+          TTransportException.CORRUPTED_DATA, "Read a negative frame size (" + size + ")!");
     }
 
     if (size > PROTECT_MAX_LENGTH) {
       close();
-      throw new TTransportException(TTransportException.CORRUPTED_DATA,
+      throw new TTransportException(
+          TTransportException.CORRUPTED_DATA,
           "Frame size (" + size + ") larger than protect max length (" + PROTECT_MAX_LENGTH + ")!");
     }
 

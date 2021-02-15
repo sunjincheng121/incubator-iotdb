@@ -24,8 +24,6 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import org.apache.iotdb.db.auth.AuthException;
 import org.apache.iotdb.db.auth.authorizer.IAuthorizer;
 import org.apache.iotdb.db.auth.authorizer.LocalFileAuthorizer;
@@ -49,11 +47,7 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * <p>
- * This class is used for cleaning test environment in unit test and integration test
- * </p>
- */
+/** This class is used for cleaning test environment in unit test and integration test */
 public class EnvironmentUtils {
 
   private static final String OUTPUT_DATA_DIR = "target/";
@@ -154,17 +148,12 @@ public class EnvironmentUtils {
     }
   }
 
-
-  /**
-   * disable the system monitor</br> this function should be called before all code in the setup
-   */
+  /** disable the system monitor</br> this function should be called before all code in the setup */
   public static void closeStatMonitor() {
     config.setEnableStatMonitor(false);
   }
 
-  /**
-   * disable memory control</br> this function should be called before all code in the setup
-   */
+  /** disable memory control</br> this function should be called before all code in the setup */
   public static void envSetUp() throws StartupException {
     IoTDB.metaManager.init();
 

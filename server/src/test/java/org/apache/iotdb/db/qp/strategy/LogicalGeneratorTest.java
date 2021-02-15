@@ -25,7 +25,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
-import org.apache.iotdb.db.exception.query.LogicalOperatorException;
 import org.apache.iotdb.db.exception.runtime.SQLParserException;
 import org.apache.iotdb.db.qp.constant.SQLConstant;
 import org.apache.iotdb.db.qp.sql.IoTDBSqlVisitor;
@@ -44,8 +43,7 @@ public class LogicalGeneratorTest {
   }
 
   @After
-  public void tearDown() throws Exception {
-  }
+  public void tearDown() throws Exception {}
 
   @Test
   public void testParseTimeFormatNow() {
@@ -59,14 +57,13 @@ public class LogicalGeneratorTest {
         offset1 = ZoneOffset.of("+" + i + ":00");
         offset2 = ZoneOffset.of("-" + i + ":00");
       }
-      ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(now),
-          ZoneId.of(offset1.toString()));
+      ZonedDateTime zonedDateTime =
+          ZonedDateTime.ofInstant(Instant.ofEpochMilli(now), ZoneId.of(offset1.toString()));
       assertEquals(now, zonedDateTime.toInstant().toEpochMilli());
-      zonedDateTime = ZonedDateTime
-          .ofInstant(Instant.ofEpochMilli(now), ZoneId.of(offset2.toString()));
+      zonedDateTime =
+          ZonedDateTime.ofInstant(Instant.ofEpochMilli(now), ZoneId.of(offset2.toString()));
       assertEquals(now, zonedDateTime.toInstant().toEpochMilli());
     }
-
   }
 
   @Test

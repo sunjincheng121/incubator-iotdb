@@ -39,7 +39,6 @@ import org.apache.iotdb.tsfile.utils.BytesUtils;
 import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;
 import org.apache.thrift.TException;
 
-
 public class IoTDBRpcDataSet {
 
   public static final String TIMESTAMP_STR = "Time";
@@ -50,13 +49,13 @@ public class IoTDBRpcDataSet {
   public TSIService.Iface client;
   public List<String> columnNameList; // no deduplication
   public List<TSDataType> columnTypeList; // no deduplication
-  public Map<String, Integer> columnOrdinalMap; // used because the server returns deduplicated columns
+  public Map<String, Integer>
+      columnOrdinalMap; // used because the server returns deduplicated columns
   public List<TSDataType> columnTypeDeduplicatedList; // deduplicated from columnTypeList
   public int fetchSize;
   public boolean emptyResultSet = false;
   public boolean hasCachedRecord = false;
   public boolean lastReadWasNull;
-
 
   public byte[][] values; // used to cache the current row record value
   // column size
@@ -71,12 +70,20 @@ public class IoTDBRpcDataSet {
   public TSQueryDataSet tsQueryDataSet = null;
   public byte[] time; // used to cache the current time value
   public byte[] currentBitmap; // used to cache the current bitmap for every column
-  public static final int FLAG = 0x80; // used to do `and` operation with bitmap to judge whether the value is null
+  public static final int FLAG =
+      0x80; // used to do `and` operation with bitmap to judge whether the value is null
 
   @SuppressWarnings("squid:S3776") // Suppress high Cognitive Complexity warning
-  public IoTDBRpcDataSet(String sql, List<String> columnNameList, List<String> columnTypeList,
-      Map<String, Integer> columnNameIndex, boolean ignoreTimeStamp,
-      long queryId, TSIService.Iface client, long sessionId, TSQueryDataSet queryDataSet,
+  public IoTDBRpcDataSet(
+      String sql,
+      List<String> columnNameList,
+      List<String> columnTypeList,
+      Map<String, Integer> columnNameIndex,
+      boolean ignoreTimeStamp,
+      long queryId,
+      TSIService.Iface client,
+      long sessionId,
+      TSQueryDataSet queryDataSet,
       int fetchSize) {
     this.sessionId = sessionId;
     this.ignoreTimeStamp = ignoreTimeStamp;
@@ -154,8 +161,7 @@ public class IoTDBRpcDataSet {
           break;
         default:
           throw new UnSupportedDataTypeException(
-              String
-                  .format("Data type %s is not supported.", columnTypeDeduplicatedList.get(i)));
+              String.format("Data type %s is not supported.", columnTypeDeduplicatedList.get(i)));
       }
     }
     this.tsQueryDataSet = queryDataSet;
@@ -245,8 +251,7 @@ public class IoTDBRpcDataSet {
             break;
           default:
             throw new UnSupportedDataTypeException(
-                String
-                    .format("Data type %s is not supported.", columnTypeDeduplicatedList.get(i)));
+                String.format("Data type %s is not supported.", columnTypeDeduplicatedList.get(i)));
         }
       }
     }

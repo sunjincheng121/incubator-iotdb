@@ -39,8 +39,8 @@ public class RemoteTsFileResource extends TsFileResource {
   /**
    * Whether the plan range ([minPlanIndex, maxPlanIndex]) overlaps with another TsFile in the same
    * time partition. If not (unique = true), we shall have confidence that the file has all data
-   * whose plan indexes are within [minPlanIndex, maxPlanIndex], so we can remove other local
-   * files that overlaps with it.
+   * whose plan indexes are within [minPlanIndex, maxPlanIndex], so we can remove other local files
+   * that overlaps with it.
    */
   private boolean isPlanRangeUnique = false;
 

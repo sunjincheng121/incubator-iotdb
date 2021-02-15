@@ -53,8 +53,8 @@ public class ClusterPhysicalGenerator extends PhysicalGenerator {
   }
 
   @Override
-  protected Pair<List<TSDataType>, List<TSDataType>> getSeriesTypes(List<PartialPath> paths,
-      String aggregation) throws MetadataException {
+  protected Pair<List<TSDataType>, List<TSDataType>> getSeriesTypes(
+      List<PartialPath> paths, String aggregation) throws MetadataException {
     return getCMManager().getSeriesTypesByPaths(paths, aggregation);
   }
 
@@ -73,7 +73,6 @@ public class ClusterPhysicalGenerator extends PhysicalGenerator {
     return ((CMManager) IoTDB.metaManager).getMatchedDevices(path);
   }
 
-
   @Override
   protected PhysicalPlan generateLoadConfigurationPlan(LoadConfigurationOperatorType type)
       throws QueryProcessException {
@@ -81,7 +80,8 @@ public class ClusterPhysicalGenerator extends PhysicalGenerator {
       Properties[] properties = new Properties[2];
       properties[0] = new Properties();
       URL iotdbEnginePropertiesUrl = IoTDBDescriptor.getInstance().getPropsUrl();
-      try (InputStream inputStream = new FileInputStream(new File(iotdbEnginePropertiesUrl.toString()))) {
+      try (InputStream inputStream =
+          new FileInputStream(new File(iotdbEnginePropertiesUrl.toString()))) {
         properties[0].load(inputStream);
       } catch (IOException e) {
         logger.warn("Fail to find config file {}", iotdbEnginePropertiesUrl, e);

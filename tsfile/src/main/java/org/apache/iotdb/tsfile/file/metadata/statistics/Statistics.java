@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Objects;
-
 import org.apache.iotdb.tsfile.exception.filter.StatisticsClassException;
 import org.apache.iotdb.tsfile.exception.write.UnknownColumnTypeException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
@@ -35,9 +34,11 @@ import org.slf4j.LoggerFactory;
 /**
  * This class is used for recording statistic information of each measurement in a delta file. While
  * writing processing, the processor records the statistics information. Statistics includes
- * maximum, minimum and null value count up to version 0.0.1.<br> Each data type extends this
- * Statistic as super class.<br>
- * <br>For the statistics in the Unseq file TimeSeriesMetadata, only firstValue, lastValue, startTime and endTime can be used.</br>
+ * maximum, minimum and null value count up to version 0.0.1.<br>
+ * Each data type extends this Statistic as super class.<br>
+ * <br>
+ * For the statistics in the Unseq file TimeSeriesMetadata, only firstValue, lastValue, startTime
+ * and endTime can be used.</br>
  */
 public abstract class Statistics<T> {
 
@@ -47,9 +48,7 @@ public abstract class Statistics<T> {
    */
   protected boolean isEmpty = true;
 
-  /**
-   * number of time-value points
-   */
+  /** number of time-value points */
   private long count = 0;
 
   private long startTime = Long.MAX_VALUE;
@@ -120,9 +119,7 @@ public abstract class Statistics<T> {
 
   abstract int serializeStats(OutputStream outputStream) throws IOException;
 
-  /**
-   * read data from the inputStream.
-   */
+  /** read data from the inputStream. */
   abstract void deserialize(InputStream inputStream) throws IOException;
 
   abstract void deserialize(ByteBuffer byteBuffer);

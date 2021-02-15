@@ -47,10 +47,11 @@ public class IoTDBMergeTest {
   public void setUp() throws Exception {
     EnvironmentUtils.closeStatMonitor();
     prevPartitionInterval = IoTDBDescriptor.getInstance().getConfig().getPartitionInterval();
-    prevTsFileManagementStrategy = IoTDBDescriptor.getInstance().getConfig()
-        .getCompactionStrategy();
+    prevTsFileManagementStrategy =
+        IoTDBDescriptor.getInstance().getConfig().getCompactionStrategy();
     IoTDBDescriptor.getInstance().getConfig().setPartitionInterval(1);
-    IoTDBDescriptor.getInstance().getConfig()
+    IoTDBDescriptor.getInstance()
+        .getConfig()
         .setCompactionStrategy(CompactionStrategy.NO_COMPACTION);
     EnvironmentUtils.envSetUp();
     Class.forName(Config.JDBC_DRIVER_NAME);
@@ -60,21 +61,24 @@ public class IoTDBMergeTest {
   public void tearDown() throws Exception {
     EnvironmentUtils.cleanEnv();
     IoTDBDescriptor.getInstance().getConfig().setPartitionInterval(prevPartitionInterval);
-    IoTDBDescriptor.getInstance().getConfig()
-        .setCompactionStrategy(prevTsFileManagementStrategy);
+    IoTDBDescriptor.getInstance().getConfig().setCompactionStrategy(prevTsFileManagementStrategy);
   }
 
   @Test
   public void test() throws SQLException {
     logger.info("test...");
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+    try (Connection connection =
+            DriverManager.getConnection(
+                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
         Statement statement = connection.createStatement()) {
       statement.execute("SET STORAGE GROUP TO root.mergeTest");
       for (int i = 1; i <= 3; i++) {
         try {
-          statement.execute("CREATE TIMESERIES root.mergeTest.s" + i + " WITH DATATYPE=INT64,"
-              + "ENCODING=PLAIN");
+          statement.execute(
+              "CREATE TIMESERIES root.mergeTest.s"
+                  + i
+                  + " WITH DATATYPE=INT64,"
+                  + "ENCODING=PLAIN");
         } catch (SQLException e) {
           // ignore
         }
@@ -83,15 +87,17 @@ public class IoTDBMergeTest {
       for (int i = 0; i < 10; i++) {
         logger.info("Running the {} round merge", i);
         for (int j = i * 10 + 1; j <= (i + 1) * 10; j++) {
-          statement
-              .execute(String.format("INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                  + "%d,%d)", j, j + 1, j + 2, j + 3));
+          statement.execute(
+              String.format(
+                  "INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                  j, j + 1, j + 2, j + 3));
         }
         statement.execute("FLUSH");
         for (int j = i * 10 + 1; j <= (i + 1) * 10; j++) {
-          statement
-              .execute(String.format("INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                  + "%d,%d)", j, j + 10, j + 20, j + 30));
+          statement.execute(
+              String.format(
+                  "INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                  j, j + 10, j + 20, j + 30));
         }
         statement.execute("FLUSH");
         statement.execute("MERGE");
@@ -120,42 +126,50 @@ public class IoTDBMergeTest {
     logger.info("testInvertedOrder...");
     // case: seq data and unseq data are written in reverted order
     // e.g.: write 1. seq [10, 20), 2. seq [20, 30), 3. unseq [20, 30), 4. unseq [10, 20)
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+    try (Connection connection =
+            DriverManager.getConnection(
+                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
         Statement statement = connection.createStatement()) {
       statement.execute("SET STORAGE GROUP TO root.mergeTest");
       for (int i = 1; i <= 3; i++) {
         try {
-          statement.execute("CREATE TIMESERIES root.mergeTest.s" + i + " WITH DATATYPE=INT64,"
-              + "ENCODING=PLAIN");
+          statement.execute(
+              "CREATE TIMESERIES root.mergeTest.s"
+                  + i
+                  + " WITH DATATYPE=INT64,"
+                  + "ENCODING=PLAIN");
         } catch (SQLException e) {
           // ignore
         }
       }
 
       for (int j = 10; j < 20; j++) {
-        statement
-            .execute(String.format("INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                + "%d,%d)", j, j + 1, j + 2, j + 3));
+        statement.execute(
+            String.format(
+                "INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                j, j + 1, j + 2, j + 3));
       }
       statement.execute("FLUSH");
       for (int j = 20; j < 30; j++) {
-        statement
-            .execute(String.format("INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                + "%d,%d)", j, j + 1, j + 2, j + 3));
+        statement.execute(
+            String.format(
+                "INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                j, j + 1, j + 2, j + 3));
       }
       statement.execute("FLUSH");
 
       for (int j = 20; j < 30; j++) {
-        statement
-            .execute(String.format("INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                + "%d,%d)", j, j + 10, j + 20, j + 30));
+        statement.execute(
+            String.format(
+                "INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                j, j + 10, j + 20, j + 30));
       }
       statement.execute("FLUSH");
       for (int j = 10; j < 20; j++) {
-        statement
-            .execute(String.format("INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                + "%d,%d)", j, j + 10, j + 20, j + 30));
+        statement.execute(
+            String.format(
+                "INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                j, j + 10, j + 20, j + 30));
       }
       statement.execute("FLUSH");
 
@@ -191,14 +205,18 @@ public class IoTDBMergeTest {
   @Test
   public void testCrossPartition() throws SQLException {
     logger.info("testCrossPartition...");
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+    try (Connection connection =
+            DriverManager.getConnection(
+                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
         Statement statement = connection.createStatement()) {
       statement.execute("SET STORAGE GROUP TO root.mergeTest");
       for (int i = 1; i <= 3; i++) {
         try {
-          statement.execute("CREATE TIMESERIES root.mergeTest.s" + i + " WITH DATATYPE=INT64,"
-              + "ENCODING=PLAIN");
+          statement.execute(
+              "CREATE TIMESERIES root.mergeTest.s"
+                  + i
+                  + " WITH DATATYPE=INT64,"
+                  + "ENCODING=PLAIN");
         } catch (SQLException e) {
           // ignore
         }
@@ -211,15 +229,17 @@ public class IoTDBMergeTest {
           // sequence files
           for (int j = i * 1000 + 300 + k * 100; j <= i * 1000 + 399 + k * 100; j++) {
             statement.execute(
-                String.format("INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                    + "%d,%d)", j, j + 1, j + 2, j + 3));
+                String.format(
+                    "INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                    j, j + 1, j + 2, j + 3));
           }
           statement.execute("FLUSH");
           // unsequence files
           for (int j = i * 1000 + k * 100; j <= i * 1000 + 99 + k * 100; j++) {
             statement.execute(
-                String.format("INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                    + "%d,%d)", j, j + 10, j + 20, j + 30));
+                String.format(
+                    "INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                    j, j + 10, j + 20, j + 30));
           }
           statement.execute("FLUSH");
         }
@@ -254,29 +274,35 @@ public class IoTDBMergeTest {
 
   @Test
   public void testShowMergeStatus() throws SQLException {
-    try (Connection connection = DriverManager
-        .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
+    try (Connection connection =
+            DriverManager.getConnection(
+                Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
         Statement statement = connection.createStatement()) {
       statement.execute("SET STORAGE GROUP TO root.mergeTest");
       for (int i = 1; i <= 3; i++) {
         try {
-          statement.execute("CREATE TIMESERIES root.mergeTest.s" + i + " WITH DATATYPE=INT64,"
-              + "ENCODING=PLAIN");
+          statement.execute(
+              "CREATE TIMESERIES root.mergeTest.s"
+                  + i
+                  + " WITH DATATYPE=INT64,"
+                  + "ENCODING=PLAIN");
         } catch (SQLException e) {
           // ignore
         }
       }
 
       for (int j = 1; j <= 10; j++) {
-        statement
-            .execute(String.format("INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                + "%d,%d)", j, j + 1, j + 2, j + 3));
+        statement.execute(
+            String.format(
+                "INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                j, j + 1, j + 2, j + 3));
       }
       statement.execute("FLUSH");
       for (int j = 1; j <= 10; j++) {
-        statement
-            .execute(String.format("INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d,"
-                + "%d,%d)", j, j + 10, j + 20, j + 30));
+        statement.execute(
+            String.format(
+                "INSERT INTO root.mergeTest(timestamp,s1,s2,s3) VALUES (%d,%d," + "%d,%d)",
+                j, j + 10, j + 20, j + 30));
       }
       statement.execute("FLUSH");
       statement.execute("MERGE");
