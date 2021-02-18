@@ -39,13 +39,13 @@ public class RPCServiceThriftHandler implements TServerEventHandler {
 
   @Override
   public void deleteContext(ServerContext arg0, TProtocol arg1, TProtocol arg2) {
-    //release query resources.
+    // release query resources.
     serviceImpl.handleClientExit();
   }
 
   @Override
   public void preServe() {
-    //nothing
+    // nothing
   }
 
   @Override

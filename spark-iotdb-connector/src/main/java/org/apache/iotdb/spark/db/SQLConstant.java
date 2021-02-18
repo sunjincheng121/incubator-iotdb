@@ -18,9 +18,7 @@
  */
 package org.apache.iotdb.spark.db;
 
-/**
- * this class contains several constants used in SQL.
- */
+/** this class contains several constants used in SQL. */
 public class SQLConstant {
 
   public static final String RESERVED_TIME = "time";
