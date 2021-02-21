@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.iotdb.db.conf.directories.DirectoryManager;
 import org.apache.iotdb.db.exception.DiskSpaceInsufficientException;
-import org.apache.iotdb.db.exception.StartupException;
 import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.sync.conf.SyncConstant;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
@@ -44,14 +43,14 @@ public class SyncReceiverLoggerTest {
 
   @Before
   public void setUp()
-      throws IOException, InterruptedException, StartupException, DiskSpaceInsufficientException {
+      throws DiskSpaceInsufficientException {
     EnvironmentUtils.envSetUp();
     dataDir = new File(DirectoryManager.getInstance().getNextFolderForSequenceFile())
         .getParentFile().getAbsolutePath();
   }
 
   @After
-  public void tearDown() throws InterruptedException, IOException, StorageEngineException {
+  public void tearDown() throws IOException, StorageEngineException {
     EnvironmentUtils.cleanEnv();
   }
 

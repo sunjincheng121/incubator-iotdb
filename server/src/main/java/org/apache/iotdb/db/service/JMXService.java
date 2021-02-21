@@ -27,7 +27,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.iotdb.db.conf.IoTDBConstant;
-import org.apache.iotdb.db.exception.StartupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +81,7 @@ public class JMXService implements IService {
   }
 
   @Override
-  public void start() throws StartupException {
+  public void start() {
     String jmxPort = System.getProperty(IoTDBConstant.IOTDB_JMX_PORT);
     if (jmxPort == null) {
       logger.debug("{} JMX port is undefined", this.getID().getName());

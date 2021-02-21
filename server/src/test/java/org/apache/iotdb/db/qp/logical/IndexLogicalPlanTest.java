@@ -27,7 +27,6 @@ import static org.apache.iotdb.db.index.common.IndexConstant.TOP_K;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.index.common.IndexType;
 import org.apache.iotdb.db.qp.logical.Operator;
 import org.apache.iotdb.db.qp.logical.Operator.OperatorType;
@@ -108,7 +107,7 @@ public class IndexLogicalPlanTest {
   }
 
   @Test
-  public void testParseQueryIndexWholeMatching() throws IllegalPathException {
+  public void testParseQueryIndexWholeMatching() {
     String sqlStr = "SELECT TOP 2 Glu FROM root.Ery.* WHERE Glu LIKE (0, 120, 20, 80, 120, 100, 80, 0)";
     Operator op = generator.generate(sqlStr, ZoneId.systemDefault());
     Assert.assertEquals(QueryOperator.class, op.getClass());
@@ -126,7 +125,7 @@ public class IndexLogicalPlanTest {
   }
 
   @Test
-  public void testParseQueryIndexSubMatching() throws IllegalPathException {
+  public void testParseQueryIndexSubMatching() {
     String sqlStr = "SELECT Speed.* FROM root.Wind.AZQ02 WHERE Speed "
         + "CONTAIN (15, 14, 12, 12, 12, 11) WITH TOLERANCE 1 "
         + "CONCAT (10, 20, 25, 24, 14, 8) WITH TOLERANCE 2 "

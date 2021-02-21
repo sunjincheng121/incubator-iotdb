@@ -21,7 +21,6 @@ package org.apache.iotdb.db.engine.memtable;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import org.apache.iotdb.db.constant.TestConstant;
 import org.apache.iotdb.db.engine.MetadataManagerHelper;
@@ -60,7 +59,7 @@ public class MemTableFlushTaskTest {
   }
 
   @Test
-  public void testFlushMemTable() throws ExecutionException, InterruptedException, IOException {
+  public void testFlushMemTable() throws ExecutionException, InterruptedException {
     MemTableTestUtils.produceData(memTable, startTime, endTime, MemTableTestUtils.deviceId0,
         MemTableTestUtils.measurementId0,
         MemTableTestUtils.dataType0);

@@ -23,7 +23,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.iotdb.db.constant.TestConstant;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
@@ -40,7 +39,7 @@ import org.junit.Test;
 public class IoTDBNumberPathIT {
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     EnvironmentUtils.closeStatMonitor();
     EnvironmentUtils.envSetUp();
   }
@@ -51,7 +50,7 @@ public class IoTDBNumberPathIT {
   }
 
   @Test
-  public void test() throws ClassNotFoundException, SQLException {
+  public void test() throws ClassNotFoundException {
     String[] sqls = {"SET STORAGE GROUP TO root.123"};
     executeSQL(sqls);
     //simpleTest();
@@ -64,7 +63,7 @@ public class IoTDBNumberPathIT {
 //    funcTestWithOutTimeGenerator();
   }
 
-  public void simpleTest() throws ClassNotFoundException, SQLException {
+  public void simpleTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.123.456.789 WITH DATATYPE=INT32,ENCODING=RLE",
         "SHOW TIMESERIES",
         "===  Timeseries Tree  ===\n"
@@ -180,7 +179,7 @@ public class IoTDBNumberPathIT {
     executeSQL(sqlS);
   }
 
-  public void insertTest() throws ClassNotFoundException, SQLException {
+  public void insertTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.123.456.789 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.123.456(timestamp,789) values(1,101)",
         "CREATE TIMESERIES root.123.456.000 WITH DATATYPE=INT32,ENCODING=RLE",
@@ -194,7 +193,7 @@ public class IoTDBNumberPathIT {
     executeSQL(sqlS);
   }
 
-  public void deleteTest() throws ClassNotFoundException, SQLException {
+  public void deleteTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.123.456.789 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.123.456(timestamp,789) values(1,101)",
         "CREATE TIMESERIES root.123.456.000 WITH DATATYPE=INT32,ENCODING=RLE",
@@ -241,7 +240,7 @@ public class IoTDBNumberPathIT {
     executeSQL(sqlS);
   }
 
-  public void selectTest() throws ClassNotFoundException, SQLException {
+  public void selectTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.123.456.789 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.123.456(timestamp,789) values(1,101)",
         "INSERT INTO root.123.456(timestamp,789) values(2,102)",
@@ -262,7 +261,7 @@ public class IoTDBNumberPathIT {
     executeSQL(sqlS);
   }
 
-  public void funcTest() throws ClassNotFoundException, SQLException {
+  public void funcTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.123.456.789 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.123.456(timestamp,789) values(1,110)",
         "INSERT INTO root.123.456(timestamp,789) values(2,109)",
@@ -296,7 +295,7 @@ public class IoTDBNumberPathIT {
     executeSQL(sqlS);
   }
 
-  public void funcTestWithOutTimeGenerator() throws ClassNotFoundException, SQLException {
+  public void funcTestWithOutTimeGenerator() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.123.456.789 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.123.456(timestamp,789) values(1,110)",
         "INSERT INTO root.123.456(timestamp,789) values(2,109)",
@@ -332,7 +331,7 @@ public class IoTDBNumberPathIT {
     executeSQL(sqlS);
   }
 
-  public void groupByTest() throws ClassNotFoundException, SQLException {
+  public void groupByTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.123.456.789 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.123.456(timestamp,789) values(1,110)",
         "INSERT INTO root.123.456(timestamp,789) values(2,109)",
@@ -365,7 +364,7 @@ public class IoTDBNumberPathIT {
     executeSQL(sqlS);
   }
 
-  private void executeSQL(String[] sqls) throws ClassNotFoundException, SQLException {
+  private void executeSQL(String[] sqls) throws ClassNotFoundException {
     Class.forName(Config.JDBC_DRIVER_NAME);
     try (Connection connection = DriverManager.getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/",
             "root", "root");

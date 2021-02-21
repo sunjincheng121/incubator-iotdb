@@ -32,7 +32,7 @@ import org.junit.Test;
 public class IoTDBVersionIT {
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     EnvironmentUtils.envSetUp();
   }
 

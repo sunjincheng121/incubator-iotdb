@@ -578,7 +578,7 @@ public class IoTDBStatement implements Statement {
   }
 
   @Override
-  public int getUpdateCount() throws SQLException {
+  public int getUpdateCount() {
     return -1;
   }
 

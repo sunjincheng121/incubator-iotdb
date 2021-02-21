@@ -92,7 +92,7 @@ public class IoTDBRecoverIT {
   }
 
   @Test
-  public void mergeTest() throws SQLException, IOException, StartupException {
+  public void mergeTest() {
     String[] retArray = new String[]{
         "0,2",
         "0,4",

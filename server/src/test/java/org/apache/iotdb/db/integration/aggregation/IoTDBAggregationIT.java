@@ -120,7 +120,7 @@ public class IoTDBAggregationIT {
   //add test for part of points in page don't satisfy filter
   //details in: https://issues.apache.org/jira/projects/IOTDB/issues/IOTDB-54
   @Test
-  public void test() throws SQLException {
+  public void test() {
     String[] retArray = new String[]{
         "0,2",
         "0,4",
@@ -195,7 +195,7 @@ public class IoTDBAggregationIT {
   }
 
   @Test
-  public void countTest() throws SQLException {
+  public void countTest() {
     String[] retArray = new String[]{
         "0,2001,2001,2001,2001",
         "0,7500,7500,7500,7500"
@@ -341,7 +341,7 @@ public class IoTDBAggregationIT {
   }
 
   @Test
-  public void lastTest() throws SQLException {
+  public void lastTest() {
     String[] retArray = new String[]{
         "0,8499,8499.0",
         "0,1499,1499.0",
@@ -434,7 +434,7 @@ public class IoTDBAggregationIT {
   }
 
   @Test
-  public void maxminTimeTest() throws SQLException {
+  public void maxminTimeTest() {
     String[] retArray = new String[]{
         "0,8499,500",
         "0,2499,2000"
@@ -523,7 +523,7 @@ public class IoTDBAggregationIT {
   }
 
   @Test
-  public void maxminValueTest() throws SQLException {
+  public void maxminValueTest() {
     String[] retArray = new String[]{
         "0,8499,500.0",
         "0,2499,500.0"

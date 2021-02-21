@@ -35,7 +35,6 @@ import org.apache.iotdb.db.engine.cache.TimeSeriesMetadataCache;
 import org.apache.iotdb.db.engine.merge.manage.MergeManager;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
-import org.apache.iotdb.db.exception.query.PathException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.query.control.FileReaderManager;
 import org.apache.iotdb.db.service.IoTDB;
@@ -62,7 +61,7 @@ public class SeriesReaderTestUtil {
 
   public static void setUp(List<MeasurementSchema> measurementSchemas, List<String> deviceIds,
       List<TsFileResource> seqResources, List<TsFileResource> unseqResources)
-      throws MetadataException, PathException, IOException, WriteProcessException {
+      throws MetadataException, IOException, WriteProcessException {
     IoTDB.metaManager.init();
     prepareSeries(measurementSchemas, deviceIds);
     prepareFiles(seqResources, unseqResources, measurementSchemas, deviceIds);
@@ -159,7 +158,7 @@ public class SeriesReaderTestUtil {
 
 
   private static void prepareSeries(List<MeasurementSchema> measurementSchemas,
-      List<String> deviceIds) throws MetadataException, PathException {
+      List<String> deviceIds) throws MetadataException {
     for (int i = 0; i < measurementNum; i++) {
       measurementSchemas.add(new MeasurementSchema("sensor" + i, TSDataType.INT32,
           encoding, CompressionType.UNCOMPRESSED));

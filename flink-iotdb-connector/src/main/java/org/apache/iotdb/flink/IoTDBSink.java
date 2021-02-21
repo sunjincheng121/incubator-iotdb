@@ -156,7 +156,7 @@ public class IoTDBSink<IN> extends RichSinkFunction<IN> {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     if (pool != null) {
       try {
         flush();

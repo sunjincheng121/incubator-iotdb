@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
-import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.tsfile.utils.Pair;
 import org.junit.After;
 import org.junit.Assert;
@@ -111,7 +110,7 @@ public class FilePathUtilsTest {
   }
 
   @After
-  public void tearDown() throws IOException, StorageEngineException {
+  public void tearDown() {
     Assert.assertTrue(tsFile.delete());
   }
 }

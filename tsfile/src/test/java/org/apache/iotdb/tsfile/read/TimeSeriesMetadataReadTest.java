@@ -49,7 +49,7 @@ public class TimeSeriesMetadataReadTest {
   }
 
   @After
-  public void after() throws IOException {
+  public void after() {
     FileGenerator.after();
     conf.setMaxDegreeOfIndexNode(maxDegreeOfIndexNode);
   }

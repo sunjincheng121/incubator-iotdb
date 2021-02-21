@@ -49,7 +49,7 @@ public class FloatDecoderTest {
   private List<Double> doubleList;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     floatList = new ArrayList<Float>();
     int hybridCount = 11;
     int hybridNum = 5;
@@ -83,7 +83,7 @@ public class FloatDecoderTest {
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
   }
 
   @Test

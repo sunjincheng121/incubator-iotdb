@@ -111,7 +111,7 @@ public class RemoteSimpleSeriesReaderTest {
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
     ClusterDescriptor.getInstance().getConfig().setUseAsyncServer(prevUseAsyncServer);
   }
 

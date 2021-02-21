@@ -62,7 +62,7 @@ public class TsFileGeneratorForSeriesReaderByTimestamp {
   private static int prePageSize;
 
   public static void generateFile(int rc, int rs, int ps)
-      throws IOException, InterruptedException, WriteProcessException {
+      throws IOException {
     rowCount = rc;
     chunkGroupSize = rs;
     pageSize = ps;
@@ -145,7 +145,7 @@ public class TsFileGeneratorForSeriesReaderByTimestamp {
     fw.close();
   }
 
-  static public void write() throws IOException, InterruptedException, WriteProcessException {
+  static public void write() throws IOException {
     File file = new File(outputDataFile);
     File errorFile = new File(errorOutputDataFile);
     if (file.exists()) {
@@ -193,7 +193,7 @@ public class TsFileGeneratorForSeriesReaderByTimestamp {
     schema.registerTimeseries(new Path("d2", "s4"), new MeasurementSchema("s4", TSDataType.TEXT, TSEncoding.PLAIN));
   }
 
-  static public void writeToFile(Schema schema) throws InterruptedException, IOException, WriteProcessException {
+  static public void writeToFile(Schema schema) throws IOException, WriteProcessException {
     Scanner in = getDataFile(inputDataFile);
     long lineCount = 0;
     long startTime = System.currentTimeMillis();

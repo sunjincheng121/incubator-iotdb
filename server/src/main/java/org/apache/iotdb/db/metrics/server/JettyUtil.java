@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.List;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -45,7 +44,7 @@ public class JettyUtil {
       private final MetricRegistry mr = metricRegistry;
 
       @Override
-      protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("text/html;charset=utf-8");
         resp.setStatus(HttpServletResponse.SC_OK);
         PrintWriter out = resp.getWriter();
@@ -56,7 +55,7 @@ public class JettyUtil {
 
       @Override
       public void doPost(HttpServletRequest req, HttpServletResponse resp)
-          throws ServletException, IOException {
+          throws IOException {
         doGet(req, resp);
       }
     };

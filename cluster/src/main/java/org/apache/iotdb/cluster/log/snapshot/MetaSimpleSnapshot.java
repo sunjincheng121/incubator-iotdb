@@ -212,7 +212,7 @@ public class MetaSimpleSnapshot extends Snapshot {
           try {
             IoTDB.metaManager.setTTL(sgPath, entry.getValue());
             StorageEngine.getInstance().setTTL(sgPath, entry.getValue());
-          } catch (MetadataException | StorageEngineException | IOException e) {
+          } catch (MetadataException | IOException e) {
             logger
                 .error("{}: Cannot set ttl in storage group {} , errMessage: {}",
                     metaGroupMember.getName(),

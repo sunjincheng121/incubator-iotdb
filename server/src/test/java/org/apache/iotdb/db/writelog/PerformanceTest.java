@@ -25,7 +25,6 @@ import java.nio.MappedByteBuffer;
 import java.util.Collections;
 import org.apache.iotdb.db.conf.IoTDBConfig;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
-import org.apache.iotdb.db.exception.WriteProcessException;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.metadata.PartialPath;
@@ -53,7 +52,7 @@ public class PerformanceTest {
   private boolean skip = true;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     enableWal = config.isEnableWal();
     config.setEnableWal(true);
     EnvironmentUtils.envSetUp();
@@ -128,7 +127,7 @@ public class PerformanceTest {
 
   @Test
   public void recoverTest()
-      throws IOException, MetadataException, WriteProcessException {
+      throws IOException, MetadataException {
     // this test insert 1000000 * 3 logs , recover from them and report elapsed time
     if (skip) {
       return;

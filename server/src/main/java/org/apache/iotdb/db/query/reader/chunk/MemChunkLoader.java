@@ -19,7 +19,6 @@
 
 package org.apache.iotdb.db.query.reader.chunk;
 
-import java.io.IOException;
 import org.apache.iotdb.db.engine.querycontext.ReadOnlyMemChunk;
 import org.apache.iotdb.tsfile.file.metadata.ChunkMetadata;
 import org.apache.iotdb.tsfile.read.common.Chunk;
@@ -43,7 +42,7 @@ public class MemChunkLoader implements IChunkLoader {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     //no resources need to close
   }
 

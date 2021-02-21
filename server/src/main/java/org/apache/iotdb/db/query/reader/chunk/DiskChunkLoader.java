@@ -47,7 +47,7 @@ public class DiskChunkLoader implements IChunkLoader {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     // do nothing
   }
 }

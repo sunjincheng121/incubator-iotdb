@@ -83,7 +83,7 @@ public class SeriesRawDataPointReader implements IPointReader {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     // no resources need to close
   }
 }

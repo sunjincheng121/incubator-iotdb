@@ -41,7 +41,7 @@ public class LocalFileRoleManagerTest {
   private LocalFileRoleManager manager;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     EnvironmentUtils.envSetUp();
     testFolder = new File(TestConstant.BASE_OUTPUT_PATH.concat("test"));
     testFolder.mkdirs();

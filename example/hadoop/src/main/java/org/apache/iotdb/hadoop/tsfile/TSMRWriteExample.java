@@ -19,7 +19,6 @@
 package org.apache.iotdb.hadoop.tsfile;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -47,7 +46,7 @@ import org.apache.iotdb.tsfile.write.schema.Schema;
 public class TSMRWriteExample {
 
   public static void main(String[] args)
-      throws IOException, ClassNotFoundException, TSFHadoopException, URISyntaxException {
+      throws IOException, ClassNotFoundException, TSFHadoopException {
 
     if (args.length != 3) {
       System.out.println("Please give hdfs url, input path, output path");

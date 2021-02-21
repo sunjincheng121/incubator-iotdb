@@ -195,7 +195,7 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
     }
 
     @Override
-    public void createUser(String username, String password) throws AuthException {
+    public void createUser(String username, String password) {
         throwUnsupportedOperationException();
     }
 
@@ -204,7 +204,7 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
     }
 
     @Override
-    public void deleteUser(String username) throws AuthException {
+    public void deleteUser(String username) {
         throwUnsupportedOperationException();
     }
 
@@ -263,7 +263,7 @@ public class OpenIdAuthorizer extends BasicAuthorizer {
     }
 
     @Override
-    public void updateUserPassword(String username, String newPassword) throws AuthException {
+    public void updateUserPassword(String username, String newPassword) {
         throwUnsupportedOperationException();
     }
 

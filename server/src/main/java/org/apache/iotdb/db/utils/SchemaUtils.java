@@ -155,10 +155,9 @@ public class SchemaUtils {
    * @param measurementDataType
    * @param aggregation
    * @return
-   * @throws MetadataException
    */
   public static List<TSDataType> getAggregatedDataTypes(List<TSDataType> measurementDataType,
-      String aggregation) throws MetadataException {
+      String aggregation) {
     TSDataType dataType = getAggregationType(aggregation);
     if (dataType != null) {
       return Collections.nCopies(measurementDataType.size(), dataType);

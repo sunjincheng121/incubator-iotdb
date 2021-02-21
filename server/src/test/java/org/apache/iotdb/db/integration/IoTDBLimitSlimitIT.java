@@ -25,7 +25,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.iotdb.db.constant.TestConstant;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
@@ -84,7 +83,7 @@ public class IoTDBLimitSlimitIT {
       "insert into root.vehicle.d0(timestamp,s1) values(2000-01-01T08:00:00+08:00, 100)",};
 
   @BeforeClass
-  public static void setUp() throws Exception {
+  public static void setUp() {
     EnvironmentUtils.closeStatMonitor();
     EnvironmentUtils.envSetUp();
   }
@@ -94,7 +93,7 @@ public class IoTDBLimitSlimitIT {
     EnvironmentUtils.cleanEnv();
   }
 
-  private static void insertData() throws ClassNotFoundException, SQLException {
+  private static void insertData() throws ClassNotFoundException {
     Class.forName(Config.JDBC_DRIVER_NAME);
     try (Connection connection = DriverManager
         .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
@@ -110,12 +109,12 @@ public class IoTDBLimitSlimitIT {
   }
 
   @Test
-  public void Test() throws ClassNotFoundException, SQLException {
+  public void Test() throws ClassNotFoundException {
     insertData();
     SelectTest();
   }
 
-  public void SelectTest() throws ClassNotFoundException, SQLException {
+  public void SelectTest() throws ClassNotFoundException {
     String[] sqlS = {"SELECT s1 FROM root.vehicle.d0 WHERE time<200 limit 3",
         "1,1101,\n" + "2,40000,\n" + "50,50000,\n",
 
@@ -145,7 +144,7 @@ public class IoTDBLimitSlimitIT {
     executeSQL(sqlS);
   }
 
-  private void executeSQL(String[] sqls) throws ClassNotFoundException, SQLException {
+  private void executeSQL(String[] sqls) throws ClassNotFoundException {
     Class.forName(Config.JDBC_DRIVER_NAME);
 
     try ( Connection  connection = DriverManager

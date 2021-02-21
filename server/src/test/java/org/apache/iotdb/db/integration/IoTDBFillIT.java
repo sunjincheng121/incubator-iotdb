@@ -149,7 +149,7 @@ public class IoTDBFillIT {
   }
 
   @Test
-  public void LinearFillCommonTest() throws SQLException {
+  public void LinearFillCommonTest() {
     String[] retArray1 = new String[]{
         "3,3.3,false,33",
         "70,70.34,false,374",
@@ -211,7 +211,7 @@ public class IoTDBFillIT {
   }
 
   @Test
-  public void LinearFillWithBeforeOrAfterValueNullTest() throws SQLException {
+  public void LinearFillWithBeforeOrAfterValueNullTest() {
     String[] retArray1 = new String[]{
         "70,null,null,null",
         "80,null,null,null",
@@ -334,7 +334,7 @@ public class IoTDBFillIT {
   }
 
   @Test
-  public void EmptyTimeRangeFillTest() throws SQLException {
+  public void EmptyTimeRangeFillTest() {
     String[] retArray1 = new String[]{
         "3,3.3,false,33",
         "70,70.34,false,374"
@@ -380,7 +380,7 @@ public class IoTDBFillIT {
   }
 
   @Test
-  public void PreviousFillWithOnlySeqFileTest() throws SQLException {
+  public void PreviousFillWithOnlySeqFileTest() {
     String[] retArray = new String[]{
         "1050,1020.5,false",
         "800,55.2,true"
@@ -422,7 +422,7 @@ public class IoTDBFillIT {
   }
 
   @Test
-  public void PreviousFillWithOnlyUnseqFileOverlappedTest() throws SQLException {
+  public void PreviousFillWithOnlyUnseqFileOverlappedTest() {
     String[] retArray = new String[]{
         "58,82.1,true",
         "40,121.22,true",
@@ -478,7 +478,7 @@ public class IoTDBFillIT {
   }
 
   @Test
-  public void PreviousFillMultiUnseqFileWithSameLastTest() throws SQLException {
+  public void PreviousFillMultiUnseqFileWithSameLastTest() {
     String[] retArray = new String[]{
         "59,82.1,true",
         "52,32.2,false",
@@ -524,7 +524,7 @@ public class IoTDBFillIT {
   }
 
   @Test
-  public void PreviousFillSeqFileFilterOverlappedFilesTest() throws SQLException {
+  public void PreviousFillSeqFileFilterOverlappedFilesTest() {
     String[] retArray1 = new String[]{
         "886,55.2,true",
         "730,121.22,true",
@@ -577,7 +577,7 @@ public class IoTDBFillIT {
   }
 
   @Test
-  public void PreviousFillUnseqFileFilterOverlappedFilesTest() throws SQLException {
+  public void PreviousFillUnseqFileFilterOverlappedFilesTest() {
     String[] retArray1 = new String[]{
         "990,121.22,true",
         "925,33.1,false",
@@ -633,7 +633,7 @@ public class IoTDBFillIT {
   }
 
   @Test
-  public void PreviousFillWithNullUnseqFilesTest() throws SQLException {
+  public void PreviousFillWithNullUnseqFilesTest() {
     String[] retArray1 = new String[]{
         "990,1020.5,true",
     };
@@ -672,7 +672,7 @@ public class IoTDBFillIT {
   }
 
   @Test
-  public void PreviousFillWithDeletionTest() throws SQLException {
+  public void PreviousFillWithDeletionTest() {
     String[] retArray1 = new String[]{
         "1080,21.6,true",
     };

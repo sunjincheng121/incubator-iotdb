@@ -38,7 +38,7 @@ import org.junit.Test;
 public class IoTDBDeleteStorageGroupIT {
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     EnvironmentUtils.closeStatMonitor();
     EnvironmentUtils.envSetUp();
   }

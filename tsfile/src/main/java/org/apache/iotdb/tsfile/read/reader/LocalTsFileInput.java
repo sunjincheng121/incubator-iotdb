@@ -93,7 +93,7 @@ public class LocalTsFileInput implements TsFileInput {
   }
 
   @Override
-  public int read() throws IOException {
+  public int read() {
     throw new UnsupportedOperationException();
   }
 

@@ -38,7 +38,6 @@ import org.apache.iotdb.db.engine.StorageEngine;
 import org.apache.iotdb.db.engine.storagegroup.StorageGroupProcessor;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.exception.DiskSpaceInsufficientException;
-import org.apache.iotdb.db.exception.StartupException;
 import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
@@ -68,7 +67,7 @@ public class SyncReceiverLogAnalyzerTest {
 
   @Before
   public void setUp()
-      throws IOException, InterruptedException, StartupException, DiskSpaceInsufficientException, MetadataException {
+      throws DiskSpaceInsufficientException, MetadataException {
     IoTDBDescriptor.getInstance().getConfig().setSyncEnable(true);
     EnvironmentUtils.closeStatMonitor();
     EnvironmentUtils.envSetUp();
@@ -87,7 +86,7 @@ public class SyncReceiverLogAnalyzerTest {
   }
 
   @After
-  public void tearDown() throws InterruptedException, IOException, StorageEngineException {
+  public void tearDown() throws IOException, StorageEngineException {
     EnvironmentUtils.cleanEnv();
     IoTDBDescriptor.getInstance().getConfig().setSyncEnable(false);
   }

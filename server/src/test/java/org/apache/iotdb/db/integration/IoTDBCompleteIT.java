@@ -37,7 +37,7 @@ import java.sql.*;
 public class IoTDBCompleteIT {
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     // test different partition
     HashVirtualPartitioner.getInstance().setStorageGroupNum(16);
     EnvironmentUtils.closeStatMonitor();
@@ -51,7 +51,7 @@ public class IoTDBCompleteIT {
   }
 
   @Test
-  public void test() throws ClassNotFoundException, SQLException {
+  public void test() throws ClassNotFoundException {
     String[] sqls = {"SET STORAGE GROUP TO root.vehicle"};
     executeSQL(sqls);
     //simpleTest();
@@ -64,7 +64,7 @@ public class IoTDBCompleteIT {
 //    funcTestWithOutTimeGenerator();
   }
 
-  public void simpleTest() throws ClassNotFoundException, SQLException {
+  public void simpleTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32,ENCODING=RLE",
         "SHOW TIMESERIES",
         "===  Timeseries Tree  ===\n"
@@ -180,7 +180,7 @@ public class IoTDBCompleteIT {
     executeSQL(sqlS);
   }
 
-  public void insertTest() throws ClassNotFoundException, SQLException {
+  public void insertTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.vehicle.d0(timestamp,s0) values(1,101)",
         "CREATE TIMESERIES root.vehicle.d0.s1 WITH DATATYPE=INT32,ENCODING=RLE",
@@ -194,7 +194,7 @@ public class IoTDBCompleteIT {
     executeSQL(sqlS);
   }
 
-  public void deleteTest() throws ClassNotFoundException, SQLException {
+  public void deleteTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.vehicle.d0(timestamp,s0) values(1,101)",
         "CREATE TIMESERIES root.vehicle.d0.s1 WITH DATATYPE=INT32,ENCODING=RLE",
@@ -241,7 +241,7 @@ public class IoTDBCompleteIT {
     executeSQL(sqlS);
   }
 
-  public void selectTest() throws ClassNotFoundException, SQLException {
+  public void selectTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.vehicle.d0(timestamp,s0) values(1,101)",
         "INSERT INTO root.vehicle.d0(timestamp,s0) values(2,102)",
@@ -262,7 +262,7 @@ public class IoTDBCompleteIT {
     executeSQL(sqlS);
   }
 
-  public void funcTest() throws ClassNotFoundException, SQLException {
+  public void funcTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.vehicle.d0(timestamp,s0) values(1,110)",
         "INSERT INTO root.vehicle.d0(timestamp,s0) values(2,109)",
@@ -295,7 +295,7 @@ public class IoTDBCompleteIT {
     executeSQL(sqlS);
   }
 
-  public void funcTestWithOutTimeGenerator() throws ClassNotFoundException, SQLException {
+  public void funcTestWithOutTimeGenerator() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.vehicle.d0(timestamp,s0) values(1,110)",
         "INSERT INTO root.vehicle.d0(timestamp,s0) values(2,109)",
@@ -331,7 +331,7 @@ public class IoTDBCompleteIT {
     executeSQL(sqlS);
   }
 
-  public void groupByTest() throws ClassNotFoundException, SQLException {
+  public void groupByTest() throws ClassNotFoundException {
     String[] sqlS = {"CREATE TIMESERIES root.vehicle.d0.s0 WITH DATATYPE=INT32,ENCODING=RLE",
         "INSERT INTO root.vehicle.d0(timestamp,s0) values(1,110)",
         "INSERT INTO root.vehicle.d0(timestamp,s0) values(2,109)",
@@ -363,7 +363,7 @@ public class IoTDBCompleteIT {
     executeSQL(sqlS);
   }
 
-  private void executeSQL(String[] sqls) throws ClassNotFoundException, SQLException {
+  private void executeSQL(String[] sqls) throws ClassNotFoundException {
     Class.forName(Config.JDBC_DRIVER_NAME);
     try (Connection connection = DriverManager
         .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");

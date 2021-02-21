@@ -61,7 +61,7 @@ public class RPCService extends ThriftService implements RPCServiceMBean {
 
   @Override
   public void initThriftServiceThread()
-      throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+      throws IllegalAccessException {
     IoTDBConfig config = IoTDBDescriptor.getInstance().getConfig();
     try {
       thriftServiceThread = new ThriftServiceThread(processor,

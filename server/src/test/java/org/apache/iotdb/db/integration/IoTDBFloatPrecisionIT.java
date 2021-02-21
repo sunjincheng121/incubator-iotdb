@@ -85,7 +85,7 @@ public class IoTDBFloatPrecisionIT {
 
   }
 
-  private static void insertData() throws ClassNotFoundException, SQLException {
+  private static void insertData() throws ClassNotFoundException {
     Class.forName(Config.JDBC_DRIVER_NAME);
     try (Connection connection = DriverManager
         .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
@@ -100,7 +100,7 @@ public class IoTDBFloatPrecisionIT {
   }
 
   @Test
-  public void selectAllSQLTest() throws ClassNotFoundException, SQLException {
+  public void selectAllSQLTest() throws ClassNotFoundException {
     Class.forName(Config.JDBC_DRIVER_NAME);
     try (Connection connection = DriverManager
         .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");

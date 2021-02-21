@@ -165,7 +165,7 @@ public class EnvironmentUtils {
   /**
    * disable memory control</br> this function should be called before all code in the setup
    */
-  public static void envSetUp() throws StartupException, IOException {
+  public static void envSetUp() throws StartupException {
     IoTDB.metaManager.init();
     createAllDir();
     // disable the system monitor
@@ -212,7 +212,7 @@ public class EnvironmentUtils {
     file.mkdirs();
   }
 
-  public static void prepareData() throws SQLException {
+  public static void prepareData() {
     try (Connection connection = DriverManager
         .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
             "root");

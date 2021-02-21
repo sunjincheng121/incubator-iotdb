@@ -117,7 +117,7 @@ public class TSFRecordReader extends RecordReader<NullWritable, MapWritable> imp
   }
 
   @Override
-  public boolean nextKeyValue() throws IOException, InterruptedException {
+  public boolean nextKeyValue() throws IOException {
     while (currentIndex < dataSetList.size()) {
       if (!dataSetList.get(currentIndex).hasNext()) {
         currentIndex++;
@@ -132,7 +132,7 @@ public class TSFRecordReader extends RecordReader<NullWritable, MapWritable> imp
   }
 
   @Override
-  public NullWritable getCurrentKey() throws IOException, InterruptedException {
+  public NullWritable getCurrentKey() {
     return NullWritable.get();
   }
 

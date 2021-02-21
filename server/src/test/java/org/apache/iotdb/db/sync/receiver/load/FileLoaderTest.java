@@ -39,8 +39,6 @@ import org.apache.iotdb.db.engine.StorageEngine;
 import org.apache.iotdb.db.engine.storagegroup.StorageGroupProcessor;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.engine.storagegroup.virtualSg.HashVirtualPartitioner;
-import org.apache.iotdb.db.exception.DiskSpaceInsufficientException;
-import org.apache.iotdb.db.exception.StartupException;
 import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
@@ -64,7 +62,7 @@ public class FileLoaderTest {
 
   @Before
   public void setUp()
-      throws IOException, InterruptedException, StartupException, DiskSpaceInsufficientException, MetadataException {
+      throws Exception {
     IoTDBDescriptor.getInstance().getConfig().setSyncEnable(true);
     HashVirtualPartitioner.getInstance().setStorageGroupNum(1);
     EnvironmentUtils.closeStatMonitor();
@@ -83,7 +81,7 @@ public class FileLoaderTest {
   }
 
   @After
-  public void tearDown() throws InterruptedException, IOException, StorageEngineException {
+  public void tearDown() throws IOException, StorageEngineException {
     EnvironmentUtils.cleanEnv();
     IoTDBDescriptor.getInstance().getConfig().setSyncEnable(false);
     HashVirtualPartitioner.getInstance()

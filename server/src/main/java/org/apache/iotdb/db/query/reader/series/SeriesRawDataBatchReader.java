@@ -115,7 +115,7 @@ public class SeriesRawDataBatchReader implements ManagedSeriesReader {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     //no resources need to close
   }
 

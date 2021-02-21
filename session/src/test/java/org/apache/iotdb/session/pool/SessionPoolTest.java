@@ -43,7 +43,7 @@ import org.junit.Test;
 public class SessionPoolTest {
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     System.setProperty(IoTDBConstant.IOTDB_CONF, "src/test/resources/");
     EnvironmentUtils.closeStatMonitor();
     EnvironmentUtils.envSetUp();
@@ -241,7 +241,7 @@ public class SessionPoolTest {
   }
 
   @Test
-  public void restart() throws Exception {
+  public void restart() {
     SessionPool pool = new SessionPool("127.0.0.1", 6667, "root", "root", 1, 1, 1000, false, null, false);
     write10Data(pool, true);
     //stop the server.

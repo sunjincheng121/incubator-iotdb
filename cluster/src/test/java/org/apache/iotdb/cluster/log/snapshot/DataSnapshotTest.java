@@ -87,8 +87,7 @@ public abstract class DataSnapshotTest {
           }
 
           @Override
-          public void removeHardLink(String hardLinkPath, AsyncMethodCallback<Void> resultHandler)
-              throws TException {
+          public void removeHardLink(String hardLinkPath, AsyncMethodCallback<Void> resultHandler) {
             new Thread(() -> {
               try {
                 Files.deleteIfExists(new File(hardLinkPath).toPath());

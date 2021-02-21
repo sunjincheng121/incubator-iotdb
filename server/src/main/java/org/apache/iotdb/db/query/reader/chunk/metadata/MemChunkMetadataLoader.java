@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.db.query.reader.chunk.metadata;
 
-import java.io.IOException;
 import java.util.List;
 import org.apache.iotdb.db.engine.querycontext.ReadOnlyMemChunk;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
@@ -71,7 +70,7 @@ public class MemChunkMetadataLoader implements IChunkMetadataLoader {
   }
 
   @Override
-  public void setDiskChunkLoader(List<ChunkMetadata> chunkMetadataList) throws IOException {
+  public void setDiskChunkLoader(List<ChunkMetadata> chunkMetadataList) {
     // DO NOTHING
   }
 }

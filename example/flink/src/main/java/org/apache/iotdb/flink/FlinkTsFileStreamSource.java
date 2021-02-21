@@ -31,7 +31,6 @@ import org.apache.iotdb.tsfile.read.common.Path;
 import org.apache.iotdb.tsfile.read.expression.QueryExpression;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -42,7 +41,7 @@ import java.util.stream.Collectors;
  */
 public class FlinkTsFileStreamSource {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		String path = "test.tsfile";
 		TsFileUtils.writeTsFile(path);
 		new File(path).deleteOnExit();

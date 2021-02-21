@@ -48,7 +48,7 @@ public class MaxValueAggrResult extends AggregateResult {
   }
 
   @Override
-  public void updateResultFromPageData(BatchData dataInThisPage) throws IOException {
+  public void updateResultFromPageData(BatchData dataInThisPage) {
     updateResultFromPageData(dataInThisPage, Long.MIN_VALUE, Long.MAX_VALUE);
   }
 
@@ -99,7 +99,7 @@ public class MaxValueAggrResult extends AggregateResult {
   }
 
   @Override
-  protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
+  protected void serializeSpecificFields(OutputStream outputStream) {
 
   }
 

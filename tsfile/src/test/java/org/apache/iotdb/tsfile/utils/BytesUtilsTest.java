@@ -57,7 +57,7 @@ public class BytesUtilsTest {
   }
 
   @Test
-  public void testFloatToBytes() throws Exception {
+  public void testFloatToBytes() {
     // fail("NotFilter yet implemented");
     float b = 25.0f;
     byte[] bb = BytesUtils.floatToBytes(b);
@@ -79,7 +79,7 @@ public class BytesUtilsTest {
   }
 
   @Test
-  public void testBoolToBytes() throws Exception {
+  public void testBoolToBytes() {
     boolean b = true;
     byte[] bb = BytesUtils.boolToBytes(b);
     boolean bf = BytesUtils.bytesToBool(bb);
@@ -87,7 +87,7 @@ public class BytesUtilsTest {
   }
 
   @Test
-  public void testBytesToBool() throws Exception {
+  public void testBytesToBool() {
     boolean b = false;
     byte[] bb = BytesUtils.boolToBytes(b);
     boolean bf = BytesUtils.bytesToBool(bb);
@@ -210,7 +210,7 @@ public class BytesUtilsTest {
   }
 
   @Test
-  public void testSubBytes() throws IOException {
+  public void testSubBytes() {
     List<byte[]> list = new ArrayList<byte[]>();
     float f1 = 12.4f;
     boolean b1 = true;

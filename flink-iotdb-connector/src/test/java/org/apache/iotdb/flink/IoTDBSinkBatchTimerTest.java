@@ -37,7 +37,7 @@ public class IoTDBSinkBatchTimerTest {
   private SessionPool pool;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     IoTDBOptions options = new IoTDBOptions();
     options.setTimeseriesOptionList(
         Lists.newArrayList(new IoTDBOptions.TimeseriesOption("root.sg.D01.temperature")));
@@ -71,7 +71,7 @@ public class IoTDBSinkBatchTimerTest {
   }
 
   @Test
-  public void close() throws Exception {
+  public void close() {
     ioTDBSink.close();
     verify(pool).close();
   }

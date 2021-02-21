@@ -101,6 +101,6 @@ public class CountAggrResult extends AggregateResult {
   }
 
   @Override
-  protected void serializeSpecificFields(OutputStream outputStream) throws IOException {
+  protected void serializeSpecificFields(OutputStream outputStream) {
   }
 }

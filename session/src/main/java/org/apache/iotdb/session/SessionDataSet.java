@@ -168,7 +168,7 @@ public class SessionDataSet {
       return ioTDBRpcDataSet.isNull(columnIndex);
     }
 
-    public boolean isNull(String columnName) throws StatementExecutionException {
+    public boolean isNull(String columnName) {
       return ioTDBRpcDataSet.isNull(columnName);
     }
 

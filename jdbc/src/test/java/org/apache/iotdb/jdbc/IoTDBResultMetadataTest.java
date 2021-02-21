@@ -37,11 +37,11 @@ public class IoTDBResultMetadataTest {
   private IoTDBResultMetadata metadata;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
   }
 
   @Test

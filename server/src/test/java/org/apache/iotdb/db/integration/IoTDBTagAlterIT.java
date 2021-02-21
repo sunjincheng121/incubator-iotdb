@@ -36,7 +36,7 @@ import org.junit.Test;
 public class IoTDBTagAlterIT {
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     EnvironmentUtils.closeStatMonitor();
     EnvironmentUtils.envSetUp();
   }

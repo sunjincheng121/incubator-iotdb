@@ -27,7 +27,6 @@ import org.junit.Test;
 
 import org.apache.iotdb.tsfile.common.conf.TSFileConfig;
 import org.apache.iotdb.tsfile.common.conf.TSFileDescriptor;
-import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSDataType;
 import org.apache.iotdb.tsfile.file.metadata.enums.TSEncoding;
 import org.apache.iotdb.tsfile.read.common.Path;
@@ -57,7 +56,7 @@ public class RecordUtilsTest {
   }
 
   @Before
-  public void prepare() throws WriteProcessException {
+  public void prepare() {
     schema = new Schema();
     schema = generateTestData();
   }

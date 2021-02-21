@@ -51,7 +51,7 @@ public class WriteLogNodeManagerTest {
   private boolean enableWal;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     enableWal = config.isEnableWal();
     config.setEnableWal(true);
     EnvironmentUtils.envSetUp();

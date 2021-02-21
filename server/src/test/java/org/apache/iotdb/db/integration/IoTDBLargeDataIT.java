@@ -90,7 +90,7 @@ public class IoTDBLargeDataIT {
   }
 
   private static void insertData()
-      throws ClassNotFoundException, SQLException, InterruptedException {
+      throws ClassNotFoundException {
     Class.forName(Config.JDBC_DRIVER_NAME);
     try (Connection connection = DriverManager
         .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root", "root");
@@ -214,7 +214,7 @@ public class IoTDBLargeDataIT {
 
   // "select * from root.vehicle" : test select wild data
   @Test
-  public void selectAllTest() throws ClassNotFoundException, SQLException {
+  public void selectAllTest() throws ClassNotFoundException {
     String selectSql = "select * from root.vehicle";
 
     Class.forName(Config.JDBC_DRIVER_NAME);
@@ -252,7 +252,7 @@ public class IoTDBLargeDataIT {
 
   // "select s0 from root.vehicle.d0 where s0 >= 20" : test select same series with same series filter
   @Test
-  public void selectOneSeriesWithValueFilterTest() throws ClassNotFoundException, SQLException {
+  public void selectOneSeriesWithValueFilterTest() throws ClassNotFoundException {
 
     String selectSql = "select s0 from root.vehicle.d0 where s0 >= 20";
 
@@ -283,7 +283,7 @@ Statement statement = connection.createStatement()) {
 
   // "select s0 from root.vehicle.d0 where time > 22987 " : test select clause with only global time filter
   @Test
-  public void seriesGlobalTimeFilterTest() throws ClassNotFoundException, SQLException {
+  public void seriesGlobalTimeFilterTest() throws ClassNotFoundException {
 
     Class.forName(Config.JDBC_DRIVER_NAME);
 
@@ -315,7 +315,7 @@ Statement statement = connection.createStatement()) {
 
   // "select s1 from root.vehicle.d0 where s0 < 111" : test select clause with different series filter
   @Test
-  public void crossSeriesReadUpdateTest() throws ClassNotFoundException, SQLException {
+  public void crossSeriesReadUpdateTest() throws ClassNotFoundException {
     Class.forName(Config.JDBC_DRIVER_NAME);
 
     boolean hasResultSet;

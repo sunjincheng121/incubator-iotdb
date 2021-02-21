@@ -41,16 +41,16 @@ public class IoTDBThreadPoolFactoryTest {
   private CountDownLatch latch;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     count = new AtomicInteger(0);
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
   }
 
   @Test
-  public void testNewFixedThreadPool() throws InterruptedException, ExecutionException {
+  public void testNewFixedThreadPool() {
     String reason = "(can be ignored in Tests) NewFixedThreadPool";
     Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
     int threadCount = 4;
@@ -70,7 +70,7 @@ public class IoTDBThreadPoolFactoryTest {
   }
 
   @Test
-  public void testNewSingleThreadExecutor() throws InterruptedException {
+  public void testNewSingleThreadExecutor() {
     String reason = "(can be ignored in Tests)NewSingleThreadExecutor";
     Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
     int threadCount = 2;
@@ -89,7 +89,7 @@ public class IoTDBThreadPoolFactoryTest {
   }
 
   @Test
-  public void testNewCachedThreadPool() throws InterruptedException {
+  public void testNewCachedThreadPool() {
     String reason = "(can be ignored in Tests) NewCachedThreadPool";
     Thread.UncaughtExceptionHandler handler = new TestExceptionHandler(reason);
     int threadCount = 4;
@@ -162,7 +162,7 @@ public class IoTDBThreadPoolFactoryTest {
   }
 
   @Test
-  public void testCreateJDBCClientThreadPool() throws InterruptedException {
+  public void testCreateJDBCClientThreadPool() {
     String reason = "(can be ignored in Tests) CreateJDBCClientThreadPool";
     TThreadPoolServer.Args args = new Args(null);
     args.maxWorkerThreads = 4;

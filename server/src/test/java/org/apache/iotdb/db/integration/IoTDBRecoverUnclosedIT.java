@@ -25,14 +25,11 @@ import static org.apache.iotdb.db.constant.TestConstant.min_time;
 import static org.apache.iotdb.db.constant.TestConstant.min_value;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Locale;
-import org.apache.iotdb.db.exception.StartupException;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
 import org.apache.iotdb.jdbc.Config;
 import org.junit.After;
@@ -92,7 +89,7 @@ public class IoTDBRecoverUnclosedIT {
   }
 
   @Test
-  public void test() throws SQLException, IOException, StartupException {
+  public void test() {
     String[] retArray = new String[]{
         "0,2",
         "0,4",
@@ -209,7 +206,7 @@ public class IoTDBRecoverUnclosedIT {
     }
   }
 
-  private void prepareData() throws SQLException {
+  private void prepareData() {
     try (Connection connection = DriverManager
         .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
             "root");
@@ -227,7 +224,7 @@ public class IoTDBRecoverUnclosedIT {
     }
   }
 
-  private void insertMoreData() throws SQLException {
+  private void insertMoreData() {
     try (Connection connection = DriverManager
         .getConnection(Config.IOTDB_URL_PREFIX + "127.0.0.1:6667/", "root",
             "root");

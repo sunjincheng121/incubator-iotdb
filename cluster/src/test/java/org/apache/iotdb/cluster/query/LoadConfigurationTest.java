@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 import org.apache.iotdb.cluster.config.ClusterDescriptor;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.constant.TestConstant;
-import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
 
 import org.apache.iotdb.db.qp.logical.sys.LoadConfigurationOperator;
@@ -96,7 +95,7 @@ public class LoadConfigurationTest {
   }
 
   @After
-  public void tearDown() throws IOException, StorageEngineException {
+  public void tearDown() {
     File engineFile = fsFactory.getFile(ENGINE_PROPERTIES_FILE);
     if (engineFile.exists()) {
       Assert.assertTrue(engineFile.delete());
@@ -119,4 +118,4 @@ public class LoadConfigurationTest {
     String clusterIp = (String) loadConfigurationPlan.getClusterProperties().get("cluster_rpc_ip");
     assertEquals("127.0.0.1", clusterIp);
   }
-}
+}

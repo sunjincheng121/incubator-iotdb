@@ -35,7 +35,6 @@ import org.apache.iotdb.cluster.config.ClusterDescriptor;
 import org.apache.iotdb.cluster.log.Log;
 import org.apache.iotdb.cluster.server.Response;
 import org.apache.iotdb.cluster.server.member.RaftMember;
-import org.apache.iotdb.db.exception.StorageEngineException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,7 +54,7 @@ public class AppendGroupEntryHandlerTest {
   }
 
   @After
-  public void tearDown() throws IOException, StorageEngineException {
+  public void tearDown() throws IOException {
     ClusterDescriptor.getInstance().getConfig().setReplicationNum(prevReplicationNum);
     member.stop();
     member.closeLogManager();
@@ -87,7 +86,7 @@ public class AppendGroupEntryHandlerTest {
   }
 
   @Test
-  public void testNoAgreement() throws InterruptedException {
+  public void testNoAgreement() {
     int[] groupReceivedCounter = new int[10];
     for (int i = 0; i < 10; i++) {
       groupReceivedCounter[i] = REPLICATION_NUM;
@@ -137,7 +136,7 @@ public class AppendGroupEntryHandlerTest {
   }
 
   @Test
-  public void testError() throws InterruptedException {
+  public void testError() {
     int[] groupReceivedCounter = new int[10];
     for (int i = 0; i < 10; i++) {
       groupReceivedCounter[i] = REPLICATION_NUM / 2;

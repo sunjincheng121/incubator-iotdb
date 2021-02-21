@@ -33,7 +33,6 @@ import static org.junit.Assert.fail;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import org.apache.iotdb.db.conf.IoTDBDescriptor;
 import org.apache.iotdb.db.engine.compaction.CompactionStrategy;
@@ -115,7 +114,7 @@ public class IoTDBAggregationLargeDataIT {
   private long prevPartitionInterval;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     EnvironmentUtils.closeStatMonitor();
     prevPartitionInterval = IoTDBDescriptor.getInstance().getConfig().getPartitionInterval();
     IoTDBDescriptor.getInstance().getConfig()
@@ -132,7 +131,7 @@ public class IoTDBAggregationLargeDataIT {
   }
 
   @Test
-  public void test() throws ClassNotFoundException, SQLException {
+  public void test() throws ClassNotFoundException {
     insertSQL();
 
     lastValueAggreWithSingleFilterTest();
@@ -712,7 +711,7 @@ public class IoTDBAggregationLargeDataIT {
     }
   }
 
-  private void maxTimeAggreWithMultiFilterTest() throws ClassNotFoundException, SQLException {
+  private void maxTimeAggreWithMultiFilterTest() throws ClassNotFoundException {
     String[] retArray = new String[]{
         "0,3999,3999,3999,3599,100"
     };

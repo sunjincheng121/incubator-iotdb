@@ -42,7 +42,6 @@ import org.apache.iotdb.db.engine.querycontext.ReadOnlyMemChunk;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.engine.version.VersionController;
 import org.apache.iotdb.db.exception.StorageEngineException;
-import org.apache.iotdb.db.exception.StorageGroupProcessorException;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
 import org.apache.iotdb.db.exception.query.QueryProcessException;
@@ -79,7 +78,7 @@ public class LogReplayerTest {
 
   @Test
   public void test()
-      throws IOException, StorageGroupProcessorException, QueryProcessException, MetadataException {
+      throws IOException, QueryProcessException, MetadataException {
     String logNodePrefix = "testLogNode";
     File tsFile = SystemFileFactory.INSTANCE.getFile("temp", "1-1-1.tsfile");
     File modF = SystemFileFactory.INSTANCE.getFile("test.mod");
@@ -195,9 +194,8 @@ public class LogReplayerTest {
    * s1 is set to INT64, it will output its value
    * @return
    * @throws IllegalPathException
-   * @throws IOException
    */
-  public InsertTabletPlan insertTablePlan() throws IllegalPathException, IOException {
+  public InsertTabletPlan insertTablePlan() throws IllegalPathException {
     String[] measurements = new String[2];
     measurements[0] = "sensor0";
     measurements[1] = "sensor1";

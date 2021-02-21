@@ -106,7 +106,7 @@ public class StorageEngine implements IService {
   private static boolean enablePartition =
       IoTDBDescriptor.getInstance().getConfig().isEnablePartition();
 
-  private final Logger logger;
+  private final Logger logger;IoTDBSinkBatchInsertTest
   /**
    * a folder (system/storage_groups/ by default) that persist system info. Each Storage Processor
    * will have a subfolder under the systemDir.
@@ -749,7 +749,7 @@ public class StorageEngine implements IService {
     return true;
   }
 
-  public void setTTL(PartialPath storageGroup, long dataTTL) throws StorageEngineException {
+  public void setTTL(PartialPath storageGroup, long dataTTL) {
     // storage group has no data
     if (!processorMap.containsKey(storageGroup)) {
       return;
@@ -859,8 +859,7 @@ public class StorageEngine implements IService {
     processorMap.get(storageGroup).setPartitionVersionToMax(partitionId, newMaxVersion);
   }
 
-  public void removePartitions(PartialPath storageGroupPath, TimePartitionFilter filter)
-      throws StorageEngineException {
+  public void removePartitions(PartialPath storageGroupPath, TimePartitionFilter filter) {
     processorMap.get(storageGroupPath).removePartitions(filter);
   }
 

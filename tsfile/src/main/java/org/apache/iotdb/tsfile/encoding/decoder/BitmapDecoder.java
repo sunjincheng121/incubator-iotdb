@@ -19,7 +19,6 @@
 
 package org.apache.iotdb.tsfile.encoding.decoder;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -88,14 +87,9 @@ public class BitmapDecoder extends Decoder {
   @Override
   public int readInt(ByteBuffer buffer) {
     if (currentCount == 0) {
-      try {
-        reset();
-        getLengthAndNumber(buffer);
-        readNext();
-      } catch (IOException e) {
-        logger.error("tsfile-encoding BitmapDecoder: error occurs when reading next number. lenght {}, "
-            + "number {}, current number {}, result buffer {}", length, number, currentCount, this.buffer, e);
-      }
+      reset();
+      getLengthAndNumber(buffer);
+      readNext();
     }
     int result = 0;
     int index = (number - currentCount) / 8;
@@ -122,7 +116,7 @@ public class BitmapDecoder extends Decoder {
   /**
    * Decode all data from buffer and save them.
    */
-  private void readNext() throws IOException {
+  private void readNext() {
     int len = (this.number + 7) / 8;
     while (byteCache.remaining() > 0) {
       int value = ReadWriteForEncodingUtils.readUnsignedVarInt(byteCache);
@@ -186,10 +180,9 @@ public class BitmapDecoder extends Decoder {
    *
    * @param buffer : decoded data saved in InputStream
    * @return true or false to indicate whether there is number left
-   * @throws IOException cannot read next value
    */
   @Override
-  public boolean hasNext(ByteBuffer buffer) throws IOException {
+  public boolean hasNext(ByteBuffer buffer) {
     if (currentCount > 0 || buffer.remaining() > 0) {
       return true;
     }

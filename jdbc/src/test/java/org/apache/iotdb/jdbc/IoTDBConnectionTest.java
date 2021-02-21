@@ -51,12 +51,12 @@ public class IoTDBConnectionTest {
   private long sessionId;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
   }
 
   @Test
@@ -70,7 +70,7 @@ public class IoTDBConnectionTest {
   }
 
   @Test
-  public void testGetTimeZone() throws IoTDBSQLException, TException {
+  public void testGetTimeZone() throws TException {
     String timeZone = ZoneId.systemDefault().toString();
     sessionId = connection.getSessionId();
     when(client.getTimeZone(sessionId)).thenReturn(new TSGetTimeZoneResp(successStatus, timeZone));

@@ -18,7 +18,6 @@
  */
 package org.apache.iotdb.db.query.dataset;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.iotdb.db.metadata.PartialPath;
@@ -40,12 +39,12 @@ public class SingleDataSet extends QueryDataSet {
   }
 
   @Override
-  public boolean hasNextWithoutConstraint() throws IOException {
+  public boolean hasNextWithoutConstraint() {
     return i == 0;
   }
 
   @Override
-  public RowRecord nextWithoutConstraint() throws IOException {
+  public RowRecord nextWithoutConstraint() {
     i++;
     return record;
   }

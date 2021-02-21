@@ -28,10 +28,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
-import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.exception.metadata.MetadataException;
-import org.apache.iotdb.db.exception.query.PathException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.query.context.QueryContext;
 import org.apache.iotdb.tsfile.exception.write.WriteProcessException;
@@ -55,12 +53,12 @@ public class SeriesReaderTest {
   private List<TsFileResource> unseqResources = new ArrayList<>();
 
   @Before
-  public void setUp() throws MetadataException, PathException, IOException, WriteProcessException {
+  public void setUp() throws MetadataException, IOException, WriteProcessException {
     SeriesReaderTestUtil.setUp(measurementSchemas, deviceIds, seqResources, unseqResources);
   }
 
   @After
-  public void tearDown() throws IOException, StorageEngineException {
+  public void tearDown() throws IOException {
     SeriesReaderTestUtil.tearDown(seqResources, unseqResources);
   }
 

@@ -48,7 +48,6 @@ import org.apache.iotdb.db.utils.SyncUtils;
 import org.apache.iotdb.service.sync.thrift.ConfirmInfo;
 import org.apache.iotdb.service.sync.thrift.SyncService;
 import org.apache.iotdb.service.sync.thrift.SyncStatus;
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,7 +161,7 @@ public class SyncServiceImpl implements SyncService.Iface {
   }
 
   @Override
-  public SyncStatus syncDeletedFileName(String fileName) throws TException {
+  public SyncStatus syncDeletedFileName(String fileName) {
     try {
       syncLog.get().finishSyncDeletedFileName(
           new File(getSyncDataPath(), currentSG.get() + File.separatorChar + fileName));
@@ -178,7 +177,7 @@ public class SyncServiceImpl implements SyncService.Iface {
 
   @SuppressWarnings("squid:S2095") // Suppress unclosed resource warning
   @Override
-  public SyncStatus initSyncData(String filename) throws TException {
+  public SyncStatus initSyncData(String filename) {
     try {
       File file;
       if (currentSG.get() == null) { // schema mlog.txt file
@@ -224,7 +223,7 @@ public class SyncServiceImpl implements SyncService.Iface {
 
   @SuppressWarnings("squid:S2095") // Suppress unclosed resource warning
   @Override
-  public SyncStatus checkDataDigest(String digestOfSender) throws TException {
+  public SyncStatus checkDataDigest(String digestOfSender) {
     String digestOfReceiver = (new BigInteger(1, messageDigest.get().digest())).toString(16);
     try {
       if (currentFileWriter.get() != null) {
@@ -289,7 +288,7 @@ public class SyncServiceImpl implements SyncService.Iface {
   }
 
   @Override
-  public SyncStatus endSync() throws TException {
+  public SyncStatus endSync() {
     try {
       if (syncLog.get() != null) {
         syncLog.get().close();

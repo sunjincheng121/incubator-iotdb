@@ -50,7 +50,7 @@ import org.junit.Test;
 public class IoTDBSimpleQueryIT {
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     EnvironmentUtils.envSetUp();
   }
 

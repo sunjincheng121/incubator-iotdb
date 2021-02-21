@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.iotdb.db.engine.StorageEngine;
-import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.exception.metadata.IllegalPathException;
 import org.apache.iotdb.db.metadata.PartialPath;
 import org.apache.iotdb.db.utils.EnvironmentUtils;
@@ -60,7 +59,7 @@ public class IoTDBRemovePartitionIT {
   }
 
   @Test
-  public void testRemoveNoPartition() throws StorageEngineException, IllegalPathException {
+  public void testRemoveNoPartition() throws IllegalPathException {
     StorageEngine.getInstance().removePartitions(new PartialPath("root.test1"),
         (storageGroupName, timePartitionId) -> false);
 
@@ -82,7 +81,7 @@ public class IoTDBRemovePartitionIT {
   }
 
   @Test
-  public void testRemovePartialPartition() throws StorageEngineException, IllegalPathException {
+  public void testRemovePartialPartition() throws IllegalPathException {
     StorageEngine.getInstance().removePartitions(new PartialPath("root.test1"),
         (storageGroupName, timePartitionId) -> timePartitionId >= 5);
     StorageEngine.getInstance().removePartitions(new PartialPath("root.test2"),
@@ -116,7 +115,7 @@ public class IoTDBRemovePartitionIT {
   }
 
   @Test
-  public void testRemoveAllPartition() throws StorageEngineException, IllegalPathException {
+  public void testRemoveAllPartition() throws IllegalPathException {
     StorageEngine.getInstance().removePartitions(new PartialPath("root.test1"),
         (storageGroupName, timePartitionId) -> true);
 

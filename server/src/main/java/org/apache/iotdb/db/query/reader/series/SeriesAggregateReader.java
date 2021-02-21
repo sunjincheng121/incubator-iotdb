@@ -59,7 +59,7 @@ public class SeriesAggregateReader implements IAggregateReader {
   }
 
   @Override
-  public Statistics currentFileStatistics() throws IOException {
+  public Statistics currentFileStatistics() {
     return seriesReader.currentFileStatistics();
   }
 

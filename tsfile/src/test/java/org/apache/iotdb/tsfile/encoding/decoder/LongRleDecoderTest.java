@@ -43,7 +43,7 @@ public class LongRleDecoderTest {
   private int hybridWidth;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     rleList = new ArrayList<Long>();
     int rleCount = 11;
     int rleNum = 38;
@@ -101,7 +101,7 @@ public class LongRleDecoderTest {
   }
 
   @After
-  public void tearDown() throws Exception {
+  public void tearDown() {
   }
 
   @Test

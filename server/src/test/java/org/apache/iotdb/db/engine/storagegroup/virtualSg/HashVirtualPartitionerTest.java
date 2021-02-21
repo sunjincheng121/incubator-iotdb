@@ -33,7 +33,7 @@ import org.junit.Test;
 
 public class HashVirtualPartitionerTest {
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     EnvironmentUtils.envSetUp();
     // init file dir
     StorageEngine.getInstance();

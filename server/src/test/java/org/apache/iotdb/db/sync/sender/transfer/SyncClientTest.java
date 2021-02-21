@@ -34,7 +34,6 @@ import org.apache.iotdb.db.conf.IoTDBConstant;
 import org.apache.iotdb.db.conf.directories.DirectoryManager;
 import org.apache.iotdb.db.engine.storagegroup.TsFileResource;
 import org.apache.iotdb.db.exception.DiskSpaceInsufficientException;
-import org.apache.iotdb.db.exception.StartupException;
 import org.apache.iotdb.db.exception.StorageEngineException;
 import org.apache.iotdb.db.sync.conf.SyncSenderConfig;
 import org.apache.iotdb.db.sync.conf.SyncSenderDescriptor;
@@ -58,7 +57,7 @@ public class SyncClientTest {
 
   @Before
   public void setUp()
-      throws IOException, InterruptedException, StartupException, DiskSpaceInsufficientException {
+      throws DiskSpaceInsufficientException {
     EnvironmentUtils.envSetUp();
     dataDir = new File(DirectoryManager.getInstance().getNextFolderForSequenceFile())
         .getParentFile().getAbsolutePath();
@@ -67,7 +66,7 @@ public class SyncClientTest {
   }
 
   @After
-  public void tearDown() throws InterruptedException, IOException, StorageEngineException {
+  public void tearDown() throws IOException, StorageEngineException {
     EnvironmentUtils.cleanEnv();
   }
 

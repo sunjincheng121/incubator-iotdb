@@ -106,7 +106,7 @@ public class PerfTest {
     }
   }
 
-  static private void write() throws IOException, InterruptedException, WriteProcessException {
+  static private void write() throws IOException {
     File file = new File(outputDataFile);
     File errorFile = new File(errorOutputDataFile);
     if (file.exists()) {
@@ -140,7 +140,7 @@ public class PerfTest {
     }
   }
 
-  static private void writeToFile(Schema schema) throws InterruptedException, IOException, WriteProcessException {
+  static private void writeToFile(Schema schema) throws IOException, WriteProcessException {
     Scanner in = getDataFile(inputDataFile);
     assert in != null;
     while (in.hasNextLine()) {
@@ -211,7 +211,7 @@ public class PerfTest {
   }
 
   @Test
-  public void writeTest() throws IOException, InterruptedException, WriteProcessException {
+  public void writeTest() throws IOException {
     write();
   }
 }
